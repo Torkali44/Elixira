@@ -1,0 +1,161 @@
+/* Homepage CMS sections — matches Elixira brand motion */
+.elx-section {
+    position: relative;
+    overflow: hidden;
+}
+
+.elx-hero {
+    min-height: 72vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 4rem 1.5rem;
+    background: linear-gradient(135deg, var(--section-gradient-start) 0%, #0d2838 45%, var(--section-gradient-end) 100%);
+    background-size: 200% 200%;
+    animation: elx-gradient-shift 14s ease infinite;
+    color: var(--white);
+}
+
+.elx-hero.has-image {
+    background-size: cover;
+    background-position: center;
+    animation: none;
+}
+
+.elx-hero.has-image::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(120deg, rgba(5, 16, 23, 0.88), rgba(19, 37, 45, 0.72));
+}
+
+.elx-hero .container {
+    position: relative;
+    z-index: 1;
+}
+
+.elx-hero h1 {
+    color: var(--white);
+    font-size: clamp(2rem, 5vw, 3.25rem);
+    letter-spacing: -0.02em;
+    margin-bottom: 1rem;
+}
+
+.elx-hero p {
+    color: rgba(255, 255, 255, 0.88);
+    font-size: 1.2rem;
+    max-width: 640px;
+    margin: 0 auto 1.75rem;
+}
+
+@keyframes elx-gradient-shift {
+    0%, 100% { background-position: 0% 40%; }
+    50% { background-position: 100% 60%; }
+}
+
+.elx-heading-block {
+    padding: 4rem 1.5rem 2rem;
+    text-align: center;
+    max-width: 760px;
+    margin: 0 auto;
+}
+
+.elx-heading-block h2 {
+    margin-bottom: 0.75rem;
+}
+
+.elx-split {
+    padding: var(--section-padding);
+    background: var(--bg-color);
+}
+
+.elx-split .elx-split-inner {
+    display: grid;
+    gap: 2.5rem;
+    align-items: center;
+}
+
+@media (min-width: 992px) {
+    .elx-split .elx-split-inner {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.elx-glass-card {
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 20px 50px rgba(19, 37, 45, 0.08);
+    border: 1px solid rgba(183, 215, 208, 0.35);
+    transition: transform var(--transition-smooth), box-shadow var(--transition-smooth);
+}
+
+.elx-glass-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 28px 60px rgba(19, 37, 45, 0.12);
+}
+
+.elx-icon-cards {
+    padding: 3rem 1.5rem 4rem;
+    background: linear-gradient(180deg, var(--white) 0%, var(--light-gray) 100%);
+}
+
+.elx-icon-cards .icon-round {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--secondary-color);
+    color: var(--primary-color);
+    font-size: 1.35rem;
+    margin-bottom: 1rem;
+}
+
+.elx-newsletter {
+    padding: 4rem 1.5rem;
+    background: var(--primary-color);
+    color: var(--white);
+    text-align: center;
+}
+
+.elx-newsletter h2 {
+    color: var(--secondary-color);
+}
+
+.elx-newsletter p {
+    color: rgba(255, 255, 255, 0.85);
+    max-width: 520px;
+    margin: 0 auto 1.5rem;
+}
+
+.elx-animate-init {
+    opacity: 0;
+    transform: translateY(28px);
+}
+
+.elx-animate-in {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.7s var(--transition-smooth), transform 0.7s var(--transition-smooth);
+}
+
+.elx-featured-cta {
+    text-align: center;
+    padding: 0 1.5rem 3rem;
+}
+
+.elx-paragraph {
+    padding: 3rem 1.5rem;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.elx-cta-band {
+    padding: 3.5rem 1.5rem;
+    text-align: center;
+    background: var(--light-gray);
+}
