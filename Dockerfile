@@ -9,18 +9,19 @@ FROM php:8.2-cli
 
 RUN apt-get update && apt-get install -y \
     git curl zip unzip libzip-dev libonig-dev libpng-dev \
-    && docker-php-ext-install pdo_mysql mbstring zip exif pcntl
+    && docker-php-ext-install pdo_mysql mbstring zip exif pcntl \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www
 
-COPY composer.json composer.lock* ./
-RUN composer install --no-dev --optimize-autoloader --no-interaction
-
 COPY . .
+
+RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
 COPY --from=assets /app/public/build ./public/build
 
+RUN php artisan package:discover --ansi || true
 RUN php artisan optimize:clear || true
 
 EXPOSE 8080
