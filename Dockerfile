@@ -17,11 +17,11 @@ COPY . .
 # Install Laravel dependencies
 RUN composer install --no-dev --optimize-autoloader
 
-# Generate key
-RUN php artisan key:generate
+# Cache config (important)
+RUN php artisan config:cache || true
 
 # Expose port
 EXPOSE 10000
 
-# Start server
-CMD php -S 0.0.0.0:$PORT -t public
+# Start server + run migrations
+CMD php artisan migrate --force && php -S 0.0.0.0:${PORT:-10000} -t public
