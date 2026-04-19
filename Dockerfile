@@ -1,29 +1,27 @@
-FROM node:20-bookworm-slim AS assets
-WORKDIR /app
-COPY package*.json ./
-RUN if [ -f package-lock.json ]; then npm ci; else npm install; fi
-COPY . .
-RUN npm run build
-
 FROM php:8.2-cli
 
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
     git curl zip unzip libzip-dev libonig-dev libpng-dev \
-    && docker-php-ext-install pdo_mysql mbstring zip exif pcntl \
-    && rm -rf /var/lib/apt/lists/*
+    && docker-php-ext-install pdo_mysql mbstring zip exif pcntl
 
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+# Install Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
+# Set working directory
 WORKDIR /var/www
 
+# Copy project
 COPY . .
 
-RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
-COPY --from=assets /app/public/build ./public/build
+# Install Laravel dependencies
+RUN composer install --no-dev --optimize-autoloader
 
-RUN php artisan package:discover --ansi || true
-RUN php artisan optimize:clear || true
+# Cache config (important)
+RUN php artisan config:cache || true
 
-EXPOSE 8080
+# Expose port
+EXPOSE 10000
 
-CMD php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=${PORT:-8080}
+# Start server + run migrations
+CMD php artisan migrate --force && php -S 0.0.0.0:${PORT:-10000} -t public
