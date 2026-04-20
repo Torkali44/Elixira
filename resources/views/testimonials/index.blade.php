@@ -157,7 +157,7 @@
 
 <div class="testimonials-page">
     <div class="testimonials-header">
-        <h1 class="testimonials-title">Testimonials</h1>
+        <h1 class="testimonials-title">Testimonialsss</h1>
         <ul class="testimonials-tabs">
             <!-- <li><a href="{{ route('testimonials.index', ['tab' => 'direct']) }}" class="{{ $tab == 'direct' ? 'active' : '' }}">Direct</a></li> -->
             <!-- <li><a href="{{ route('testimonials.index', ['tab' => 'whatsapp']) }}" class="{{ $tab == 'whatsapp' ? 'active' : '' }}">WhatsApp</a></li>
