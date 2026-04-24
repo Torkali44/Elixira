@@ -1,6 +1,6 @@
-@extends('layouts.framer')
+﻿@extends('layouts.framer')
 
-@section('title', 'Track your order — Elixira')
+@section('title', 'Track your order - Elixira')
 
 @section('head')
 <style>
@@ -98,7 +98,7 @@
                     {{-- Orders List --}}
                     <div data-animate>
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-                            <h2 style="font-size: 1.3rem; color: var(--elx-accent);">✦ Found {{ $orders->count() }} orders</h2>
+                            <h2 style="font-size: 1.3rem; color: var(--elx-accent);">✧ Found {{ $orders->count() }} orders</h2>
                             <a href="{{ route('orders.track') }}" class="elx-btn elx-btn--glass" style="padding: 0.5rem 1.2rem;">New Search</a>
                         </div>
 
@@ -122,7 +122,7 @@
                                     <span class="status-badge bg-{{ $statusMap[$order->status] ?? 'pending' }}">
                                         {{ ucfirst($order->status) }}
                                     </span>
-                                    <div style="margin-top: 0.5rem; font-weight: 700; color: var(--elx-white);">SAR {{ number_format($order->total_amount, 2) }}</div>
+                                    <div style="margin-top: 0.5rem; font-weight: 700; color: var(--elx-white);">﷼ {{ number_format($order->total_amount, 2) }}</div>
                                 </div>
                             </div>
                         </a>

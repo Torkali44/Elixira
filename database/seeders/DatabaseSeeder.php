@@ -38,6 +38,7 @@ class DatabaseSeeder extends Seeder
             );
         }
 
+        $this->call(AvatarOptionSeeder::class);
         $this->call(HomePageSectionSeeder::class);
     }
 }

@@ -1,4 +1,4 @@
-@extends('layouts.admin')
+﻿@extends('layouts.admin')
 
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
@@ -29,7 +29,7 @@
                             @if($item->image)
                                 <img src="{{ asset('storage/' . $item->image) }}" alt="{{ $item->name }}" width="50" class="rounded">
                             @else
-                                <span class="text-muted">—</span>
+                                <span class="text-muted">-</span>
                             @endif
                         </td>
                         <td class="fw-bold">{{ $item->name }}</td>
@@ -39,13 +39,13 @@
                             @if($item->is_featured)
                                 <i class="fas fa-star text-warning" title="Featured on home"></i>
                             @else
-                                <span class="text-muted">—</span>
+                                <span class="text-muted">-</span>
                             @endif
                         </td>
                         <td>
                             <div class="btn-group">
                                 <a href="{{ route('admin.items.edit', $item->id) }}" class="btn btn-sm btn-outline-primary"><i class="fas fa-edit"></i></a>
-                                <form action="{{ route('admin.items.destroy', $item->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Delete this product?')">
+                                <form action="{{ route('admin.items.destroy', $item->id) }}" method="POST" class="d-inline" data-confirm="Delete this product?">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>

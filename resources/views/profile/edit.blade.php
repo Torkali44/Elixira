@@ -1,183 +1,756 @@
 @extends('layouts.framer')
 
-@section('title', 'Account — Elixira')
+@section('title', 'My Account - Elixira')
 
 @section('head')
 <style>
-    .profile-card {
-        background: var(--elx-glass);
-        backdrop-filter: blur(42px);
+    .account-shell {
+        display: grid;
+        grid-template-columns: minmax(280px, 340px) minmax(0, 1fr);
+        gap: 2rem;
+        align-items: start;
+    }
+
+    .account-card {
+        background: linear-gradient(180deg, rgba(19, 37, 45, 0.96), rgba(10, 26, 34, 0.96));
         border: 1px solid var(--elx-border);
-        border-radius: var(--elx-radius-sm);
-        padding: 2.5rem;
+        border-radius: 28px;
+        padding: 2rem;
+        box-shadow: 0 24px 70px rgba(0, 0, 0, 0.25);
+    }
+
+    .account-card + .account-card {
+        margin-top: 1.5rem;
+    }
+
+    .account-sidebar {
+        position: sticky;
+        top: 110px;
+    }
+
+    .account-hero {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 1.5rem;
         margin-bottom: 2rem;
     }
-    .form-input {
-        width: 100%;
-        padding: 0.8rem 1.2rem;
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid var(--elx-border);
-        border-radius: 10px;
+
+    .account-hero__copy {
+        max-width: 720px;
+    }
+
+    .account-hero__copy p {
+        color: rgba(255, 255, 255, 0.72);
+        max-width: 620px;
+    }
+
+    .account-hero__actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        align-items: center;
+    }
+
+    .account-avatar {
+        width: 84px;
+        height: 84px;
+        border-radius: 28px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(74, 200, 246, 0.25);
+    }
+
+    .account-avatar-panel {
+        display: grid;
+        grid-template-columns: 92px minmax(0, 1fr);
+        gap: 1rem;
+        align-items: center;
+        padding: 1rem;
+        border-radius: 22px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .account-avatar-actions {
+        display: grid;
+        gap: 0.75rem;
+    }
+
+    .account-check {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        color: rgba(255, 255, 255, 0.78);
+        font-size: 0.92rem;
+    }
+
+    .account-sidebar__top {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .account-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        border-radius: 999px;
+        padding: 0.38rem 0.9rem;
+        background: rgba(74, 200, 246, 0.1);
+        color: var(--elx-cyan);
+        font-size: 0.8rem;
+        border: 1px solid rgba(74, 200, 246, 0.22);
+    }
+
+    .account-muted {
+        color: var(--elx-gray);
+        font-size: 0.92rem;
+    }
+
+    .account-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.9rem;
+        margin-top: 1.5rem;
+    }
+
+    .account-stat {
+        padding: 1rem;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .account-stat__value {
+        display: block;
+        font-size: 1.4rem;
+        font-weight: 700;
         color: var(--elx-white);
-        margin-bottom: 1rem;
+    }
+
+    .account-stat__label {
+        font-size: 0.78rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--elx-light);
+    }
+
+    .account-links {
+        display: grid;
+        gap: 0.75rem;
+        margin-top: 1.5rem;
+    }
+
+    .account-link {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 0.95rem 1rem;
+        border-radius: 18px;
+        color: var(--elx-white);
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        transition: var(--elx-transition);
+    }
+
+    .account-link:hover {
+        border-color: var(--elx-cyan);
+        transform: translateY(-2px);
+    }
+
+    .account-section__header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .account-section__title {
+        font-size: 1.25rem;
+        color: var(--elx-accent);
+        margin: 0;
+    }
+
+    .account-form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1rem;
+    }
+
+    .account-field--full {
+        grid-column: 1 / -1;
+    }
+
+    .account-label {
+        display: block;
+        color: var(--elx-light);
+        font-size: 0.82rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        margin-bottom: 0.5rem;
+    }
+
+    .account-input,
+    .account-select,
+    .account-textarea {
+        width: 100%;
+        padding: 0.95rem 1rem;
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.09);
+        background: rgba(255, 255, 255, 0.04);
+        color: var(--elx-white);
         outline: none;
         transition: var(--elx-transition);
     }
-    .form-input:focus { border-color: var(--elx-cyan); }
-    .form-label {
-        display: block;
-        color: var(--elx-gray);
-        font-size: 0.85rem;
-        margin-bottom: 0.5rem;
+
+    .account-input:focus,
+    .account-select:focus,
+    .account-textarea:focus {
+        border-color: var(--elx-cyan);
+        box-shadow: 0 0 0 3px rgba(74, 200, 246, 0.12);
     }
-    .profile-header {
-        margin-bottom: 3rem;
+
+    .account-select option {
+        background: #13252d;
+        color: #fff;
+    }
+
+    .account-inline {
+        display: grid;
+        grid-template-columns: 140px minmax(0, 1fr);
+        gap: 0.75rem;
+    }
+
+    .account-error {
+        color: #ff9b9b;
+        font-size: 0.85rem;
+        margin-top: 0.45rem;
+    }
+
+    .account-success {
+        margin-bottom: 1.5rem;
+        padding: 1rem 1.2rem;
+        border-radius: 18px;
+        border: 1px solid rgba(74, 200, 246, 0.26);
+        background: rgba(74, 200, 246, 0.1);
+        color: var(--elx-cyan);
+    }
+
+    .account-order-list {
+        display: grid;
+        gap: 1rem;
+    }
+
+    .account-order {
+        border-radius: 22px;
+        padding: 1.3rem;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .account-order__top,
+    .account-order__bottom {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 1rem;
+    }
+
+    .account-order__top {
+        margin-bottom: 1rem;
+        align-items: flex-start;
+    }
+
+    .account-order__meta {
+        color: var(--elx-light);
+        font-size: 0.82rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+
+    .account-order__items {
+        color: rgba(255, 255, 255, 0.72);
+        font-size: 0.94rem;
+        margin-top: 0.8rem;
+        display: grid;
+        gap: 0.35rem;
+    }
+
+    .account-status {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        border: 1px solid transparent;
+    }
+
+    .account-status--pending {
+        color: #ffd36a;
+        background: rgba(255, 193, 7, 0.12);
+        border-color: rgba(255, 193, 7, 0.2);
+    }
+
+    .account-status--confirmed,
+    .account-status--preparing {
+        color: #8fdfff;
+        background: rgba(13, 202, 240, 0.12);
+        border-color: rgba(13, 202, 240, 0.2);
+    }
+
+    .account-status--ready,
+    .account-status--delivered {
+        color: #7ef0bf;
+        background: rgba(25, 135, 84, 0.12);
+        border-color: rgba(25, 135, 84, 0.2);
+    }
+
+    .account-status--cancelled {
+        color: #ff9b9b;
+        background: rgba(220, 53, 69, 0.12);
+        border-color: rgba(220, 53, 69, 0.2);
+    }
+
+    .account-pagination {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 1rem;
+        align-items: center;
+        margin-top: 1.5rem;
+    }
+
+    .account-pagination__link,
+    .account-pagination__text {
+        padding: 0.75rem 1rem;
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(255, 255, 255, 0.03);
+        color: var(--elx-white);
+        font-size: 0.92rem;
+    }
+
+    .account-pagination__link:hover {
+        border-color: var(--elx-cyan);
+    }
+
+    .account-featured {
+        display: grid;
+        gap: 0.85rem;
+        margin-top: 1.2rem;
+    }
+
+    .account-featured__item {
+        display: grid;
+        grid-template-columns: 64px minmax(0, 1fr);
+        gap: 0.9rem;
+        align-items: center;
+        padding: 0.85rem;
+        border-radius: 18px;
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        background: rgba(255, 255, 255, 0.03);
+        color: var(--elx-white);
+    }
+
+    .account-featured__thumb {
+        width: 64px;
+        height: 64px;
+        border-radius: 16px;
+        overflow: hidden;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .account-featured__thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .account-danger {
+        border-color: rgba(220, 53, 69, 0.28);
+    }
+
+    .account-danger summary {
+        list-style: none;
+        cursor: pointer;
+    }
+
+    .account-danger summary::-webkit-details-marker {
+        display: none;
+    }
+
+    .account-danger__panel {
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid rgba(220, 53, 69, 0.16);
+    }
+
+    @media (max-width: 1024px) {
+        .account-shell {
+            grid-template-columns: 1fr;
+        }
+
+        .account-sidebar {
+            position: static;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .account-form-grid,
+        .account-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .account-inline {
+            grid-template-columns: 1fr;
+        }
+
+        .account-card {
+            padding: 1.4rem;
+        }
+
+        .account-avatar {
+            width: 70px;
+            height: 70px;
+            border-radius: 22px;
+        }
+
+        .account-avatar-panel {
+            grid-template-columns: 1fr;
+        }
     }
 </style>
 @endsection
 
 @section('content')
+@php
+    $phone = old('phone_number', $user->phone);
+    $countryCode = old('country_code', '+966');
+    $phoneNumber = $phone;
+
+    if ($phone && str_starts_with($phone, '+971')) {
+        $countryCode = '+971';
+        $phoneNumber = substr($phone, 4);
+    } elseif ($phone && str_starts_with($phone, '+966')) {
+        $countryCode = '+966';
+        $phoneNumber = substr($phone, 4);
+    }
+
+    $statusClasses = [
+        'pending' => 'account-status--pending',
+        'confirmed' => 'account-status--confirmed',
+        'preparing' => 'account-status--preparing',
+        'ready' => 'account-status--ready',
+        'delivered' => 'account-status--delivered',
+        'cancelled' => 'account-status--cancelled',
+    ];
+@endphp
+
 <div class="page-content">
     <div class="elx-container">
-        {{-- Section Header --}}
-        <div class="elx-section__header profile-header" data-animate>
-            <h1 class="elx-hero__title">
-                <span class="elx-hero__title-gradient">Your Account</span>
-            </h1>
-            <p class="elx-hero__subtitle">Update your details and manage your security.</p>
+        <div class="account-hero" data-animate>
+            <div class="account-hero__copy">
+                <h1 class="elx-hero__title">
+                    <span class="elx-hero__title-gradient">My Account</span>
+                </h1>
+                <p>Manage your details, keep your member code ready for checkout, and review every order from one place.</p>
+            </div>
+
+            <div class="account-hero__actions">
+                <a href="#details" class="elx-btn elx-btn--glass">Edit Details</a>
+                <a href="{{ route('profile.orders.index') }}" class="elx-btn elx-btn--glass">My Orders</a>
+                <a href="{{ route('menu.index') }}" class="elx-btn elx-btn--primary">Shop Now</a>
+            </div>
         </div>
 
         @if (session('status') === 'profile-updated' || session('status') === 'password-updated')
-            <div style="background: rgba(74, 200, 246, 0.1); color: var(--elx-cyan); padding: 1rem; border-radius: 10px; margin-bottom: 2rem; text-align: center; border: 1px solid var(--elx-cyan);" data-animate>
-                Changes saved successfully.
+            <div class="account-success" data-animate>
+                Your account changes were saved successfully.
             </div>
         @endif
 
-        <div class="row g-4">
-            <div class="col-lg-7">
-                {{-- Profile Info --}}
-                <div class="profile-card" data-animate>
-                    <h2 style="font-size: 1.2rem; color: var(--elx-accent); margin-bottom: 1.5rem;">✦ Profile Information</h2>
-                    <form method="post" action="{{ route('profile.update') }}">
-                        @csrf
-                        @method('patch')
-                        
-                        <label class="form-label">Full Name</label>
-                        <input name="name" type="text" class="form-input" value="{{ old('name', $user->name) }}" required>
-                        @error('name')<div style="color: #ff8a8a; font-size: 0.8rem; margin-top: -0.5rem; margin-bottom: 1rem;">{{ $message }}</div>@enderror
+        <div class="account-shell">
+            <aside class="account-sidebar" data-animate>
+                <div class="account-card">
+                    <div class="account-sidebar__top">
+                        <x-user-avatar :user="$user" size="84" class="account-avatar" />
 
-                        <label class="form-label">Email Address</label>
-                        <input name="email" type="email" class="form-input" value="{{ old('email', $user->email) }}" required>
-                        @error('email')<div style="color: #ff8a8a; font-size: 0.8rem; margin-top: -0.5rem; margin-bottom: 1rem;">{{ $message }}</div>@enderror
+                        <div>
+                            <div class="account-pill">
+                                <i class="fas fa-user-circle"></i>
+                                <span>{{ $user->role === 'admin' ? 'Administrator' : 'Member' }}</span>
+                            </div>
+                            <h2 style="margin: 0.9rem 0 0.25rem; font-size: 1.5rem;">{{ $user->name }}</h2>
+                            <p class="account-muted">{{ $user->email }}</p>
+                        </div>
+                    </div>
 
-                        <button type="submit" class="elx-btn elx-btn--primary" style="margin-top: 1rem;">Save Changes</button>
-                    </form>
-                </div>
+                    <div class="account-grid">
+                        <div class="account-stat">
+                            <span class="account-stat__value">{{ $accountStats['total_orders'] }}</span>
+                            <span class="account-stat__label">Orders</span>
+                        </div>
+                        <div class="account-stat">
+                            <span class="account-stat__value">{{ $accountStats['active_orders'] }}</span>
+                            <span class="account-stat__label">In Progress</span>
+                        </div>
+                        <div class="account-stat">
+                            <span class="account-stat__value">{{ $accountStats['delivered_orders'] }}</span>
+                            <span class="account-stat__label">Delivered</span>
+                        </div>
+                        <div class="account-stat">
+                            <span class="account-stat__value">﷼ {{ number_format((float) $accountStats['total_spent'], 2) }}</span>
+                            <span class="account-stat__label">Spent</span>
+                        </div>
+                    </div>
 
-                {{-- Update Password --}}
-                <div class="profile-card" data-animate>
-                    <h2 style="font-size: 1.2rem; color: var(--elx-accent); margin-bottom: 1.5rem;">✦ Update Password</h2>
-                    <form method="post" action="{{ route('password.update') }}">
-                        @csrf
-                        @method('put')
-                        
-                        <label class="form-label">Current Password</label>
-                        <input name="current_password" type="password" class="form-input">
-                        @error('current_password', 'updatePassword')<div style="color: #ff8a8a; font-size: 0.8rem; margin-top: -0.5rem; margin-bottom: 1rem;">{{ $message }}</div>@enderror
-
-                        <label class="form-label">New Password</label>
-                        <input name="password" type="password" class="form-input">
-                        @error('password', 'updatePassword')<div style="color: #ff8a8a; font-size: 0.8rem; margin-top: -0.5rem; margin-bottom: 1rem;">{{ $message }}</div>@enderror
-
-                        <label class="form-label">Confirm New Password</label>
-                        <input name="password_confirmation" type="password" class="form-input">
-                        
-                        <button type="submit" class="elx-btn elx-btn--glass" style="margin-top: 1rem;">Update Password</button>
-                    </form>
-                </div>
-
-                {{-- Danger Zone --}}
-                <div class="profile-card" style="border-color: rgba(220, 53, 69, 0.3);" data-animate>
-                    <h2 style="font-size: 1.2rem; color: #ff8a8a; margin-bottom: 0.5rem;">✦ Danger Zone</h2>
-                    <p style="color: var(--elx-gray); font-size: 0.9rem; margin-bottom: 1.5rem;">Once you delete your account, there is no going back. Please be certain.</p>
-                    <button type="button" class="elx-btn" style="background: rgba(220, 53, 69, 0.1); color: #ff8a8a; border: 1px solid rgba(220, 53, 69, 0.3);" data-bs-toggle="modal" data-bs-target="#deleteAccountModal">
-                        Delete Account
-                    </button>
-                </div>
-            </div>
-
-            <div class="col-lg-5">
-                <div class="profile-card" data-animate>
-                    <h2 style="font-size: 1.2rem; color: var(--elx-accent); margin-bottom: 1.5rem;">✦ Quick Actions</h2>
-                    <div style="display: flex; flex-direction: column; gap: 1rem;">
-                        <a href="{{ route('menu.index') }}" class="elx-btn elx-btn--primary" style="justify-content: center;">Browse Shop</a>
-                        <a href="{{ route('orders.track') }}" class="elx-btn elx-btn--glass" style="justify-content: center;">Track Orders</a>
+                    <div class="account-links">
+                        <a href="#security" class="account-link">
+                            <span>Update password</span>
+                            <i class="fas fa-lock"></i>
+                        </a>
+                        <a href="{{ route('profile.orders.index') }}" class="account-link">
+                            <span>View previous orders</span>
+                            <i class="fas fa-box-open"></i>
+                        </a>
+                        <a href="{{ route('profile.avatar-options') }}" class="account-link">
+                            <span>Choose avatar</span>
+                            <i class="fas fa-image-portrait"></i>
+                        </a>
+                        <a href="{{ route('orders.track') }}" class="account-link">
+                            <span>Track by phone</span>
+                            <i class="fas fa-location-arrow"></i>
+                        </a>
                     </div>
                 </div>
 
-                @if(isset($featuredItems) && $featuredItems->isNotEmpty())
-                    <h3 style="font-size: 1.1rem; color: var(--elx-white); margin-bottom: 1.5rem; margin-left: 1rem;">Featured for you</h3>
-                    <div style="display: flex; flex-direction: column; gap: 1rem;" data-animate>
-                        @foreach($featuredItems as $item)
-                        <a href="{{ route('menu.show', $item->id) }}" style="text-decoration: none; display: flex; align-items: center; gap: 1rem; background: var(--elx-glass); padding: 1rem; border-radius: 15px; border: 1px solid var(--elx-border); transition: 0.3s; color: inherit;">
-                            <div style="width: 60px; height: 60px; border-radius: 10px; overflow: hidden; border: 1px solid var(--elx-border);">
-                                @if($item->image)
-                                    <img src="{{ asset('storage/' . $item->image) }}" style="width: 100%; height: 100%; object-fit: cover;">
-                                @else
-                                    <div style="width: 100%; height: 100%; background: #1a2e38; display: flex; align-items: center; justify-content: center; color: var(--elx-cyan);">
-                                        <i class="fas fa-seedling"></i>
+                <div class="account-card">
+                    <div class="account-section__header" style="margin-bottom: 1rem;">
+                        <h3 class="account-section__title">Account Snapshot</h3>
+                    </div>
+
+                    <div style="display: grid; gap: 0.85rem;">
+                        <div>
+                            <span class="account-label">Member Since</span>
+                            <div>{{ $user->created_at?->format('F Y') ?? 'Recently joined' }}</div>
+                        </div>
+                        <div>
+                            <span class="account-label">Phone</span>
+                            <div>{{ $user->phone ?: 'Add your number for faster checkout' }}</div>
+                        </div>
+                        <div>
+                            <span class="account-label">Member Code</span>
+                            <div>{{ $user->user_code ?: 'Not added yet' }}</div>
+                        </div>
+                        <div>
+                            <span class="account-label">Last Delivery Address</span>
+                            <div class="account-muted">{{ $latestOrder?->address ?: 'No saved delivery orders yet.' }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                @if($featuredItems->isNotEmpty())
+                    <div class="account-card">
+                        <div class="account-section__header" style="margin-bottom: 1rem;">
+                            <h3 class="account-section__title">Suggested For You</h3>
+                        </div>
+
+                        <div class="account-featured">
+                            @foreach($featuredItems as $item)
+                                <a href="{{ route('menu.show', $item) }}" class="account-featured__item">
+                                    <div class="account-featured__thumb">
+                                        @if($item->image)
+                                            <img src="{{ asset('storage/' . $item->image) }}" alt="{{ $item->name }}">
+                                        @else
+                                            <div style="width: 100%; height: 100%; display: grid; place-items: center; color: var(--elx-cyan);">
+                                                <i class="fas fa-seedling"></i>
+                                            </div>
+                                        @endif
                                     </div>
-                                @endif
-                            </div>
-                            <div style="flex-grow: 1;">
-                                <h4 style="font-size: 1rem; margin-bottom: 0.2rem;">{{ $item->name }}</h4>
-                                <span style="color: var(--elx-cyan); font-weight: 700;">SAR {{ number_format($item->price, 2) }}</span>
-                            </div>
-                            <i class="fas fa-chevron-right" style="color: var(--elx-gray); font-size: 0.8rem;"></i>
-                        </a>
-                        @endforeach
+
+                                    <div>
+                                        <div style="font-weight: 700;">{{ $item->name }}</div>
+                                        <div class="account-muted">{{ $item->category?->name ?: 'Featured ritual' }}</div>
+                                        <div style="margin-top: 0.35rem; color: var(--elx-cyan); font-weight: 700;">﷼ {{ number_format($item->price, 2) }}</div>
+                                    </div>
+                                </a>
+                            @endforeach
+                        </div>
                     </div>
                 @endif
-            </div>
+            </aside>
+
+            <section data-animate>
+                <div class="account-card" id="details">
+                    <div class="account-section__header">
+                        <div>
+                            <h2 class="account-section__title">Profile Details</h2>
+                            <p class="account-muted">Keep your contact information ready for checkout and support.</p>
+                        </div>
+                    </div>
+
+                    <form method="POST" action="{{ route('profile.update') }}" enctype="multipart/form-data">
+                        @csrf
+                        @method('PATCH')
+
+                        <div class="account-form-grid">
+                            <div class="account-field--full">
+                                <label class="account-label">Avatar</label>
+                                <div class="account-avatar-panel">
+                                    <x-user-avatar :user="$user" size="92" class="account-avatar" />
+
+                                    <div class="account-avatar-actions">
+                                        <input type="file" name="avatar" class="account-input" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp">
+                                        <span class="account-muted">Upload a JPG, PNG, or WEBP avatar up to 2MB.</span>
+
+                                        @if($user->avatar)
+                                            <label class="account-check">
+                                                <input type="checkbox" name="remove_avatar" value="1">
+                                                <span>Remove current avatar and use initials instead</span>
+                                            </label>
+                                        @endif
+                                    </div>
+                                </div>
+                                @error('avatar')
+                                    <div class="account-error">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div>
+                                <label for="name" class="account-label">Full Name</label>
+                                <input id="name" name="name" type="text" class="account-input" value="{{ old('name', $user->name) }}" required>
+                                @error('name')
+                                    <div class="account-error">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div>
+                                <label for="email" class="account-label">Email Address</label>
+                                <input id="email" name="email" type="email" class="account-input" value="{{ old('email', $user->email) }}" required>
+                                @error('email')
+                                    <div class="account-error">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="account-field--full">
+                                <label for="user_code" class="account-label">Member Code</label>
+                                <input id="user_code" name="user_code" type="text" class="account-input" value="{{ old('user_code', $user->user_code) }}" placeholder="Optional code used to match older orders">
+                                @error('user_code')
+                                    <div class="account-error">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="account-field--full">
+                                <label class="account-label">Phone Number</label>
+                                <div class="account-inline">
+                                    <select name="country_code" class="account-select">
+                                        <option value="+966" @selected($countryCode === '+966')>+966</option>
+                                        <option value="+971" @selected($countryCode === '+971')>+971</option>
+                                    </select>
+                                    <input name="phone_number" type="tel" class="account-input" value="{{ $phoneNumber }}" placeholder="Phone number">
+                                </div>
+                                @error('phone_number')
+                                    <div class="account-error">{{ $message }}</div>
+                                @enderror
+                                @error('country_code')
+                                    <div class="account-error">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 1.5rem; display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                            <button type="submit" class="elx-btn elx-btn--primary">Save Changes</button>
+                            <a href="{{ route('cart.index') }}" class="elx-btn elx-btn--glass">Go To Checkout</a>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="account-card" id="security">
+                    <div class="account-section__header">
+                        <div>
+                            <h2 class="account-section__title">Security</h2>
+                            <p class="account-muted">Change your password whenever you want to keep the account protected.</p>
+                        </div>
+                    </div>
+
+                    <form method="POST" action="{{ route('password.update') }}">
+                        @csrf
+                        @method('PUT')
+
+                        <div class="account-form-grid">
+                            <div class="account-field--full">
+                                <label for="current_password" class="account-label">Current Password</label>
+                                <input id="current_password" name="current_password" type="password" class="account-input" autocomplete="current-password">
+                                @error('current_password', 'updatePassword')
+                                    <div class="account-error">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div>
+                                <label for="password" class="account-label">New Password</label>
+                                <input id="password" name="password" type="password" class="account-input" autocomplete="new-password">
+                                @error('password', 'updatePassword')
+                                    <div class="account-error">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div>
+                                <label for="password_confirmation" class="account-label">Confirm Password</label>
+                                <input id="password_confirmation" name="password_confirmation" type="password" class="account-input" autocomplete="new-password">
+                            </div>
+                        </div>
+
+                        <button type="submit" class="elx-btn elx-btn--glass" style="margin-top: 1.5rem;">Update Password</button>
+                    </form>
+                </div>
+
+                @if($user->role === 'admin')
+                    <div class="account-card account-danger">
+                        <div class="account-section__header" style="margin-bottom: 0;">
+                            <div>
+                                <h2 class="account-section__title" style="color: #ffb1b1;">Danger Zone</h2>
+                                <p class="account-muted">Administrator accounts are protected and cannot delete themselves from the system.</p>
+                            </div>
+                            <span class="elx-btn" style="background: rgba(255, 193, 7, 0.12); border-color: rgba(255, 193, 7, 0.24); color: #ffd36a;">Protected</span>
+                        </div>
+                    </div>
+                @else
+                    <details class="account-card account-danger" @if($errors->userDeletion->isNotEmpty()) open @endif>
+                        <summary>
+                            <div class="account-section__header" style="margin-bottom: 0;">
+                                <div>
+                                    <h2 class="account-section__title" style="color: #ffb1b1;">Danger Zone</h2>
+                                    <p class="account-muted">Delete the account permanently only if you are completely sure.</p>
+                                </div>
+                                <span class="elx-btn" style="background: rgba(220, 53, 69, 0.12); border-color: rgba(220, 53, 69, 0.24); color: #ff9b9b;">Delete Account</span>
+                            </div>
+                        </summary>
+
+                        <div class="account-danger__panel">
+                            <form method="POST" action="{{ route('profile.destroy') }}">
+                                @csrf
+                                @method('DELETE')
+
+                                <label for="delete_password" class="account-label">Confirm With Password</label>
+                                <input id="delete_password" name="password" type="password" class="account-input" placeholder="Enter your password to continue" required>
+                                @error('password', 'userDeletion')
+                                    <div class="account-error">{{ $message }}</div>
+                                @enderror
+
+                                <button type="submit" class="elx-btn" style="margin-top: 1rem; background: rgba(220, 53, 69, 0.16); border-color: rgba(220, 53, 69, 0.28); color: #ff9b9b;">Permanently Delete Account</button>
+                            </form>
+                        </div>
+                    </details>
+                @endif
+            </section>
         </div>
     </div>
 </div>
-
-{{-- Delete Modal --}}
-<div class="modal fade" id="deleteAccountModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="background: #0f1c24; border: 1px solid var(--elx-border); color: white; border-radius: 20px;">
-            <form method="post" action="{{ route('profile.destroy') }}">
-                @csrf
-                @method('delete')
-                <div class="modal-header" style="border-bottom: 1px solid var(--elx-border);">
-                    <h5 class="modal-title">Confirm Deletion</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <p style="color: var(--elx-gray); font-size: 0.9rem; margin-bottom: 1.5rem;">Enter your password to permanently delete this account.</p>
-                    <label class="form-label">Password</label>
-                    <input name="password" type="password" class="form-input" required>
-                    @error('password', 'userDeletion')<div style="color: #ff8a8a; font-size: 0.8rem;">{{ $message }}</div>@enderror
-                </div>
-                <div class="modal-footer" style="border-top: 1px solid var(--elx-border);">
-                    <button type="button" class="elx-btn elx-btn--glass" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="elx-btn" style="background: #dc3545; border: none; color: white;">Delete Account</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-@endsection
-
-@section('scripts')
-<script>
-    // Ensure modal works if there are errors
-    @if($errors->userDeletion->isNotEmpty())
-        document.addEventListener('DOMContentLoaded', function () {
-            var myModal = new bootstrap.Modal(document.getElementById('deleteAccountModal'));
-            myModal.show();
-        });
-    @endif
-</script>
 @endsection

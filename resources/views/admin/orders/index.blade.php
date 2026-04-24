@@ -34,9 +34,10 @@
             <table class="table table-hover mb-0 align-middle">
                 <thead class="table-light">
                     <tr>
-                        <th>Order</th>
+                        <th>Order ID</th>
                         <th>Customer</th>
                         <th>Phone</th>
+                        <th>User Code</th>
                         <th>Total</th>
                         <th>Date</th>
                         <th>Status</th>
@@ -49,7 +50,8 @@
                         <td class="fw-bold">#{{ $order->id }}</td>
                         <td>{{ $order->customer_name }}</td>
                         <td>{{ $order->customer_phone }}</td>
-                        <td>${{ number_format($order->total_amount, 2) }}</td>
+                        <td>{{ $order->user_code ?? '-' }}</td>
+                        <td>﷼ {{ number_format($order->total_amount, 2) }}</td>
                         <td>{{ $order->created_at->format('Y-m-d H:i') }}</td>
                         <td>
                             <span class="badge bg-{{ $badge($order->status) }}">{{ $label($order->status) }}</span>
@@ -60,7 +62,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="7" class="text-center py-4">No orders yet.</td>
+                        <td colspan="8" class="text-center py-4">No orders yet.</td>
                     </tr>
                     @endforelse
                 </tbody>

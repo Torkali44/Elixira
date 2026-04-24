@@ -1,6 +1,6 @@
-@extends('layouts.framer')
+﻿@extends('layouts.framer')
 
-@section('title', 'Log in — Elixira')
+@section('title', 'Log in - Elixira')
 
 @section('head')
 <style>

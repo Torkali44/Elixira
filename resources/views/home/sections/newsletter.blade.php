@@ -1,4 +1,4 @@
-<section class="elx-section elx-newsletter" data-elx-animate>
+﻿<section class="elx-section elx-newsletter" data-elx-animate>
     @if($section->title)
         <h2>{{ $section->title }}</h2>
     @endif

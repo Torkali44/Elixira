@@ -1,4 +1,4 @@
-@extends('layouts.admin')
+﻿@extends('layouts.admin')
 
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
@@ -49,7 +49,7 @@
 
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <label for="price" class="form-label">Price (SAR) <span class="text-danger">*</span></label>
+                    <label for="price" class="form-label">Price (﷼) <span class="text-danger">*</span></label>
                     <input type="number" step="0.01" min="0" class="form-control" id="price" name="price" value="{{ old('price', $item->price) }}" required>
                 </div>
 
@@ -81,8 +81,7 @@
                         <div class="col-auto position-relative">
                             <img src="{{ asset('storage/' . $img->image) }}" class="img-thumbnail" style="width: 100px; height: 100px; object-fit: cover;">
                             {{-- Unified Delete Trigger --}}
-                            <button type="button" class="btn btn-danger btn-sm rounded-circle position-absolute top-0 end-0 p-1 px-2 m-1" 
-                                    onclick="if(confirm('Remove this image?')) { document.getElementById('delete-gallery-img-{{ $img->id }}').submit(); }">
+                            <button type="button" class="btn btn-danger btn-sm rounded-circle position-absolute top-0 end-0 p-1 px-2 m-1 js-delete-gallery" data-form-id="delete-gallery-img-{{ $img->id }}" data-confirm="Remove this image?">
                                 <i class="fas fa-times" style="font-size: 0.7rem;"></i>
                             </button>
                         </div>
@@ -109,5 +108,28 @@
         @method('DELETE')
     </form>
 @endforeach
+
+<script>
+document.querySelectorAll('.js-delete-gallery').forEach((button) => {
+    button.addEventListener('click', function () {
+        const formId = button.dataset.formId;
+        const form = document.getElementById(formId);
+        if (!form) return;
+
+        Swal.fire({
+            icon: 'warning',
+            title: 'Please confirm',
+            text: button.dataset.confirm || 'Delete this image?',
+            showCancelButton: true,
+            confirmButtonText: 'Yes',
+            cancelButtonText: 'Cancel',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                form.submit();
+            }
+        });
+    });
+});
+</script>
 
 @endsection

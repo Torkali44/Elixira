@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
@@ -9,6 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Istok+Web:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
     <link rel="stylesheet" href="{{ asset('css/elixira-sections.css') }}">
     <style>
@@ -107,30 +108,12 @@
         }
     </style>
 
-    <main>
-        @if(session('success'))
-            <div class="container pt-3">
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    {{ session('success') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            </div>
-        @endif
-        @if(session('error'))
-            <div class="container pt-3">
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    {{ session('error') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            </div>
-        @endif
-        @yield('content')
-    </main>
+    <main>@yield('content')</main>
 
     <footer class="footer">
         <div class="container text-center text-white pb-5">
-            <h2 style="color: var(--secondary-color);">Unlock exclusive launches, curated tips, and members‑only offers.</h2>
-            <p>No spam — good stuff only.</p>
+            <h2 style="color: var(--secondary-color);">Unlock exclusive launches, curated tips, and membersâ€‘only offers.</h2>
+            <p>No spam - good stuff only.</p>
             <div class="mt-4 mb-5 d-flex flex-wrap justify-content-center gap-2">
                 <a href="{{ route('contact') }}" class="btn btn-lg rounded-pill px-4" style="background-color: var(--secondary-color); color: #000; border: none;">Get in touch</a>
                 <a href="{{ route('orders.track') }}" class="btn btn-lg btn-outline-light rounded-pill px-4">Track an order</a>
@@ -164,6 +147,15 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        @if(session('success'))
+            Swal.fire({ icon: 'success', text: "{!! addslashes(session('success')) !!}", toast: true, position: 'top-end', showConfirmButton: false, timer: 3000 });
+        @endif
+        @if(session('error'))
+            Swal.fire({ icon: 'error', text: "{!! addslashes(session('error')) !!}", toast: true, position: 'top-end', showConfirmButton: false, timer: 4000 });
+        @endif
+    </script>
     <script src="{{ asset('js/script.js') }}"></script>
     <script>
         document.querySelectorAll('[data-elx-animate]').forEach(function (el) {

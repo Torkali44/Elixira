@@ -12,6 +12,7 @@ use App\Http\Controllers\ProfileController; // Breeze
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\TestimonialController;
 use App\Http\Controllers\Admin\ReviewController;
+use App\Http\Controllers\Admin\AvatarOptionController;
 use Illuminate\Support\Facades\Route;
 
 // Public Routes
@@ -47,6 +48,11 @@ Route::get('/dashboard', function () {
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::get('/profile/orders', [ProfileController::class, 'orders'])->name('profile.orders.index');
+    Route::get('/profile/orders/{order}', [ProfileController::class, 'showOrder'])->name('profile.orders.show');
+    Route::get('/profile/orders/{order}/invoice', [ProfileController::class, 'invoice'])->name('profile.orders.invoice');
+    Route::get('/profile/avatar-options', [ProfileController::class, 'avatarOptions'])->name('profile.avatar-options');
+    Route::patch('/profile/avatar-options', [ProfileController::class, 'updateAvatarOption'])->name('profile.avatar-options.update');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
@@ -64,7 +70,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::resource('categories', CategoryController::class);
     Route::resource('items', ItemController::class);
     Route::delete('items/images/{image}', [ItemController::class, 'deleteImage'])->name('items.delete-image');
-    Route::resource('users', \App\Http\Controllers\Admin\UserController::class)->only(['index', 'destroy']);
+    Route::resource('users', \App\Http\Controllers\Admin\UserController::class)->only(['index', 'edit', 'update', 'destroy']);
     Route::patch('users/{user}/suspend', [\App\Http\Controllers\Admin\UserController::class, 'suspend'])->name('users.suspend');
     
     Route::get('orders', [AdminOrderController::class, 'index'])->name('orders.index');
@@ -75,6 +81,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
 
     Route::resource('reviews', ReviewController::class)->only(['index', 'destroy', 'create', 'store']);
     Route::patch('reviews/{review}/status', [ReviewController::class, 'updateStatus'])->name('reviews.updateStatus');
+    Route::patch('avatar-options/{avatarOption}/toggle', [AvatarOptionController::class, 'toggle'])->name('avatar-options.toggle');
+    Route::resource('avatar-options', AvatarOptionController::class)->except(['show']);
 });
 
 require __DIR__.'/auth.php';

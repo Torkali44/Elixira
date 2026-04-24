@@ -1,4 +1,4 @@
-<section class="elx-section elx-split" data-elx-animate>
+﻿<section class="elx-section elx-split" data-elx-animate>
     <div class="container elx-split-inner">
         <div>
             @if($section->title)

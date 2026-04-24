@@ -21,7 +21,7 @@
             @endforeach
         </div>
 
-        <div class="elx-products__grid" id="products-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 2.5rem; margin-bottom: 6rem;">
+        <div class="elx-products__grid menu-products-grid" id="products-grid" style="margin-bottom: 6rem;">
             @foreach($items as $product)
                 <div class="product-item cat-{{ $product->category_id }}" data-animate>
                     @include('partials.product-card', ['product' => $product])
@@ -75,6 +75,29 @@
     }
     .category-section {
         margin-bottom: 6rem !important;
+    }
+    .menu-products-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 3rem;
+        justify-content: center;
+        align-items: stretch;
+    }
+    .menu-products-grid .product-item {
+        width: 100%;
+        min-width: 0;
+    }
+    @media (max-width: 1024px) {
+        .menu-products-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 2rem;
+        }
+    }
+    @media (max-width: 768px) {
+        .menu-products-grid {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
     }
 </style>
 @endsection

@@ -1,6 +1,6 @@
-@extends('layouts.framer')
+﻿@extends('layouts.framer')
 
-@section('title', 'Register — Elixira')
+@section('title', 'Register - Elixira')
 
 @section('head')
 <style>
@@ -53,7 +53,7 @@
                 <p style="color: var(--elx-gray);">Create an account for faster checkout and exclusive offers.</p>
             </div>
 
-            <form method="POST" action="{{ route('register') }}">
+            <form method="POST" action="{{ route('register') }}" enctype="multipart/form-data">
                 @csrf
 
                 <label class="auth-label">Full Name</label>
@@ -63,6 +63,10 @@
                 <label class="auth-label">Email Address</label>
                 <input type="email" name="email" class="form-input" value="{{ old('email') }}" required autocomplete="username">
                 <x-input-error :messages="$errors->get('email')" style="color: #ff8a8a; font-size: 0.8rem; margin-bottom: 0.5rem;" />
+
+                <label class="auth-label">Avatar (Optional)</label>
+                <input type="file" name="avatar" class="form-input" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp">
+                <x-input-error :messages="$errors->get('avatar')" style="color: #ff8a8a; font-size: 0.8rem; margin-bottom: 0.5rem;" />
 
                 <label class="auth-label">Password</label>
                 <input type="password" name="password" class="form-input" required autocomplete="new-password">

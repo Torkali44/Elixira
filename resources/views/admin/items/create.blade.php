@@ -1,4 +1,4 @@
-@extends('layouts.admin')
+﻿@extends('layouts.admin')
 
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
@@ -20,7 +20,7 @@
                 <div class="col-md-6 mb-3">
                     <label for="category_id" class="form-label">Category <span class="text-danger">*</span></label>
                     <select class="form-select" id="category_id" name="category_id" required>
-                        <option value="">Select category…</option>
+                        <option value="">Select categoryâ€¦</option>
                         @foreach($categories as $category)
                             <option value="{{ $category->id }}">{{ $category->name }}</option>
                         @endforeach
@@ -47,7 +47,7 @@
             </div>
 
                 <div class="col-md-6 mb-3">
-                    <label for="price" class="form-label">Price (SAR) <span class="text-danger">*</span></label>
+                    <label for="price" class="form-label">Price (﷼) <span class="text-danger">*</span></label>
                     <input type="number" step="0.01" min="0" class="form-control" id="price" name="price" value="{{ old('price') }}" required>
                 </div>
 

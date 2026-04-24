@@ -1,6 +1,6 @@
-@extends('layouts.framer')
+﻿@extends('layouts.framer')
 
-@section('title', 'Explore — Elixira')
+@section('title', 'Explore - Elixira')
 
 @section('content')
 <div class="page-content">
@@ -10,12 +10,12 @@
             <h1 class="elx-hero__title">
                 <span class="elx-hero__title-gradient">Explore the ritual</span>
             </h1>
-            <p class="elx-hero__subtitle">Browse categories curated in your admin — tuned for discovery.</p>
+            <p class="elx-hero__subtitle">Browse categories curated in your admin - tuned for discovery.</p>
         </div>
 
         <div class="elx-section" style="padding-top: 0;">
             <div class="elx-section__header" style="text-align: left; margin-bottom: 2rem;" data-animate>
-                <h2 class="elx-section__title" style="font-size: 1.8rem; color: var(--elx-accent);">✦ Shop by Category</h2>
+                <h2 class="elx-section__title" style="font-size: 1.8rem; color: var(--elx-accent);">✧ Shop by Category</h2>
             </div>
             
             <div class="elx-categories__grid" data-animate>
@@ -42,7 +42,7 @@
         @if($featuredItems->isNotEmpty())
         <div class="elx-section">
             <div class="elx-section__header" style="text-align: left; margin-bottom: 2rem;" data-animate>
-                <h2 class="elx-section__title" style="font-size: 1.8rem; color: var(--elx-accent);">✦ Featured Now</h2>
+                <h2 class="elx-section__title" style="font-size: 1.8rem; color: var(--elx-accent);">✧ Featured Now</h2>
             </div>
             
             <div class="elx-products__grid" data-animate>
@@ -64,7 +64,7 @@
                     <div class="elx-product-card__info">
                         <h3 class="elx-product-card__name">{{ $item->name }}</h3>
                         <div class="elx-product-card__price-row">
-                            <span class="elx-product-card__currency">SAR</span>
+                            <span class="elx-product-card__currency">﷼</span>
                             <span class="elx-product-card__price">{{ number_format($item->price, 2) }}</span>
                         </div>
                         <p class="elx-product-card__desc">{{ Str::limit($item->description, 80) }}</p>

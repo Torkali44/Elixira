@@ -4,11 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\AddToCartRequest;
 use App\Http\Requests\CheckoutRequest;
+use App\Http\Requests\RemoveFromCartRequest;
 use App\Http\Requests\UpdateCartRequest;
 use App\Models\Item;
 use App\Models\Order;
 use App\Models\OrderItem;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class CartController extends Controller
@@ -16,6 +16,7 @@ class CartController extends Controller
     public function index()
     {
         $cart = session()->get('cart', []);
+
         return view('cart.index', compact('cart'));
     }
 
@@ -25,30 +26,32 @@ class CartController extends Controller
         $cart = session()->get('cart', []);
         $quantity = $request->quantity ?? 1;
 
-        // Check if item is out of stock
         if ($item->stock <= 0) {
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json(['success' => false, 'message' => 'This product is currently out of stock.']);
             }
+
             return redirect()->back()->with('error', 'This product is currently out of stock. The administration has been notified to restock it soon.');
         }
 
-        // Calculate total quantity (existing in cart + new)
         $existingQty = isset($cart[$item->id]) ? $cart[$item->id]['quantity'] : 0;
         $totalQty = $existingQty + $quantity;
 
-        // Check if total quantity exceeds available stock
         if ($totalQty > $item->stock) {
             $remaining = $item->stock - $existingQty;
+
             if ($remaining <= 0) {
                 if ($request->ajax() || $request->wantsJson()) {
                     return response()->json(['success' => false, 'message' => 'You already have the maximum available quantity of this product in your cart.']);
                 }
+
                 return redirect()->back()->with('error', 'You already have the maximum available quantity of this product in your cart.');
             }
+
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json(['success' => false, 'message' => 'Only ' . $remaining . ' more unit(s) available. You already have ' . $existingQty . ' in your cart.']);
             }
+
             return redirect()->back()->with('error', 'Only ' . $remaining . ' more unit(s) available. You already have ' . $existingQty . ' in your cart.');
         }
 
@@ -59,7 +62,8 @@ class CartController extends Controller
                 'name' => $item->name,
                 'quantity' => $quantity,
                 'price' => $item->price,
-                'image' => $item->image
+                'points' => $item->points ?? 0,
+                'image' => $item->image,
             ];
         }
 
@@ -68,82 +72,121 @@ class CartController extends Controller
         if ($request->ajax() || $request->wantsJson()) {
             return response()->json(['success' => true, 'message' => 'Added to your cart.', 'cartCount' => count($cart)]);
         }
+
         return redirect()->back()->with('success', 'Added to your cart.');
     }
 
     public function update(UpdateCartRequest $request)
     {
-        $cart = session()->get('cart');
-        if (isset($cart[$request->id])) {
-            // Validate stock before updating
-            $item = Item::find($request->id);
-            if ($item && $request->quantity > $item->stock) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Only ' . $item->stock . ' units available.'
-                ], 422);
-            }
+        $cart = session()->get('cart', []);
 
-            $cart[$request->id]['quantity'] = $request->quantity;
-            session()->put('cart', $cart);
-            return response()->json(['success' => true]);
+        if (!isset($cart[$request->id])) {
+            return response()->json(['success' => false, 'message' => 'Item not found in cart.'], 404);
         }
-        return response()->json(['success' => false], 404);
+
+        $item = Item::find($request->id);
+
+        if ($item && $request->quantity > $item->stock) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Only ' . $item->stock . ' units available.',
+            ], 422);
+        }
+
+        $cart[$request->id]['quantity'] = $request->quantity;
+        session()->put('cart', $cart);
+
+        return response()->json(['success' => true]);
     }
 
-    public function remove(Request $request)
+    public function remove(RemoveFromCartRequest $request)
     {
         $id = $request->id;
+        $cart = session()->get('cart', []);
 
-        $cart = session()->get('cart');
-        if (isset($cart[$id])) {
-            unset($cart[$id]);
-            session()->put('cart', $cart);
-            
-            if ($request->ajax()) {
-                return response()->json(['success' => true]);
+        if (!isset($cart[$id])) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'Item not found in cart.'], 404);
             }
-            return redirect()->back()->with('success', 'Item removed from your cart.');
+
+            return redirect()->back()->with('error', 'Item not found in cart.');
         }
 
-        if ($request->ajax()) {
-            return response()->json(['success' => false], 404);
+        unset($cart[$id]);
+        session()->put('cart', $cart);
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json(['success' => true]);
         }
-        return redirect()->back()->with('error', 'Item not found in cart.');
+
+        return redirect()->back()->with('success', 'Item removed from your cart.');
     }
 
     public function checkout(CheckoutRequest $request)
     {
-        $cart = session()->get('cart');
-        
-        if (!$cart) {
+        $cart = session()->get('cart', []);
+
+        if (empty($cart)) {
             return redirect()->back()->with('error', 'Your cart is empty.');
         }
 
-        // Re-validate stock before checkout
         foreach ($cart as $id => $details) {
             $item = Item::find($id);
+
             if (!$item || $details['quantity'] > $item->stock) {
                 $name = $item ? $item->name : 'Unknown product';
                 $available = $item ? $item->stock : 0;
+
                 return redirect()->back()->with('error', "'{$name}' only has {$available} units available. Please update your cart.");
             }
         }
 
-        $total = 0;
-        foreach ($cart as $id => $details) {
-            $total += $details['price'] * $details['quantity'];
+        $total = collect($cart)->sum(fn (array $details) => $details['price'] * $details['quantity']);
+
+        $fullPhone = $request->country_code . ltrim($request->phone_number, '0');
+        $authenticatedUser = $request->user();
+        $resolvedUserCode = $request->filled('user_code')
+            ? $request->user_code
+            : $authenticatedUser?->user_code;
+
+        if ($authenticatedUser?->user_code && $request->filled('user_code') && $resolvedUserCode !== $authenticatedUser->user_code) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->withErrors([
+                    'user_code' => 'Use the member code already saved on your account, or update it from your profile first.',
+                ]);
         }
 
         DB::beginTransaction();
+
         try {
+
+            if ($authenticatedUser) {
+                $updates = [];
+
+                if (!$authenticatedUser->phone) {
+                    $updates['phone'] = $fullPhone;
+                }
+
+                if (!$authenticatedUser->user_code && $resolvedUserCode) {
+                    $updates['user_code'] = $resolvedUserCode;
+                }
+
+                if (!empty($updates)) {
+                    $authenticatedUser->update($updates);
+                }
+            }
+
             $order = Order::create([
+                'user_id' => $authenticatedUser?->id,
+                'user_code' => $resolvedUserCode,
                 'customer_name' => $request->customer_name,
-                'customer_phone' => $request->customer_phone,
+                'customer_phone' => $fullPhone,
                 'address' => $request->address,
                 'total_amount' => $total,
                 'status' => 'pending',
-                'notes' => $request->notes
+                'notes' => $request->notes,
             ]);
 
             foreach ($cart as $id => $details) {
@@ -151,11 +194,11 @@ class CartController extends Controller
                     'order_id' => $order->id,
                     'item_id' => $id,
                     'quantity' => $details['quantity'],
-                    'price' => $details['price']
+                    'price' => $details['price'],
                 ]);
 
-                // Decrement stock and increment points for each purchased item
                 $item = Item::find($id);
+
                 if ($item) {
                     $item->decrement('stock', $details['quantity']);
                     $item->increment('points', 1);
@@ -166,13 +209,13 @@ class CartController extends Controller
             session()->forget('cart');
 
             return redirect()->route('orders.track', [
-                'order_id' => $order->id, 
-                'phone' => $order->customer_phone
+                'order_id' => $order->id,
+                'phone' => $order->customer_phone,
             ])->with('success', 'Thank you! Your order #' . $order->id . ' has been placed.');
+        } catch (\Throwable $exception) {
+            DB::rollBack();
 
-        } catch (\Exception $e) {
-            DB::rollback();
-            return redirect()->back()->with('error', 'Something went wrong while placing your order. Please try again.');
+            return redirect()->back()->withInput()->with('error', 'Something went wrong while placing your order. Please try again.');
         }
     }
 }

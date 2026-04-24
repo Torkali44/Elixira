@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
@@ -41,6 +42,10 @@
                     @if(auth()->user()->role === 'admin')
                         <li><a href="{{ route('admin.dashboard') }}" class="text-primary fw-bold">Admin</a></li>
                     @endif
+                    <li class="d-flex align-items-center gap-2">
+                        <x-user-avatar :user="auth()->user()" size="32" />
+                        <a href="{{ route('profile.edit') }}" class="{{ request()->routeIs('profile.*') ? 'active' : '' }}">Account</a>
+                    </li>
                     <li>
                         <form method="POST" action="{{ route('logout') }}" class="d-inline">
                             @csrf
@@ -121,30 +126,12 @@
     </style>
 
     <!-- Main Content -->
-    <main>
-        @if(session('success'))
-            <div class="container pt-3">
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    {{ session('success') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            </div>
-        @endif
-        @if(session('error'))
-            <div class="container pt-3">
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    {{ session('error') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            </div>
-        @endif
-        @yield('content')
-    </main>
+    <main>@yield('content')</main>
 
     <!-- Footer -->
     <footer class="footer">
         <div class="container text-center text-white pb-5">
-            <h2 style="color: var(--secondary-color);">Unlock exclusive launches, curated tips, and members‑only offers.</h2>
+            <h2 style="color: var(--secondary-color);">Unlock exclusive launches, curated tips, and membersâ€‘only offers.</h2>
             <p>No Spam, Good Stuff Only!</p>
             <div class="mt-4 mb-5 d-flex justify-content-center">
                 <input type="email" placeholder="Your email address" style="padding: 10px 20px; border-radius: 50px 0 0 50px; border: none; outline: none; width: 300px;">
@@ -179,6 +166,15 @@
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        @if(session('success'))
+            Swal.fire({ icon: 'success', text: "{!! addslashes(session('success')) !!}", toast: true, position: 'top-end', showConfirmButton: false, timer: 3000 });
+        @endif
+        @if(session('error'))
+            Swal.fire({ icon: 'error', text: "{!! addslashes(session('error')) !!}", toast: true, position: 'top-end', showConfirmButton: false, timer: 4000 });
+        @endif
+    </script>
     <script src="{{ asset('js/script.js') }}"></script>
     @stack('scripts')
 </body>

@@ -83,3 +83,22 @@ test('correct password must be provided to delete account', function () {
 
     $this->assertNotNull($user->fresh());
 });
+
+test('admin user can not delete their own account', function () {
+    $admin = User::factory()->create([
+        'role' => 'admin',
+    ]);
+
+    $response = $this
+        ->actingAs($admin)
+        ->from('/profile')
+        ->delete('/profile', [
+            'password' => 'password',
+        ]);
+
+    $response
+        ->assertRedirect('/profile')
+        ->assertSessionHas('error', 'Administrator accounts cannot delete themselves from the system.');
+
+    $this->assertNotNull($admin->fresh());
+});

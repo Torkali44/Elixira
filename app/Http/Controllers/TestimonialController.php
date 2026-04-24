@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\AvatarOption;
 use App\Models\Review;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Validation\Rule;
 
 class TestimonialController extends Controller
 {
@@ -17,11 +19,15 @@ class TestimonialController extends Controller
             ->latest()
             ->get();
 
-        return view('testimonials.index', compact('tab', 'reviews'));
+        $avatarOptions = AvatarOption::active()->ordered()->get();
+
+        return view('testimonials.index', compact('tab', 'reviews', 'avatarOptions'));
     }
 
     public function store(Request $request)
     {
+        $avatarUrls = AvatarOption::active()->pluck('image_url')->toArray();
+
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'nullable|email|max:255',
@@ -29,7 +35,11 @@ class TestimonialController extends Controller
             'gender' => 'required|string',
             'rating' => 'required|string',
             'content' => 'required|string',
-            'avatar' => 'required|string',
+            'avatar' => [
+                'required',
+                'string',
+                Rule::in($avatarUrls),
+            ],
             'type' => 'required|string|in:direct',
         ]);
 

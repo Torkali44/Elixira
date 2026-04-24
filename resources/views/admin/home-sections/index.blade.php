@@ -1,4 +1,4 @@
-@extends('layouts.admin')
+﻿@extends('layouts.admin')
 
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
@@ -26,7 +26,7 @@
                     @foreach($sections as $section)
                     <tr>
                         <td>{{ $section->sort_order }}</td>
-                        <td>{{ $section->admin_label ?? '—' }}</td>
+                        <td>{{ $section->admin_label ?? '-' }}</td>
                         <td><code>{{ $section->slug }}</code></td>
                         <td><span class="badge bg-secondary">{{ $section->template }}</span></td>
                         <td>

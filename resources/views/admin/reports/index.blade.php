@@ -1,4 +1,4 @@
-@extends('layouts.admin')
+﻿@extends('layouts.admin')
 
 @section('content')
 <style>
@@ -18,9 +18,9 @@
         <p class="text-muted">Overview of your store performance, inventory, and users.</p>
     </div>
     <!-- print -->
-    <!-- <div class="d-print-none">
+     <div class="d-print-none">
         <button onclick="window.print()" class="btn btn-primary"><i class="fas fa-print me-2"></i> Print Full Report</button>
-    </div> -->
+    </div> 
 </div>
 
 <div class="row g-4 mb-5">
@@ -29,7 +29,7 @@
         <div class="card border-0 shadow-sm h-100" style="border-left: 5px solid #28a745 !important;">
             <div class="card-body">
                 <small class="text-muted text-uppercase fw-bold">Total Revenue</small>
-                <h3 class="mt-2">SAR {{ number_format($totalRevenue, 2) }}</h3>
+                <h3 class="mt-2">﷼ {{ number_format($totalRevenue, 2) }}</h3>
                 <p class="mb-0 text-success small"><i class="fas fa-wallet me-1"></i> Non-cancelled orders</p>
             </div>
         </div>
@@ -101,7 +101,7 @@
                                 <td class="text-center">
                                     <span class="badge {{ $item->stock > 0 ? 'bg-success' : 'bg-danger' }}">{{ $item->stock }}</span>
                                 </td>
-                                <td class="text-end fw-bold">SAR {{ number_format($item->total_sold * $item->price, 2) }}</td>
+                                <td class="text-end fw-bold">﷼ {{ number_format($item->total_sold * $item->price, 2) }}</td>
                             </tr>
                             @endforeach
                         </tbody>
@@ -178,7 +178,7 @@
                         <div class="d-flex align-items-center">
                             <small class="text-muted me-3 d-none d-md-block">{{ $user->created_at->format('Y-m-d') }}</small>
                             @if($user->role !== 'admin')
-                            <form action="{{ route('admin.users.destroy', $user->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this user?');">
+                            <form action="{{ route('admin.users.destroy', $user->id) }}" method="POST" data-confirm="Are you sure you want to delete this user?">
                                 @csrf
                                 @method('DELETE')
                                 <button class="btn btn-sm btn-outline-danger d-print-none"><i class="fas fa-trash"></i></button>
@@ -226,7 +226,7 @@
                                         <span class="badge bg-warning text-dark">{{ ucfirst($order->status) }}</span>
                                     @endif
                                 </td>
-                                <td class="text-end fw-bold">SAR {{ number_format($order->total_amount, 2) }}</td>
+                                <td class="text-end fw-bold">﷼ {{ number_format($order->total_amount, 2) }}</td>
                             </tr>
                             @empty
                             <tr>
@@ -237,7 +237,7 @@
                         <tfoot class="table-light fw-bold">
                             <tr>
                                 <td colspan="5" class="text-end">Total Revenue (Completed/Pending):</td>
-                                <td class="text-end text-success">SAR {{ number_format($totalRevenue, 2) }}</td>
+                                <td class="text-end text-success">﷼ {{ number_format($totalRevenue, 2) }}</td>
                             </tr>
                         </tfoot>
                     </table>

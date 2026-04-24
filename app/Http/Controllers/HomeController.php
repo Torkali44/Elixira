@@ -19,6 +19,13 @@ class HomeController extends Controller
             ->take(8)
             ->get();
 
+        if ($featuredItems->isEmpty()) {
+            $featuredItems = Item::with('category')
+                ->latest()
+                ->take(8)
+                ->get();
+        }
+
         return view('home', compact('sections', 'featuredItems'));
     }
 

@@ -1,6 +1,6 @@
 @extends('layouts.framer')
 
-@section('title', 'Your cart — Elixira')
+@section('title', 'Your cart - Elixira')
 
 @section('head')
 <style>
@@ -73,6 +73,21 @@
         background: rgba(220, 60, 60, 0.3);
         transform: scale(1.1);
     }
+    
+    select[name="country_code"] option {
+        background-color: #808080 !important;
+        color: #ffffff !important;
+    }
+    
+    select[name="country_code"] option:checked {
+        background-color: #13252D !important;
+        color: #ffffff !important;
+    }
+    
+    select[name="country_code"] option:hover {
+        background-color: #13252D !important;
+        color: #ffffff !important;
+    }
 </style>
 @endsection
 
@@ -96,15 +111,20 @@
                                 <tr>
                                     <th>Product</th>
                                     <th>Price</th>
-                                    <th>Qty</th>
+                                    <th>Points</th>
+                                    <th>Quantity</th>
                                     <th>Subtotal</th>
                                     <th></th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @php $total = 0 @endphp
+                                @php $total = 0; $totalPoints = 0; @endphp
                                 @foreach(session('cart') as $id => $details)
-                                    @php $total += $details['price'] * $details['quantity'] @endphp
+                                    @php 
+                                        $total += $details['price'] * $details['quantity'];
+                                        $points = isset($details['points']) ? $details['points'] : 0;
+                                        $totalPoints += $points * $details['quantity'];
+                                    @endphp
                                     <tr class="cart-row" data-id="{{ $id }}">
                                         <td>
                                             <div style="display: flex; align-items: center; gap: 1rem;">
@@ -120,11 +140,12 @@
                                                 <span style="font-weight: 600;">{{ $details['name'] }}</span>
                                             </div>
                                         </td>
-                                        <td>SAR {{ number_format($details['price'], 2) }}</td>
+                                        <td>﷼ {{ number_format($details['price'], 2) }}</td>
+                                        <td style="color: var(--elx-cyan);">{{ $points }}</td>
                                         <td>
                                             <input type="number" value="{{ $details['quantity'] }}" class="qty-input update-cart" min="1" max="50">
                                         </td>
-                                        <td style="color: var(--elx-cyan); font-weight: 700;">SAR {{ number_format($details['price'] * $details['quantity'], 2) }}</td>
+                                        <td style="color: var(--elx-cyan); font-weight: 700;">﷼ {{ number_format($details['price'] * $details['quantity'], 2) }}</td>
                                         <td style="text-align: right;">
                                             <button class="remove-btn remove-from-cart" data-id="{{ $id }}">
                                                 <i class="fas fa-trash"></i>
@@ -144,17 +165,50 @@
                         
                         <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; color: var(--elx-gray);">
                             <span>Total Amount</span>
-                            <span style="color: var(--elx-white); font-weight: 700; font-size: 1.2rem;">SAR {{ number_format($total, 2) }}</span>
+                            <span style="color: var(--elx-white); font-weight: 700; font-size: 1.2rem;">﷼ {{ number_format($total, 2) }}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; color: var(--elx-gray);">
+                            <span>Total Points</span>
+                            <span style="color: var(--elx-cyan); font-weight: 700; font-size: 1.2rem;">{{ $totalPoints }}</span>
                         </div>
                         
                         <hr style="border: none; border-top: 1px solid var(--elx-border); margin: 2rem 0;">
 
                         <form action="{{ route('checkout') }}" method="POST">
                             @csrf
-                            <input type="text" name="customer_name" class="form-input" placeholder="Full Name *" required>
-                            <input type="tel" name="customer_phone" class="form-input" placeholder="Phone Number *" required>
-                            <input type="text" name="address" class="form-input" placeholder="Shipping Address *" required>
-                            <textarea name="notes" class="form-input" style="border-radius: 15px;" placeholder="Notes (optional)" rows="2"></textarea>
+                            <input type="text" name="customer_name" class="form-input" placeholder="Full Name *" value="{{ auth()->check() ? auth()->user()->name : old('customer_name') }}" required>
+                            @error('customer_name')<div style="color: #ff8a8a; font-size: 0.8rem; margin-top: -0.5rem; margin-bottom: 1rem;">{{ $message }}</div>@enderror
+                            
+                            @php
+                                $phone = auth()->check() ? auth()->user()->phone : old('phone_number');
+                                $cCode = old('country_code', '+966');
+                                $pNum = $phone;
+                                if($phone && str_starts_with($phone, '+971')) {
+                                    $cCode = '+971';
+                                    $pNum = substr($phone, 4);
+                                } elseif($phone && str_starts_with($phone, '+966')) {
+                                    $cCode = '+966';
+                                    $pNum = substr($phone, 4);
+                                }
+                            @endphp
+                            <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+                                <select name="country_code" class="form-input" style="width: auto; margin-bottom: 0; padding-right: 2rem; cursor: pointer;">
+                                    <option value="+966" {{ $cCode == '+966' ? 'selected' : '' }}>🇸🇦 +966</option>
+                                    <option value="+971" {{ $cCode == '+971' ? 'selected' : '' }}>🇦🇪 +971</option>
+                                </select>
+                                <input type="tel" name="phone_number" class="form-input" placeholder="Phone Number *" value="{{ $pNum }}" style="flex-grow: 1; margin-bottom: 0;" required>
+                            </div>
+                            @error('phone_number')<div style="color: #ff8a8a; font-size: 0.8rem; margin-top: -0.5rem; margin-bottom: 1rem;">{{ $message }}</div>@enderror
+                            @error('country_code')<div style="color: #ff8a8a; font-size: 0.8rem; margin-top: -0.5rem; margin-bottom: 1rem;">{{ $message }}</div>@enderror
+
+                            <input type="text" name="user_code" class="form-input" placeholder="User Code (optional)" value="{{ old('user_code', auth()->user()?->user_code ?? '') }}">
+                            @error('user_code')<div style="color: #ff8a8a; font-size: 0.8rem; margin-top: -0.5rem; margin-bottom: 1rem;">{{ $message }}</div>@enderror
+                            
+                            <input type="text" name="address" class="form-input" placeholder="Shipping Address *" value="{{ old('address') }}" required>
+                            @error('address')<div style="color: #ff8a8a; font-size: 0.8rem; margin-top: -0.5rem; margin-bottom: 1rem;">{{ $message }}</div>@enderror
+                            
+                            <textarea name="notes" class="form-input" style="border-radius: 15px;" placeholder="Notes (optional)" rows="2">{{ old('notes') }}</textarea>
+                            @error('notes')<div style="color: #ff8a8a; font-size: 0.8rem; margin-top: -0.5rem; margin-bottom: 1rem;">{{ $message }}</div>@enderror
                             
                             <button type="submit" class="elx-btn elx-btn--primary" style="width: 100%; justify-content: center; padding: 1rem; margin-top: 1rem;">
                                 Place Order
@@ -193,15 +247,24 @@ $(function () {
     });
 
     $('.remove-from-cart').on('click', function (e) {
-        if (confirm('Remove this item from your bag?')) {
-            var id = $(this).attr('data-id');
-            $.ajax({
-                url: '{{ route('cart.remove') }}',
-                method: 'DELETE',
-                data: { _token: '{{ csrf_token() }}', id: id },
-                success: function () { window.location.reload(); }
-            });
-        }
+        Swal.fire({
+            icon: 'warning',
+            title: 'Please confirm',
+            text: 'Remove this item from your bag?',
+            showCancelButton: true,
+            confirmButtonText: 'Yes',
+            cancelButtonText: 'Cancel',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                var id = $(this).attr('data-id');
+                $.ajax({
+                    url: '{{ route('cart.remove') }}',
+                    method: 'DELETE',
+                    data: { _token: '{{ csrf_token() }}', id: id },
+                    success: function () { window.location.reload(); }
+                });
+            }
+        });
     });
 });
 </script>

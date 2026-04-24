@@ -30,27 +30,27 @@
             <a href="{{ route('menu.show', $product->id) }}" style="text-decoration: none; color: inherit;" onclick="event.stopPropagation();">
                 <h3 class="elx-product-card__name">{{ $product->name }}</h3>
             </a>
-            <span class="elx-product-card__price">SAR {{ number_format($product->price, 2) }}</span>
+            <span class="elx-product-card__price">﷼ {{ number_format($product->price, 2) }}</span>
         </div>
 
         {{-- Meta Info: Category, Brand, Points, Stock --}}
-        <div class="elx-product-card__meta" style="display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.6rem;">
+        <div class="elx-product-card__meta" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.8rem;">
             @if($product->category)
-                <span class="elx-product-card__tag" style="background: rgba(74, 200, 246, 0.1); color: #4ac8f6; padding: 0.15rem 0.6rem; border-radius: 50px; font-size: 0.65rem; font-weight: 600; border: 1px solid rgba(74, 200, 246, 0.2);">
+                <span class="elx-product-card__tag" style="background: rgba(74, 200, 246, 0.1); color: #4ac8f6; padding: 0.2rem 0.7rem; border-radius: 50px; font-size: 0.78rem; font-weight: 600; border: 1px solid rgba(74, 200, 246, 0.2);">
                     <i class="fas fa-layer-group" style="margin-right: 3px;"></i>{{ $product->category->name }}
                 </span>
             @endif
             @if($product->brand)
-                <span class="elx-product-card__tag" style="background: rgba(255, 215, 0, 0.1); color: #ffd700; padding: 0.15rem 0.6rem; border-radius: 50px; font-size: 0.65rem; font-weight: 600; border: 1px solid rgba(255, 215, 0, 0.2);">
+                <span class="elx-product-card__tag" style="background: rgba(255, 215, 0, 0.1); color: #ffd700; padding: 0.2rem 0.7rem; border-radius: 50px; font-size: 0.78rem; font-weight: 600; border: 1px solid rgba(255, 215, 0, 0.2);">
                     <i class="fas fa-tag" style="margin-right: 3px;"></i>{{ $product->brand }}
                 </span>
             @endif
             @if($product->points > 0)
-                <span class="elx-product-card__tag" style="background: rgba(0, 255, 136, 0.1); color: #00ff88; padding: 0.15rem 0.6rem; border-radius: 50px; font-size: 0.65rem; font-weight: 600; border: 1px solid rgba(0, 255, 136, 0.2);">
+                <span class="elx-product-card__tag" style="background: rgba(0, 255, 136, 0.1); color: #00ff88; padding: 0.2rem 0.7rem; border-radius: 50px; font-size: 0.78rem; font-weight: 600; border: 1px solid rgba(0, 255, 136, 0.2);">
                     <i class="fas fa-star" style="margin-right: 3px;"></i>{{ $product->points }} pts
                 </span>
             @endif
-            <span class="elx-product-card__tag" style="background: {{ $isOutOfStock ? 'rgba(255,77,77,0.1)' : 'rgba(74,200,246,0.08)' }}; color: {{ $isOutOfStock ? '#ff4d4d' : 'rgba(255,255,255,0.5)' }}; padding: 0.15rem 0.6rem; border-radius: 50px; font-size: 0.65rem; font-weight: 600; border: 1px solid {{ $isOutOfStock ? 'rgba(255,77,77,0.2)' : 'rgba(255,255,255,0.1)' }};">
+            <span class="elx-product-card__tag" style="background: {{ $isOutOfStock ? 'rgba(255,77,77,0.1)' : 'rgba(74,200,246,0.08)' }}; color: {{ $isOutOfStock ? '#ff4d4d' : 'rgba(255,255,255,0.5)' }}; padding: 0.2rem 0.7rem; border-radius: 50px; font-size: 0.78rem; font-weight: 600; border: 1px solid {{ $isOutOfStock ? 'rgba(255,77,77,0.2)' : 'rgba(255,255,255,0.1)' }};">
                 <i class="fas fa-box" style="margin-right: 3px;"></i>{{ $product->stock }} in stock
             </span>
         </div>
@@ -62,7 +62,7 @@
         <div class="elx-product-card__cart-form" onclick="event.stopPropagation();" style="position: relative; z-index: 20;">
             @if($isOutOfStock)
                 <button type="button" class="elx-product-card__add-btn elx-product-card__add-btn--disabled" disabled 
-                        onclick="alert('This product is out of stock. The administration will be notified to provide it soon.')" style="position: relative; z-index: 20;">
+                        onclick="showInfoPopup('This product is out of stock. The administration will be notified to provide it soon.')" style="position: relative; z-index: 20;">
                     <i class="fas fa-info-circle"></i> Out of Stock
                 </button>
             @else

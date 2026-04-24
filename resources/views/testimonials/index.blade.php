@@ -1,6 +1,6 @@
-@extends('layouts.framer')
+﻿@extends('layouts.framer')
 
-@section('title', 'Testimonials — Elixira')
+@section('title', 'Testimonials - Elixira')
 
 @section('content')
 <style>
@@ -100,7 +100,7 @@
     .newsletter-group { display: inline-flex; align-items: center; gap: 12px; cursor: pointer; padding: 5px; }
     .newsletter-checkbox { width: 20px; height: 20px; border-radius: 6px; background-color: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.15); appearance: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; }
     .newsletter-checkbox:checked { background-color: #4ac8f6; border-color: #4ac8f6; }
-    .newsletter-checkbox:checked::after { content: '✓'; color: #000; font-size: 14px; font-weight: 900; }
+    .newsletter-checkbox:checked::after { content: 'âœ“'; color: #000; font-size: 14px; font-weight: 900; }
     .submit-btn-wrapper { display: flex; justify-content: flex-end; margin-top: 15px; }
     .submit-btn { background: linear-gradient(135deg, rgba(74, 200, 246, 0.15) 0%, rgba(74, 200, 246, 0.05) 100%); border: 1px solid rgba(74, 200, 246, 0.4); color: #4ac8f6; padding: 14px 40px; border-radius: 40px; font-size: 16px; font-weight: 700; cursor: pointer; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); backdrop-filter: blur(10px); box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); letter-spacing: 0.5px; }
     .submit-btn:hover { background: rgba(74, 200, 246, 0.25); box-shadow: 0 8px 25px rgba(74, 200, 246, 0.3); transform: translateY(-3px) scale(1.02); color: #fff; border-color: #fff; }
@@ -159,12 +159,12 @@
     <div class="testimonials-header">
         <h1 class="testimonials-title">Testimonials</h1>
         <ul class="testimonials-tabs">
-            <!-- <li><a href="{{ route('testimonials.index', ['tab' => 'direct']) }}" class="{{ $tab == 'direct' ? 'active' : '' }}">Direct</a></li> -->
-            <!-- <li><a href="{{ route('testimonials.index', ['tab' => 'whatsapp']) }}" class="{{ $tab == 'whatsapp' ? 'active' : '' }}">WhatsApp</a></li>
+             <li><a href="{{ route('testimonials.index', ['tab' => 'direct']) }}" class="{{ $tab == 'direct' ? 'active' : '' }}">Direct</a></li> 
+             <li><a href="{{ route('testimonials.index', ['tab' => 'whatsapp']) }}" class="{{ $tab == 'whatsapp' ? 'active' : '' }}">WhatsApp</a></li>
             <li><a href="{{ route('testimonials.index', ['tab' => 'instagram']) }}" class="{{ $tab == 'instagram' ? 'active' : '' }}">Instagram</a></li>
             <li><a href="{{ route('testimonials.index', ['tab' => 'external']) }}" class="{{ $tab == 'external' ? 'active' : '' }}">External</a></li>
             <li><a href="{{ route('testimonials.index', ['tab' => 'video']) }}" class="{{ $tab == 'video' ? 'active' : '' }}">Videos</a></li>
-            <li><a href="{{ route('testimonials.index', ['tab' => 'write']) }}" class="tab-write {{ $tab == 'write' ? 'active' : '' }}">Write Review</a></li> -->
+            <li><a href="{{ route('testimonials.index', ['tab' => 'write']) }}" class="tab-write {{ $tab == 'write' ? 'active' : '' }}">Write Review</a></li> 
         </ul>
     </div>
 
@@ -183,150 +183,18 @@
 
                     <div class="review-section-title">Select Your Avatar</div>
                     <div class="avatars-wrapper">
-                <label class="avatar-label">
-                    <div class="avatar-img-container">
-                        <img src="https://framerusercontent.com/images/cTc7CUtNbTmlTgoiKuHSwOHME.png" alt="Avatar 1">
-                    </div>
-                    <input type="radio" name="avatar" value="https://framerusercontent.com/images/cTc7CUtNbTmlTgoiKuHSwOHME.png" class="avatar-radio" checked>
-                </label>
-                <label class="avatar-label">
-                    <div class="avatar-img-container">
-                        <img src="https://framerusercontent.com/images/xujOvWlIH4jCpEHwRSO8fL3AZyM.png" alt="Avatar 2">
-                    </div>
-                    <input type="radio" name="avatar" value="https://framerusercontent.com/images/xujOvWlIH4jCpEHwRSO8fL3AZyM.png" class="avatar-radio" >
-                </label>
-                <label class="avatar-label">
-                    <div class="avatar-img-container">
-                        <img src="https://framerusercontent.com/images/voEeLI8QvLxIBheChMgZpIZDBDw.png" alt="Avatar 3">
-                    </div>
-                    <input type="radio" name="avatar" value="https://framerusercontent.com/images/voEeLI8QvLxIBheChMgZpIZDBDw.png" class="avatar-radio" >
-                </label>
-                <label class="avatar-label">
-                    <div class="avatar-img-container">
-                        <img src="https://framerusercontent.com/images/P6B3UqKPpI7pUX8hpOGEuB7DoYI.png" alt="Avatar 4">
-                    </div>
-                    <input type="radio" name="avatar" value="https://framerusercontent.com/images/P6B3UqKPpI7pUX8hpOGEuB7DoYI.png" class="avatar-radio" >
-                </label>
-                <label class="avatar-label">
-                    <div class="avatar-img-container">
-                        <img src="https://framerusercontent.com/images/ZOmjcnCegPgIJe774bHLeiqGoRY.png" alt="Avatar 5">
-                    </div>
-                    <input type="radio" name="avatar" value="https://framerusercontent.com/images/ZOmjcnCegPgIJe774bHLeiqGoRY.png" class="avatar-radio" >
-                </label>
-                <label class="avatar-label">
-                    <div class="avatar-img-container">
-                        <img src="https://framerusercontent.com/images/aH4TSB4QigZBUovRTOzJbNfmE8.png" alt="Avatar 6">
-                    </div>
-                    <input type="radio" name="avatar" value="https://framerusercontent.com/images/aH4TSB4QigZBUovRTOzJbNfmE8.png" class="avatar-radio" >
-                </label>
-                <label class="avatar-label">
-                    <div class="avatar-img-container">
-                        <img src="https://framerusercontent.com/images/vjNbwG6wtp9Zat3QDbEDG5SQ8nc.png" alt="Avatar 7">
-                    </div>
-                    <input type="radio" name="avatar" value="https://framerusercontent.com/images/vjNbwG6wtp9Zat3QDbEDG5SQ8nc.png" class="avatar-radio" >
-                </label>
-                <label class="avatar-label">
-                    <div class="avatar-img-container">
-                        <img src="https://framerusercontent.com/images/yLvdWmXt1qfpzFexvRPL1YPjEM.png" alt="Avatar 8">
-                    </div>
-                    <input type="radio" name="avatar" value="https://framerusercontent.com/images/yLvdWmXt1qfpzFexvRPL1YPjEM.png" class="avatar-radio" >
-                </label>
-                <!-- <label class="avatar-label">
-                    <div class="avatar-img-container">
-                        <img src="https://framerusercontent.com/images/L0MgVueQuuaTbIG2RDygjv6nxw.png" alt="Avatar 9">
-                    </div>
-                    <input type="radio" name="avatar" value="https://framerusercontent.com/images/L0MgVueQuuaTbIG2RDygjv6nxw.png" class="avatar-radio" >
-                </label>
-                <label class="avatar-label">
-                    <div class="avatar-img-container">
-                        <img src="https://framerusercontent.com/images/cyZY6rN0VQ2rTCXAp8vDkwwfs.png" alt="Avatar 10">
-                    </div>
-                    <input type="radio" name="avatar" value="https://framerusercontent.com/images/cyZY6rN0VQ2rTCXAp8vDkwwfs.png" class="avatar-radio" >
-                </label>
-                <label class="avatar-label">
-                    <div class="avatar-img-container">
-                        <img src="https://framerusercontent.com/images/avsgw3MlrBZ7Qemx2LDUzfksapA.png" alt="Avatar 11">
-                    </div>
-                    <input type="radio" name="avatar" value="https://framerusercontent.com/images/avsgw3MlrBZ7Qemx2LDUzfksapA.png" class="avatar-radio" >
-                </label>
-                <label class="avatar-label">
-                    <div class="avatar-img-container">
-                        <img src="https://framerusercontent.com/images/tNsNvr6rtFzILJLih7KTMe4uM.png" alt="Avatar 12">
-                    </div>
-                    <input type="radio" name="avatar" value="https://framerusercontent.com/images/tNsNvr6rtFzILJLih7KTMe4uM.png" class="avatar-radio" >
-                </label>
-                <label class="avatar-label">
-                    <div class="avatar-img-container">
-                        <img src="https://framerusercontent.com/images/QHfWARUm32FA9v9bgBIZeTDFaB8.png" alt="Avatar 13">
-                    </div>
-                    <input type="radio" name="avatar" value="https://framerusercontent.com/images/QHfWARUm32FA9v9bgBIZeTDFaB8.png" class="avatar-radio" >
-                </label>
-                <label class="avatar-label">
-                    <div class="avatar-img-container">
-                        <img src="https://framerusercontent.com/images/epaiBXj1vYRcJ7bEafNzHniJ8gQ.png" alt="Avatar 14">
-                    </div>
-                    <input type="radio" name="avatar" value="https://framerusercontent.com/images/epaiBXj1vYRcJ7bEafNzHniJ8gQ.png" class="avatar-radio" >
-                </label>
-                <label class="avatar-label">
-                    <div class="avatar-img-container">
-                        <img src="https://framerusercontent.com/images/yMGFyp1B3WEQPWVHuC2AOcqCwBk.png" alt="Avatar 15">
-                    </div>
-                    <input type="radio" name="avatar" value="https://framerusercontent.com/images/yMGFyp1B3WEQPWVHuC2AOcqCwBk.png" class="avatar-radio" >
-                </label>
-                <label class="avatar-label">
-                    <div class="avatar-img-container">
-                        <img src="https://framerusercontent.com/images/AW5gsxnLBvhE7bhUymsSWpcAP0.png" alt="Avatar 16">
-                    </div>
-                    <input type="radio" name="avatar" value="https://framerusercontent.com/images/AW5gsxnLBvhE7bhUymsSWpcAP0.png" class="avatar-radio" >
-                </label>
-                <label class="avatar-label">
-                    <div class="avatar-img-container">
-                        <img src="https://framerusercontent.com/images/0pOGEkOl3QOA0AOhql07dLjouU.png" alt="Avatar 17">
-                    </div>
-                    <input type="radio" name="avatar" value="https://framerusercontent.com/images/0pOGEkOl3QOA0AOhql07dLjouU.png" class="avatar-radio" >
-                </label>
-                <label class="avatar-label">
-                    <div class="avatar-img-container">
-                        <img src="https://framerusercontent.com/images/Xdax07q3fD8YGG6qtDgZOZEaqI.png" alt="Avatar 18">
-                    </div>
-                    <input type="radio" name="avatar" value="https://framerusercontent.com/images/Xdax07q3fD8YGG6qtDgZOZEaqI.png" class="avatar-radio" >
-                </label>
-                <label class="avatar-label">
-                    <div class="avatar-img-container">
-                        <img src="https://framerusercontent.com/images/rMJN1hMOPP8cSGd8LdmmlMesy8.png" alt="Avatar 19">
-                    </div>
-                    <input type="radio" name="avatar" value="https://framerusercontent.com/images/rMJN1hMOPP8cSGd8LdmmlMesy8.png" class="avatar-radio" >
-                </label>
-                <label class="avatar-label">
-                    <div class="avatar-img-container">
-                        <img src="https://framerusercontent.com/images/iyDK7k3FedurGjdTkG1KSJYm8no.png" alt="Avatar 20">
-                    </div>
-                    <input type="radio" name="avatar" value="https://framerusercontent.com/images/iyDK7k3FedurGjdTkG1KSJYm8no.png" class="avatar-radio" >
-                </label>
-                <label class="avatar-label">
-                    <div class="avatar-img-container">
-                        <img src="https://framerusercontent.com/images/Ryq4xjuMhGxgQzm7NiX6xlq3938.png" alt="Avatar 21">
-                    </div>
-                    <input type="radio" name="avatar" value="https://framerusercontent.com/images/Ryq4xjuMhGxgQzm7NiX6xlq3938.png" class="avatar-radio" >
-                </label>
-                <label class="avatar-label">
-                    <div class="avatar-img-container">
-                        <img src="https://framerusercontent.com/images/YCyyVb7j8C5U4vDHPAPqKNHIfAc.png" alt="Avatar 22">
-                    </div>
-                    <input type="radio" name="avatar" value="https://framerusercontent.com/images/YCyyVb7j8C5U4vDHPAPqKNHIfAc.png" class="avatar-radio" >
-                </label>
-                <label class="avatar-label">
-                    <div class="avatar-img-container">
-                        <img src="https://framerusercontent.com/images/CD114mrqzRMe6TQ3ieg8ZQxUk.png" alt="Avatar 23">
-                    </div>
-                    <input type="radio" name="avatar" value="https://framerusercontent.com/images/CD114mrqzRMe6TQ3ieg8ZQxUk.png" class="avatar-radio" >
-                </label>
-                <label class="avatar-label">
-                    <div class="avatar-img-container">
-                        <img src="https://framerusercontent.com/images/7wRDToSNM4pfN5ZhkkMQRo4zuY.png" alt="Avatar 24">
-                    </div>
-                    <input type="radio" name="avatar" value="https://framerusercontent.com/images/7wRDToSNM4pfN5ZhkkMQRo4zuY.png" class="avatar-radio" >
-                </label> -->
+                        @forelse($avatarOptions as $index => $avatar)
+                            <label class="avatar-label">
+                                <div class="avatar-img-container">
+                                    <img src="{{ $avatar->image_url }}" alt="{{ $avatar->name }}">
+                                </div>
+                                <input type="radio" name="avatar" value="{{ $avatar->image_url }}" class="avatar-radio" @checked($index === 0)>
+                            </label>
+                        @empty
+                            <p style="grid-column: 1 / -1; color: #ff8a8a;">
+                                No avatar options are active now. Please contact support.
+                            </p>
+                        @endforelse
                     </div>
 
                     <div class="form-wrapper">
@@ -413,7 +281,12 @@
             <div class="testimonials-grid">
                 @foreach($reviews as $rev)
                     <div class="screenshot-card">
-                        <img src="{{ asset('storage/' . $rev->avatar) }}" alt="Testimonial Screenshot">
+                        @php
+                            $avatarSrc = \Illuminate\Support\Str::startsWith((string) $rev->avatar, ['http://', 'https://'])
+                                ? $rev->avatar
+                                : asset('storage/' . ltrim((string) $rev->avatar, '/'));
+                        @endphp
+                        <img src="{{ $avatarSrc }}" alt="Testimonial Screenshot">
                         @if($rev->content)
                             <div style="padding: 15px; color: #ccc; font-size: 0.9rem; border-top: 1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.2);">
                                 {{ $rev->content }}

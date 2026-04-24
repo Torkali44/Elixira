@@ -1,4 +1,4 @@
-@php
+﻿@php
     $style = '';
     if ($section->image) {
         $style = "background-image: url('" . e(asset('storage/' . $section->image)) . "');";

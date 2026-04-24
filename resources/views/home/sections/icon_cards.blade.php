@@ -1,4 +1,4 @@
-@php
+﻿@php
     $cards = [];
     if ($section->body) {
         try {

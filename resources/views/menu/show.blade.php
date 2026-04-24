@@ -1,6 +1,6 @@
-@extends('layouts.framer')
+﻿@extends('layouts.framer')
 
-@section('title', $item->name . ' — Elixira')
+@section('title', $item->name . ' - Elixira')
 
 @section('head')
 <style>
@@ -136,7 +136,7 @@
                 </h1>
                 
                 <div style="font-size: 2rem; font-weight: 700; color: var(--elx-white); margin-bottom: 2rem;">
-                    SAR {{ number_format($item->price, 2) }}
+                    ﷼ {{ number_format($item->price, 2) }}
                 </div>
 
                 <p style="color: var(--elx-gray); font-size: 1.1rem; margin-bottom: 3rem; line-height: 1.6;">
@@ -188,7 +188,7 @@
         @if(isset($relatedItems) && $relatedItems->count() > 0)
         <div class="elx-section" style="margin-top: 6rem;">
             <div class="elx-section__header" style="text-align: left; margin-bottom: 3rem;" data-animate>
-                <h2 class="elx-section__title">✦ Related Rituals</h2>
+                <h2 class="elx-section__title">✧ Related Rituals</h2>
             </div>
             
             <div class="elx-products__grid" data-animate>

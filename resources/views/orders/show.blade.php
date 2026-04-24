@@ -1,6 +1,6 @@
-@extends('layouts.framer')
+﻿@extends('layouts.framer')
 
-@section('title', 'Order #' . $order->id . ' — Elixira')
+@section('title', 'Order #' . $order->id . ' - Elixira')
 
 @section('head')
 <style>
@@ -113,11 +113,11 @@
                     <div class="status-header">
                         <div>
                             <span style="color: var(--elx-gray);">Current Status</span>
-                            <h2 style="color: var(--elx-accent); margin-top: 0.5rem; font-size: 1.8rem;">✦ {{ ucfirst($order->status) }}</h2>
+                            <h2 style="color: var(--elx-accent); margin-top: 0.5rem; font-size: 1.8rem;">✧ {{ ucfirst($order->status) }}</h2>
                         </div>
                         <div style="text-align: right;">
                             <span style="color: var(--elx-gray);">Order Total</span>
-                            <h2 style="color: var(--elx-cyan); margin-top: 0.5rem; font-size: 1.8rem;">SAR {{ number_format($order->total_amount, 2) }}</h2>
+                            <h2 style="color: var(--elx-cyan); margin-top: 0.5rem; font-size: 1.8rem;">﷼ {{ number_format($order->total_amount, 2) }}</h2>
                         </div>
                     </div>
 
@@ -161,7 +161,7 @@
 
                     {{-- Items --}}
                     <div style="margin-top: 4rem;">
-                        <h3 style="font-size: 1.2rem; color: var(--elx-accent); margin-bottom: 1rem;">✦ Order Items</h3>
+                        <h3 style="font-size: 1.2rem; color: var(--elx-accent); margin-bottom: 1rem;">✧ Order Items</h3>
                         <table class="item-table">
                             <thead>
                                 <tr>
@@ -175,10 +175,10 @@
                                 <tr>
                                     <td>
                                         <div style="font-weight: 600;">{{ $item->item->name }}</div>
-                                        <div style="font-size: 0.8rem; color: var(--elx-gray);">SAR {{ number_format($item->price, 2) }} each</div>
+                                        <div style="font-size: 0.8rem; color: var(--elx-gray);">﷼ {{ number_format($item->price, 2) }} each</div>
                                     </td>
                                     <td>x{{ $item->quantity }}</td>
-                                    <td style="text-align: right; font-weight: 700; color: var(--elx-cyan);">SAR {{ number_format($item->price * $item->quantity, 2) }}</td>
+                                    <td style="text-align: right; font-weight: 700; color: var(--elx-cyan);">﷼ {{ number_format($item->price * $item->quantity, 2) }}</td>
                                 </tr>
                                 @endforeach
                             </tbody>

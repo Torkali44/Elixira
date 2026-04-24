@@ -1,4 +1,4 @@
-@extends('layouts.admin')
+﻿@extends('layouts.admin')
 
 @section('content')
 <div class="container-fluid">
@@ -6,9 +6,9 @@
         <div class="col-12">
             <h1 class="h3 mb-4 text-gray-800">Testimonials & Reviews Management</h1>
 
-            <!-- <div class="mb-4">
+             <div class="mb-4">
                 <a href="{{ route('admin.reviews.create') }}" class="btn btn-primary">Add New Screenshot/Video</a>
-            </div> -->
+            </div> 
 
             <!-- List of Reviews -->
             <div class="card shadow mb-4">
@@ -108,7 +108,7 @@
                                                 @endif
                                             </form>
                                             
-                                            <form action="{{ route('admin.reviews.destroy', $review->id) }}" method="POST" class="d-inline ml-1" onsubmit="return confirm('Permanently delete?');">
+                                            <form action="{{ route('admin.reviews.destroy', $review->id) }}" method="POST" class="d-inline ml-1" data-confirm="Permanently delete?">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="btn btn-sm btn-danger p-1" title="Delete">

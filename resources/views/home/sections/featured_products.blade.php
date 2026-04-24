@@ -1,4 +1,4 @@
-<section class="elx-section section-padding" data-elx-animate>
+﻿<section class="elx-section section-padding" data-elx-animate>
     <div class="container">
         @if($featuredItems->isEmpty())
             <p class="text-center text-muted mb-0">Featured products will appear here when your admin marks items as featured.</p>
