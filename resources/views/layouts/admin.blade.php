@@ -15,7 +15,7 @@
         body {
             font-family: 'Istok Web', sans-serif;
             background-color: #f8f9fa;
-            zoom: 1.2;
+            /* zoom: 1.2; */
         }
         .sidebar {
             min-height: 100vh;
