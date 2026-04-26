@@ -111,7 +111,7 @@
         </div>
 
         <!-- Orders Breakdown -->
-        <div class="card border-0 shadow-sm">
+        <!-- <div class="card border-0 shadow-sm">
             <div class="card-header bg-white py-3">
                 <h5 class="mb-0"><i class="fas fa-tasks me-2"></i> Orders by Status</h5>
             </div>
@@ -127,7 +127,7 @@
                     @endforeach
                 </div>
             </div>
-        </div>
+        </div> -->
     </div>
 
     <!-- Right Column (Alerts & Recent) -->

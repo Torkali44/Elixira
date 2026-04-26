@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Elixira - Superfoods & Wellness')</title>
-    <meta name="description" content="A blend of superfoods, science, and selfâ€‘care rituals.">
+    <meta name="description" content="A blend of superfoods, science, and self-care rituals.">
 
     {{-- Fonts --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -22,7 +22,6 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <style>
-        /* Ø¥Ø¶Ø§ÙØ© Ø³ØªØ§ÙŠÙ„ Ø®Ø§Øµ Ù„Ù„Ù…Ø­ØªÙˆÙ‰ Ø§Ù„Ø¯Ø§Ø®Ù„ÙŠ Ù„Ø¶Ù…Ø§Ù† Ø¸Ù‡ÙˆØ±Ù‡ ØªØ­Øª Ø§Ù„Ù†Ø§Ù Ø¨Ø§Ø± Ø§Ù„Ø«Ø§Ø¨Øª */
         .page-content {
             padding-top: 100px;
             padding-bottom: 80px;
@@ -49,10 +48,8 @@
 
 <body>
 
-    {{-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• --}}
     {{-- NAVIGATION BAR (Global) --}}
-    {{-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• --}}
-    <nav class="elx-nav @yield('nav-class', 'scrolled')" id="elxNav">
+     <nav class="elx-nav @yield('nav-class', 'scrolled')" id="elxNav">
         <div class="elx-nav__inner">
             <a href="{{ route('home') }}" class="elx-nav__logo">
                 <img src="https://framerusercontent.com/images/uXbQX90j2iRjfRCUW6NdMiNzUVM.png" alt="Elixira" class="elx-nav__logo-img" style="height: 28px; width: auto;">
@@ -154,7 +151,7 @@
                 @endauth -->
 
                 <!-- بعد -->
-                 
+                                     
 @auth
     @if(auth()->user()->role === 'admin')
         <a href="{{ route('admin.dashboard') }}" class="elx-nav__btn elx-nav__btn--admin">
@@ -207,11 +204,8 @@
         @yield('content')
     </main>
 
-    {{-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• --}}
+
     {{-- FOOTER (Global) --}}
-    {{-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• --}}
-    {{-- FOOTER (Global) --}}
-    {{-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• --}}
     <footer class="elx-footer"
         style="position: relative; overflow: visible; padding: 6rem 1rem 4rem; background-color: #13252d;">
         {{-- Cloud Decorations - Absolute positioned --}}
@@ -231,14 +225,6 @@
                 style="background: #13252D; backdrop-filter: blur(14px); border: 1px solid rgba(20, 204, 255, 0.15); border-radius: 32px; padding: 4rem 2rem;">
 
                 {{-- Tagline --}}
-                <div class="elx-footer__tagline"
-                    style="display: flex; flex-direction: column; align-items: center; text-align: center; gap: 0.5rem; margin-bottom: 4rem;">
-                    <p style="font-size: 1.1rem; color: #fff; margin: 0;">✧ Clean, potent, and beautifully crafted
-                        formulas</p>
-                    <p style="font-size: 1.1rem; color: #fff; margin: 0;">✧ Rooted in nature</p>
-                    <p style="font-size: 1.1rem; color: #fff; margin: 0;">✧ Guided by modern wellness</p>
-                </div>
-
                 <div class="elx-footer__grid"
                     style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 4rem; margin-bottom: 4rem;">
                     <div class="elx-footer__brand">
@@ -247,7 +233,7 @@
                                 alt="Elixira Logo" style="height: 35px;">
                         </a>
                         <p style="color: rgba(255,255,255,0.6); font-size: 0.95rem; line-height: 1.6;">
-                            *Designed to support beauty, energy, and inner harmony through the ritual of superfoods and
+                            Designed to support beauty, energy, and inner harmony through the ritual of superfoods and
                             science.
                         </p>
                     </div>
@@ -380,13 +366,13 @@
         });
 
         const nav = document.getElementById('elxNav');
-        // Ø¥Ø°Ø§ ÙƒÙ†Øª ÙÙŠ Ø§Ù„ØµÙØ­Ø© Ø§Ù„Ø±Ø¦ÙŠØ³ÙŠØ©ØŒ Ø§Ø¬Ø¹Ù„ Ø§Ù„Ù†Ø§Ù Ø¨Ø§Ø± ÙŠØªØºÙŠØ± Ù„ÙˆÙ†Ù‡ Ø¹Ù†Ø¯ Ø§Ù„Ø³ÙƒØ±ÙˆÙ„
         if (nav && !nav.classList.contains('scrolled-permanent')) {
             window.addEventListener('scroll', () => {
                 if (window.scrollY > 50) {
                     nav.classList.add('scrolled');
                 } else if (!document.body.classList.contains('home-page')) {
-                    // Ù„Ø§ ØªÙØ¹Ù„ Ø´ÙŠØ¦Ø§
+                    //add white bg
+                    nav.classList.add('scrolled');
                 } else {
                     nav.classList.remove('scrolled');
                 }

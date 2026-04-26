@@ -15,6 +15,7 @@
                         <th>#</th>
                         <th>Image</th>
                         <th>Name</th>
+                        <th>Brand</th>
                         <th>Category</th>
                         <th>Price</th>
                         <th>Featured</th>
@@ -33,6 +34,7 @@
                             @endif
                         </td>
                         <td class="fw-bold">{{ $item->name }}</td>
+                        <td class="fw-bold">{{ $item->brand }}</td>
                         <td><span class="badge bg-secondary">{{ $item->category->name }}</span></td>
                         <td>${{ number_format($item->price, 2) }}</td>
                         <td>

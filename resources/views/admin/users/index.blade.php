@@ -1,4 +1,4 @@
-@extends('layouts.admin')
+﻿@extends('layouts.admin')
 
 @section('content')
 @php($currentUser = auth()->user())
@@ -27,14 +27,14 @@
             </div>
         </div>
     </div>
-    <div class="col-md-3">
+    <!-- <div class="col-md-3">
         <div class="card border-0 shadow-sm h-100">
             <div class="card-body">
-                <small class="text-muted text-uppercase">With Avatar</small>
+                <small class="text-muted text-uppercase">Total Sellers</small>
                 <h3 class="mt-2 mb-0">{{ $stats['with_avatars'] }}</h3>
             </div>
         </div>
-    </div>
+    </div> -->
     <div class="col-md-3">
         <div class="card border-0 shadow-sm h-100">
             <div class="card-body">
@@ -58,16 +58,11 @@
                     <option value="">All roles</option>
                     <option value="admin" @selected(request('role') === 'admin')>Admin</option>
                     <option value="user" @selected(request('role') === 'user')>User</option>
+                    <!-- <option value="Seller" @selected(request('role') === 'Seller')>Seller</option> -->
+
                 </select>
             </div>
-            <div class="col-md-2">
-                <label for="avatar_status" class="form-label">Avatar</label>
-                <select id="avatar_status" name="avatar_status" class="form-select">
-                    <option value="">All</option>
-                    <option value="with-avatar" @selected(request('avatar_status') === 'with-avatar')>Has avatar</option>
-                    <option value="missing-avatar" @selected(request('avatar_status') === 'missing-avatar')>Missing avatar</option>
-                </select>
-            </div>
+            
             <div class="col-md-2 d-flex gap-2">
                 <button type="submit" class="btn btn-primary w-100">Filter</button>
                 <a href="{{ route('admin.users.index') }}" class="btn btn-outline-secondary">Reset</a>

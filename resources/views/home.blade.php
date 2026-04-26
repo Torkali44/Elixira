@@ -2,17 +2,13 @@
 
 @section('title', 'Elixira - Superfoods, Science & Self-Care')
 
-@section('nav-class', '') {{-- ÙÙŠ Ø§Ù„Ù‡ÙˆÙ… Ù„Ø§ Ù†Ø±ÙŠØ¯ Ø®Ù„ÙÙŠØ© Ø³ÙˆØ¯Ø§Ø¡ ÙÙˆØ±ÙŠØ© --}}
+@section('nav-class', '')  
 
 @section('content')
 
-    {{--
-    â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-    --}}
+   
     {{-- HERO SECTION --}}
-    {{--
-    â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-    --}}
+   
     <section class="elx-hero" id="hero"
         style="position: relative; overflow: hidden; height: 100vh; display: flex; align-items: center; justify-content: center;">
         {{-- Main Background Image --}}
@@ -39,8 +35,8 @@
             </h1>
             <p class="elx-hero__subtitle"
                 style="color: rgba(255,255,255,0.76); font-size: 1.25rem; line-height: 1.6; margin: 1.5rem 0 2rem;">
-                A blend of<br>superfoods, science, and selfâ€‘care rituals that restores your glow,<br>balance your energy,
-                and elevate your daily wellbeingâ€¦
+                A blend of<br>superfoods, science, and self-care rituals that restores your glow,<br>balance your energy,
+                and elevate your daily wellbeing...
             </p>
             <div class="elx-hero__actions" style="display: flex; gap: 1rem; justify-content: center;">
                 <a href="{{ route('menu.index') }}" class="elx-btn elx-btn--primary">Enter Store</a>
@@ -49,13 +45,9 @@
         </div>
     </section>
 
-    {{--
-    â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-    --}}
+ 
     {{-- CATEGORIES SECTION --}}
-    {{--
-    â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-    --}}
+   
     <section class="elx-section elx-categories" id="categories" style="padding: 4rem 0;">
         <div class="elx-container">
             @php
@@ -160,7 +152,7 @@
             }
         }
     </style>
-   
+
     <section class="elx-section elx-products" id="products" style="background-color: #13252d; padding: 6rem 0;">
         <div class="elx-container">
             <div class="elx-section__header" data-animate style="text-align: center; margin-bottom: 4rem;">
@@ -216,13 +208,9 @@
         </div>
     </section>
 
-    {{--
-    â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-    --}}
+   
     {{-- NEWSLETTER --}}
-    {{--
-    â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-    --}}
+    
     <section class="elx-section elx-newsletter" id="newsletter">
         <div class="elx-container">
             <div class="elx-newsletter__box" data-animate>
@@ -240,34 +228,91 @@
             </div>
         </div>
     </section>
-
-
-    {{--
-    â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-    --}}
+      
     {{-- TESTIMONIALS SECTION --}}
-    {{--
-    â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-    --}}
     @php
-        $homeReviews = \App\Models\Review::where('status', 'approved')->where('type', 'direct')->latest()->take(6)->get();
+        $homeReviews = \App\Models\Review::where('status', 'approved')->where('type', 'direct')->latest()->take(12)->get();
     @endphp
     @if($homeReviews->isNotEmpty())
         <style>
+            .testimonial-carousel-container {
+                position: relative;
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 0 50px;
+                overflow: visible;
+            }
+
+            .testimonial-carousel-track-container {
+                overflow: hidden;
+            }
+
+            .testimonial-carousel-track {
+                display: flex;
+                transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+                list-style: none;
+                padding: 0;
+                margin: 0;
+            }
+
+            .testimonial-carousel-slide {
+                flex: 0 0 calc(33.333% - 26.666px); /* 3 items minus gap */
+                margin-right: 40px;
+            }
+
             .testimonial-card {
                 transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                height: 100%;
             }
 
             .testimonial-card:hover {
-                transform: translateY(-15px) scale(1.02);
+                transform: translateY(-10px) scale(1.01);
                 box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
                 border-color: rgba(74, 200, 246, 0.3) !important;
                 background: #11222b !important;
             }
 
-            .testimonial-card:hover .avatar-container {
-                box-shadow: 0 0 25px rgba(74, 200, 246, 0.5) !important;
-                transform: rotate(5deg);
+            .carousel-btn {
+                position: absolute;
+                top: 50%;
+                transform: translateY(-50%);
+                background: rgba(74, 200, 246, 0.1);
+                border: 1px solid rgba(74, 200, 246, 0.3);
+                color: #4ac8f6;
+                width: 50px;
+                height: 50px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                z-index: 10;
+                transition: all 0.3s ease;
+            }
+
+            .carousel-btn:hover {
+                background: #4ac8f6;
+                color: #000;
+                box-shadow: 0 0 20px rgba(74, 200, 246, 0.4);
+            }
+
+            .carousel-btn.prev { left: -10px; }
+            .carousel-btn.next { right: -10px; }
+
+            @media (max-width: 1024px) {
+                .testimonial-carousel-slide {
+                    flex: 0 0 calc(50% - 20px);
+                }
+            }
+
+            @media (max-width: 768px) {
+                .testimonial-carousel-slide {
+                    flex: 0 0 100%;
+                    margin-right: 0;
+                }
+                .testimonial-carousel-container {
+                    padding: 0 40px;
+                }
             }
         </style>
         <section class="elx-section" style="padding: 6rem 0; background-color: #0b161c;">
@@ -276,70 +321,128 @@
                     style="text-align: center; color: #4ac8f6; margin-bottom: 4rem; font-family: 'Istok Web', sans-serif;">What
                     Our Community Says</h2>
 
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 40px;">
-                    @foreach($homeReviews as $rev)
-                        <div class="testimonial-card"
-                            style="background: #0d1a20; border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 30px; padding: 40px; position: relative; box-shadow: 0 15px 40px rgba(0,0,0,0.4); display: flex; flex-direction: column; justify-content: space-between; min-height: 400px;">
+                <div class="testimonial-carousel-container">
+                    <button class="carousel-btn prev" id="carouselPrev"><i class="fas fa-chevron-left"></i></button>
+                    
+                    <div class="testimonial-carousel-track-container">
+                        <div class="testimonial-carousel-track" id="carouselTrack">
+                            @foreach($homeReviews as $rev)
+                                <div class="testimonial-carousel-slide">
+                                    <div class="testimonial-card"
+                                        style="background: #0d1a20; border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 30px; padding: 40px; position: relative; box-shadow: 0 15px 40px rgba(0,0,0,0.4); display: flex; flex-direction: column; justify-content: space-between; min-height: 400px;">
 
-                            <!-- Header: Stars & Rating Circle -->
-                            <div
-                                style="display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 20px;">
-                                <div style="display: flex; gap: 5px; color: #4ac8f6; font-size: 1.2rem;">
-                                    @for($i = 1; $i <= 5; $i++)
-                                        <i class="{{ $i <= $rev->rating ? 'fas' : 'far' }} fa-star"></i>
-                                    @endfor
-                                </div>
-                                <div
-                                    style="width: 35px; height: 35px; border-radius: 50%; border: 2px solid #4ac8f6; display: flex; align-items: center; justify-content: center; color: #4ac8f6; font-weight: bold; font-size: 1rem; box-shadow: 0 0 10px rgba(74, 200, 246, 0.3);">
-                                    {{ $rev->rating }}
-                                </div>
-                            </div>
+                                        <!-- Header: Stars & Rating Circle -->
+                                        <div
+                                            style="display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 20px;">
+                                            <div style="display: flex; gap: 5px; color: #4ac8f6; font-size: 1.2rem;">
+                                                @for($i = 1; $i <= 5; $i++)
+                                                    <i class="{{ $i <= $rev->rating ? 'fas' : 'far' }} fa-star"></i>
+                                                @endfor
+                                            </div>
+                                            <div
+                                                style="width: 35px; height: 35px; border-radius: 50%; border: 2px solid #4ac8f6; display: flex; align-items: center; justify-content: center; color: #4ac8f6; font-weight: bold; font-size: 1rem; box-shadow: 0 0 10px rgba(74, 200, 246, 0.3);">
+                                                {{ $rev->rating }}
+                                            </div>
+                                        </div>
 
-                            <!-- Quote Icon Top Left -->
-                            <i class="fas fa-quote-left"
-                                style="position: absolute; top: 30px; left: 30px; font-size: 2rem; color: rgba(255,255,255,0.05);"></i>
+                                        <!-- Quote Icon Top Left -->
+                                        <i class="fas fa-quote-left"
+                                            style="position: absolute; top: 30px; left: 30px; font-size: 2rem; color: rgba(255,255,255,0.05);"></i>
 
-                            <!-- Content -->
-                            <div style="text-align: center; flex-grow: 1; display: flex; align-items: center; padding: 20px 0;">
-                                <p
-                                    style="color: #eee; font-size: 1.2rem; line-height: 1.7; font-family: 'Istok Web', sans-serif; font-weight: 400; font-style: normal;">
-                                    {{ $rev->content }}
-                                </p>
-                            </div>
+                                        <!-- Content -->
+                                        <div style="text-align: center; flex-grow: 1; display: flex; align-items: center; padding: 20px 0;">
+                                            <p
+                                                style="color: #eee; font-size: 1.2rem; line-height: 1.7; font-family: 'Istok Web', sans-serif; font-weight: 400; font-style: normal;">
+                                                {{ $rev->content }}
+                                            </p>
+                                        </div>
 
-                            <!-- Quote Icon Bottom Right -->
-                            <i class="fas fa-quote-right"
-                                style="position: absolute; bottom: 100px; right: 30px; font-size: 2rem; color: rgba(255,255,255,0.05);"></i>
-
-                            <!-- Footer: User Info -->
-                            <div
-                                style="display: flex; align-items: center; gap: 15px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05);">
-                                <div class="avatar-container"
-                                    style="width: 55px; height: 55px; border-radius: 50%; border: 2px solid #4ac8f6; padding: 2px; box-shadow: 0 0 15px rgba(74, 200, 246, 0.2); transition: all 0.3s ease;">
-                                    <img src="{{ $rev->avatar ?? 'https://framerusercontent.com/images/cTc7CUtNbTmlTgoiKuHSwOHME.png' }}"
-                                        alt="{{ $rev->name }}"
-                                        style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
-                                </div>
-                                <div style="display: flex; flex-direction: column;">
-                                    <h4 style="margin: 0; color: #fff; font-size: 1.1rem; font-weight: 700;">{{ $rev->name }}</h4>
-                                    <div style="display: flex; gap: 15px; font-size: 0.85rem; color: #666; margin-top: 3px;">
-                                        <span>Gen.: <strong style="color: #999;">{{ $rev->skin_type ?? 'N/A' }}</strong></span>
-                                        <span>Age: <strong style="color: #999;">{{ $rev->age ?? 'N/A' }}</strong></span>
+                                        <!-- Footer: User Info -->
+                                        <div
+                                            style="display: flex; align-items: center; gap: 15px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05);">
+                                            <div class="avatar-container"
+                                                style="width: 55px; height: 55px; border-radius: 50%; border: 2px solid #4ac8f6; padding: 2px; box-shadow: 0 0 15px rgba(74, 200, 246, 0.2); transition: all 0.3s ease;">
+                                                <img src="{{ $rev->avatar ?? 'https://framerusercontent.com/images/cTc7CUtNbTmlTgoiKuHSwOHME.png' }}"
+                                                    alt="{{ $rev->name }}"
+                                                    style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+                                            </div>
+                                            <div style="display: flex; flex-direction: column;">
+                                                <h4 style="margin: 0; color: #fff; font-size: 1.1rem; font-weight: 700;">{{ $rev->name }}</h4>
+                                                <div style="display: flex; gap: 15px; font-size: 0.85rem; color: #666; margin-top: 3px;">
+                                                    <span>Gen.: <strong style="color: #999;">{{ $rev->skin_type ?? 'N/A' }}</strong></span>
+                                                    <span>Age: <strong style="color: #999;">{{ $rev->age ?? 'N/A' }}</strong></span>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
+                            @endforeach
                         </div>
-                    @endforeach
+                    </div>
+
+                    <button class="carousel-btn next" id="carouselNext"><i class="fas fa-chevron-right"></i></button>
                 </div>
 
                 <div style="text-align: center; margin-top: 4rem;">
-                    <a href="{{ route('testimonials.index') }}" class="elx-btn elx-btn--glass"
+                    <a href="{{ route('testimonials.index', ['tab' => 'direct']) }}" class="elx-btn elx-btn--glass"
                         style="padding: 15px 40px; border-radius: 30px;">
-                        Read More Reflections <i class="fas fa-arrow-right" style="margin-left: 10px;"></i>
+                        See All Comments <i class="fas fa-arrow-right" style="margin-left: 10px;"></i>
                     </a>
                 </div>
             </div>
         </section>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const track = document.getElementById('carouselTrack');
+                const slides = Array.from(track.children);
+                const nextButton = document.getElementById('carouselNext');
+                const prevButton = document.getElementById('carouselPrev');
+                
+                let currentIndex = 0;
+                let itemsPerView = window.innerWidth > 1024 ? 3 : (window.innerWidth > 768 ? 2 : 1);
+                
+                const updateCarousel = () => {
+                    const slideWidth = slides[0].getBoundingClientRect().width + 40; // width + gap
+                    track.style.transform = `translateX(-${currentIndex * slideWidth}px)`;
+                };
+
+                window.addEventListener('resize', () => {
+                    itemsPerView = window.innerWidth > 1024 ? 3 : (window.innerWidth > 768 ? 2 : 1);
+                    updateCarousel();
+                });
+
+                nextButton.addEventListener('click', () => {
+                    if (currentIndex < slides.length - itemsPerView) {
+                        currentIndex++;
+                    } else {
+                        currentIndex = 0; // Loop back
+                    }
+                    updateCarousel();
+                });
+
+                prevButton.addEventListener('click', () => {
+                    if (currentIndex > 0) {
+                        currentIndex--;
+                    } else {
+                        currentIndex = slides.length - itemsPerView; // Go to end
+                    }
+                    updateCarousel();
+                });
+
+                // Auto-scroll
+                let interval = setInterval(() => {
+                    nextButton.click();
+                }, 5000);
+
+                track.addEventListener('mouseenter', () => clearInterval(interval));
+                track.addEventListener('mouseleave', () => {
+                    interval = setInterval(() => {
+                        nextButton.click();
+                    }, 5000);
+                });
+            });
+        </script>
     @endif
 @endsection
 

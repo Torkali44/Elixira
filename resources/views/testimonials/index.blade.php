@@ -1,4 +1,4 @@
-﻿@extends('layouts.framer')
+@extends('layouts.framer')
 
 @section('title', 'Testimonials - Elixira')
 
@@ -81,8 +81,30 @@
 
     /* ... Existing Form Styles ... */
     .review-section-title { font-size: 15px; margin-bottom: 25px; color: #aaa; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
-    .avatars-wrapper { display: grid; grid-template-columns: repeat(8, 1fr); gap: 15px; margin-bottom: 50px; justify-items: center; }
-    .avatar-label { display: flex; flex-direction: column; align-items: center; cursor: pointer; gap: 15px; transition: transform 0.3s ease; }
+    .avatars-wrapper { 
+        display: flex; 
+        overflow-x: auto; 
+        gap: 20px; 
+        margin-bottom: 50px; 
+        padding: 10px 5px; 
+        scrollbar-width: thin; 
+        scrollbar-color: #4ac8f6 rgba(255,255,255,0.05);
+        -webkit-overflow-scrolling: touch;
+    }
+    .avatars-wrapper::-webkit-scrollbar { height: 6px; }
+    .avatars-wrapper::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); border-radius: 10px; }
+    .avatars-wrapper::-webkit-scrollbar-thumb { background: #4ac8f6; border-radius: 10px; }
+
+    .avatar-label { 
+        flex: 0 0 calc((100% - (7 * 20px)) / 8); 
+        min-width: 85px;
+        display: flex; 
+        flex-direction: column; 
+        align-items: center; 
+        cursor: pointer; 
+        gap: 15px; 
+        transition: transform 0.3s ease; 
+    }
     .avatar-img-container { width: 65px; height: 65px; border-radius: 50%; background-color: rgba(255, 255, 255, 0.03); padding: 3px; border: 2px solid transparent; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); position: relative; }
     .avatar-img-container img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
     .avatar-radio { appearance: none; width: 18px; height: 18px; border-radius: 50%; background-color: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.15); cursor: pointer; transition: all 0.3s ease; outline: none; }
@@ -146,12 +168,22 @@
         border: none;
     }
 
+    .testimonial-card {
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .testimonial-card:hover {
+        transform: translateY(-10px) scale(1.01);
+        box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5) !important;
+        border-color: rgba(74, 200, 246, 0.3) !important;
+        background: #11222b !important;
+    }
+
     /* ... Responsive ... */
     @media (max-width: 768px) {
         .testimonials-title { font-size: 50px; }
         .testimonials-tabs { gap: 15px; }
         .testimonials-tabs li a { font-size: 1rem; }
-        .avatars-wrapper { grid-template-columns: repeat(4, 1fr); }
     }
 </style>
 
@@ -169,7 +201,55 @@
     </div>
 
     <div class="testimonials-content">
-        @if($tab == 'direct' || $tab == 'write')
+        @if($tab == 'direct')
+            <div class="testimonials-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 30px; max-width: 1200px; margin: 0 auto;">
+                @foreach($reviews as $rev)
+                    <div class="testimonial-card"
+                        style="background: #0d1a20; border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 30px; padding: 40px; position: relative; box-shadow: 0 15px 40px rgba(0,0,0,0.4); display: flex; flex-direction: column; justify-content: space-between; min-height: 350px;">
+
+                        <!-- Header: Stars -->
+                        <div style="display: flex; gap: 5px; color: #4ac8f6; font-size: 1rem; margin-bottom: 20px;">
+                            @for($i = 1; $i <= 5; $i++)
+                                <i class="{{ $i <= $rev->rating ? 'fas' : 'far' }} fa-star"></i>
+                            @endfor
+                        </div>
+
+                        <!-- Content -->
+                        <div style="flex-grow: 1; display: flex; align-items: center; padding: 10px 0;">
+                            <p style="color: #eee; font-size: 1.1rem; line-height: 1.6; font-family: 'Istok Web', sans-serif;">
+                                {{ $rev->content }}
+                            </p>
+                        </div>
+
+                        <!-- Footer: User Info -->
+                        <div style="display: flex; align-items: center; gap: 15px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05);">
+                            <div style="width: 45px; height: 45px; border-radius: 50%; border: 2px solid #4ac8f6; padding: 2px;">
+                                <img src="{{ $rev->avatar ?? 'https://framerusercontent.com/images/cTc7CUtNbTmlTgoiKuHSwOHME.png' }}"
+                                    alt="{{ $rev->name }}"
+                                    style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+                            </div>
+                            <div style="display: flex; flex-direction: column;">
+                                <h4 style="margin: 0; color: #fff; font-size: 1rem; font-weight: 700;">{{ $rev->name }}</h4>
+                                <div style="display: flex; gap: 10px; font-size: 0.8rem; color: #666;">
+                                    <span>{{ $rev->skin_type }}</span>
+                                    <span>{{ $rev->age }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+
+            <div style="margin-top: 50px; display: flex; justify-content: center;">
+                {{ $reviews->links() }}
+            </div>
+
+            <div style="text-align: center; margin-top: 60px;">
+                <p style="color: #888; margin-bottom: 20px;">Have a story to share?</p>
+                <a href="{{ route('testimonials.index', ['tab' => 'write']) }}" class="submit-btn" style="text-decoration: none; display: inline-block;">Write Your Reflection</a>
+            </div>
+
+        @elseif($tab == 'write')
             <div class="review-form-container">
                 @if(session('success'))
                     <div style="text-align: center; color: #4ac8f6; padding: 20px; font-size: 1.1rem; background: rgba(74, 200, 246, 0.1); border-radius: 16px; margin-bottom: 30px; border: 1px solid rgba(74, 200, 246, 0.2);">

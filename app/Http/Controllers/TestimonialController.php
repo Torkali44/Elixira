@@ -17,7 +17,7 @@ class TestimonialController extends Controller
         $reviews = Review::where('status', 'approved')
             ->where('type', $tab)
             ->latest()
-            ->get();
+            ->paginate(12);
 
         $avatarOptions = AvatarOption::active()->ordered()->get();
 

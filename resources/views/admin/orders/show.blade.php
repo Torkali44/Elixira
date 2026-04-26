@@ -49,6 +49,9 @@
             <div class="card-body">
                 <p><strong>Name:</strong> {{ $order->customer_name }}</p>
                 <p><strong>Phone:</strong> {{ $order->customer_phone }}</p>
+                @if($order->user_code)
+                <p><strong>Code referral : </strong> {{ $order->user_code }}</p>
+                @endif
                 <p><strong>Address:</strong> {{ $order->address }}</p>
                 <p><strong>Placed:</strong> {{ $order->created_at->format('Y-m-d h:i A') }}</p>
                 @if($order->notes)

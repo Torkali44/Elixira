@@ -31,15 +31,7 @@ class UserController extends Controller
             $query->where('role', $request->role);
         }
 
-        if ($request->filled('avatar_status')) {
-            if ($request->avatar_status === 'with-avatar') {
-                $query->whereNotNull('avatar');
-            }
-
-            if ($request->avatar_status === 'missing-avatar') {
-                $query->whereNull('avatar');
-            }
-        }
+        
 
         $users = $query->paginate(15)->appends($request->query());
 

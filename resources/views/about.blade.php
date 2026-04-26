@@ -24,7 +24,7 @@
                     <div class="elx-insights__text" style="flex: 1; min-width: 320px;">
                         <span class="elx-insights__label" style="color: var(--elx-cyan); letter-spacing: 3px;">OUR STORY</span>
                         <h2 style="font-size: 3rem; margin: 1.5rem 0; color: white;">Rooted in Nature</h2>
-                        <p style="opacity: 0.8; line-height: 1.8; font-size: 1.1rem; margin-bottom: 1.5rem;">At Elixira, we believe that true beauty and wellbeing stem from nature. We feature products crafted from pure natural ingredients, with a special focus on superfoods and bodyâ€‘care essentials.</p>
+                        <p style="opacity: 0.8; line-height: 1.8; font-size: 1.1rem; margin-bottom: 1.5rem;">At Elixira, we believe that true beauty and wellbeing stem from nature. We feature products crafted from pure natural ingredients, with a special focus on superfoods and body care essentials.</p>
                         <p style="opacity: 0.75; line-height: 1.8; font-size: 1.1rem; margin-bottom: 2.5rem;">Each formula is developed with clear ingredient lists and honest claims-so you always know what touches your skin. Whether you are building a minimal routine or layering serums and SPF, Elixira is here to help you shop with confidence.</p>
                         <a href="{{ route('menu.index') }}" class="elx-btn elx-btn--primary">Shop the Collection</a>
                     </div>
