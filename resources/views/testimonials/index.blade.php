@@ -433,27 +433,55 @@
                 </div>
 
             @elseif($tab == 'write')
-                <div class="review-form-container">
+                <div class="elx-container" style="margin-top: 0; margin-bottom: 1.5rem;">
                     @if(session('success'))
-                        <div
-                            style="text-align: center; color: #4ac8f6; padding: 20px; font-size: 1.1rem; background: rgba(74, 200, 246, 0.1); border-radius: 16px; margin-bottom: 30px; border: 1px solid rgba(74, 200, 246, 0.2);">
-                            <i class="fas fa-check-circle" style="margin-right: 10px;"></i> {{ session('success') }}
+                        <div style="margin-top: 2rem;">
+                            <div
+                                style="background: rgba(74, 200, 246, 0.1); border: 1px solid #4ac8f6; color: #4ac8f6; padding: 1rem 2rem; border-radius: 12px; text-align: center;">
+                                <i class="fas fa-check-circle" style="margin-right: 0.5rem;"></i>{{ session('success') }}
+                            </div>
                         </div>
                     @endif
+                    @if(session('error'))
+                        <div style="margin-top: 2rem;">
+                            <div
+                                style="background: rgba(220, 53, 69, 0.1); border: 1px solid #dc3545; color: #dc3545; padding: 1rem 2rem; border-radius: 12px; text-align: center;">
+                                <i class="fas fa-exclamation-circle" style="margin-right: 0.5rem;"></i>{{ session('error') }}
+                            </div>
+                        </div>
+                    @endif
+                    @if($errors->any())
+                        <div style="margin-top: 2rem;">
+                            <div
+                                style="background: rgba(255, 193, 7, 0.12); border: 1px solid #ffc107; color: #ffc107; padding: 1rem 2rem; border-radius: 12px; text-align: left;">
+                                <strong style="display: block; margin-bottom: 0.5rem; text-align: center;"><i
+                                        class="fas fa-exclamation-triangle" style="margin-right: 0.5rem;"></i>Please Contact with support
+                                        :</strong>
+                                <ul style="margin: 0; padding-left: 1.25rem; color: #e8c76a;">
+                                    @foreach($errors->all() as $message)
+                                        <li>{{ $message }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        </div>
+                    @endif
+                </div>
 
+                <div class="review-form-container">
                     <form action="{{ route('testimonials.store') }}" method="POST">
                         @csrf
                         <input type="hidden" name="type" value="direct">
 
                         <div class="review-section-title">Select Your Avatar</div>
                         <div class="avatars-wrapper">
+                            @php $defaultAvatarUrl = $avatarOptions->first()->image_url ?? ''; @endphp
                             @forelse($avatarOptions as $index => $avatar)
                                 <label class="avatar-label">
                                     <div class="avatar-img-container">
                                         <img src="{{ $avatar->image_url }}" alt="{{ $avatar->name }}">
                                     </div>
                                     <input type="radio" name="avatar" value="{{ $avatar->image_url }}" class="avatar-radio"
-                                        @checked($index === 0)>
+                                        @checked(old('avatar', $defaultAvatarUrl) === $avatar->image_url)>
                                 </label>
                             @empty
                                 <p style="grid-column: 1 / -1; color: #ff8a8a;">
@@ -466,50 +494,51 @@
                             <div class="form-row">
                                 <div class="form-group">
                                     <label class="form-label">Full Name</label>
-                                    <input type="text" name="name" class="form-input" placeholder="e.g. Ryo Hazoki" required>
+                                    <input type="text" name="name" class="form-input" placeholder="e.g. Ryo Hazoki"
+                                        value="{{ old('name') }}" required>
                                 </div>
                                 <div class="form-group">
                                     <label class="form-label">Email Address</label>
                                     <input type="email" name="email" class="form-input" placeholder="e.g. duke@elixira.com"
-                                        required>
+                                        value="{{ old('email') }}" required>
                                 </div>
                             </div>
                             <div class="form-row">
                                 <div class="form-group">
                                     <label class="form-label">Age Range</label>
                                     <select name="age" class="form-input" required>
-                                        <option value="" disabled selected>Select...</option>
-                                        <option value="18-24">18 - 24 years</option>
-                                        <option value="25-34">25 - 34 years</option>
-                                        <option value="35-44">35 - 44 years</option>
-                                        <option value="45+">45+ years</option>
+                                        <option value="" disabled @selected(old('age') === null || old('age') === '')>Select...</option>
+                                        <option value="18-24" @selected(old('age') === '18-24')>18 - 24 years</option>
+                                        <option value="25-34" @selected(old('age') === '25-34')>25 - 34 years</option>
+                                        <option value="35-44" @selected(old('age') === '35-44')>35 - 44 years</option>
+                                        <option value="45+" @selected(old('age') === '45+')>45+ years</option>
                                     </select>
                                 </div>
                                 <div class="form-group">
                                     <label class="form-label">Gender</label>
                                     <select name="gender" class="form-input" required>
-                                        <option value="" disabled selected>Select...</option>
-                                        <option value="Male">Male</option>
-                                        <option value="Female">Female</option>
-                                        <option value="Other">Other</option>
+                                        <option value="" disabled @selected(old('gender') === null || old('gender') === '')>Select...</option>
+                                        <option value="Male" @selected(old('gender') === 'Male')>Male</option>
+                                        <option value="Female" @selected(old('gender') === 'Female')>Female</option>
+                                        <option value="Other" @selected(old('gender') === 'Other')>Other</option>
                                     </select>
                                 </div>
                                 <div class="form-group">
                                     <label class="form-label">Rating</label>
                                     <select name="rating" class="form-input" required>
-                                        <option value="" disabled selected>Select Stars...</option>
-                                        <option value="5">5 Stars</option>
-                                        <option value="4">4 Stars</option>
-                                        <option value="3">3 Stars</option>
-                                        <option value="2">2 Stars</option>
-                                        <option value="1">1 Star</option>
+                                        <option value="" disabled @selected(old('rating') === null || old('rating') === '')>Select Stars...</option>
+                                        <option value="5" @selected(old('rating') == '5')>5 Stars</option>
+                                        <option value="4" @selected(old('rating') == '4')>4 Stars</option>
+                                        <option value="3" @selected(old('rating') == '3')>3 Stars</option>
+                                        <option value="2" @selected(old('rating') == '2')>2 Stars</option>
+                                        <option value="1" @selected(old('rating') == '1')>1 Star</option>
                                     </select>
                                 </div>
                             </div>
                             <div class="form-group">
                                 <label class="form-label">How would you describe your experience with us?</label>
                                 <textarea name="content" class="form-input" placeholder="Share your thoughts..."
-                                    required></textarea>
+                                    required>{{ old('content') }}</textarea>
                             </div>
                             <label class="newsletter-group">
                                 <input type="checkbox" name="newsletter" class="newsletter-checkbox">

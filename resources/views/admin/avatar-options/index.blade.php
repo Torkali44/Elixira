@@ -46,7 +46,11 @@
                             <td class="text-end">
                                 <form action="{{ route('admin.avatar-options.toggle', $avatar) }}" method="POST" class="d-inline">
                                     @csrf @method('PATCH')
-                                    <button class="btn btn-sm btn-outline-warning">{{ $avatar->is_active ? 'Disable' : 'Enable' }}</button>
+                                    <button type="submit"
+                                        class="btn btn-sm {{ $avatar->is_active ? 'btn-outline-warning' : 'btn-success' }}"
+                                        title="{{ $avatar->is_active ? 'Deactivate this avatar' : 'Activate this avatar' }}">
+                                        {{ $avatar->is_active ? 'Disable' : 'Enable' }}
+                                    </button>
                                 </form>
                                 <a href="{{ route('admin.avatar-options.edit', $avatar) }}" class="btn btn-sm btn-outline-primary">Edit</a>
                                 <form action="{{ route('admin.avatar-options.destroy', $avatar) }}" method="POST" class="d-inline" data-confirm="Delete this avatar?">

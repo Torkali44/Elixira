@@ -298,30 +298,39 @@
             });
         };
 
+        @php
+            $testimonialsWriteInlineAlerts =
+                request()->routeIs('testimonials.index') && request()->query('tab') === 'write';
+        @endphp
+
         @if(session('success'))
-            Swal.fire({
-                icon: 'success',
-                title: 'Success!',
-                text: "{!! addslashes(session('success')) !!}",
-                toast: true,
-                position: 'top-end',
-                showConfirmButton: false,
-                timer: 3000,
-                timerProgressBar: true,
-            });
+            @unless($testimonialsWriteInlineAlerts)
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: "{!! addslashes(session('success')) !!}",
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true,
+                });
+            @endunless
         @endif
 
         @if(session('error'))
-            Swal.fire({
-                icon: 'error',
-                title: 'Oops...',
-                text: "{!! addslashes(session('error')) !!}",
-                toast: true,
-                position: 'top-end',
-                showConfirmButton: false,
-                timer: 4000,
-                timerProgressBar: true,
-            });
+            @unless($testimonialsWriteInlineAlerts)
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: "{!! addslashes(session('error')) !!}",
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 4000,
+                    timerProgressBar: true,
+                });
+            @endunless
         @endif
 
         document.querySelectorAll('form[data-confirm]').forEach((form) => {

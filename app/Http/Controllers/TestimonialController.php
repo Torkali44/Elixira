@@ -43,18 +43,29 @@ class TestimonialController extends Controller
             'type' => 'required|string|in:direct',
         ]);
 
-        Review::create([
-            'type' => $request->type,
-            'avatar' => $request->avatar,
-            'name' => $request->name,
-            'age' => $request->age,
-            'skin_type' => $request->gender,
-            'rating' => intval($request->rating),
-            'content' => $request->content,
-            'status' => 'pending',
-        ]);
+        try {
+            Review::create([
+                'type' => $request->type,
+                'avatar' => $request->avatar,
+                'name' => $request->name,
+                'age' => $request->age,
+                'skin_type' => $request->gender,
+                'rating' => intval($request->rating),
+                'content' => $request->content,
+                'status' => 'pending',
+            ]);
+        } catch (\Throwable $e) {
+            report($e);
 
-        return redirect()->route('testimonials.index')->with('success', 'Your reflection has been sent successfully and is pending approval.');
+            return redirect()
+                ->route('testimonials.index', ['tab' => 'write'])
+                ->with('error', 'We could not save your reflection. Please try again in a moment.')
+                ->withInput();
+        }
+
+        return redirect()
+            ->route('testimonials.index', ['tab' => 'write'])
+            ->with('success', 'Your reflection has been sent successfully and is pending approval.');
     }
 
     public function subscribe(Request $request)
