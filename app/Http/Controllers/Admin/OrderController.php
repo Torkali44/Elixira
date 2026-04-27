@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
@@ -48,21 +49,9 @@ class OrderController extends Controller
         
         $stats['avg_execution_time'] = round($avgExecutionTime ?? 0, 1);
 
-        // Peak activity period (Hour of the day)
-        $peakHour = Order::selectRaw('HOUR(created_at) as hour, COUNT(*) as count')
-            ->groupBy('hour')
-            ->orderByDesc('count')
-            ->first();
-        
-        $stats['peak_hour'] = $peakHour ? $peakHour->hour . ':00' : 'N/A';
-
-        // Most active day
-        $peakDay = Order::selectRaw('DAYNAME(created_at) as day, COUNT(*) as count')
-            ->groupBy('day')
-            ->orderByDesc('count')
-            ->first();
-        
-        $stats['peak_day'] = $peakDay ? $peakDay->day : 'N/A';
+        $peaks = $this->orderPeakStats();
+        $stats['peak_hour'] = $peaks['peak_hour'];
+        $stats['peak_day'] = $peaks['peak_day'];
 
         return view('admin.orders.index', compact('orders', 'stats'));
     }
@@ -82,5 +71,60 @@ class OrderController extends Controller
         $order->update(['status' => $request->status]);
 
         return redirect()->back()->with('success', 'The order status has been successfully updated.');
+    }
+
+    /**
+     * Peak hour/day use MySQL-only functions in the original form; Laravel Cloud often uses PostgreSQL.
+     */
+    private function orderPeakStats(): array
+    {
+        $driver = DB::connection()->getDriverName();
+
+        if (in_array($driver, ['mysql', 'mariadb'], true)) {
+            $peakHour = Order::query()
+                ->selectRaw('HOUR(created_at) as hour, COUNT(*) as cnt')
+                ->groupByRaw('HOUR(created_at)')
+                ->orderByDesc('cnt')
+                ->first();
+
+            $peakDay = Order::query()
+                ->selectRaw('DAYNAME(created_at) as day, COUNT(*) as cnt')
+                ->groupByRaw('DAYNAME(created_at)')
+                ->orderByDesc('cnt')
+                ->first();
+        } elseif ($driver === 'pgsql') {
+            $peakHour = Order::query()
+                ->selectRaw('EXTRACT(HOUR FROM created_at)::int as hour, COUNT(*) as cnt')
+                ->groupByRaw('EXTRACT(HOUR FROM created_at)')
+                ->orderByDesc('cnt')
+                ->first();
+
+            $peakDay = Order::query()
+                ->selectRaw("TRIM(TO_CHAR(created_at, 'Day')) as day, COUNT(*) as cnt")
+                ->groupByRaw("TRIM(TO_CHAR(created_at, 'Day'))")
+                ->orderByDesc('cnt')
+                ->first();
+        } else {
+            $dayExpr = "CASE CAST(strftime('%w', created_at) AS INTEGER) "
+                ."WHEN 0 THEN 'Sunday' WHEN 1 THEN 'Monday' WHEN 2 THEN 'Tuesday' WHEN 3 THEN 'Wednesday' "
+                ."WHEN 4 THEN 'Thursday' WHEN 5 THEN 'Friday' WHEN 6 THEN 'Saturday' END";
+
+            $peakHour = Order::query()
+                ->selectRaw("CAST(strftime('%H', created_at) AS INTEGER) as hour, COUNT(*) as cnt")
+                ->groupByRaw("strftime('%H', created_at)")
+                ->orderByDesc('cnt')
+                ->first();
+
+            $peakDay = Order::query()
+                ->selectRaw("{$dayExpr} as day, COUNT(*) as cnt")
+                ->groupByRaw($dayExpr)
+                ->orderByDesc('cnt')
+                ->first();
+        }
+
+        return [
+            'peak_hour' => $peakHour ? $peakHour->hour . ':00' : 'N/A',
+            'peak_day' => $peakDay ? $peakDay->day : 'N/A',
+        ];
     }
 }
