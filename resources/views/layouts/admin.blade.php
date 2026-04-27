@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
@@ -87,9 +87,9 @@
                 <a href="{{ route('admin.reviews.index') }}" class="{{ request()->routeIs('admin.reviews.*') ? 'active' : '' }}">
                     <i class="fas fa-star me-2"></i> Testimonials & Reviews
                 </a>
-                <!-- <a href="{{ route('admin.avatar-options.index') }}" class="{{ request()->routeIs('admin.avatar-options.*') ? 'active' : '' }}">
+                <a href="{{ route('admin.avatar-options.index') }}" class="{{ request()->routeIs('admin.avatar-options.*') ? 'active' : '' }}">
                     <i class="fas fa-user-astronaut me-2"></i> Avatar Management
-                </a> -->
+                </a>
                 <a href="{{ route('home') }}" target="_blank" rel="noopener">
                     <i class="fas fa-external-link-alt me-2"></i> View storefront
                 </a>
