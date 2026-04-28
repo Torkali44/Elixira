@@ -8,7 +8,7 @@
 
 <div class="card border-0 shadow-sm">
     <div class="card-body">
-        <form action="{{ route('admin.avatar-options.update', $avatarOption) }}" method="POST">
+        <form action="{{ route('admin.avatar-options.update', $avatarOption) }}" method="POST" enctype="multipart/form-data">
             @csrf
             @method('PUT')
             @include('admin.avatar-options.partials.form', ['avatarOption' => $avatarOption])

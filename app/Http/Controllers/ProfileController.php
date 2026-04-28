@@ -62,7 +62,16 @@ class ProfileController extends Controller
 
     public function avatarOptions(Request $request): View
     {
-        $avatarOptions = AvatarOption::active()->ordered()->get();
+        $user = $request->user();
+        $avatarOptions = AvatarOption::active()
+            ->when($user->gender, function ($query, $gender) {
+                $query->where(function ($q) use ($gender) {
+                    $q->where('gender', 'both')
+                        ->orWhere('gender', $gender);
+                });
+            })
+            ->ordered()
+            ->get();
 
         return view('profile.avatar-options', [
             'avatarOptions' => $avatarOptions,

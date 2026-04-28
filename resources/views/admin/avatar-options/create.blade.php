@@ -8,7 +8,7 @@
 
 <div class="card border-0 shadow-sm">
     <div class="card-body">
-        <form action="{{ route('admin.avatar-options.store') }}" method="POST">
+        <form action="{{ route('admin.avatar-options.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
             @include('admin.avatar-options.partials.form', ['avatarOption' => null])
             <button class="btn btn-primary">Save Avatar</button>

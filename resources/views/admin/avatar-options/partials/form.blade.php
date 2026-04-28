@@ -4,16 +4,23 @@
         <input type="text" name="name" class="form-control" value="{{ old('name', $avatarOption?->name) }}" required>
     </div>
     <div class="col-md-6">
+        <label class="form-label">Gender Category</label>
+        <select name="gender" class="form-select" required>
+            <option value="male" @selected(old('gender', $avatarOption?->gender) === 'male')>Male</option>
+            <option value="female" @selected(old('gender', $avatarOption?->gender) === 'female')>Female</option>
+            <option value="both" @selected(old('gender', $avatarOption?->gender) === 'both')>Both / Neutral</option>
+        </select>
+    </div>
+    <div class="col-md-6">
         <label class="form-label">Sort Order</label>
         <input type="number" name="sort_order" class="form-control" min="1" value="{{ old('sort_order', $avatarOption?->sort_order ?? 1) }}">
     </div>
-    <div class="col-12">
-        <label class="form-label">Image URL</label>
-        <input type="url" name="image_url" class="form-control" value="{{ old('image_url', $avatarOption?->image_url) }}" required>
-    </div>
-    <div class="col-12">
-        <label class="form-label">Optional Link</label>
-        <input type="url" name="link_url" class="form-control" value="{{ old('link_url', $avatarOption?->link_url) }}">
+    <div class="col-md-6">
+        <label class="form-label">Avatar Image</label>
+        <input type="file" name="image" class="form-control" accept="image/*" {{ $avatarOption ? '' : 'required' }}>
+        @if($avatarOption)
+            <div class="form-text">Leave empty to keep current image.</div>
+        @endif
     </div>
     <div class="col-12">
         <div class="form-check">

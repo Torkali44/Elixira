@@ -639,6 +639,18 @@
                                 @enderror
                             </div>
 
+                            <div>
+                                <label for="gender" class="account-label">Gender</label>
+                                <select id="gender" name="gender" class="account-select" required>
+                                    <option value="" disabled @selected(is_null(old('gender', $user->gender)))>Select...</option>
+                                    <option value="male" @selected(old('gender', $user->gender) === 'male')>Male</option>
+                                    <option value="female" @selected(old('gender', $user->gender) === 'female')>Female</option>
+                                </select>
+                                @error('gender')
+                                    <div class="account-error">{{ $message }}</div>
+                                @enderror
+                            </div>
+
                             <div class="account-field--full">
                                 <label for="user_code" class="account-label">Member Code</label>
                                 <input id="user_code" name="user_code" type="text" class="account-input" value="{{ old('user_code', $user->user_code) }}" placeholder="Optional code used to match older orders">

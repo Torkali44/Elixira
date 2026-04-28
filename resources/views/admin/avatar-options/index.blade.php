@@ -23,10 +23,10 @@
                     <tr>
                         <th>Avatar</th>
                         <th>Name</th>
-                        <th>Link</th>
+                        <th>Gender</th>
                         <th>Sort</th>
                         <th>Status</th>
-                        <th>Users</th>
+                        <th>Usage Ratio</th>
                         <th class="text-end">Actions</th>
                     </tr>
                 </thead>
@@ -35,14 +35,42 @@
                         <tr>
                             <td><img src="{{ $avatar->image_url }}" alt="{{ $avatar->name }}" style="width:52px;height:52px;border-radius:50%;object-fit:cover;"></td>
                             <td>{{ $avatar->name }}</td>
-                            <td><a href="{{ $avatar->link_url ?: '#' }}" target="_blank">{{ $avatar->link_url ? 'Open link' : '—' }}</a></td>
+                            <td>
+                                @if($avatar->gender === 'male')
+                                    <span class="badge bg-primary">Male</span>
+                                @elseif($avatar->gender === 'female')
+                                    <span class="badge bg-danger" style="background-color: #e83e8c !important;">Female</span>
+                                @else
+                                    <span class="badge bg-info">Both</span>
+                                @endif
+                            </td>
                             <td>{{ $avatar->sort_order }}</td>
                             <td>
                                 <span class="badge {{ $avatar->is_active ? 'bg-success' : 'bg-secondary' }}">
                                     {{ $avatar->is_active ? 'Active' : 'Inactive' }}
                                 </span>
                             </td>
-                            <td>{{ $avatar->users_count }}</td>
+                            <td>
+                                <div class="small">
+                                    <strong>Total:</strong> {{ $avatar->users_count }}<br>
+                                    @if($avatar->users_count > 0)
+                                        <div class="progress mt-1" style="height: 6px;">
+                                            @php
+                                                $malePercent = ($avatar->male_users_count / $avatar->users_count) * 100;
+                                                $femalePercent = ($avatar->female_users_count / $avatar->users_count) * 100;
+                                            @endphp
+                                            <div class="progress-bar bg-primary" role="progressbar" style="width: {{ $malePercent }}%" title="Male: {{ round($malePercent) }}%"></div>
+                                            <div class="progress-bar bg-danger" role="progressbar" style="width: {{ $femalePercent }}%; background-color: #e83e8c !important;" title="Female: {{ round($femalePercent) }}%"></div>
+                                        </div>
+                                        <div class="d-flex justify-content-between mt-1" style="font-size: 0.75rem;">
+                                            <span class="text-primary">M: {{ round($malePercent) }}%</span>
+                                            <span class="text-danger">F: {{ round($femalePercent) }}%</span>
+                                        </div>
+                                    @else
+                                        <span class="text-muted">Not used yet</span>
+                                    @endif
+                                </div>
+                            </td>
                             <td class="text-end">
                                 <form action="{{ route('admin.avatar-options.toggle', $avatar) }}" method="POST" class="d-inline">
                                     @csrf @method('PATCH')

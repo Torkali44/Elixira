@@ -67,9 +67,9 @@
                 <li><a href="{{ route('orders.track') }}"
                         class="{{ request()->routeIs('orders.*') ? 'active' : '' }}">Track Order</a></li>
                 @auth
-                    <!-- <li><a href="{{ route('profile.orders.index') }}"
+                    <li><a href="{{ route('profile.orders.index') }}"
                             class="{{ request()->routeIs('profile.orders.*') ? 'active' : '' }}">My Orders</a>
-                    </li> -->
+                    </li>
                 @endauth
             </ul>
 
@@ -83,7 +83,7 @@
                 </a>
                 <!-- ======================================================= -->
                 <!-- قبل -->
-                <!-- @auth
+               @auth
                     @if(auth()->user()->role === 'admin')
                         <a href="{{ route('admin.dashboard') }}" class="elx-nav__btn elx-nav__btn--admin">
                             <i class="fas fa-cog"></i> <span>Admin</span>
@@ -148,18 +148,18 @@
                     </div>
                 @else
                     <a href="{{ route('login') }}" class="elx-nav__btn elx-nav__btn--login">Join Us</a>
-                @endauth -->
+                @endauth
 
                 <!-- بعد -->
                                      
-@auth
+<!-- @auth
     @if(auth()->user()->role === 'admin')
         <a href="{{ route('admin.dashboard') }}" class="elx-nav__btn elx-nav__btn--admin">
             <i class="fas fa-cog"></i> <span>Admin</span>
         </a>
     @endif
 
-    {{--
+    
     <div class="elx-nav__profile" id="profileMenu">
         <button type="button" class="elx-nav__profile-trigger" id="profileTrigger">
             <x-user-avatar :user="auth()->user()" size="34" />
@@ -173,7 +173,7 @@
             ...
         </div>
     </div>
-    --}}
+    
 
     <form method="POST" action="{{ route('logout') }}">
         @csrf
@@ -190,7 +190,7 @@
     <a href="{{ route('register') }}" class="elx-nav__btn elx-nav__btn--login">
         Join Us
     </a>
-@endauth
+@endauth -->
 
                 <!-- ====================================================== -->
                 <button class="elx-nav__toggle" id="navToggle">

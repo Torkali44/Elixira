@@ -11,6 +11,7 @@ class AvatarOption extends Model
 
     protected $fillable = [
         'name',
+        'gender',
         'image_url',
         'link_url',
         'is_active',
@@ -27,6 +28,14 @@ class AvatarOption extends Model
     public function users()
     {
         return $this->hasMany(User::class, 'avatar_option_id');
+    }
+
+    public function getImageUrlAttribute($value)
+    {
+        if (filter_var($value, FILTER_VALIDATE_URL)) {
+            return $value;
+        }
+        return \Illuminate\Support\Facades\Storage::url($value);
     }
 
     public function scopeActive($query)

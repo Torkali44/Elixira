@@ -14,7 +14,11 @@ class AvatarOptionController extends Controller
 {
     public function index(): View
     {
-        $avatarOptions = AvatarOption::withCount('users')
+        $avatarOptions = AvatarOption::withCount(['users as male_users_count' => function ($query) {
+            $query->where('gender', 'male');
+        }])->withCount(['users as female_users_count' => function ($query) {
+            $query->where('gender', 'female');
+        }])->withCount('users')
             ->ordered()
             ->paginate(16);
 
@@ -43,8 +47,13 @@ class AvatarOptionController extends Controller
 
             AvatarOption::where('sort_order', '>=', $sortOrder)->increment('sort_order');
 
+            $data = $request->validated();
+            if ($request->hasFile('image')) {
+                $data['image_url'] = $request->file('image')->store('avatars', 'public');
+            }
+
             AvatarOption::create([
-                ...$request->validated(),
+                ...$data,
                 'sort_order' => $sortOrder,
             ]);
         });
@@ -75,8 +84,16 @@ class AvatarOptionController extends Controller
                 }
             }
 
+            $data = $request->validated();
+            if ($request->hasFile('image')) {
+                if ($avatarOption->image_url && !filter_var($avatarOption->image_url, FILTER_VALIDATE_URL)) {
+                    \Illuminate\Support\Facades\Storage::disk('public')->delete($avatarOption->image_url);
+                }
+                $data['image_url'] = $request->file('image')->store('avatars', 'public');
+            }
+
             $avatarOption->update([
-                ...$request->validated(),
+                ...$data,
                 'sort_order' => $newSortOrder,
             ]);
         });
@@ -87,6 +104,9 @@ class AvatarOptionController extends Controller
     public function destroy(AvatarOption $avatarOption)
     {
         DB::transaction(function () use ($avatarOption) {
+            if ($avatarOption->image_url && !filter_var($avatarOption->image_url, FILTER_VALIDATE_URL)) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($avatarOption->image_url);
+            }
             $deletedSortOrder = (int) $avatarOption->sort_order;
             $avatarOption->delete();
             AvatarOption::where('sort_order', '>', $deletedSortOrder)->decrement('sort_order');
