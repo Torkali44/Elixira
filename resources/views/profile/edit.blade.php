@@ -145,19 +145,22 @@
     .account-link {
         display: flex;
         align-items: center;
-        justify-content: space-between;
-        gap: 1rem;
+        justify-content: center;
+        gap: 0.75rem;
         padding: 0.95rem 1rem;
         border-radius: 18px;
         color: var(--elx-white);
         background: rgba(255, 255, 255, 0.03);
         border: 1px solid rgba(255, 255, 255, 0.06);
         transition: var(--elx-transition);
+        font-weight: 500;
+        text-align: center;
     }
 
     .account-link:hover {
         border-color: var(--elx-cyan);
         transform: translateY(-2px);
+        background: rgba(255, 255, 255, 0.06);
     }
 
     .account-section__header {
@@ -513,20 +516,20 @@
 
                     <div class="account-links">
                         <a href="#security" class="account-link">
-                            <span>Update password</span>
                             <i class="fas fa-lock"></i>
+                            <span>Update password</span>
                         </a>
                         <a href="{{ route('profile.orders.index') }}" class="account-link">
-                            <span>View previous orders</span>
                             <i class="fas fa-box-open"></i>
+                            <span>View previous orders</span>
                         </a>
                         <a href="{{ route('profile.avatar-options') }}" class="account-link">
-                            <span>Choose avatar</span>
                             <i class="fas fa-image-portrait"></i>
+                            <span>Choose avatar</span>
                         </a>
                         <a href="{{ route('orders.track') }}" class="account-link">
-                            <span>Track by phone</span>
                             <i class="fas fa-location-arrow"></i>
+                            <span>Track by phone</span>
                         </a>
                     </div>
                 </div>
@@ -601,27 +604,7 @@
                         @method('PATCH')
 
                         <div class="account-form-grid">
-                            <div class="account-field--full">
-                                <label class="account-label">Avatar</label>
-                                <div class="account-avatar-panel">
-                                    <x-user-avatar :user="$user" size="92" class="account-avatar" />
 
-                                    <div class="account-avatar-actions">
-                                        <input type="file" name="avatar" class="account-input" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp">
-                                        <span class="account-muted">Upload a JPG, PNG, or WEBP avatar up to 2MB.</span>
-
-                                        @if($user->avatar)
-                                            <label class="account-check">
-                                                <input type="checkbox" name="remove_avatar" value="1">
-                                                <span>Remove current avatar and use initials instead</span>
-                                            </label>
-                                        @endif
-                                    </div>
-                                </div>
-                                @error('avatar')
-                                    <div class="account-error">{{ $message }}</div>
-                                @enderror
-                            </div>
 
                             <div>
                                 <label for="name" class="account-label">Full Name</label>

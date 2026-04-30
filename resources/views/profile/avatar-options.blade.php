@@ -42,7 +42,18 @@
                         <label class="avatar-card">
                             <input type="radio" name="avatar_option_id" value="{{ $option->id }}" @checked(old('avatar_option_id', $user->avatar_option_id) == $option->id)>
                             <img src="{{ $option->image_url }}" alt="{{ $option->name }}">
-                            <div style="font-weight:700; text-align:center;">{{ $option->name }}</div>
+                            <div style="font-weight:700; text-align:center; display: flex; align-items: center; justify-content: center; gap: 0.3rem;">
+                                <span>{{ $option->name }}</span>
+                                <span style="font-size: 0.75rem; color: rgba(255, 255, 255, 0.5); font-weight: normal;">
+                                    @if($option->gender === 'male')
+                                        (m)
+                                    @elseif($option->gender === 'female')
+                                        (f)
+                                    @else
+                                        (m/f)
+                                    @endif
+                                </span>
+                            </div>
                         </label>
                     @endforeach
                 </div>

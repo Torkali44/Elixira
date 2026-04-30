@@ -134,14 +134,7 @@ class ProfileController extends Controller
 
         $user->fill($data);
 
-        if ($request->hasFile('avatar')) {
-            if ($user->avatar) {
-                Storage::disk('public')->delete($user->avatar);
-            }
-
-            $user->avatar = $request->file('avatar')->store('users/avatars', 'public');
-            $user->avatar_option_id = null;
-        } elseif ($removeAvatar && $user->avatar) {
+        if ($removeAvatar && $user->avatar) {
             Storage::disk('public')->delete($user->avatar);
             $user->avatar = null;
         }
