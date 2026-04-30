@@ -250,19 +250,26 @@
             justify-content: center;
             transition: all 0.2s ease;
         }
-
+/* 
         .newsletter-checkbox:checked {
+            background-color: #4ac8f6;
+            border-color: #4ac8f6;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E");
+            background-size: 12px;
+            background-position: center;
+            background-repeat: no-repeat;
+        } */
+ .newsletter-checkbox:checked {
             background-color: #4ac8f6;
             border-color: #4ac8f6;
         }
 
         .newsletter-checkbox:checked::after {
-            content: 'âœ“';
+            content: '✓';
             color: #000;
             font-size: 14px;
             font-weight: 900;
         }
-
         .submit-btn-wrapper {
             display: flex;
             justify-content: flex-end;
