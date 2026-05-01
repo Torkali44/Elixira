@@ -35,4 +35,9 @@ class Item extends Model
     {
         return $this->hasMany(ItemImage::class);
     }
+
+    public function specialRequests()
+    {
+        return $this->hasMany(SpecialRequest::class);
+    }
 }

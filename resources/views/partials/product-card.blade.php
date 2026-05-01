@@ -1,4 +1,4 @@
-@php
+﻿@php
     $isOutOfStock = $product->stock <= 0;
 @endphp
 
@@ -61,9 +61,9 @@
 
         <div class="elx-product-card__cart-form" onclick="event.stopPropagation();" style="position: relative; z-index: 20;">
             @if($isOutOfStock)
-                <button type="button" class="elx-product-card__add-btn elx-product-card__add-btn--disabled" disabled 
-                        onclick="showInfoPopup('This product is out of stock. The administration will be notified to provide it soon.')" style="position: relative; z-index: 20;">
-                    <i class="fas fa-info-circle"></i> Out of Stock
+                <button type="button" class="elx-product-card__add-btn" 
+                        onclick="event.stopPropagation(); showSpecialRequestModal({{ $product->id }}, '{{ addslashes($product->name) }}')" style="position: relative; z-index: 20; background: rgba(255, 77, 77, 0.1); color: #ff4d4d; border-color: rgba(255, 77, 77, 0.3);">
+                    <i class="fas fa-hand-holding-heart"></i> Private order 
                 </button>
             @else
                 <form action="{{ route('cart.add') }}" method="POST" onclick="event.stopPropagation();" style="position: relative; z-index: 20;">

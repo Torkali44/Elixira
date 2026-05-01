@@ -37,6 +37,7 @@ Route::post('/testimonials', [TestimonialController::class, 'store'])->name('tes
 
 Route::post('/reservation', [ReservationController::class, 'store'])->name('reservation.store');
 Route::post('/newsletter/subscribe', [TestimonialController::class, 'subscribe'])->name('newsletter.subscribe');
+Route::post('/special-requests', [\App\Http\Controllers\SpecialRequestController::class, 'store'])->name('special-requests.store');
 
 // Breeze Auth Routes
 Route::get('/dashboard', function () {
@@ -83,6 +84,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::patch('reviews/{review}/status', [ReviewController::class, 'updateStatus'])->name('reviews.updateStatus');
     Route::patch('avatar-options/{avatarOption}/toggle', [AvatarOptionController::class, 'toggle'])->name('avatar-options.toggle');
     Route::resource('avatar-options', AvatarOptionController::class)->except(['show']);
+
+    Route::get('special-requests', [\App\Http\Controllers\SpecialRequestController::class, 'index'])->name('special-requests.index');
+    Route::patch('special-requests/{specialRequest}/status', [\App\Http\Controllers\SpecialRequestController::class, 'updateStatus'])->name('special-requests.updateStatus');
 });
 
 require __DIR__.'/auth.php';

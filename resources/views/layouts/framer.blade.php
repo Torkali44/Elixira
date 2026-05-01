@@ -463,6 +463,80 @@
                 console.error('Error:', error);
             });
         }
+
+        function showSpecialRequestModal(itemId, itemName) {
+            Swal.fire({
+                title: `Private Order - ${itemName}`,
+                html: `
+                    <p style="margin-bottom: 1rem; font-size: 0.95rem; color: #9fb2bc;">
+                        This product is currently out of stock. Leave your details and we will notify you on WhatsApp once it is available.
+                    </p>
+                    <input type="text" id="swal-name" class="swal2-input" placeholder="Your Name" value="{{ auth()->check() ? auth()->user()->name : '' }}" required>
+                    <input type="text" id="swal-phone" class="swal2-input" placeholder="WhatsApp Number" required>
+                `,
+                background: '#0d1a20',
+                color: '#eaf4f8',
+                focusConfirm: false,
+                showCancelButton: true,
+                confirmButtonText: 'Send Request',
+                cancelButtonText: 'Cancel',
+                confirmButtonColor: '#4ac8f6',
+                cancelButtonColor: '#6c757d',
+                preConfirm: () => {
+                    const name = Swal.getPopup().querySelector('#swal-name').value.trim();
+                    const phone = Swal.getPopup().querySelector('#swal-phone').value.trim();
+                    if (!phone) {
+                        Swal.showValidationMessage('Please enter your WhatsApp number.');
+                        return false;
+                    }
+                    return { name: name, phone: phone, item_id: itemId };
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch('{{ route('special-requests.store') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify(result.value)
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Request Sent',
+                                text: 'Your private order request has been received. We will contact you soon.',
+                                background: '#0d1a20',
+                                color: '#eaf4f8',
+                                confirmButtonColor: '#4ac8f6',
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Request Failed',
+                                text: data.message || 'We could not submit your request. Please try again.',
+                                background: '#0d1a20',
+                                color: '#eaf4f8',
+                                confirmButtonColor: '#dc3545',
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Connection Error',
+                            text: 'A network error occurred while sending your request.',
+                            background: '#0d1a20',
+                            color: '#eaf4f8',
+                            confirmButtonColor: '#dc3545',
+                        });
+                    });
+                }
+            });
+        }
     </script>
     @yield('scripts')
 </body>

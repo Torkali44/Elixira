@@ -250,16 +250,16 @@
             justify-content: center;
             transition: all 0.2s ease;
         }
-/* 
+        /* 
+            .newsletter-checkbox:checked {
+                background-color: #4ac8f6;
+                border-color: #4ac8f6;
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E");
+                background-size: 12px;
+                background-position: center;
+                background-repeat: no-repeat;
+            } */
         .newsletter-checkbox:checked {
-            background-color: #4ac8f6;
-            border-color: #4ac8f6;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E");
-            background-size: 12px;
-            background-position: center;
-            background-repeat: no-repeat;
-        } */
- .newsletter-checkbox:checked {
             background-color: #4ac8f6;
             border-color: #4ac8f6;
         }
@@ -463,7 +463,7 @@
                                 style="background: rgba(255, 193, 7, 0.12); border: 1px solid #ffc107; color: #ffc107; padding: 1rem 2rem; border-radius: 12px; text-align: left;">
                                 <strong style="display: block; margin-bottom: 0.5rem; text-align: center;"><i
                                         class="fas fa-exclamation-triangle" style="margin-right: 0.5rem;"></i>Please Contact with support
-                                        :</strong>
+                                    :</strong>
                                 <ul style="margin: 0; padding-left: 1.25rem; color: #e8c76a;">
                                     @foreach($errors->all() as $message)
                                         <li>{{ $message }}</li>

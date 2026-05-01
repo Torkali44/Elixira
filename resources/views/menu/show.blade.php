@@ -1,4 +1,4 @@
-﻿@extends('layouts.framer')
+@extends('layouts.framer')
 
 @section('title', $item->name . ' - Elixira')
 
@@ -143,23 +143,29 @@
                     {{ $item->description }}
                 </p>
 
-                <form action="{{ route('cart.add') }}" method="POST">
-                    @csrf
-                    <input type="hidden" name="item_id" value="{{ $item->id }}">
-                    
-                    <div style="display: flex; gap: 1rem; align-items: center; margin-bottom: 2rem;">
-                        <div style="display: flex; align-items: center; background: rgba(255,255,255,0.05); border: 1px solid var(--elx-border); border-radius: 100px; padding: 0.5rem 1rem;">
-                            <button type="button" onclick="const i = this.nextElementSibling; if(i.value > 1) i.value--;" style="background: none; border: none; color: white; cursor: pointer; padding: 0 0.5rem;">&minus;</button>
-                            <input type="number" name="quantity" id="quantity" value="1" min="1" max="{{ $item->stock }}" style="width: 50px; text-align: center; background: none; border: none; color: white; font-weight: 700; outline: none;">
-                            <button type="button" onclick="const i = this.previousElementSibling; if(i.value < {{ $item->stock }}) i.value++;" style="background: none; border: none; color: white; cursor: pointer; padding: 0 0.5rem;">+</button>
-                        </div>
-                        <span style="color: var(--elx-gray); font-size: 0.9rem;">Maximum {{ $item->stock }} units</span>
-                    </div>
-
-                    <button type="submit" class="elx-btn elx-btn--primary" style="width: 100%; justify-content: center; padding: 1.2rem; font-size: 1.2rem;" {{ $item->stock <= 0 ? 'disabled' : '' }}>
-                        <i class="fas fa-shopping-cart"></i> {{ $item->stock > 0 ? 'Add to Cart' : 'Currently Unavailable' }}
+                @if($item->stock <= 0)
+                    <button type="button" class="elx-btn" style="width: 100%; justify-content: center; padding: 1.2rem; font-size: 1.2rem; background: rgba(255, 77, 77, 0.1); color: #ff4d4d; border: 1px solid rgba(255, 77, 77, 0.3);" onclick="showSpecialRequestModal({{ $item->id }}, '{{ addslashes($item->name) }}')">
+                        <i class="fas fa-hand-holding-heart"></i> طلب خاص
                     </button>
-                </form>
+                @else
+                    <form action="{{ route('cart.add') }}" method="POST">
+                        @csrf
+                        <input type="hidden" name="item_id" value="{{ $item->id }}">
+                        
+                        <div style="display: flex; gap: 1rem; align-items: center; margin-bottom: 2rem;">
+                            <div style="display: flex; align-items: center; background: rgba(255,255,255,0.05); border: 1px solid var(--elx-border); border-radius: 100px; padding: 0.5rem 1rem;">
+                                <button type="button" onclick="const i = this.nextElementSibling; if(i.value > 1) i.value--;" style="background: none; border: none; color: white; cursor: pointer; padding: 0 0.5rem;">&minus;</button>
+                                <input type="number" name="quantity" id="quantity" value="1" min="1" max="{{ $item->stock }}" style="width: 50px; text-align: center; background: none; border: none; color: white; font-weight: 700; outline: none;">
+                                <button type="button" onclick="const i = this.previousElementSibling; if(i.value < {{ $item->stock }}) i.value++;" style="background: none; border: none; color: white; cursor: pointer; padding: 0 0.5rem;">+</button>
+                            </div>
+                            <span style="color: var(--elx-gray); font-size: 0.9rem;">Maximum {{ $item->stock }} units</span>
+                        </div>
+
+                        <button type="submit" class="elx-btn elx-btn--primary" style="width: 100%; justify-content: center; padding: 1.2rem; font-size: 1.2rem;">
+                            <i class="fas fa-shopping-cart"></i> Add to Cart
+                        </button>
+                    </form>
+                @endif
 
                 <div style="margin-top: 3rem; display: flex; gap: 2rem;">
                     <div style="display: flex; align-items: center; gap: 0.7rem; color: var(--elx-cyan);">
