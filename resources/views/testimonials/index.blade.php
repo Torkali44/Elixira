@@ -654,7 +654,7 @@
                             @php
                                 $avatarSrc = \Illuminate\Support\Str::startsWith((string) $rev->avatar, ['http://', 'https://'])
                                     ? $rev->avatar
-                                    : storage_public_url(ltrim((string) $rev->avatar, '/'));
+                                    : asset('storage/' . ltrim((string) $rev->avatar, '/'));
                             @endphp
                             <img src="{{ $avatarSrc }}" alt="Testimonial Screenshot">
                             @if($rev->content)

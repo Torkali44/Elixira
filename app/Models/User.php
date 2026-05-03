@@ -86,7 +86,7 @@ class User extends Authenticatable
             return $this->avatarOption->image_url;
         }
 
-        return $this->avatar ? storage_public_url($this->avatar) : null;
+        return $this->avatar ? asset('storage/' . $this->avatar) : null;
     }
 
     public function getAvatarInitialsAttribute(): string

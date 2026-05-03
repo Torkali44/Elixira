@@ -1,4 +1,4 @@
-﻿<section class="elx-section section-padding" data-elx-animate>
+<section class="elx-section section-padding" data-elx-animate>
     <div class="container">
         @if($featuredItems->isEmpty())
             <p class="text-center text-muted mb-0">Featured products will appear here when your admin marks items as featured.</p>
@@ -9,7 +9,7 @@
                         <div class="card-image">
                             <a href="{{ route('menu.show', $item) }}">
                                 @if($item->image)
-                                    <img src="{{ storage_public_url($item->image) }}" alt="{{ $item->name }}">
+                                    <img src="{{ asset('storage/' . $item->image) }}" alt="{{ $item->name }}">
                                 @else
                                     <img src="https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=400&q=80" alt="{{ $item->name }}">
                                 @endif

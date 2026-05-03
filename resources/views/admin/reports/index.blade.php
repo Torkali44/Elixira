@@ -1,4 +1,4 @@
-﻿@extends('layouts.admin')
+@extends('layouts.admin')
 
 @section('content')
 <style>
@@ -91,7 +91,7 @@
                                 <td>
                                     <div class="d-flex align-items-center">
                                         @if($item->image)
-                                            <img src="{{ storage_public_url($item->image) }}" class="rounded me-2" alt="" width="40">
+                                            <img src="{{ asset('storage/'.$item->image) }}" class="rounded me-2" alt="" width="40">
                                         @endif
                                         <span class="fw-bold">{{ $item->name }}</span>
                                     </div>

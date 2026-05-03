@@ -1,7 +1,7 @@
-﻿@php
+@php
     $style = '';
     if ($section->image) {
-        $style = "background-image: url('" . e(storage_public_url($section->image)) . "');";
+        $style = "background-image: url('" . e(asset('storage/' . $section->image)) . "');";
     }
 @endphp
 <section class="elx-section elx-hero {{ $section->image ? 'has-image' : '' }}" style="{{ $style }}" data-elx-animate>

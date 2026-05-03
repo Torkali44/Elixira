@@ -1,4 +1,4 @@
-﻿<section class="elx-section elx-split" data-elx-animate>
+<section class="elx-section elx-split" data-elx-animate>
     <div class="container elx-split-inner">
         <div>
             @if($section->title)
@@ -18,7 +18,7 @@
         </div>
         <div class="elx-glass-card p-0 overflow-hidden">
             @if($section->image)
-                <img src="{{ storage_public_url($section->image) }}" alt="" class="w-100 rounded-3" style="border-radius: 20px; max-height: 420px; object-fit: cover;">
+                <img src="{{ asset('storage/' . $section->image) }}" alt="" class="w-100 rounded-3" style="border-radius: 20px; max-height: 420px; object-fit: cover;">
             @else
                 <div class="d-flex align-items-center justify-content-center bg-light text-muted" style="min-height: 320px;">
                     <span><i class="fa-solid fa-image me-2"></i>Add an image in admin</span>

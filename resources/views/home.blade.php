@@ -59,7 +59,7 @@
                         <a href="{{ route('menu.index') }}?category={{ $category->id }}" class="elx-category-pill">
                             <div class="elx-category-pill__img">
                                 @if($category->image)
-                                    <img src="{{ storage_public_url($category->image) }}" alt="{{ $category->name }}">
+                                    <img src="{{ asset('storage/' . $category->image) }}" alt="{{ $category->name }}">
                                 @else
                                     <div class="elx-category-pill__placeholder">
                                         <i class="fas fa-leaf"></i>

@@ -126,7 +126,7 @@
                                             <div style="display: flex; align-items: center; gap: 1rem;">
                                                 <div style="width: 60px; height: 60px; border-radius: 10px; overflow: hidden; border: 1px solid var(--elx-border);">
                                                     @if(isset($details['image']) && $details['image'])
-                                                        <img src="{{ storage_public_url($details['image']) }}" style="width: 100%; height: 100%; object-fit: cover;" alt="">
+                                                        <img src="{{ asset('storage/' . $details['image']) }}" style="width: 100%; height: 100%; object-fit: cover;" alt="">
                                                     @else
                                                         <div style="width: 100%; height: 100%; background: #1a2e38; display: flex; align-items: center; justify-content: center; color: var(--elx-cyan);">
                                                             <i class="fas fa-leaf"></i>

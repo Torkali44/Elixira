@@ -1,4 +1,4 @@
-﻿@extends('layouts.framer')
+@extends('layouts.framer')
 
 @section('title', 'Explore - Elixira')
 
@@ -23,7 +23,7 @@
                 <a href="{{ route('menu.index') }}?category={{ $category->id }}" class="elx-category-pill" style="padding: 1rem 2rem 1rem 1rem;">
                     <div class="elx-category-pill__img" style="width: 80px; height: 80px;">
                         @if($category->image)
-                            <img src="{{ storage_public_url($category->image) }}" alt="{{ $category->name }}">
+                            <img src="{{ asset('storage/' . $category->image) }}" alt="{{ $category->name }}">
                         @else
                             <div class="elx-category-pill__placeholder">
                                 <i class="fas fa-leaf"></i>
@@ -51,7 +51,7 @@
                     <div class="elx-product-card__glow"></div>
                     <div class="elx-product-card__image">
                         @if($item->image)
-                            <img src="{{ storage_public_url($item->image) }}" alt="{{ $item->name }}" loading="lazy">
+                            <img src="{{ asset('storage/' . $item->image) }}" alt="{{ $item->name }}" loading="lazy">
                         @else
                             <div class="elx-product-card__no-img">
                                 <i class="fas fa-seedling"></i>

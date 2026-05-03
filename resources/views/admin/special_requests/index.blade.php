@@ -33,7 +33,7 @@
                                 @if($request->item)
                                     <div class="d-flex align-items-center gap-3">
                                         @if($request->item->image)
-                                            <img src="{{ storage_public_url($request->item->image) }}" alt="" style="width: 48px; height: 48px; object-fit: cover; border-radius: 8px;">
+                                            <img src="{{ asset('storage/' . $request->item->image) }}" alt="" style="width: 48px; height: 48px; object-fit: cover; border-radius: 8px;">
                                         @else
                                             <div style="width: 48px; height: 48px; background: #eee; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
                                                 <i class="fas fa-box text-muted"></i>

@@ -1,4 +1,4 @@
-﻿@extends('layouts.admin')
+@extends('layouts.admin')
 
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
@@ -26,7 +26,7 @@
                         <td>{{ $loop->iteration }}</td>
                         <td>
                             @if($category->image)
-                                <img src="{{ storage_public_url($category->image) }}" alt="{{ $category->name }}" width="50" class="rounded">
+                                <img src="{{ asset('storage/' . $category->image) }}" alt="{{ $category->name }}" width="50" class="rounded">
                             @else
                                 <span class="text-muted">-</span>
                             @endif

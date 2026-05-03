@@ -68,7 +68,7 @@ class FramerHtml
                 'name' => $item->name,
                 'description' => $item->description ? \Illuminate\Support\Str::limit(strip_tags($item->description), 120) : '',
                 'price' => (float) $item->price,
-                'image' => $item->image ? storage_public_url($item->image) : null,
+                'image' => $item->image ? asset('storage/'.$item->image) : null,
                 'category' => optional($item->category)->name ?? 'Skincare',
                 'url' => route('menu.show', $item, absolute: true),
             ];

@@ -285,7 +285,7 @@
                             <div class="account-order-item">
                                 <div class="account-order-item__thumb">
                                     @if($orderItem->item?->image)
-                                        <img src="{{ storage_public_url($orderItem->item->image) }}" alt="{{ $orderItem->item->name }}">
+                                        <img src="{{ asset('storage/' . $orderItem->item->image) }}" alt="{{ $orderItem->item->name }}">
                                     @else
                                         <div style="width: 100%; height: 100%; display: grid; place-items: center; color: var(--elx-cyan);">
                                             <i class="fas fa-box"></i>

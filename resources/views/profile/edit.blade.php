@@ -574,7 +574,7 @@
                                 <a href="{{ route('menu.show', $item) }}" class="account-featured__item">
                                     <div class="account-featured__thumb">
                                         @if($item->image)
-                                            <img src="{{ storage_public_url($item->image) }}" alt="{{ $item->name }}">
+                                            <img src="{{ asset('storage/' . $item->image) }}" alt="{{ $item->name }}">
                                         @else
                                             <div style="width: 100%; height: 100%; display: grid; place-items: center; color: var(--elx-cyan);">
                                                 <i class="fas fa-seedling"></i>

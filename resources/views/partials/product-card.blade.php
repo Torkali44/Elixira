@@ -1,4 +1,4 @@
-﻿@php
+@php
     $privateQty = (int) ($privateOfferQuantities[$product->id] ?? 0);
     $hasPrivateAccess = $privateQty > 0;
     $isOutOfStock = $product->stock <= 0 && !$hasPrivateAccess;
@@ -8,7 +8,7 @@
     {{-- Top Div: Image container --}}
     <a href="{{ route('menu.show', $product->id) }}" class="elx-product-card__image-container" onclick="event.stopPropagation();">
         @if($product->image)
-            <img src="{{ storage_public_url($product->image) }}" alt="{{ $product->name }}" style="{{ $isOutOfStock ? 'filter: grayscale(0.8);' : '' }}">
+            <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}" style="{{ $isOutOfStock ? 'filter: grayscale(0.8);' : '' }}">
         @else
             <div class="elx-product-card__no-img">
                 <i class="fas fa-seedling"></i>

@@ -83,7 +83,7 @@
             <div class="product-gallery" data-animate>
                 <div class="main-img-container">
                     @if($item->image)
-                        <img src="{{ storage_public_url($item->image) }}" alt="{{ $item->name }}" id="mainProductImage">
+                        <img src="{{ asset('storage/' . $item->image) }}" alt="{{ $item->name }}" id="mainProductImage">
                     @else
                         <div style="aspect-ratio: 1/1; background: #1a2e38; display: flex; align-items: center; justify-content: center; color: var(--elx-cyan); font-size: 5rem;">
                             <i class="fas fa-seedling"></i>
@@ -95,15 +95,15 @@
                 <div class="thumbnail-gallery" style="display: flex; gap: 1rem; margin-top: 1.5rem; overflow-x: auto; padding-bottom: 0.5rem;">
                     {{-- Main Image Thumbnail --}}
                     @if($item->image)
-                    <div class="thumb-item" onclick="document.getElementById('mainProductImage').src={{ \Illuminate\Support\Js::from(storage_public_url($item->image)) }}" style="flex: 0 0 80px; height: 80px; border-radius: 12px; border: 2px solid var(--elx-cyan); cursor: pointer; overflow: hidden; background: var(--elx-glass);">
-                        <img src="{{ storage_public_url($item->image) }}" style="width: 100%; height: 100%; object-fit: cover;">
+                    <div class="thumb-item" onclick="document.getElementById('mainProductImage').src='{{ asset('storage/' . $item->image) }}'" style="flex: 0 0 80px; height: 80px; border-radius: 12px; border: 2px solid var(--elx-cyan); cursor: pointer; overflow: hidden; background: var(--elx-glass);">
+                        <img src="{{ asset('storage/' . $item->image) }}" style="width: 100%; height: 100%; object-fit: cover;">
                     </div>
                     @endif
                     
                     {{-- Gallery Image Thumbnails --}}
                     @foreach($item->images as $img)
-                    <div class="thumb-item" onclick="document.getElementById('mainProductImage').src={{ \Illuminate\Support\Js::from(storage_public_url($img->image)) }}" style="flex: 0 0 80px; height: 80px; border-radius: 12px; border: 1px solid var(--elx-border); cursor: pointer; overflow: hidden; background: var(--elx-glass);">
-                        <img src="{{ storage_public_url($img->image) }}" style="width: 100%; height: 100%; object-fit: cover;">
+                    <div class="thumb-item" onclick="document.getElementById('mainProductImage').src='{{ asset('storage/' . $img->image) }}'" style="flex: 0 0 80px; height: 80px; border-radius: 12px; border: 1px solid var(--elx-border); cursor: pointer; overflow: hidden; background: var(--elx-glass);">
+                        <img src="{{ asset('storage/' . $img->image) }}" style="width: 100%; height: 100%; object-fit: cover;">
                     </div>
                     @endforeach
                 </div>

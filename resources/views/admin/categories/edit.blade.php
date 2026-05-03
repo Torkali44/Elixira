@@ -1,4 +1,4 @@
-﻿@extends('layouts.admin')
+@extends('layouts.admin')
 
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
@@ -26,7 +26,7 @@
                 <label for="image" class="form-label">Image</label>
                 @if($category->image)
                     <div class="mb-2">
-                        <img src="{{ storage_public_url($category->image) }}" alt="Current" width="100" class="rounded border">
+                        <img src="{{ asset('storage/' . $category->image) }}" alt="Current" width="100" class="rounded border">
                     </div>
                 @endif
                 <input type="file" class="form-control" id="image" name="image" accept="image/*">
