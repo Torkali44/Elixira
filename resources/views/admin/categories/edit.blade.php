@@ -26,7 +26,7 @@
                 <label for="image" class="form-label">Image</label>
                 @if($category->image)
                     <div class="mb-2">
-                        <img src="{{ asset('storage/' . $category->image) }}" alt="Current" width="100" class="rounded border">
+                        <img src="{{ storage_public_url($category->image) }}" alt="Current" width="100" class="rounded border">
                     </div>
                 @endif
                 <input type="file" class="form-control" id="image" name="image" accept="image/*">

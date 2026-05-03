@@ -40,4 +40,9 @@ class Item extends Model
     {
         return $this->hasMany(SpecialRequest::class);
     }
+
+    public function specialOffers()
+    {
+        return $this->hasMany(SpecialItemOffer::class);
+    }
 }

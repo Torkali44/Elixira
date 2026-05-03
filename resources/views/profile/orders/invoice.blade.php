@@ -18,7 +18,7 @@
                 <div>
                     <div style="color:var(--elx-gray);">Customer</div>
                     <strong>{{ $order->customer_name }}</strong>
-                    <div>{{ $order->customer_phone }}</div>
+                    <div style="display:flex; align-items:center; gap:.35rem;"><x-phone-flag :phone="$order->customer_phone" /></div>
                     @if($order->customer_email)<div>{{ $order->customer_email }}</div>@endif
                 </div>
                 <div style="text-align:right;">

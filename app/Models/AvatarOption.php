@@ -35,7 +35,7 @@ class AvatarOption extends Model
         if (filter_var($value, FILTER_VALIDATE_URL)) {
             return $value;
         }
-        return \Illuminate\Support\Facades\Storage::url($value);
+        return \Illuminate\Support\Facades\Storage::disk('public')->url($value);
     }
 
     public function scopeActive($query)

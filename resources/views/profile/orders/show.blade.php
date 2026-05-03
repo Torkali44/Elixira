@@ -245,10 +245,12 @@
                     <div>
                         <span class="account-status {{ $statusClasses[$order->status] ?? 'account-status--pending' }}">{{ ucfirst($order->status) }}</span>
                         <h2 style="margin-top: 0.9rem; font-size: 1.8rem;">{{ $order->customer_name }}</h2>
-                        <p style="color: rgba(255, 255, 255, 0.72);">Placed with {{ $order->customer_phone }}</p>
+                        <p style="color: rgba(255, 255, 255, 0.72); display: flex; align-items: center; flex-wrap: wrap; gap: 0.4rem;">Placed with
+                            <x-phone-flag :phone="$order->customer_phone" />
+                        </p>
                     </div>
 
-                    <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                    <div class="account-hero__actions">
                         <a href="{{ route('profile.orders.index') }}" class="elx-btn elx-btn--glass">Back To Orders</a>
                         <a href="{{ route('profile.orders.invoice', $order) }}" class="elx-btn elx-btn--glass">Invoice</a>
                         <a href="{{ route('menu.index') }}" class="elx-btn elx-btn--primary">Shop Again</a>
@@ -283,7 +285,7 @@
                             <div class="account-order-item">
                                 <div class="account-order-item__thumb">
                                     @if($orderItem->item?->image)
-                                        <img src="{{ asset('storage/' . $orderItem->item->image) }}" alt="{{ $orderItem->item->name }}">
+                                        <img src="{{ storage_public_url($orderItem->item->image) }}" alt="{{ $orderItem->item->name }}">
                                     @else
                                         <div style="width: 100%; height: 100%; display: grid; place-items: center; color: var(--elx-cyan);">
                                             <i class="fas fa-box"></i>

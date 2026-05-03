@@ -515,9 +515,13 @@
                     </div>
 
                     <div class="account-links">
-                        <a href="#security" class="account-link">
+                        <!-- <a href="#security" class="account-link">
                             <i class="fas fa-lock"></i>
                             <span>Update password</span>
+                        </a> -->
+                        <a href="#addresses" class="account-link">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>Manage addresses</span>
                         </a>
                         <a href="{{ route('profile.orders.index') }}" class="account-link">
                             <i class="fas fa-box-open"></i>
@@ -570,7 +574,7 @@
                                 <a href="{{ route('menu.show', $item) }}" class="account-featured__item">
                                     <div class="account-featured__thumb">
                                         @if($item->image)
-                                            <img src="{{ asset('storage/' . $item->image) }}" alt="{{ $item->name }}">
+                                            <img src="{{ storage_public_url($item->image) }}" alt="{{ $item->name }}">
                                         @else
                                             <div style="width: 100%; height: 100%; display: grid; place-items: center; color: var(--elx-cyan);">
                                                 <i class="fas fa-seedling"></i>
@@ -641,14 +645,10 @@
                                     <div class="account-error">{{ $message }}</div>
                                 @enderror
                             </div>
-
                             <div class="account-field--full">
                                 <label class="account-label">Phone Number</label>
                                 <div class="account-inline">
-                                    <select name="country_code" class="account-select">
-                                        <option value="+966" @selected($countryCode === '+966')>+966</option>
-                                        <option value="+971" @selected($countryCode === '+971')>+971</option>
-                                    </select>
+                                    <x-country-code-picker name="country_code" :value="$countryCode" variant="account" />
                                     <input name="phone_number" type="tel" class="account-input" value="{{ $phoneNumber }}" placeholder="Phone number">
                                 </div>
                                 @error('phone_number')
@@ -667,10 +667,68 @@
                     </form>
                 </div>
 
+                <div class="account-card" id="addresses">
+                    <div class="account-section__header">
+                        <div>
+                            <h2 class="account-section__title">Saved Addresses</h2>
+                            <p class="account-muted">Manage your delivery locations for faster checkout.</p>
+                        </div>
+                    </div>
+
+                    @php $userAddresses = $user->addresses; @endphp
+
+                    @if($userAddresses->count() > 0)
+                        <div style="display: grid; gap: 1rem; margin-bottom: 2rem;">
+                            @foreach($userAddresses as $address)
+                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; border-radius: 18px; background: rgba(255, 255, 255, 0.03); border: 1px solid {{ $address->is_main ? 'var(--elx-cyan)' : 'rgba(255, 255, 255, 0.06)' }};">
+                                    <div style="flex-grow: 1;">
+                                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                            <span style="color: var(--elx-white); font-weight: 500;">{{ $address->address }}</span>
+                                            @if($address->is_main)
+                                                <span style="font-size: 0.7rem; background: rgba(74, 200, 246, 0.2); color: var(--elx-cyan); padding: 0.2rem 0.6rem; border-radius: 10px;">MAIN</span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                    <div style="display: flex; gap: 0.5rem;">
+                                        @if(!$address->is_main)
+                                            <form method="POST" action="{{ route('profile.addresses.main', $address) }}">
+                                                @csrf
+                                                @method('PATCH')
+                                                <button type="submit" class="elx-btn" style="padding: 0.4rem 0.8rem; font-size: 0.75rem; background: rgba(74, 200, 246, 0.1); border-color: rgba(74, 200, 246, 0.3); color: var(--elx-cyan);">Set Main</button>
+                                            </form>
+                                        @endif
+                                        <form method="POST" action="{{ route('profile.addresses.destroy', $address) }}" onsubmit="return confirm('Are you sure you want to delete this address?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="elx-btn" style="padding: 0.4rem 0.8rem; font-size: 0.75rem; background: rgba(255, 77, 77, 0.1); border-color: rgba(255, 77, 77, 0.3); color: #ff4d4d;">Delete</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <p class="account-muted" style="margin-bottom: 2rem;">No saved addresses yet.</p>
+                    @endif
+
+                    <form method="POST" action="{{ route('profile.addresses.store') }}">
+                        @csrf
+                        <div class="account-field--full">
+                            <label for="address_input" class="account-label">Add New Address</label>
+                            <div style="display: flex; gap: 0.75rem;">
+                                <input id="address_input" name="address" type="text" class="account-input" placeholder="Enter full delivery address" required minlength="10">
+                                <button type="submit" class="elx-btn elx-btn--primary" style="white-space: nowrap;">Add Address</button>
+                            </div>
+                            @error('address')
+                                <div class="account-error">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </form>
+                </div>
+
                 <div class="account-card" id="security">
                     <div class="account-section__header">
                         <div>
-                            <h2 class="account-section__title">Security</h2>
+                            <h2 class="account-section__title">Update password</h2>
                             <p class="account-muted">Change your password whenever you want to keep the account protected.</p>
                         </div>
                     </div>
@@ -702,7 +760,7 @@
                             </div>
                         </div>
 
-                        <button type="submit" class="elx-btn elx-btn--glass" style="margin-top: 1.5rem;">Update Password</button>
+                        <button type="submit" class="elx-btn elx-btn--glass" style="margin-top: 1.5rem;"> Save </button>
                     </form>
                 </div>
 

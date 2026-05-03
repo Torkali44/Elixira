@@ -114,28 +114,28 @@
                                 <span>Profile Settings</span>
                                 <i class="fas fa-user"></i>
                             </a>
-                            <a href="{{ route('profile.orders.index') }}">
+                            <!-- <a href="{{ route('profile.orders.index') }}">
                                 <span>Previous Orders</span>
                                 <i class="fas fa-box-open"></i>
-                            </a>
-                            <a href="{{ route('profile.orders.index') }}">
+                            </a> -->
+                            <!-- <a href="{{ route('profile.orders.index') }}">
                                 <span>Invoices</span>
                                 <i class="fas fa-file-invoice"></i>
-                            </a>
-                            <a href="{{ route('profile.avatar-options') }}">
+                            </a> -->
+                            <!-- <a href="{{ route('profile.avatar-options') }}">
                                 <span>Choose Avatar</span>
                                 <i class="fas fa-user-astronaut"></i>
-                            </a>
-                            <a href="{{ route('cart.index') }}">
+                            </a> -->
+                            <!-- <a href="{{ route('cart.index') }}">
                                 <span>Checkout</span>
                                 <i class="fas fa-credit-card"></i>
-                            </a>
-                            @if(auth()->user()->role === 'admin')
+                            </a> -->
+                            <!-- @if(auth()->user()->role === 'admin')
                                 <a href="{{ route('admin.dashboard') }}">
                                     <span>Admin Panel</span>
                                     <i class="fas fa-shield-alt"></i>
                                 </a>
-                            @endif
+                            @endif -->
 
                             <form method="POST" action="{{ route('logout') }}" class="elx-nav__profile-form">
                                 @csrf
@@ -466,13 +466,20 @@
 
         function showSpecialRequestModal(itemId, itemName) {
             Swal.fire({
-                title: `Private Order - ${itemName}`,
+                title: `Special Order - ${itemName}`,
                 html: `
                     <p style="margin-bottom: 1rem; font-size: 0.95rem; color: #9fb2bc;">
                         This product is currently out of stock. Leave your details and we will notify you on WhatsApp once it is available.
                     </p>
-                    <input type="text" id="swal-name" class="swal2-input" placeholder="Your Name" value="{{ auth()->check() ? auth()->user()->name : '' }}" required>
-                    <input type="text" id="swal-phone" class="swal2-input" placeholder="WhatsApp Number" required>
+                    <input type="text" id="swal-name" style="width: 90%; padding: 0.75rem 1rem; background: #13252d; border: 1px solid rgba(255, 255, 255, 0.1); color: #fff; border-radius: 8px; outline: none; font-size: 1rem; margin-bottom: 1rem;" placeholder="Your Name" value="{{ auth()->check() ? auth()->user()->name : '' }}" required>
+                    <div style="display:flex; gap:0.5rem; align-items: center; margin: 0 auto 1rem; width: 90%;">
+                        <select id="swal-country-code" style="width: 100px; padding: 0.75rem 0.5rem; background: #13252d; border: 1px solid rgba(255, 255, 255, 0.1); color: #fff; border-radius: 8px; outline: none; font-size: 0.9rem;">
+                            <option value="+966">+966</option>
+                            <option value="+971">+971</option>
+                        </select>
+                        <input type="text" id="swal-phone" style="flex-grow: 1; padding: 0.75rem 1rem; background: #13252d; border: 1px solid rgba(255, 255, 255, 0.1); color: #fff; border-radius: 8px; outline: none; font-size: 1rem;" placeholder="WhatsApp Number" required>
+                    </div>
+                    <input type="email" id="swal-email" style="width: 90%; padding: 0.75rem 1rem; background: #13252d; border: 1px solid rgba(255, 255, 255, 0.1); color: #fff; border-radius: 8px; outline: none; font-size: 1rem;" placeholder="Email (optional)" value="{{ auth()->check() ? auth()->user()->email : '' }}">
                 `,
                 background: '#0d1a20',
                 color: '#eaf4f8',
@@ -484,12 +491,15 @@
                 cancelButtonColor: '#6c757d',
                 preConfirm: () => {
                     const name = Swal.getPopup().querySelector('#swal-name').value.trim();
-                    const phone = Swal.getPopup().querySelector('#swal-phone').value.trim();
-                    if (!phone) {
+                    const phoneInput = Swal.getPopup().querySelector('#swal-phone').value.trim();
+                    const countryCode = Swal.getPopup().querySelector('#swal-country-code').value;
+                    const email = Swal.getPopup().querySelector('#swal-email').value.trim();
+                    if (!phoneInput) {
                         Swal.showValidationMessage('Please enter your WhatsApp number.');
                         return false;
                     }
-                    return { name: name, phone: phone, item_id: itemId };
+                    const phone = countryCode + phoneInput;
+                    return { name: name, phone: phone, email: email, item_id: itemId };
                 }
             }).then((result) => {
                 if (result.isConfirmed) {
@@ -508,7 +518,7 @@
                             Swal.fire({
                                 icon: 'success',
                                 title: 'Request Sent',
-                                text: 'Your private order request has been received. We will contact you soon.',
+                                text: 'Your special order request has been received. We will contact you soon.',
                                 background: '#0d1a20',
                                 color: '#eaf4f8',
                                 confirmButtonColor: '#4ac8f6',

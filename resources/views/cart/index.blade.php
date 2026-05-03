@@ -50,6 +50,16 @@
         transition: var(--elx-transition);
     }
     .form-input:focus { border-color: var(--elx-cyan); }
+
+    #selected_address {
+        background-color: var(--elx-dark) !important;
+        color: var(--elx-white);
+    }
+
+    #selected_address option {
+        background-color: var(--elx-dark);
+        color: var(--elx-white);
+    }
     
     .qty-input {
         width: 60px;
@@ -74,20 +84,6 @@
         transform: scale(1.1);
     }
     
-    select[name="country_code"] option {
-        background-color: #808080 !important;
-        color: #ffffff !important;
-    }
-    
-    select[name="country_code"] option:checked {
-        background-color: #13252D !important;
-        color: #ffffff !important;
-    }
-    
-    select[name="country_code"] option:hover {
-        background-color: #13252D !important;
-        color: #ffffff !important;
-    }
 </style>
 @endsection
 
@@ -130,7 +126,7 @@
                                             <div style="display: flex; align-items: center; gap: 1rem;">
                                                 <div style="width: 60px; height: 60px; border-radius: 10px; overflow: hidden; border: 1px solid var(--elx-border);">
                                                     @if(isset($details['image']) && $details['image'])
-                                                        <img src="{{ asset('storage/' . $details['image']) }}" style="width: 100%; height: 100%; object-fit: cover;" alt="">
+                                                        <img src="{{ storage_public_url($details['image']) }}" style="width: 100%; height: 100%; object-fit: cover;" alt="">
                                                     @else
                                                         <div style="width: 100%; height: 100%; background: #1a2e38; display: flex; align-items: center; justify-content: center; color: var(--elx-cyan);">
                                                             <i class="fas fa-leaf"></i>
@@ -191,12 +187,11 @@
                                     $pNum = substr($phone, 4);
                                 }
                             @endphp
-                            <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
-                                <select name="country_code" class="form-input" style="width: auto; margin-bottom: 0; padding-right: 2rem; cursor: pointer;">
-                                    <option value="+966" {{ $cCode == '+966' ? 'selected' : '' }}>🇸🇦 +966</option>
-                                    <option value="+971" {{ $cCode == '+971' ? 'selected' : '' }}>🇦🇪 +971</option>
-                                </select>
-                                <input type="tel" name="phone_number" class="form-input" placeholder="Phone Number *" value="{{ $pNum }}" style="flex-grow: 1; margin-bottom: 0;" required>
+                            <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem; align-items: stretch;">
+                                <div style="flex: 0 0 auto; min-width: 8.75rem; max-width: 11rem;">
+                                    <x-country-code-picker name="country_code" :value="$cCode" variant="cart" />
+                                </div>
+                                <input type="tel" name="phone_number" class="form-input" placeholder="Phone Number *" value="{{ $pNum }}" style="flex: 1; margin-bottom: 0;" required>
                             </div>
                             @error('phone_number')<div style="color: #ff8a8a; font-size: 0.8rem; margin-top: -0.5rem; margin-bottom: 1rem;">{{ $message }}</div>@enderror
                             @error('country_code')<div style="color: #ff8a8a; font-size: 0.8rem; margin-top: -0.5rem; margin-bottom: 1rem;">{{ $message }}</div>@enderror
@@ -204,8 +199,48 @@
                             <input type="text" name="user_code" class="form-input" placeholder="User Code (optional)" value="{{ old('user_code', auth()->user()?->user_code ?? '') }}">
                             @error('user_code')<div style="color: #ff8a8a; font-size: 0.8rem; margin-top: -0.5rem; margin-bottom: 1rem;">{{ $message }}</div>@enderror
                             
-                            <input type="text" name="address" class="form-input" placeholder="Shipping Address *" value="{{ old('address') }}" required>
-                            @error('address')<div style="color: #ff8a8a; font-size: 0.8rem; margin-top: -0.5rem; margin-bottom: 1rem;">{{ $message }}</div>@enderror
+                            @auth
+                                @php
+                                    $userAddresses = auth()->user()->addresses;
+                                    $mainAddress = $userAddresses->where('is_main', true)->first();
+                                    $mainAddressText = $mainAddress ? $mainAddress->address : '';
+                                    $defaultAddress = old('address', $mainAddressText);
+                                @endphp
+                                @if($userAddresses->count() > 0)
+                                    <select id="selected_address" class="form-input" style="cursor: pointer;" onchange="
+                                        let addrInput = document.getElementById('address');
+                                        let newAddrControls = document.getElementById('new_address_controls');
+                                        if(this.value === 'new') {
+                                            addrInput.value = '';
+                                            addrInput.readOnly = false;
+                                            addrInput.focus();
+                                            newAddrControls.style.display = 'block';
+                                        } else {
+                                            addrInput.value = this.value;
+                                            addrInput.readOnly = true;
+                                            newAddrControls.style.display = 'none';
+                                        }
+                                    ">
+                                        <option value="" disabled {{ !$mainAddress ? 'selected' : '' }}>Select previous address</option>
+                                        @foreach($userAddresses as $addr)
+                                            <option value="{{ $addr->address }}" {{ $addr->is_main ? 'selected' : '' }}>
+                                                {{ \Illuminate\Support\Str::limit($addr->address, 50) }} {{ $addr->is_main ? '(Main)' : '' }}
+                                            </option>
+                                        @endforeach
+                                        <!-- <option value="new">Add new address</option> -->
+                                    </select>
+                                @endif
+                                
+                                <input type="text" id="address" name="address" class="form-input" placeholder="Shipping Address *" value="{{ $defaultAddress }}" {{ $userAddresses->count() > 0 && $mainAddress ? 'readonly' : '' }} required>
+                                
+                                <div id="new_address_controls" style="margin-bottom: 1rem; color: var(--elx-light); font-size: 0.9rem; {{ $userAddresses->count() > 0 && $mainAddress ? 'display: none;' : '' }}">
+                                    <label><input type="checkbox" name="save_address" value="1" checked> Save this address</label>
+                                    &nbsp;&nbsp;
+                                    <label><input type="checkbox" name="is_main_address" value="1" checked> Set as main</label>
+                                </div>
+                            @else
+                                <input type="text" name="address" class="form-input" placeholder="Shipping Address *" value="{{ old('address') }}" required>
+                            @endauth
                             
                             <textarea name="notes" class="form-input" style="border-radius: 15px;" placeholder="Notes (optional)" rows="2">{{ old('notes') }}</textarea>
                             @error('notes')<div style="color: #ff8a8a; font-size: 0.8rem; margin-top: -0.5rem; margin-bottom: 1rem;">{{ $message }}</div>@enderror

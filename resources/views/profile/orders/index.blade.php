@@ -70,7 +70,9 @@
                             {{ $itemsPreview ?: 'Items available in order details' }}
                         </div>
                         <div class="orders-row" style="margin-top:1rem;">
-                            <span style="color:var(--elx-gray);">{{ $order->customer_phone }}</span>
+                            <span style="color:var(--elx-gray); display:inline-flex; align-items:center; gap:.35rem;">
+                                <x-phone-flag :phone="$order->customer_phone" />
+                            </span>
                             <div style="display:flex; gap:.5rem;">
                                 <a href="{{ route('profile.orders.invoice', $order) }}" class="elx-btn elx-btn--glass">Invoice</a>
                                 <a href="{{ route('profile.orders.show', $order) }}" class="elx-btn elx-btn--glass">View Details</a>

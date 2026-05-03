@@ -68,7 +68,7 @@
             <div class="mb-4">
                 <label class="form-label d-block">Current Main Image</label>
                 @if($item->image)
-                    <img src="{{ asset('storage/' . $item->image) }}" alt="{{ $item->name }}" class="img-thumbnail mb-2" style="max-height: 150px;">
+                    <img src="{{ storage_public_url($item->image) }}" alt="{{ $item->name }}" class="img-thumbnail mb-2" style="max-height: 150px;">
                 @endif
                 <input type="file" class="form-control" id="image" name="image" accept="image/*">
                 <small class="text-muted">Upload a new image to replace the current one.</small>
@@ -79,7 +79,7 @@
                 <div class="row g-2 mb-3">
                     @foreach($item->images as $img)
                         <div class="col-auto position-relative">
-                            <img src="{{ asset('storage/' . $img->image) }}" class="img-thumbnail" style="width: 100px; height: 100px; object-fit: cover;">
+                            <img src="{{ storage_public_url($img->image) }}" class="img-thumbnail" style="width: 100px; height: 100px; object-fit: cover;">
                             {{-- Unified Delete Trigger --}}
                             <button type="button" class="btn btn-danger btn-sm rounded-circle position-absolute top-0 end-0 p-1 px-2 m-1 js-delete-gallery" data-form-id="delete-gallery-img-{{ $img->id }}" data-confirm="Remove this image?">
                                 <i class="fas fa-times" style="font-size: 0.7rem;"></i>

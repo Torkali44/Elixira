@@ -9,6 +9,8 @@ use App\Http\Requests\UpdateCartRequest;
 use App\Models\Item;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\SpecialItemOffer;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
 class CartController extends Controller
@@ -25,27 +27,29 @@ class CartController extends Controller
         $item = Item::findOrFail($request->item_id);
         $cart = session()->get('cart', []);
         $quantity = $request->quantity ?? 1;
+        $privateAllowance = $this->availablePrivateQuantity($request->user(), $item->id);
+        $maxAllowed = $item->stock + $privateAllowance;
 
-        if ($item->stock <= 0) {
+        if ($maxAllowed <= 0) {
             if ($request->ajax() || $request->wantsJson()) {
-                return response()->json(['success' => false, 'message' => 'This product is currently out of stock.']);
+                return response()->json(['success' => false, 'message' => 'This product is currently out of stock for your account.']);
             }
 
-            return redirect()->back()->with('error', 'This product is currently out of stock. The administration has been notified to restock it soon.');
+            return redirect()->back()->with('error', 'This product is currently out of stock for your account.');
         }
 
         $existingQty = isset($cart[$item->id]) ? $cart[$item->id]['quantity'] : 0;
         $totalQty = $existingQty + $quantity;
 
-        if ($totalQty > $item->stock) {
-            $remaining = $item->stock - $existingQty;
+        if ($totalQty > $maxAllowed) {
+            $remaining = $maxAllowed - $existingQty;
 
             if ($remaining <= 0) {
                 if ($request->ajax() || $request->wantsJson()) {
                     return response()->json(['success' => false, 'message' => 'You already have the maximum available quantity of this product in your cart.']);
                 }
 
-                return redirect()->back()->with('error', 'You already have the maximum available quantity of this product in your cart.');
+                return redirect()->back()->with('error', 'You already have the maximum allowed quantity of this product in your cart.');
             }
 
             if ($request->ajax() || $request->wantsJson()) {
@@ -86,10 +90,12 @@ class CartController extends Controller
 
         $item = Item::find($request->id);
 
-        if ($item && $request->quantity > $item->stock) {
+        $maxAllowed = $item ? $item->stock + $this->availablePrivateQuantity($request->user(), $item->id) : 0;
+
+        if ($item && $request->quantity > $maxAllowed) {
             return response()->json([
                 'success' => false,
-                'message' => 'Only ' . $item->stock . ' units available.',
+                'message' => 'Only ' . $maxAllowed . ' units available for your account.',
             ], 422);
         }
 
@@ -132,10 +138,11 @@ class CartController extends Controller
 
         foreach ($cart as $id => $details) {
             $item = Item::find($id);
+            $maxAllowed = $item ? $item->stock + $this->availablePrivateQuantity($request->user(), (int) $id) : 0;
 
-            if (!$item || $details['quantity'] > $item->stock) {
+            if (!$item || $details['quantity'] > $maxAllowed) {
                 $name = $item ? $item->name : 'Unknown product';
-                $available = $item ? $item->stock : 0;
+                $available = $item ? $maxAllowed : 0;
 
                 return redirect()->back()->with('error', "'{$name}' only has {$available} units available. Please update your cart.");
             }
@@ -170,11 +177,32 @@ class CartController extends Controller
                 }
 
                 if (!$authenticatedUser->user_code && $resolvedUserCode) {
+                    $exists = User::where('user_code', $resolvedUserCode)->where('id', '!=', $authenticatedUser->id)->exists();
+                    if ($exists) {
+                        return redirect()
+                            ->back()
+                            ->withInput()
+                            ->withErrors([
+                                'user_code' => 'This member code is already assigned to another account.',
+                            ]);
+                    }
                     $updates['user_code'] = $resolvedUserCode;
                 }
 
                 if (!empty($updates)) {
                     $authenticatedUser->update($updates);
+                }
+                
+                if ($request->filled('address') && $request->has('save_address')) {
+                    $addr = \App\Models\UserAddress::firstOrCreate([
+                        'user_id' => $authenticatedUser->id,
+                        'address' => $request->address,
+                    ]);
+                    
+                    if ($request->has('is_main_address')) {
+                        \App\Models\UserAddress::where('user_id', $authenticatedUser->id)->update(['is_main' => false]);
+                        $addr->update(['is_main' => true]);
+                    }
                 }
             }
 
@@ -200,7 +228,17 @@ class CartController extends Controller
                 $item = Item::find($id);
 
                 if ($item) {
-                    $item->decrement('stock', $details['quantity']);
+                    $normalStockUsed = min((int) $item->stock, (int) $details['quantity']);
+                    $privateUnitsUsed = max(0, (int) $details['quantity'] - $normalStockUsed);
+
+                    if ($normalStockUsed > 0) {
+                        $item->decrement('stock', $normalStockUsed);
+                    }
+
+                    if ($privateUnitsUsed > 0) {
+                        $this->consumePrivateOffers($authenticatedUser, (int) $item->id, $privateUnitsUsed);
+                    }
+
                     $item->increment('points', 1);
                 }
             }
@@ -214,8 +252,97 @@ class CartController extends Controller
             ])->with('success', 'Thank you! Your order #' . $order->id . ' has been placed.');
         } catch (\Throwable $exception) {
             DB::rollBack();
-
-            return redirect()->back()->withInput()->with('error', 'Something went wrong while placing your order. Please try again.');
+            \Log::error('Checkout Error: ' . $exception->getMessage(), [
+                'file' => $exception->getFile(),
+                'line' => $exception->getLine(),
+                'trace' => $exception->getTraceAsString()
+            ]);
+            return redirect()->back()->withInput()->with('error', 'Something went wrong while placing your order: ' . $exception->getMessage());
         }
+    }
+
+    private function availablePrivateQuantity(?User $user, int $itemId): int
+    {
+        if (!$user) {
+            return 0;
+        }
+
+        $phoneDigits = $this->normalizePhone((string) $user->phone);
+        $email = strtolower((string) $user->email);
+
+        return (int) SpecialItemOffer::query()
+            ->where('item_id', $itemId)
+            ->where('is_active', true)
+            ->whereColumn('used_quantity', '<', 'quantity')
+            ->where(function ($query) use ($user, $phoneDigits, $email) {
+                $query->where('user_id', $user->id);
+
+                if ($phoneDigits !== '') {
+                    $query->orWhere('target_phone', $phoneDigits);
+                }
+
+                if ($email !== '') {
+                    $query->orWhereRaw('LOWER(target_email) = ?', [$email]);
+                }
+            })
+            ->get()
+            ->sum(fn (SpecialItemOffer $offer) => $offer->remainingQuantity());
+    }
+
+    private function consumePrivateOffers(?User $user, int $itemId, int $quantity): void
+    {
+        if (!$user || $quantity <= 0) {
+            return;
+        }
+
+        $phoneDigits = $this->normalizePhone((string) $user->phone);
+        $email = strtolower((string) $user->email);
+
+        $offers = SpecialItemOffer::query()
+            ->where('item_id', $itemId)
+            ->where('is_active', true)
+            ->whereColumn('used_quantity', '<', 'quantity')
+            ->where(function ($query) use ($user, $phoneDigits, $email) {
+                $query->where('user_id', $user->id);
+
+                if ($phoneDigits !== '') {
+                    $query->orWhere('target_phone', $phoneDigits);
+                }
+
+                if ($email !== '') {
+                    $query->orWhereRaw('LOWER(target_email) = ?', [$email]);
+                }
+            })
+            ->orderBy('created_at')
+            ->lockForUpdate()
+            ->get();
+
+        $remaining = $quantity;
+
+        foreach ($offers as $offer) {
+            if ($remaining <= 0) {
+                break;
+            }
+
+            $canUse = min($remaining, $offer->remainingQuantity());
+
+            if ($canUse <= 0) {
+                continue;
+            }
+
+            $offer->increment('used_quantity', $canUse);
+            $remaining -= $canUse;
+
+            $offer->refresh();
+
+            if ($offer->used_quantity >= $offer->quantity) {
+                $offer->update(['is_active' => false]);
+            }
+        }
+    }
+
+    private function normalizePhone(string $value): string
+    {
+        return preg_replace('/\D+/', '', $value) ?? '';
     }
 }

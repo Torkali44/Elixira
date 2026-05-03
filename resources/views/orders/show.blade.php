@@ -151,7 +151,7 @@
                         </div>
                         <div class="info-group">
                             <label>Phone Number</label>
-                            <p>{{ $order->customer_phone }}</p>
+                            <p style="display: flex; align-items: center; gap: 0.4rem;"><x-phone-flag :phone="$order->customer_phone" /></p>
                         </div>
                         <div class="info-group" style="grid-column: span 2;">
                             <label>Shipping Address</label>

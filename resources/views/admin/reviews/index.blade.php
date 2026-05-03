@@ -67,8 +67,8 @@
                                             </a>
                                         @else
                                             <div class="d-flex flex-column gap-2">
-                                                <a href="{{ asset('storage/' . $review->avatar) }}" target="_blank">
-                                                    <img src="{{ asset('storage/' . $review->avatar) }}" class="rounded shadow-sm" style="height: 50px; width: 50px; object-fit: cover; border: 1px solid #ddd;">
+                                                <a href="{{ storage_public_url($review->avatar) }}" target="_blank">
+                                                    <img src="{{ storage_public_url($review->avatar) }}" class="rounded shadow-sm" style="height: 50px; width: 50px; object-fit: cover; border: 1px solid #ddd;">
                                                 </a>
                                                 @if($review->content)
                                                     <div class="small text-dark font-italic" style="max-width: 200px;">{{ $review->content }}</div>

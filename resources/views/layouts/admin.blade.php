@@ -65,6 +65,21 @@
                 <h4 class="m-0">Elixira</h4>
                 <small class="text-white-50">Admin</small>
             </div>
+            @php
+                if (request()->routeIs('admin.orders.*')) {
+                    session(['orders_last_viewed_at' => now()]);
+                }
+
+                if (request()->routeIs('admin.special-requests.*')) {
+                    session(['special_requests_last_viewed_at' => now()]);
+                }
+
+                $ordersLastViewed = session('orders_last_viewed_at');
+                $newOrdersCount = $ordersLastViewed ? \App\Models\Order::where('created_at', '>', $ordersLastViewed)->count() : 0;
+
+                $specialRequestsLastViewed = session('special_requests_last_viewed_at');
+                $newSpecialRequestsCount = $specialRequestsLastViewed ? \App\Models\SpecialRequest::where('created_at', '>', $specialRequestsLastViewed)->count() : 0;
+            @endphp
             <div class="mt-3">
                 <a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
                     <i class="fas fa-home me-2"></i> Dashboard
@@ -77,6 +92,9 @@
                 </a>
                 <a href="{{ route('admin.orders.index') }}" class="{{ request()->routeIs('admin.orders.*') ? 'active' : '' }}">
                     <i class="fas fa-shopping-bag me-2"></i> Orders
+                    @if($newOrdersCount > 0 && !request()->routeIs('admin.orders.*'))
+                        <span class="badge bg-danger rounded-pill ms-2">{{ $newOrdersCount }}</span>
+                    @endif
                 </a>
                 <a href="{{ route('admin.items.index') }}" class="{{ request()->routeIs('admin.items.*') ? 'active' : '' }}">
                     <i class="fas fa-boxes me-2"></i> Inventory & Products
@@ -92,6 +110,9 @@
                 </a>
                 <a href="{{ route('admin.special-requests.index') }}" class="{{ request()->routeIs('admin.special-requests.*') ? 'active' : '' }}">
                     <i class="fas fa-hand-holding-heart me-2"></i> Special Requests
+                    @if($newSpecialRequestsCount > 0 && !request()->routeIs('admin.special-requests.*'))
+                        <span class="badge bg-danger rounded-pill ms-2">{{ $newSpecialRequestsCount }}</span>
+                    @endif
                 </a>
                 <a href="{{ route('home') }}" target="_blank" rel="noopener">
                     <i class="fas fa-external-link-alt me-2"></i> View storefront

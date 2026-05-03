@@ -213,4 +213,47 @@ class ProfileController extends Controller
         return ($user->phone && $order->customer_phone === $user->phone)
             || ($user->user_code && $order->user_code === $user->user_code);
     }
+
+    public function addAddress(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'address' => ['required', 'string', 'min:10', 'max:500'],
+        ]);
+
+        $user = $request->user();
+        
+        $address = $user->addresses()->create([
+            'address' => $request->address,
+            'is_main' => $user->addresses()->count() === 0,
+        ]);
+
+        return back()->with('status', 'address-added');
+    }
+
+    public function deleteAddress(Request $request, \App\Models\UserAddress $address): RedirectResponse
+    {
+        abort_unless($address->user_id === $request->user()->id, 403);
+        
+        $isMain = $address->is_main;
+        $address->delete();
+
+        if ($isMain) {
+            $next = $request->user()->addresses()->first();
+            if ($next) {
+                $next->update(['is_main' => true]);
+            }
+        }
+
+        return back()->with('status', 'address-deleted');
+    }
+
+    public function setMainAddress(Request $request, \App\Models\UserAddress $address): RedirectResponse
+    {
+        abort_unless($address->user_id === $request->user()->id, 403);
+
+        $request->user()->addresses()->update(['is_main' => false]);
+        $address->update(['is_main' => true]);
+
+        return back()->with('status', 'address-main-set');
+    }
 }

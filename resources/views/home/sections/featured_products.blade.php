@@ -9,7 +9,7 @@
                         <div class="card-image">
                             <a href="{{ route('menu.show', $item) }}">
                                 @if($item->image)
-                                    <img src="{{ asset('storage/' . $item->image) }}" alt="{{ $item->name }}">
+                                    <img src="{{ storage_public_url($item->image) }}" alt="{{ $item->name }}">
                                 @else
                                     <img src="https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=400&q=80" alt="{{ $item->name }}">
                                 @endif

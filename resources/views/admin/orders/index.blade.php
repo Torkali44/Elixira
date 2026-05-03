@@ -161,6 +161,8 @@
             };
         };
     @endphp
+
+
     <div class="card border-0 shadow-sm mb-4">
         <div class="card-body">
             <form action="{{ route('admin.orders.index') }}" method="GET" class="row g-3 align-items-end">
@@ -169,6 +171,16 @@
                     <input type="text" id="search" name="search" class="form-control"
                         placeholder="Customer, phone ,or member code" value="{{ request('search') }}">
                 </div>
+                 <div class="col-md-2">
+                <label for="role" class="form-label">Role</label>
+                <select id="role" name="role" class="form-select">
+                    <option value="">All roles</option>
+                    <option value="admin" @selected(request('role') === 'admin')>Admin</option>
+                    <option value="user" @selected(request('role') === 'user')>User</option>
+                    <option value="guest" @selected(request('role') === 'guest')>Guest</option>
+                </select>
+            </div>
+            
                 <div class="col-md-2">
                     <label for="status" class="form-label">Status</label>
                     <select id="status" name="status" class="form-select">
@@ -199,7 +211,9 @@
                             <th>Order ID</th>
                             <th>Customer</th>
                             <th>Phone</th>
+                            <th>Role</th>
                             <th>Code</th>
+                            <th>Address</th>
                             <th>Total</th>
                             <th>Date</th>
                             <th>Status</th>
@@ -211,8 +225,12 @@
                             <tr>
                                 <td class="fw-bold">#{{ $order->id }}</td>
                                 <td>{{ $order->customer_name }}</td>
-                                <td>{{ $order->customer_phone }}</td>
+                                <td>
+                                    <x-phone-flag :phone="$order->customer_phone" />
+                                </td>
+                                <td>{{ $order->user ? $order->user->role : 'Guest' }}</td>
                                 <td>{{ $order->user_code ?? '-' }}</td>
+                                <td>{{ $order->address ?? '-' }}</td>
                                 <td>﷼ {{ number_format($order->total_amount, 2) }}</td>
                                 <td>{{ $order->created_at->format('Y-m-d H:i') }}</td>
                                 <td>

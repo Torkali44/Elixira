@@ -56,6 +56,10 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile/avatar-options', [ProfileController::class, 'updateAvatarOption'])->name('profile.avatar-options.update');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    Route::post('/profile/addresses', [ProfileController::class, 'addAddress'])->name('profile.addresses.store');
+    Route::delete('/profile/addresses/{address}', [ProfileController::class, 'deleteAddress'])->name('profile.addresses.destroy');
+    Route::patch('/profile/addresses/{address}/main', [ProfileController::class, 'setMainAddress'])->name('profile.addresses.main');
 });
 
 // Admin Routes (Protected)
@@ -87,6 +91,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
 
     Route::get('special-requests', [\App\Http\Controllers\SpecialRequestController::class, 'index'])->name('special-requests.index');
     Route::patch('special-requests/{specialRequest}/status', [\App\Http\Controllers\SpecialRequestController::class, 'updateStatus'])->name('special-requests.updateStatus');
+    Route::post('special-requests/{specialRequest}/assign-offer', [\App\Http\Controllers\SpecialRequestController::class, 'assignOffer'])->name('special-requests.assign-offer');
 });
 
 require __DIR__.'/auth.php';

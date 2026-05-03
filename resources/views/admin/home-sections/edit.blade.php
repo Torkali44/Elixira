@@ -70,7 +70,7 @@
             <div class="mb-3">
                 <label class="form-label">Image</label>
                 @if($section->image)
-                    <div class="mb-2"><img src="{{ asset('storage/'.$section->image) }}" alt="" class="rounded border" style="max-height:160px;"></div>
+                    <div class="mb-2"><img src="{{ storage_public_url($section->image) }}" alt="" class="rounded border" style="max-height:160px;"></div>
                 @endif
                 <input type="file" name="image" class="form-control" accept="image/*">
             </div>

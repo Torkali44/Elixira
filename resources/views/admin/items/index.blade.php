@@ -12,7 +12,7 @@
             <table class="table table-hover mb-0 align-middle">
                 <thead class="table-light">
                     <tr>
-                        <th>#</th>
+                        <th>ID</th>
                         <th>Image</th>
                         <th>Name</th>
                         <th>Brand</th>
@@ -28,7 +28,7 @@
                         <td>{{ $loop->iteration }}</td>
                         <td>
                             @if($item->image)
-                                <img src="{{ asset('storage/' . $item->image) }}" alt="{{ $item->name }}" width="50" class="rounded">
+                                <img src="{{ storage_public_url($item->image) }}" alt="{{ $item->name }}" width="50" class="rounded">
                             @else
                                 <span class="text-muted">-</span>
                             @endif
@@ -36,7 +36,7 @@
                         <td class="fw-bold">{{ $item->name }}</td>
                         <td class="fw-bold">{{ $item->brand }}</td>
                         <td><span class="badge bg-secondary">{{ $item->category->name }}</span></td>
-                        <td>${{ number_format($item->price, 2) }}</td>
+                        <td>﷼ {{ number_format($item->price, 2) }}</td>
                         <td>
                             @if($item->is_featured)
                                 <i class="fas fa-star text-warning" title="Featured on home"></i>

@@ -70,6 +70,11 @@ class User extends Authenticatable
         return $this->hasMany(Order::class);
     }
 
+    public function addresses()
+    {
+        return $this->hasMany(UserAddress::class);
+    }
+
     public function avatarOption(): BelongsTo
     {
         return $this->belongsTo(AvatarOption::class);
@@ -81,7 +86,7 @@ class User extends Authenticatable
             return $this->avatarOption->image_url;
         }
 
-        return $this->avatar ? asset('storage/' . $this->avatar) : null;
+        return $this->avatar ? storage_public_url($this->avatar) : null;
     }
 
     public function getAvatarInitialsAttribute(): string

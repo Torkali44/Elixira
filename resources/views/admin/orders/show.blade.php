@@ -27,14 +27,14 @@
                             @foreach($order->orderItems as $item)
                                 <tr>
                                     <td>{{ $item->item->name ?? 'Removed product' }}</td>
-                                    <td>${{ number_format($item->price, 2) }}</td>
+                                    <td>﷼ {{ number_format($item->price, 2) }}</td>
                                     <td>{{ $item->quantity }}</td>
-                                    <td>${{ number_format($item->price * $item->quantity, 2) }}</td>
+                                    <td>﷼ {{ number_format($item->price * $item->quantity, 2) }}</td>
                                 </tr>
                             @endforeach
                             <tr class="table-light fw-bold">
                                 <td colspan="3" class="text-end">Total</td>
-                                <td>${{ number_format($order->total_amount, 2) }}</td>
+                                <td>﷼ {{ number_format($order->total_amount, 2) }}</td>
                             </tr>
                         </tbody>
                     </table>
@@ -49,11 +49,16 @@
                 </div>
                 <div class="card-body">
                     <p><strong>Name:</strong> {{ $order->customer_name }}</p>
-                    <p><strong>Phone:</strong> {{ $order->customer_phone }}</p>
+                    <p class="mb-2"><strong>Phone:</strong>
+                        <x-phone-flag :phone="$order->customer_phone" />
+                    </p>
+                    <p><strong>Role:</strong> {{ $order->user ? $order->user->role : 'Guest' }}</p>
                     @if($order->user_code)
                         <p><strong>Code referral : </strong> {{ $order->user_code }}</p>
                     @endif
-                    <p><strong>Address:</strong> {{ $order->address }}</p>
+                    @if($order->address)
+                        <p><strong>Address:</strong> {{ $order->address }}</p>
+                    @endif
                     <p><strong>Placed:</strong> {{ $order->created_at->format('Y-m-d h:i A') }}</p>
                     @if($order->notes)
                         <div class="alert alert-secondary mb-0">

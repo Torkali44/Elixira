@@ -611,7 +611,7 @@ img {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.9rem 2.5rem;
+    padding: 0.7rem 1.8rem;
     border-radius: 100px;
     font-family: var(--elx-font);
     font-size: 1rem;
@@ -662,10 +662,14 @@ img {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 1.5rem;
+    gap: 1.2rem;
+    max-width: 1300px;
+    margin: 0 auto;
 }
 
 .elx-category-pill {
+    flex: 0 1 calc(20% - 1.2rem);
+    min-width: 210px;
     display: flex;
     align-items: center;
     gap: 1rem;
@@ -777,11 +781,11 @@ img {
 
 .elx-product-card__image-container {
     background-color: #13252D;
-    height: 320px;
+    height: 220px;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 2.5rem;
+    padding: 1.5rem;
     position: relative;
     overflow: hidden;
 }
@@ -821,7 +825,7 @@ img {
 }
 
 .elx-product-card__info {
-    padding: 1.5rem 1rem;
+    padding: 1rem 1rem 1.2rem;
     /* Gradient from black to primary #13252D */
     background: linear-gradient(180deg, #000000 0%, #13252D 100%);
     transition: background 0.5s ease;
@@ -835,7 +839,7 @@ img {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.5rem;
 }
 
 .elx-product-card__name {
@@ -854,8 +858,8 @@ img {
 
 .elx-product-card__desc {
     color: rgba(255, 255, 255, 0.4);
-    font-size: 0.85rem;
-    margin-bottom: 1.5rem;
+    font-size: 0.82rem;
+    margin-bottom: 0.8rem;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

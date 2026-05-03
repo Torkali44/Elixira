@@ -137,9 +137,9 @@
                             <tbody>
                                 @forelse(\App\Models\Order::latest()->take(6)->get() as $order)
                                     <tr>
-                                        <td class="ps-4"><span class="fw-bold">#{{ $order->id }}</span></td>
+                                        <td class="ps-4"><span class="fw-bold">{{ $order->id }}</span></td>
                                         <td>{{ $order->customer_name }}</td>
-                                        <td class="fw-bold">Rs {{ number_format($order->total_amount, 2) }}</td>
+                                        <td class="fw-bold">﷼ {{ number_format($order->total_amount, 2) }}</td>
                                         <td>
                                             <span
                                                 class="badge rounded-pill bg-{{ $adminStatusBadge($order->status) }} py-2 px-3">

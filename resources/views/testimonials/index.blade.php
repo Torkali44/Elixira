@@ -351,6 +351,50 @@
             background: #11222b !important;
         }
 
+        .testimonial-card[data-expandable="1"] {
+            cursor: pointer;
+        }
+
+        .testimonial-content-preview {
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            padding: 10px 0;
+            min-height: 170px;
+        }
+
+        .testimonial-message {
+            color: #eee;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            font-family: 'Istok Web', sans-serif;
+            margin: 0;
+            display: -webkit-box;
+            -webkit-line-clamp: 7;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 100%;
+        }
+
+        .testimonial-read-more {
+            margin-top: 12px;
+            color: #4ac8f6;
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+        }
+
+        /* .testimonial-bottom-quotes {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 8px 0 14px;
+            color: rgba(74, 200, 246, 0.35);
+            font-size: 1.2rem;
+        } */
+
         /* ... Responsive ... */
         @media (max-width: 768px) {
             .testimonials-title {
@@ -391,22 +435,48 @@
                 <div class="testimonials-grid"
                     style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 30px; max-width: 1200px; margin: 0 auto;">
                     @foreach($reviews as $rev)
+                        @php
+                            $isExpandable = \Illuminate\Support\Str::length((string) $rev->content) > 230;
+                        @endphp
                         <div class="testimonial-card"
+                            data-expandable="{{ $isExpandable ? '1' : '0' }}"
+                            data-review-name="{{ $rev->name }}"
+                            data-review-rating="{{ $rev->rating }}"
+                            data-review-content="{{ $rev->content }}"
                             style="background: #0d1a20; border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 30px; padding: 40px; position: relative; box-shadow: 0 15px 40px rgba(0,0,0,0.4); display: flex; flex-direction: column; justify-content: space-between; min-height: 350px;">
 
-                            <!-- Header: Stars -->
-                            <div style="display: flex; gap: 5px; color: #4ac8f6; font-size: 1rem; margin-bottom: 20px;">
-                                @for($i = 1; $i <= 5; $i++)
-                                    <i class="{{ $i <= $rev->rating ? 'fas' : 'far' }} fa-star"></i>
-                                @endfor
+                            <!-- Header: Stars & Rating Circle -->
+                            <div
+                                style="display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 20px;">
+                                <div style="display: flex; gap: 5px; color: #4ac8f6; font-size: 1.1rem;">
+                                    @for($i = 1; $i <= 5; $i++)
+                                        <i class="{{ $i <= $rev->rating ? 'fas' : 'far' }} fa-star"></i>
+                                    @endfor
+                                </div>
+                                <div
+                                    style="width: 35px; height: 35px; border-radius: 50%; border: 2px solid #4ac8f6; display: flex; align-items: center; justify-content: center; color: #4ac8f6; font-weight: bold; font-size: 1rem; box-shadow: 0 0 10px rgba(74, 200, 246, 0.3);">
+                                    {{ $rev->rating }}
+                                </div>
                             </div>
 
+                            <!-- Quote Icon -->
+                            <i class="fas fa-quote-left"
+                                style="position: absolute; top: 30px; left: 30px; font-size: 2rem; color: rgba(255,255,255,0.05);"></i>
+
                             <!-- Content -->
-                            <div style="flex-grow: 1; display: flex; align-items: center; padding: 10px 0;">
-                                <p style="color: #eee; font-size: 1.1rem; line-height: 1.6; font-family: 'Istok Web', sans-serif;">
+                            <div class="testimonial-content-preview">
+                                <p class="testimonial-message">
                                     {{ $rev->content }}
                                 </p>
                             </div>
+                            @if($isExpandable)
+                                <div class="testimonial-read-more">Tap to read full comment ...</div>
+                            @endif
+
+                            <!-- <div class="testimonial-bottom-quotes" aria-hidden="true">
+                                <i class="fas fa-quote-left"></i>
+                                <i class="fas fa-quote-right"></i>
+                            </div> -->
 
                             <!-- Footer: User Info -->
                             <div
@@ -419,9 +489,9 @@
                                 </div>
                                 <div style="display: flex; flex-direction: column;">
                                     <h4 style="margin: 0; color: #fff; font-size: 1rem; font-weight: 700;">{{ $rev->name }}</h4>
-                                    <div style="display: flex; gap: 10px; font-size: 0.8rem; color: #666;">
-                                        <span>{{ $rev->skin_type }}</span>
-                                        <span>{{ $rev->age }}</span>
+                                    <div style="display: flex; gap: 15px; font-size: 0.85rem; color: #8fa8b3; margin-top: 3px;">
+                                        <span>Gen.: <strong style="color: #d0dee5;">{{ $rev->skin_type  ?? 'N/A' }}</strong></span>
+                                        <span>Age: <strong style="color: #d0dee5;">{{ $rev->age ?? 'N/A' }}</strong></span>
                                     </div>
                                 </div>
                             </div>
@@ -436,7 +506,7 @@
                 <div style="text-align: center; margin-top: 60px;">
                     <p style="color: #888; margin-bottom: 20px;">Have a story to share?</p>
                     <a href="{{ route('testimonials.index', ['tab' => 'write']) }}" class="submit-btn"
-                        style="text-decoration: none; display: inline-block;">Write Your Reflection</a>
+                        style="text-decoration: none; display: inline-block;">Write Your Review</a>
                 </div>
 
             @elseif($tab == 'write')
@@ -547,12 +617,9 @@
                                 <textarea name="content" class="form-input" placeholder="Share your thoughts..."
                                     required>{{ old('content') }}</textarea>
                             </div>
-                            <label class="newsletter-group">
-                                <input type="checkbox" name="newsletter" class="newsletter-checkbox">
-                                <span class="newsletter-text">Keep me in the loop about new features and member benefits</span>
-                            </label>
+                            
                             <div class="submit-btn-wrapper">
-                                <button type="submit" class="submit-btn">Send Reflection</button>
+                                <button type="submit" class="submit-btn">Send Review</button>
                             </div>
                         </div>
                     </form>
@@ -587,7 +654,7 @@
                             @php
                                 $avatarSrc = \Illuminate\Support\Str::startsWith((string) $rev->avatar, ['http://', 'https://'])
                                     ? $rev->avatar
-                                    : asset('storage/' . ltrim((string) $rev->avatar, '/'));
+                                    : storage_public_url(ltrim((string) $rev->avatar, '/'));
                             @endphp
                             <img src="{{ $avatarSrc }}" alt="Testimonial Screenshot">
                             @if($rev->content)
@@ -602,4 +669,40 @@
             @endif
         </div>
     </div>
+@endsection
+
+@section('scripts')
+    <script>
+        const escapeHtml = (unsafeText) => {
+            const div = document.createElement('div');
+            div.textContent = unsafeText;
+            return div.innerHTML;
+        };
+
+        document.querySelectorAll('.testimonial-card[data-expandable="1"]').forEach((card) => {
+            card.addEventListener('click', () => {
+                const reviewerName = card.dataset.reviewName || 'Customer';
+                const reviewContent = card.dataset.reviewContent || '';
+                const reviewRating = Number(card.dataset.reviewRating || 0);
+                const stars = '★'.repeat(reviewRating) + '☆'.repeat(Math.max(0, 5 - reviewRating));
+                const safeReviewerName = escapeHtml(reviewerName);
+                const safeReviewContent = escapeHtml(reviewContent);
+
+                Swal.fire({
+                    title: safeReviewerName,
+                    html: `
+                        <div style="text-align: start;">
+                            <div style="color:#4ac8f6; font-size:1.1rem; letter-spacing:2px; margin-bottom:12px;">${stars}</div>
+                            <div style="line-height:1.9; color:#eaf4f8; font-size:1rem; white-space:pre-wrap;">${safeReviewContent}</div>
+                        </div>
+                    `,
+                    background: '#0d1a20',
+                    color: '#eaf4f8',
+                    width: 640,
+                    confirmButtonText: 'Close',
+                    confirmButtonColor: '#4ac8f6',
+                });
+            });
+        });
+    </script>
 @endsection

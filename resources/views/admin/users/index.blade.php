@@ -1,8 +1,6 @@
 ﻿@extends('layouts.admin')
 
 @section('content')
-@php($currentUser = auth()->user())
-
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
     <div>
         <h2 class="mb-1">Users Management</h2>
@@ -78,6 +76,7 @@
                 <thead>
                     <tr>
                         <th>User</th>
+                        <th>Country</th>
                         <th>Role</th>
                         <th>Phone</th>
                         <th>Email</th>
@@ -94,10 +93,22 @@
                                     <x-user-avatar :user="$user" size="48" />
                                     <div>
                                         <div class="fw-bold">{{ $user->name }}</div>
-                                        <small class="text-muted">{{ $user->avatar ? 'Custom avatar' : 'Initials avatar' }}</small>
                                     </div>
                                 </div>
                             </td>
+                            <td>
+                                <div>
+                                    <div class="fw-bold d-flex align-items-center">
+                                        <x-phone-flag :phone="$user->phone" :show-phone="false" />
+                                    </div>
+                                    @if($user->birth_date)
+                                        <small class="text-muted">
+                                            {{ \Carbon\Carbon::parse($user->birth_date)->age }} years old
+                                        </small>
+                                    @endif
+                                </div>
+                            </td>
+
                             <td>
                                 @if($user->role === 'admin')
                                     <span class="badge bg-primary">Admin</span>
@@ -121,7 +132,7 @@
                                         <i class="fas fa-pen"></i>
                                     </a>
 
-                                    @if($user->role !== 'admin' && $user->id !== $currentUser->id)
+                                    @if($user->role !== 'admin' && $user->id !== auth()->id())
                                         <form action="{{ route('admin.users.suspend', $user) }}" method="POST" class="d-inline">
                                             @csrf
                                             @method('PATCH')

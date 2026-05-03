@@ -71,6 +71,11 @@
 @endsection
 
 @section('content')
+@php
+    $privateQty = (int) ($privateOfferQuantities[$item->id] ?? 0);
+    $hasPrivateAccess = $privateQty > 0;
+    $availableQty = $item->stock + $privateQty;
+@endphp
 <div class="page-content">
     <div class="elx-container">
         <div class="product-detail-grid">
@@ -78,7 +83,7 @@
             <div class="product-gallery" data-animate>
                 <div class="main-img-container">
                     @if($item->image)
-                        <img src="{{ asset('storage/' . $item->image) }}" alt="{{ $item->name }}" id="mainProductImage">
+                        <img src="{{ storage_public_url($item->image) }}" alt="{{ $item->name }}" id="mainProductImage">
                     @else
                         <div style="aspect-ratio: 1/1; background: #1a2e38; display: flex; align-items: center; justify-content: center; color: var(--elx-cyan); font-size: 5rem;">
                             <i class="fas fa-seedling"></i>
@@ -90,15 +95,15 @@
                 <div class="thumbnail-gallery" style="display: flex; gap: 1rem; margin-top: 1.5rem; overflow-x: auto; padding-bottom: 0.5rem;">
                     {{-- Main Image Thumbnail --}}
                     @if($item->image)
-                    <div class="thumb-item" onclick="document.getElementById('mainProductImage').src='{{ asset('storage/' . $item->image) }}'" style="flex: 0 0 80px; height: 80px; border-radius: 12px; border: 2px solid var(--elx-cyan); cursor: pointer; overflow: hidden; background: var(--elx-glass);">
-                        <img src="{{ asset('storage/' . $item->image) }}" style="width: 100%; height: 100%; object-fit: cover;">
+                    <div class="thumb-item" onclick="document.getElementById('mainProductImage').src={{ \Illuminate\Support\Js::from(storage_public_url($item->image)) }}" style="flex: 0 0 80px; height: 80px; border-radius: 12px; border: 2px solid var(--elx-cyan); cursor: pointer; overflow: hidden; background: var(--elx-glass);">
+                        <img src="{{ storage_public_url($item->image) }}" style="width: 100%; height: 100%; object-fit: cover;">
                     </div>
                     @endif
                     
                     {{-- Gallery Image Thumbnails --}}
                     @foreach($item->images as $img)
-                    <div class="thumb-item" onclick="document.getElementById('mainProductImage').src='{{ asset('storage/' . $img->image) }}'" style="flex: 0 0 80px; height: 80px; border-radius: 12px; border: 1px solid var(--elx-border); cursor: pointer; overflow: hidden; background: var(--elx-glass);">
-                        <img src="{{ asset('storage/' . $img->image) }}" style="width: 100%; height: 100%; object-fit: cover;">
+                    <div class="thumb-item" onclick="document.getElementById('mainProductImage').src={{ \Illuminate\Support\Js::from(storage_public_url($img->image)) }}" style="flex: 0 0 80px; height: 80px; border-radius: 12px; border: 1px solid var(--elx-border); cursor: pointer; overflow: hidden; background: var(--elx-glass);">
+                        <img src="{{ storage_public_url($img->image) }}" style="width: 100%; height: 100%; object-fit: cover;">
                     </div>
                     @endforeach
                 </div>
@@ -107,9 +112,9 @@
 
             {{-- Right: Info --}}
             <div class="product-info" data-animate>
-                <div class="stock-badge {{ $item->stock > 0 ? 'stock-in' : 'stock-out' }}">
-                    <i class="fas {{ $item->stock > 0 ? 'fa-check' : 'fa-times' }} me-1"></i>
-                    {{ $item->stock > 0 ? 'In Stock (' . $item->stock . ')' : 'Out of Stock' }}
+                <div class="stock-badge {{ ($item->stock > 0 || $hasPrivateAccess) ? 'stock-in' : 'stock-out' }}">
+                    <i class="fas {{ ($item->stock > 0 || $hasPrivateAccess) ? 'fa-check' : 'fa-times' }} me-1"></i>
+                    {{ $item->stock > 0 ? 'In Stock (' . $item->stock . ')' : ($hasPrivateAccess ? 'Private Access Available' : 'Out of Stock') }}
                 </div>
 
                 {{-- Meta Tags: Category, Brand, Points --}}
@@ -143,9 +148,9 @@
                     {{ $item->description }}
                 </p>
 
-                @if($item->stock <= 0)
+                @if($item->stock <= 0 && !$hasPrivateAccess)
                     <button type="button" class="elx-btn" style="width: 100%; justify-content: center; padding: 1.2rem; font-size: 1.2rem; background: rgba(255, 77, 77, 0.1); color: #ff4d4d; border: 1px solid rgba(255, 77, 77, 0.3);" onclick="showSpecialRequestModal({{ $item->id }}, '{{ addslashes($item->name) }}')">
-                        <i class="fas fa-hand-holding-heart"></i> طلب خاص
+                        <i class="fas fa-hand-holding-heart"></i> Private order
                     </button>
                 @else
                     <form action="{{ route('cart.add') }}" method="POST">
@@ -155,10 +160,10 @@
                         <div style="display: flex; gap: 1rem; align-items: center; margin-bottom: 2rem;">
                             <div style="display: flex; align-items: center; background: rgba(255,255,255,0.05); border: 1px solid var(--elx-border); border-radius: 100px; padding: 0.5rem 1rem;">
                                 <button type="button" onclick="const i = this.nextElementSibling; if(i.value > 1) i.value--;" style="background: none; border: none; color: white; cursor: pointer; padding: 0 0.5rem;">&minus;</button>
-                                <input type="number" name="quantity" id="quantity" value="1" min="1" max="{{ $item->stock }}" style="width: 50px; text-align: center; background: none; border: none; color: white; font-weight: 700; outline: none;">
-                                <button type="button" onclick="const i = this.previousElementSibling; if(i.value < {{ $item->stock }}) i.value++;" style="background: none; border: none; color: white; cursor: pointer; padding: 0 0.5rem;">+</button>
+                                <input type="number" name="quantity" id="quantity" value="1" min="1" max="{{ $availableQty }}" style="width: 50px; text-align: center; background: none; border: none; color: white; font-weight: 700; outline: none;">
+                                <button type="button" onclick="const i = this.previousElementSibling; if(i.value < {{ $availableQty }}) i.value++;" style="background: none; border: none; color: white; cursor: pointer; padding: 0 0.5rem;">+</button>
                             </div>
-                            <span style="color: var(--elx-gray); font-size: 0.9rem;">Maximum {{ $item->stock }} units</span>
+                            <span style="color: var(--elx-gray); font-size: 0.9rem;">Maximum {{ $availableQty }} units</span>
                         </div>
 
                         <button type="submit" class="elx-btn elx-btn--primary" style="width: 100%; justify-content: center; padding: 1.2rem; font-size: 1.2rem;">
@@ -197,7 +202,7 @@
                 <h2 class="elx-section__title">✧ Related Rituals</h2>
             </div>
             
-            <div class="elx-products__grid" data-animate>
+            <div class="elx-products__grid menu-products-grid" data-animate>
                 @foreach($relatedItems as $product)
                     @include('partials.product-card', ['product' => $product])
                 @endforeach

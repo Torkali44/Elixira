@@ -54,13 +54,12 @@
                 $categories = \App\Models\Category::withCount('items')->get();
             @endphp
             @if($categories->count() > 0)
-                <div class="elx-categories__grid" data-animate
-                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;">
+                <div class="elx-categories__grid" data-animate>
                     @foreach($categories as $category)
                         <a href="{{ route('menu.index') }}?category={{ $category->id }}" class="elx-category-pill">
                             <div class="elx-category-pill__img">
                                 @if($category->image)
-                                    <img src="{{ asset('storage/' . $category->image) }}" alt="{{ $category->name }}">
+                                    <img src="{{ storage_public_url($category->image) }}" alt="{{ $category->name }}">
                                 @else
                                     <div class="elx-category-pill__placeholder">
                                         <i class="fas fa-leaf"></i>
@@ -81,7 +80,7 @@
     {{-- LOGO TICKER (Scrolling Bar) --}}
     {{-- ═══════════════════════════════════════════════════════════ --}}
     <section class="elx-ticker-section"
-        style="background: rgba(0,0,0,0.3); border-top: 1px solid rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.05); padding: 1.5rem 0; overflow: hidden;">
+        style="background: rgba(0,0,0,0.3); border-top: 1px solid rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.05);  overflow: hidden;">
         <div class="elx-ticker" style="display: flex; overflow: hidden; user-select: none; gap: 4rem;">
             <div class="elx-ticker__inner"
                 style="display: flex; flex-shrink: 0; align-items: center; gap: 6rem; animation: ticker-scroll 40s linear infinite;">
@@ -141,7 +140,7 @@
 
         .menu-products-grid {
             display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
+            grid-template-columns: repeat(4, minmax(0, 1fr));
             gap: 3rem;
             justify-content: center;
             align-items: stretch;
@@ -224,26 +223,6 @@
         </div>
     </section>
 
-   
-    {{-- NEWSLETTER --}}
-    
-    <section class="elx-section elx-newsletter" id="newsletter">
-        <div class="elx-container">
-            <div class="elx-newsletter__box" data-animate>
-                <h2>Unlock exclusive launches, curated tips, and membersâ€‘only offers.</h2>
-                <p class="elx-newsletter__sub">No Spam, Good Stuff Only!</p>
-                <div class="elx-newsletter__form">
-                    <form action="{{ route('newsletter.subscribe') }}" method="POST"
-                        style="display: flex; width: 100%; gap: 10px;">
-                        @csrf
-                        <input type="email" name="email" placeholder="Your email address" class="elx-newsletter__input"
-                            required style="flex: 1;">
-                        <button type="submit" class="elx-newsletter__btn">Receive the Whisper</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </section>
       
     {{-- TESTIMONIALS SECTION --}}
     @php
@@ -286,6 +265,36 @@
                 box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
                 border-color: rgba(74, 200, 246, 0.3) !important;
                 background: #11222b !important;
+            }
+
+            .testimonial-card[data-expandable="1"] {
+                cursor: pointer;
+            }
+
+            .home-testimonial-message {
+                color: #eee;
+                font-size: 1.2rem;
+                line-height: 1.7;
+                font-family: 'Istok Web', sans-serif;
+                font-weight: 400;
+                font-style: normal;
+                margin: 0;
+                display: -webkit-box;
+                -webkit-line-clamp: 7;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                width: 100%;
+            }
+
+            .home-testimonial-read-more {
+                margin-top: 10px;
+                text-align: center;
+                color: #4ac8f6;
+                font-size: 0.82rem;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 0.3px;
             }
 
             .carousel-btn {
@@ -343,8 +352,15 @@
                     <div class="testimonial-carousel-track-container">
                         <div class="testimonial-carousel-track" id="carouselTrack">
                             @foreach($homeReviews as $rev)
+                                @php
+                                    $isHomeExpandable = \Illuminate\Support\Str::length((string) $rev->content) > 230;
+                                @endphp
                                 <div class="testimonial-carousel-slide">
                                     <div class="testimonial-card"
+                                        data-expandable="{{ $isHomeExpandable ? '1' : '0' }}"
+                                        data-review-name="{{ $rev->name }}"
+                                        data-review-rating="{{ $rev->rating }}"
+                                        data-review-content="{{ $rev->content }}"
                                         style="background: #0d1a20; border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 30px; padding: 40px; position: relative; box-shadow: 0 15px 40px rgba(0,0,0,0.4); display: flex; flex-direction: column; justify-content: space-between; min-height: 400px;">
 
                                         <!-- Header: Stars & Rating Circle -->
@@ -367,11 +383,13 @@
 
                                         <!-- Content -->
                                         <div style="text-align: center; flex-grow: 1; display: flex; align-items: center; padding: 20px 0;">
-                                            <p
-                                                style="color: #eee; font-size: 1.2rem; line-height: 1.7; font-family: 'Istok Web', sans-serif; font-weight: 400; font-style: normal;">
+                                            <p class="home-testimonial-message">
                                                 {{ $rev->content }}
                                             </p>
                                         </div>
+                                        @if($isHomeExpandable)
+                                            <div class="home-testimonial-read-more">Tap to read full comment ...</div>
+                                        @endif
 
                                         <!-- Footer: User Info -->
                                         <div
@@ -400,13 +418,38 @@
                 </div>
 
                 <div style="text-align: center; margin-top: 4rem;">
+                    <a href="{{ route('testimonials.index', ['tab' => 'write']) }}" class="elx-btn elx-btn--glass"
+                        style="padding: 15px 40px; border-radius: 30px; margin-right: 20px;">
+                          Write Review <!--<i class="fas fa-arrow-right" style="margin-left: 10px;"></i> -->
+                    </a>
+
                     <a href="{{ route('testimonials.index', ['tab' => 'direct']) }}" class="elx-btn elx-btn--glass"
                         style="padding: 15px 40px; border-radius: 30px;">
-                        See All Comments <i class="fas fa-arrow-right" style="margin-left: 10px;"></i>
+                         All Review <i class="fas fa-arrow-right" style="margin-left: 10px;"></i>
                     </a>
                 </div>
+                
             </div>
         </section>
+  {{-- NEWSLETTER --}}
+    
+    <section class="elx-section elx-newsletter" id="newsletter">
+        <div class="elx-container">
+            <div class="elx-newsletter__box" data-animate>
+                <h2>Unlock exclusive launches, curated tips, and membersâ€‘only offers.</h2>
+                <p class="elx-newsletter__sub">No Spam, Good Stuff Only!</p>
+                <div class="elx-newsletter__form display: flex; gap: 15px; ">
+                    <form action="{{ route('newsletter.subscribe') }}" method="POST"
+                        style="display: flex; width: 100%; gap: 10px;">
+                        @csrf
+                        <input type="email" name="email" placeholder="Your email address" class="elx-newsletter__input"
+                            required style="flex: 1; margin-right: 15px;">
+                        <button type="submit" class="elx-newsletter__btn" >Receive the Whisper</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
 
         <script>
             document.addEventListener('DOMContentLoaded', () => {
@@ -414,6 +457,11 @@
                 const slides = Array.from(track.children);
                 const nextButton = document.getElementById('carouselNext');
                 const prevButton = document.getElementById('carouselPrev');
+                const escapeHtml = (unsafeText) => {
+                    const div = document.createElement('div');
+                    div.textContent = unsafeText;
+                    return div.innerHTML;
+                };
                 
                 let currentIndex = 0;
                 let itemsPerView = window.innerWidth > 1024 ? 3 : (window.innerWidth > 768 ? 2 : 1);
@@ -456,6 +504,32 @@
                     interval = setInterval(() => {
                         nextButton.click();
                     }, 5000);
+                });
+
+                document.querySelectorAll('.testimonial-card[data-expandable="1"]').forEach((card) => {
+                    card.addEventListener('click', () => {
+                        const reviewerName = card.dataset.reviewName || 'Customer';
+                        const reviewContent = card.dataset.reviewContent || '';
+                        const reviewRating = Number(card.dataset.reviewRating || 0);
+                        const stars = '★'.repeat(reviewRating) + '☆'.repeat(Math.max(0, 5 - reviewRating));
+                        const safeReviewerName = escapeHtml(reviewerName);
+                        const safeReviewContent = escapeHtml(reviewContent);
+
+                        Swal.fire({
+                            title: safeReviewerName,
+                            html: `
+                                <div style="text-align: start;">
+                                    <div style="color:#4ac8f6; font-size:1.1rem; letter-spacing:2px; margin-bottom:12px;">${stars}</div>
+                                    <div style="line-height:1.9; color:#eaf4f8; font-size:1rem; white-space:pre-wrap;">${safeReviewContent}</div>
+                                </div>
+                            `,
+                            background: '#0d1a20',
+                            color: '#eaf4f8',
+                            width: 640,
+                            confirmButtonText: 'Close',
+                            confirmButtonColor: '#4ac8f6',
+                        });
+                    });
                 });
             });
         </script>

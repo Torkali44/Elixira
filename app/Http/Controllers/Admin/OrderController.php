@@ -11,6 +11,7 @@ class OrderController extends Controller
 {
     public function index(Request $request)
     {
+        session(['orders_last_viewed_at' => now()]);
         $query = Order::query();
 
         if ($request->filled('search')) {
@@ -25,6 +26,16 @@ class OrderController extends Controller
 
         if ($request->filled('status')) {
             $query->where('status', $request->status);
+        }
+
+        if ($request->filled('role')) {
+            if ($request->role === 'guest') {
+                $query->whereNull('user_id');
+            } else {
+                $query->whereHas('user', function($q) use ($request) {
+                    $q->where('role', $request->role);
+                });
+            }
         }
 
         $orders = $query->latest()->paginate(20)->withQueryString();

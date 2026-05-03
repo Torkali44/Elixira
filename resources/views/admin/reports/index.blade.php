@@ -91,7 +91,7 @@
                                 <td>
                                     <div class="d-flex align-items-center">
                                         @if($item->image)
-                                            <img src="{{ asset('storage/'.$item->image) }}" class="rounded me-2" alt="" width="40">
+                                            <img src="{{ storage_public_url($item->image) }}" class="rounded me-2" alt="" width="40">
                                         @endif
                                         <span class="fw-bold">{{ $item->name }}</span>
                                     </div>
@@ -216,7 +216,7 @@
                                 <td>#{{ $order->id }}</td>
                                 <td>{{ $order->created_at->format('Y-m-d H:i') }}</td>
                                 <td>{{ $order->customer_name }}</td>
-                                <td>{{ $order->customer_phone }}</td>
+                                <td><x-phone-flag :phone="$order->customer_phone" /></td>
                                 <td>
                                     @if($order->status == 'completed')
                                         <span class="badge bg-success">Completed</span>

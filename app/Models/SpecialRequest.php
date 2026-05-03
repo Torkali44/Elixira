@@ -11,6 +11,7 @@ class SpecialRequest extends Model
         'user_id',
         'name',
         'phone',
+        'email',
         'status',
     ];
 
@@ -22,5 +23,10 @@ class SpecialRequest extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function offers()
+    {
+        return $this->hasMany(SpecialItemOffer::class);
     }
 }
