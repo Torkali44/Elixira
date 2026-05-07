@@ -277,7 +277,22 @@ $(function () {
             url: '{{ route('cart.update') }}',
             method: 'PATCH',
             data: { _token: '{{ csrf_token() }}', id: id, quantity: quantity },
-            success: function () { window.location.reload(); }
+            success: function () { window.location.reload(); },
+            error: function(xhr) {
+                let msg = 'Something went wrong';
+                try {
+                    let err = JSON.parse(xhr.responseText);
+                    if (err.errors) {
+                        msg = Object.values(err.errors).flat().join('<br>');
+                    } else if (err.message) {
+                        msg = err.message;
+                    }
+                } catch(e) {}
+                Swal.fire({icon: 'error', title: 'Oops...', html: msg});
+                
+                // Reset the input value to previous (or just reload to sync)
+                setTimeout(() => window.location.reload(), 2000);
+            }
         });
     });
 

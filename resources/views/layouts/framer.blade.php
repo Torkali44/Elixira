@@ -3,6 +3,9 @@
 
 <head>
     <meta charset="UTF-8">
+    <script>
+        document.documentElement.classList.add('elx-animate-scroll');
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Elixira - Superfoods & Wellness')</title>
     <meta name="description" content="A blend of superfoods, science, and self-care rituals.">
@@ -549,6 +552,13 @@
         }
     </script>
     @yield('scripts')
+    <script>
+        window.setTimeout(function () {
+            document.querySelectorAll('[data-animate]:not(.animate-in)').forEach(function (el) {
+                el.classList.add('animate-in');
+            });
+        }, 2500);
+    </script>
 </body>
 
 </html>

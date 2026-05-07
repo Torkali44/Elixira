@@ -130,16 +130,29 @@ img {
     position: relative;
 }
 
-/* ─── Scroll Animations ─── */
+/* ─── Scroll Animations ───
+   Default: visible (no-JS, or before opt-in). JS adds .elx-animate-scroll on <html>. */
 [data-animate] {
-    opacity: 0;
-    transform: translateY(40px);
+    opacity: 1;
+    transform: translateY(0);
     transition: opacity 0.8s ease, transform 0.8s ease;
 }
 
-[data-animate].animate-in {
+html.elx-animate-scroll [data-animate]:not(.animate-in) {
+    opacity: 0;
+    transform: translateY(40px);
+}
+
+html.elx-animate-scroll [data-animate].animate-in {
     opacity: 1;
     transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html.elx-animate-scroll [data-animate]:not(.animate-in) {
+        opacity: 1;
+        transform: none;
+    }
 }
 
 /* ═══════════════════════════════════════════════════════════

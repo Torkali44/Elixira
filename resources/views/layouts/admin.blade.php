@@ -75,10 +75,10 @@
                 }
 
                 $ordersLastViewed = session('orders_last_viewed_at');
-                $newOrdersCount = $ordersLastViewed ? \App\Models\Order::where('created_at', '>', $ordersLastViewed)->count() : 0;
+                $newOrdersCount = $ordersLastViewed ? \App\Models\Order::where('created_at', '>', $ordersLastViewed)->count() : \App\Models\Order::where('status', 'pending')->count();
 
                 $specialRequestsLastViewed = session('special_requests_last_viewed_at');
-                $newSpecialRequestsCount = $specialRequestsLastViewed ? \App\Models\SpecialRequest::where('created_at', '>', $specialRequestsLastViewed)->count() : 0;
+                $newSpecialRequestsCount = $specialRequestsLastViewed ? \App\Models\SpecialRequest::where('created_at', '>', $specialRequestsLastViewed)->count() : \App\Models\SpecialRequest::where('status', 'pending')->count();
             @endphp
             <div class="mt-3">
                 <a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
@@ -92,7 +92,7 @@
                 </a>
                 <a href="{{ route('admin.orders.index') }}" class="{{ request()->routeIs('admin.orders.*') ? 'active' : '' }}">
                     <i class="fas fa-shopping-bag me-2"></i> Orders
-                    @if($newOrdersCount > 0 && !request()->routeIs('admin.orders.*'))
+                    @if($newOrdersCount > 0)
                         <span class="badge bg-danger rounded-pill ms-2">{{ $newOrdersCount }}</span>
                     @endif
                 </a>
@@ -110,7 +110,7 @@
                 </a>
                 <a href="{{ route('admin.special-requests.index') }}" class="{{ request()->routeIs('admin.special-requests.*') ? 'active' : '' }}">
                     <i class="fas fa-hand-holding-heart me-2"></i> Special Requests
-                    @if($newSpecialRequestsCount > 0 && !request()->routeIs('admin.special-requests.*'))
+                    @if($newSpecialRequestsCount > 0)
                         <span class="badge bg-danger rounded-pill ms-2">{{ $newSpecialRequestsCount }}</span>
                     @endif
                 </a>
