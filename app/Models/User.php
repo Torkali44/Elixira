@@ -103,4 +103,9 @@ class User extends Authenticatable
 
         return $initials !== '' ? $initials : 'U';
     }
+
+    public function vendorProfile()
+    {
+        return $this->hasOne(VendorProfile::class);
+    }
 }

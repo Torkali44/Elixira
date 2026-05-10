@@ -37,9 +37,22 @@ class RegisteredUserController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
+        if ($request->account_type === 'vendor') {
+            \App\Models\VendorProfile::create([
+                'user_id' => $user->id,
+                'brand_name' => $request->brand_name,
+                'status' => 'draft',
+                'payment_method' => 'cash_on_delivery',
+            ]);
+        }
+
         event(new Registered($user));
 
         Auth::login($user);
+
+        if ($request->account_type === 'vendor') {
+            return redirect()->route('vendor.onboarding')->with('status', 'Welcome! Please complete your vendor profile.');
+        }
 
         return redirect(route('dashboard', absolute: false));
     }

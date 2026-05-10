@@ -535,6 +535,23 @@
                             <i class="fas fa-location-arrow"></i>
                             <span>Track by phone</span>
                         </a>
+                        
+                        @if(!auth()->user()->vendorProfile || auth()->user()->vendorProfile->status === 'draft')
+                        <a href="{{ route('vendor.onboarding') }}" class="account-link" style="border-color: rgba(74, 200, 246, 0.3); background: rgba(74, 200, 246, 0.05);">
+                            <i class="fas fa-store"></i>
+                            <span style="color: var(--elx-cyan);">Become a Vendor</span>
+                        </a>
+                        @elseif(auth()->user()->vendorProfile->status === 'pending')
+                        <a href="{{ route('vendor.pending') }}" class="account-link">
+                            <i class="fas fa-clock"></i>
+                            <span style="color: #ffd36a;">Vendor Request Pending</span>
+                        </a>
+                        @elseif(auth()->user()->vendorProfile->status === 'approved')
+                        <a href="#" class="account-link">
+                            <i class="fas fa-store"></i>
+                            <span style="color: #7ef0bf;">Vendor Dashboard</span>
+                        </a>
+                        @endif
                     </div>
                 </div>
 

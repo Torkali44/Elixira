@@ -114,6 +114,9 @@
                         <span class="badge bg-danger rounded-pill ms-2">{{ $newSpecialRequestsCount }}</span>
                     @endif
                 </a>
+                <a href="{{ route('admin.vendors.requests.index') }}" class="{{ request()->routeIs('admin.vendors.*') ? 'active' : '' }}">
+                    <i class="fas fa-store-alt me-2"></i> Vendor Requests
+                </a>
                 <a href="{{ route('home') }}" target="_blank" rel="noopener">
                     <i class="fas fa-external-link-alt me-2"></i> View storefront
                 </a>

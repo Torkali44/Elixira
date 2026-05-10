@@ -30,6 +30,8 @@ class RegisterUserRequest extends FormRequest
             'email' => ['required', 'string', 'email', 'max:255', 'unique:' . User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'avatar' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'account_type' => ['required', 'string', 'in:customer,vendor'],
+            'brand_name' => ['nullable', 'string', 'max:255', 'required_if:account_type,vendor'],
         ];
     }
 

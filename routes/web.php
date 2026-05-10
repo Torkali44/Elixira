@@ -60,6 +60,11 @@ Route::middleware('auth')->group(function () {
     Route::post('/profile/addresses', [ProfileController::class, 'addAddress'])->name('profile.addresses.store');
     Route::delete('/profile/addresses/{address}', [ProfileController::class, 'deleteAddress'])->name('profile.addresses.destroy');
     Route::patch('/profile/addresses/{address}/main', [ProfileController::class, 'setMainAddress'])->name('profile.addresses.main');
+
+    // Vendor Onboarding
+    Route::get('/vendor/onboarding', [\App\Http\Controllers\VendorProfileController::class, 'create'])->name('vendor.onboarding');
+    Route::post('/vendor/onboarding', [\App\Http\Controllers\VendorProfileController::class, 'store'])->name('vendor.store');
+    Route::get('/vendor/pending', [\App\Http\Controllers\VendorProfileController::class, 'pending'])->name('vendor.pending');
 });
 
 // Admin Routes (Protected)
@@ -92,6 +97,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::get('special-requests', [\App\Http\Controllers\SpecialRequestController::class, 'index'])->name('special-requests.index');
     Route::patch('special-requests/{specialRequest}/status', [\App\Http\Controllers\SpecialRequestController::class, 'updateStatus'])->name('special-requests.updateStatus');
     Route::post('special-requests/{specialRequest}/assign-offer', [\App\Http\Controllers\SpecialRequestController::class, 'assignOffer'])->name('special-requests.assign-offer');
+
+    Route::get('vendors/requests', [\App\Http\Controllers\Admin\VendorRequestController::class, 'index'])->name('vendors.requests.index');
+    Route::get('vendors/requests/{vendorProfile}', [\App\Http\Controllers\Admin\VendorRequestController::class, 'show'])->name('vendors.requests.show');
+    Route::patch('vendors/requests/{vendorProfile}', [\App\Http\Controllers\Admin\VendorRequestController::class, 'update'])->name('vendors.requests.update');
 });
 
 require __DIR__.'/auth.php';
