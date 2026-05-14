@@ -1,4 +1,4 @@
-﻿@extends('layouts.admin')
+@extends('layouts.admin')
 
 @section('content')
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
@@ -25,14 +25,14 @@
             </div>
         </div>
     </div>
-    <!-- <div class="col-md-3">
+    <div class="col-md-3">
         <div class="card border-0 shadow-sm h-100">
             <div class="card-body">
-                <small class="text-muted text-uppercase">Total Sellers</small>
-                <h3 class="mt-2 mb-0">{{ $stats['with_avatars'] }}</h3>
+                <small class="text-muted text-uppercase">Vendors</small>
+                <h3 class="mt-2 mb-0">{{ $stats['vendors'] }}</h3>
             </div>
         </div>
-    </div> -->
+    </div>
     <div class="col-md-3">
         <div class="card border-0 shadow-sm h-100">
             <div class="card-body">
@@ -55,8 +55,8 @@
                 <select id="role" name="role" class="form-select">
                     <option value="">All roles</option>
                     <option value="admin" @selected(request('role') === 'admin')>Admin</option>
+                    <option value="vendor" @selected(request('role') === 'vendor')>Vendor</option>
                     <option value="user" @selected(request('role') === 'user')>User</option>
-                    <!-- <option value="Seller" @selected(request('role') === 'Seller')>Seller</option> -->
 
                 </select>
             </div>
@@ -98,8 +98,24 @@
                             </td>
                             <td>
                                 <div>
-                                    <div class="fw-bold d-flex align-items-center">
-                                        <x-phone-flag :phone="$user->phone" :show-phone="false" />
+                                    <div class="fw-bold d-flex align-items-center gap-1">
+                                        @if($user->role === 'vendor' && $user->vendorProfile && $user->vendorProfile->service_countries)
+                                            @foreach($user->vendorProfile->service_countries as $country)
+                                                @php
+                                                    $flagSrc = '';
+                                                    if (stripos($country, 'Saudi') !== false || stripos($country, 'KSA') !== false) {
+                                                        $flagSrc = asset('images/sa.png');
+                                                    } elseif (stripos($country, 'Emirates') !== false || stripos($country, 'UAE') !== false) {
+                                                        $flagSrc = asset('images/AE.png');
+                                                    }
+                                                @endphp
+                                                @if($flagSrc)
+                                                    <img src="{{ $flagSrc }}" alt="{{ $country }}" width="20" height="14" style="border-radius: 2px;" title="{{ $country }}">
+                                                @endif
+                                            @endforeach
+                                        @else
+                                            <x-phone-flag :phone="$user->phone" :show-phone="false" />
+                                        @endif
                                     </div>
                                     @if($user->birth_date)
                                         <small class="text-muted">
@@ -112,6 +128,8 @@
                             <td>
                                 @if($user->role === 'admin')
                                     <span class="badge bg-primary">Admin</span>
+                                @elseif($user->role === 'vendor')
+                                    <span class="badge bg-info">Vendor</span>
                                 @else
                                     <span class="badge bg-secondary">User</span>
                                 @endif

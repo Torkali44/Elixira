@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\VendorProfile;
+use App\Models\Brand;
 
 class VendorRequestController extends Controller
 {
@@ -33,6 +34,23 @@ class VendorRequestController extends Controller
             $user = $vendorProfile->user;
             $user->role = 'vendor';
             $user->save();
+
+            // Create Brand from VendorProfile data if not exists
+            if (!$vendorProfile->brand) {
+                Brand::create([
+                    'vendor_profile_id' => $vendorProfile->id,
+                    'name' => $vendorProfile->brand_name,
+                    'logo' => $vendorProfile->brand_logo,
+                    'description' => $vendorProfile->brand_description,
+                    'instagram_link' => $vendorProfile->instagram_link,
+                    'tiktok_link' => $vendorProfile->tiktok_link,
+                    'snapchat_link' => $vendorProfile->snapchat_link,
+                    'store_link' => $vendorProfile->store_link,
+                    'store_link_description' => $vendorProfile->store_link_description,
+                    'service_countries' => $vendorProfile->service_countries,
+                    'is_active' => true,
+                ]);
+            }
         } elseif ($request->status === 'rejected') {
             $user = $vendorProfile->user;
             if ($user->role === 'vendor') {
@@ -44,3 +62,4 @@ class VendorRequestController extends Controller
         return redirect()->route('admin.vendors.requests.index')->with('success', 'Vendor request ' . $request->status . ' successfully.');
     }
 }
+

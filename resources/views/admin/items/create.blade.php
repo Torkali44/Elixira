@@ -1,4 +1,4 @@
-﻿@extends('layouts.admin')
+@extends('layouts.admin')
 
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
@@ -30,8 +30,19 @@
 
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <label for="brand" class="form-label">Brand</label>
+                    <label for="brand_id" class="form-label">Brand (Vendor)</label>
+                    <select class="form-select" id="brand_id" name="brand_id">
+                        <option value="">— No brand —</option>
+                        @foreach($brands as $b)
+                            <option value="{{ $b->id }}" {{ old('brand_id') == $b->id ? 'selected' : '' }}>{{ $b->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label for="brand" class="form-label">Brand (Text)</label>
                     <input type="text" class="form-control" id="brand" name="brand" value="{{ old('brand') }}" placeholder="e.g. DXN">
+                    <small class="text-muted">Fallback text label if no vendor brand is selected above.</small>
                 </div>
 
                 <div class="col-md-6 mb-3">

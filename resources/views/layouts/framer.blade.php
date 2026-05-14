@@ -62,6 +62,8 @@
                 <li><a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'active' : '' }}">Home</a></li>
                 <li><a href="{{ route('menu.index') }}"
                         class="{{ request()->routeIs('menu.*') ? 'active' : '' }}">Shop</a></li>
+                <li><a href="{{ route('brands.index') }}"
+                        class="{{ request()->routeIs('brands.*') ? 'active' : '' }}">Brands</a></li>
                 <li><a href="{{ route('about') }}" class="{{ request()->routeIs('about') ? 'active' : '' }}">About</a>
                 </li>
                 <li><a href="{{ route('testimonials.index') }}" class="{{ request()->routeIs('testimonials.*') ? 'active' : '' }}">Testimonials</a></li>

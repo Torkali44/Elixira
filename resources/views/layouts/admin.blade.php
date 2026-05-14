@@ -74,11 +74,25 @@
                     session(['special_requests_last_viewed_at' => now()]);
                 }
 
+                if (request()->routeIs('admin.vendors.requests.*')) {
+                    session(['vendors_last_viewed_at' => now()]);
+                }
+
+                if (request()->routeIs('admin.brands.*')) {
+                    session(['brands_last_viewed_at' => now()]);
+                }
+
                 $ordersLastViewed = session('orders_last_viewed_at');
                 $newOrdersCount = $ordersLastViewed ? \App\Models\Order::where('created_at', '>', $ordersLastViewed)->count() : \App\Models\Order::where('status', 'pending')->count();
 
                 $specialRequestsLastViewed = session('special_requests_last_viewed_at');
                 $newSpecialRequestsCount = $specialRequestsLastViewed ? \App\Models\SpecialRequest::where('created_at', '>', $specialRequestsLastViewed)->count() : \App\Models\SpecialRequest::where('status', 'pending')->count();
+
+                $vendorsLastViewed = session('vendors_last_viewed_at');
+                $newVendorsCount = $vendorsLastViewed ? \App\Models\VendorProfile::where('created_at', '>', $vendorsLastViewed)->count() : \App\Models\VendorProfile::where('status', 'pending')->count();
+
+                $brandsLastViewed = session('brands_last_viewed_at');
+                $newBrandsCount = $brandsLastViewed ? \App\Models\Brand::where('created_at', '>', $brandsLastViewed)->count() : \App\Models\Brand::where('is_active', false)->count();
             @endphp
             <div class="mt-3">
                 <a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
@@ -116,6 +130,15 @@
                 </a>
                 <a href="{{ route('admin.vendors.requests.index') }}" class="{{ request()->routeIs('admin.vendors.*') ? 'active' : '' }}">
                     <i class="fas fa-store-alt me-2"></i> Vendor Requests
+                    @if($newVendorsCount > 0)
+                        <span class="badge bg-danger rounded-pill ms-2">{{ $newVendorsCount }}</span>
+                    @endif
+                </a>
+                <a href="{{ route('admin.brands.index') }}" class="{{ request()->routeIs('admin.brands.*') ? 'active' : '' }}">
+                    <i class="fas fa-tags me-2"></i> Brands
+                    @if($newBrandsCount > 0)
+                        <span class="badge bg-danger rounded-pill ms-2">{{ $newBrandsCount }}</span>
+                    @endif
                 </a>
                 <a href="{{ route('home') }}" target="_blank" rel="noopener">
                     <i class="fas fa-external-link-alt me-2"></i> View storefront

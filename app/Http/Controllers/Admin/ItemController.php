@@ -8,6 +8,7 @@ use App\Http\Requests\Admin\UpdateItemRequest;
 use App\Models\Category;
 use App\Models\Item;
 use App\Models\ItemImage;
+use App\Models\Brand;
 use Illuminate\Support\Facades\Storage;
 
 class ItemController extends Controller
@@ -21,7 +22,8 @@ class ItemController extends Controller
     public function create()
     {
         $categories = Category::all();
-        return view('admin.items.create', compact('categories'));
+        $brands = Brand::where('is_active', true)->orderBy('name')->get();
+        return view('admin.items.create', compact('categories', 'brands'));
     }
 
     public function store(StoreItemRequest $request)
@@ -48,7 +50,8 @@ class ItemController extends Controller
     public function edit(Item $item)
     {
         $categories = Category::all();
-        return view('admin.items.edit', compact('item', 'categories'));
+        $brands = Brand::where('is_active', true)->orderBy('name')->get();
+        return view('admin.items.edit', compact('item', 'categories', 'brands'));
     }
 
     public function update(UpdateItemRequest $request, Item $item)

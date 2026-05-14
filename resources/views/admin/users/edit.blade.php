@@ -70,6 +70,18 @@
                             @enderror
                         </div>
 
+                        <div class="col-md-6">
+                            <label for="role" class="form-label">User Role</label>
+                            <select id="role" name="role" class="form-select @error('role') is-invalid @enderror" required>
+                                <option value="user" {{ old('role', $user->role) === 'user' ? 'selected' : '' }}>User</option>
+                                <option value="vendor" {{ old('role', $user->role) === 'vendor' ? 'selected' : '' }}>Vendor</option>
+                                <option value="admin" {{ old('role', $user->role) === 'admin' ? 'selected' : '' }}>Admin</option>
+                            </select>
+                            @error('role')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
                         <div class="col-12">
                             <label for="avatar" class="form-label">Avatar</label>
                             <input type="file" id="avatar" name="avatar" class="form-control @error('avatar') is-invalid @enderror" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp">

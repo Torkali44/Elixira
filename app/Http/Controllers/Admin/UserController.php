@@ -13,7 +13,7 @@ class UserController extends Controller
 {
     public function index(Request $request): View
     {
-        $query = User::query()->latest();
+        $query = User::query()->with('vendorProfile')->latest();
 
         if ($request->filled('search')) {
             $search = $request->search;
@@ -40,6 +40,7 @@ class UserController extends Controller
             'stats' => [
                 'total' => User::count(),
                 'admins' => User::where('role', 'admin')->count(),
+                'vendors' => User::where('role', 'vendor')->count(),
                 'with_avatars' => User::whereNotNull('avatar')->count(),
                 'suspended' => User::where('is_suspended', true)->count(),
             ],

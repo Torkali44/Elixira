@@ -39,6 +39,9 @@ Route::post('/reservation', [ReservationController::class, 'store'])->name('rese
 Route::post('/newsletter/subscribe', [TestimonialController::class, 'subscribe'])->name('newsletter.subscribe');
 Route::post('/special-requests', [\App\Http\Controllers\SpecialRequestController::class, 'store'])->name('special-requests.store');
 
+Route::get('/brands', [\App\Http\Controllers\BrandController::class, 'index'])->name('brands.index');
+Route::get('/brands/{brand:slug}', [\App\Http\Controllers\BrandController::class, 'show'])->name('brands.show');
+
 // Breeze Auth Routes
 Route::get('/dashboard', function () {
     if (auth()->user()->role === 'admin') {
@@ -66,6 +69,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/vendor/onboarding', [\App\Http\Controllers\VendorProfileController::class, 'store'])->name('vendor.store');
     Route::get('/vendor/pending', [\App\Http\Controllers\VendorProfileController::class, 'pending'])->name('vendor.pending');
 });
+
+Route::post('/ratings', [\App\Http\Controllers\RatingController::class, 'store'])->name('ratings.store');
 
 // Admin Routes (Protected)
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function () {
@@ -101,6 +106,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::get('vendors/requests', [\App\Http\Controllers\Admin\VendorRequestController::class, 'index'])->name('vendors.requests.index');
     Route::get('vendors/requests/{vendorProfile}', [\App\Http\Controllers\Admin\VendorRequestController::class, 'show'])->name('vendors.requests.show');
     Route::patch('vendors/requests/{vendorProfile}', [\App\Http\Controllers\Admin\VendorRequestController::class, 'update'])->name('vendors.requests.update');
+
+    // Brands Management
+    Route::get('/brands', [\App\Http\Controllers\Admin\BrandController::class, 'index'])->name('brands.index');
 });
 
 require __DIR__.'/auth.php';

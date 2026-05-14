@@ -46,7 +46,16 @@
                     <i class="fas fa-layer-group" style="margin-right: 2px;"></i>{{ $product->category->name }}
                 </span>
             @endif
-            @if($product->brand)
+            @if($product->brandModel)
+                <a href="{{ route('brands.show', $product->brandModel->slug) }}" onclick="event.stopPropagation();" style="display: inline-flex; align-items: center; gap: 4px; background: rgba(255, 215, 0, 0.1); color: #ffd700; padding: 0.15rem 0.55rem; border-radius: 50px; font-size: 0.7rem; font-weight: 600; border: 1px solid rgba(255, 215, 0, 0.2); text-decoration: none; transition: all 0.2s ease;">
+                    @if($product->brandModel->logo)
+                        <img src="{{ asset('storage/' . $product->brandModel->logo) }}" style="width: 16px; height: 16px; border-radius: 4px; object-fit: cover;" alt="">
+                    @else
+                        <i class="fas fa-store" style="margin-right: 2px;"></i>
+                    @endif
+                    {{ $product->brandModel->name }}
+                </a>
+            @elseif($product->brand)
                 <span class="elx-product-card__tag" style="background: rgba(255, 215, 0, 0.1); color: #ffd700; padding: 0.15rem 0.55rem; border-radius: 50px; font-size: 0.7rem; font-weight: 600; border: 1px solid rgba(255, 215, 0, 0.2);">
                     <i class="fas fa-tag" style="margin-right: 2px;"></i>{{ $product->brand }}
                 </span>

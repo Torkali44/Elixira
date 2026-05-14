@@ -34,4 +34,9 @@ class VendorProfile extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function brand()
+    {
+        return $this->hasOne(Brand::class);
+    }
 }

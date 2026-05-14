@@ -1,4 +1,4 @@
-﻿@extends('layouts.admin')
+@extends('layouts.admin')
 
 @section('content')
     <h2 class="mb-4">Dashboard Overview</h2>
@@ -184,14 +184,32 @@
                     </div>
 
                     <div class="list-group list-group-flush">
-                        @forelse(\App\Models\User::latest()->take(6)->get() as $user)
+                        @forelse(\App\Models\User::with('vendorProfile')->latest()->take(6)->get() as $user)
                             <div class="list-group-item border-0 px-0 py-3 d-flex justify-content-between align-items-center">
                                 <div class="d-flex align-items-center gap-3">
                                     <x-user-avatar :user="$user" size="48" />
                                     <div>
                                         <div class="fw-bold">{{ $user->name }}</div>
-                                        <small
-                                            class="text-muted">{{ $user->avatar ? 'Custom avatar uploaded' : 'Using initials avatar' }}</small>
+                                        <div class="d-flex align-items-center gap-2 mt-1">
+                                            <span class="badge {{ $user->role === 'admin' ? 'bg-primary' : ($user->role === 'vendor' ? 'bg-info' : 'bg-secondary') }} px-2 py-1" style="font-size: 0.65rem;">{{ ucfirst($user->role) }}</span>
+                                            @if($user->role === 'vendor' && $user->vendorProfile && $user->vendorProfile->service_countries)
+                                                @foreach($user->vendorProfile->service_countries as $country)
+                                                    @php
+                                                        $flagSrc = '';
+                                                        if (stripos($country, 'Saudi') !== false || stripos($country, 'KSA') !== false) {
+                                                            $flagSrc = asset('images/sa.png');
+                                                        } elseif (stripos($country, 'Emirates') !== false || stripos($country, 'UAE') !== false) {
+                                                            $flagSrc = asset('images/AE.png');
+                                                        }
+                                                    @endphp
+                                                    @if($flagSrc)
+                                                        <img src="{{ $flagSrc }}" alt="{{ $country }}" width="18" height="12" style="border-radius: 2px;" title="{{ $country }}">
+                                                    @endif
+                                                @endforeach
+                                            @else
+                                                <x-phone-flag :phone="$user->phone" :show-phone="false" />
+                                            @endif
+                                        </div>
                                     </div>
                                 </div>
                                 <a href="{{ route('admin.users.edit', $user) }}"
