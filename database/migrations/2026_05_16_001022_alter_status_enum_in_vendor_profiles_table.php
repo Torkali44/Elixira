@@ -12,7 +12,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        DB::statement("ALTER TABLE vendor_profiles MODIFY COLUMN status ENUM('draft', 'pending', 'approved', 'rejected', 'rejected_with_notes') DEFAULT 'draft'");
+        Schema::table('vendor_profiles', function (Blueprint $table) {
+            $table->enum('status', ['draft', 'pending', 'approved', 'rejected', 'rejected_with_notes'])
+                ->default('draft')
+                ->change();
+        });
     }
 
     /**
@@ -20,6 +24,10 @@ return new class extends Migration
      */
     public function down(): void
     {
-        DB::statement("ALTER TABLE vendor_profiles MODIFY COLUMN status ENUM('draft', 'pending', 'approved', 'rejected') DEFAULT 'draft'");
+        Schema::table('vendor_profiles', function (Blueprint $table) {
+            $table->enum('status', ['draft', 'pending', 'approved', 'rejected'])
+                ->default('draft')
+                ->change();
+        });
     }
 };
