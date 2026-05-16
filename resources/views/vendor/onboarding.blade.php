@@ -223,6 +223,13 @@
                 </div>
             @endif
 
+            @if($vendorProfile->status === 'rejected_with_notes')
+                <div class="vendor-error" style="margin-bottom: 1.5rem; padding: 1rem; border-radius: 16px; background: rgba(220, 53, 69, 0.1); border: 1px solid rgba(220, 53, 69, 0.2);">
+                    <strong><i class="fas fa-exclamation-triangle"></i> Application Returned for Revision</strong>
+                    <p style="margin-top: 0.5rem; margin-bottom: 0;">{{ $vendorProfile->rejection_reason }}</p>
+                </div>
+            @endif
+
             <div class="vendor-card" data-animate>
                 <div class="stepper">
                     <div class="step" :class="{ 'active': step === 1, 'completed': step > 1 }" @click="if (step > 1) step = 1">

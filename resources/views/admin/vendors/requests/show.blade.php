@@ -12,13 +12,14 @@
     </div>
     <div>
         @if($vendorProfile->status === 'pending')
-            <form action="{{ route('admin.vendors.requests.update', $vendorProfile) }}" method="POST" class="d-inline">
+            <button type="button" class="btn btn-outline-danger" onclick="showRejectPopup()">
+                <i class="fas fa-times"></i> Reject
+            </button>
+            <form id="rejectForm" action="{{ route('admin.vendors.requests.update', $vendorProfile) }}" method="POST" style="display: none;">
                 @csrf
                 @method('PATCH')
-                <input type="hidden" name="status" value="rejected">
-                <button type="submit" class="btn btn-outline-danger" onclick="return confirm('Are you sure you want to reject this application?')">
-                    <i class="fas fa-times"></i> Reject
-                </button>
+                <input type="hidden" name="status" id="hidden_reject_status">
+                <input type="hidden" name="rejection_reason" id="hidden_reject_reason">
             </form>
             <form action="{{ route('admin.vendors.requests.update', $vendorProfile) }}" method="POST" class="d-inline ms-2">
                 @csrf
@@ -29,9 +30,18 @@
                 </button>
             </form>
         @else
-            <span class="badge bg-{{ $vendorProfile->status === 'approved' ? 'success' : 'danger' }} fs-6 px-3 py-2">
-                {{ ucfirst($vendorProfile->status) }}
-            </span>
+            @if($vendorProfile->status === 'rejected_with_notes')
+                <div class="text-end">
+                    <span class="badge bg-warning text-dark fs-6 px-3 py-2 mb-2">Returned for Revision</span>
+                    <div class="small text-muted" style="max-width: 300px; text-align: left;">
+                        <strong>Admin Notes:</strong> {{ $vendorProfile->rejection_reason }}
+                    </div>
+                </div>
+            @else
+                <span class="badge bg-{{ $vendorProfile->status === 'approved' ? 'success' : 'danger' }} fs-6 px-3 py-2">
+                    {{ ucfirst($vendorProfile->status) }}
+                </span>
+            @endif
         @endif
     </div>
 </div>
@@ -185,5 +195,91 @@
         </div>
     </div>
 </div>
+
+<script>
+function showRejectPopup() {
+    Swal.fire({
+        title: '<div class="pt-2">Review Vendor Request</div>',
+        icon: 'warning',
+        html: `
+            <div class="text-start px-2 mb-2">
+                <div class="p-3 rounded-4 bg-light border mb-4">
+                    <label class="form-label fw-bold mb-3 d-block text-secondary small text-uppercase" style="letter-spacing: 0.5px;">Rejection Action</label>
+                    
+                    <div class="mb-3">
+                        <input class="btn-check" type="radio" name="swal_status" id="swalRejectNotes" value="rejected_with_notes" checked autocomplete="off">
+                        <label class="btn btn-outline-warning w-100 text-start py-3 px-4 rounded-4 d-flex align-items-center gap-3 shadow-sm border-2" for="swalRejectNotes">
+                            <i class="fas fa-undo-alt fs-4"></i>
+                            <div>
+                                <div class="fw-bold">Return for Revision</div>
+                                <div class="small opacity-75">Vendor can edit and resubmit their request</div>
+                            </div>
+                        </label>
+                    </div>
+
+                    <div>
+                        <input class="btn-check" type="radio" name="swal_status" id="swalRejectPermanent" value="rejected" autocomplete="off">
+                        <label class="btn btn-outline-danger w-100 text-start py-3 px-4 rounded-4 d-flex align-items-center gap-3 shadow-sm border-2" for="swalRejectPermanent">
+                            <i class="fas fa-ban fs-4"></i>
+                            <div>
+                                <div class="fw-bold">Permanent Rejection</div>
+                                <div class="small opacity-75">Account will not be allowed to resubmit</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+                
+                <div id="swalRejectionNotesContainer" class="px-1" style="transition: all 0.3s ease;">
+                    <label for="swal_rejection_reason" class="form-label fw-bold mb-2 text-secondary small text-uppercase" style="letter-spacing: 0.5px;">Admin Feedback <span class="text-danger">*</span></label>
+                    <textarea id="swal_rejection_reason" class="form-control rounded-4 border-2" style="padding: 1.2rem; font-size: 1rem; line-height: 1.6; resize: none; border-color: #dee2e6;" rows="4" placeholder="Explain what needs to be fixed or why the request was rejected..."></textarea>
+                </div>
+            </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'Process Rejection',
+        cancelButtonText: 'Cancel',
+        confirmButtonColor: '#13252D',
+        cancelButtonColor: '#6c757d',
+        padding: '1.5rem',
+        width: '550px',
+        customClass: {
+            popup: 'rounded-5 border-0 shadow-lg',
+            confirmButton: 'px-5 py-2 fw-bold rounded-pill',
+            cancelButton: 'px-4 py-2 fw-bold rounded-pill',
+            title: 'fw-bold'
+        },
+        didOpen: () => {
+            const radioNotes = document.getElementById('swalRejectNotes');
+            const radioPerm = document.getElementById('swalRejectPermanent');
+            const notesContainer = document.getElementById('swalRejectionNotesContainer');
+            
+            const toggleNotes = () => {
+                notesContainer.style.opacity = radioNotes.checked ? '1' : '0.4';
+                notesContainer.style.pointerEvents = radioNotes.checked ? 'auto' : 'none';
+            };
+            
+            radioNotes.addEventListener('change', toggleNotes);
+            radioPerm.addEventListener('change', toggleNotes);
+        },
+        preConfirm: () => {
+            const status = document.querySelector('input[name="swal_status"]:checked').value;
+            const reason = document.getElementById('swal_rejection_reason').value;
+            
+            if (status === 'rejected_with_notes' && !reason.trim()) {
+                Swal.showValidationMessage('Please provide specific feedback for the vendor.');
+                return false;
+            }
+            
+            return { status, reason };
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            document.getElementById('hidden_reject_status').value = result.value.status;
+            document.getElementById('hidden_reject_reason').value = result.value.reason;
+            document.getElementById('rejectForm').submit();
+        }
+    });
+}
+</script>
 
 @endsection

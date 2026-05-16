@@ -15,6 +15,10 @@ class VendorProfileController extends Controller
                 return redirect()->route('vendor.pending');
             } elseif ($user->vendorProfile->status === 'approved') {
                 return redirect()->route('dashboard')->with('status', 'You are already an approved vendor.');
+            } elseif ($user->vendorProfile->status === 'rejected') {
+                return redirect()->route('dashboard')->with('error', 'Your vendor application has been permanently rejected.');
+            } elseif ($user->vendorProfile->status === 'rejected_with_notes' && !request()->has('edit')) {
+                return redirect()->route('vendor.rejected');
             }
         }
         
@@ -42,7 +46,7 @@ class VendorProfileController extends Controller
 
         $user = auth()->user();
         
-        if ($user->vendorProfile && $user->vendorProfile->status !== 'draft') {
+        if ($user->vendorProfile && !in_array($user->vendorProfile->status, ['draft', 'rejected_with_notes'])) {
             return redirect()->route('vendor.pending')->with('error', 'You have already submitted a request.');
         }
 
@@ -96,5 +100,17 @@ class VendorProfileController extends Controller
         }
 
         return view('vendor.pending');
+    }
+
+    public function rejected()
+    {
+        $user = auth()->user();
+        if (!$user->vendorProfile || $user->vendorProfile->status !== 'rejected_with_notes') {
+            return redirect()->route('vendor.onboarding');
+        }
+
+        return view('vendor.rejected', [
+            'vendorProfile' => $user->vendorProfile
+        ]);
     }
 }

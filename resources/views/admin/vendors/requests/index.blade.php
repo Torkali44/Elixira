@@ -58,6 +58,8 @@
                                     <span class="badge bg-success">Approved</span>
                                 @elseif($request->status === 'rejected')
                                     <span class="badge bg-danger">Rejected</span>
+                                @elseif($request->status === 'rejected_with_notes')
+                                    <span class="badge bg-warning text-dark" title="{{ $request->rejection_reason }}">Returned</span>
                                 @endif
                             </td>
                             <td class="text-end">

@@ -68,6 +68,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/vendor/onboarding', [\App\Http\Controllers\VendorProfileController::class, 'create'])->name('vendor.onboarding');
     Route::post('/vendor/onboarding', [\App\Http\Controllers\VendorProfileController::class, 'store'])->name('vendor.store');
     Route::get('/vendor/pending', [\App\Http\Controllers\VendorProfileController::class, 'pending'])->name('vendor.pending');
+    Route::get('/vendor/rejected', [\App\Http\Controllers\VendorProfileController::class, 'rejected'])->name('vendor.rejected');
 });
 
 Route::post('/ratings', [\App\Http\Controllers\RatingController::class, 'store'])->name('ratings.store');

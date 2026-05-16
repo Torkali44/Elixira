@@ -11,7 +11,7 @@ class VendorRequestController extends Controller
 {
     public function index()
     {
-        $requests = VendorProfile::with('user')->whereIn('status', ['pending', 'approved', 'rejected'])->latest()->paginate(15);
+        $requests = VendorProfile::with('user')->whereIn('status', ['pending', 'approved', 'rejected', 'rejected_with_notes'])->latest()->paginate(15);
         return view('admin.vendors.requests.index', compact('requests'));
     }
 
@@ -24,10 +24,16 @@ class VendorRequestController extends Controller
     public function update(Request $request, VendorProfile $vendorProfile)
     {
         $request->validate([
-            'status' => 'required|in:approved,rejected'
+            'status' => 'required|in:approved,rejected,rejected_with_notes',
+            'rejection_reason' => 'required_if:status,rejected_with_notes|nullable|string|max:1000',
         ]);
 
         $vendorProfile->status = $request->status;
+        if ($request->status === 'rejected_with_notes') {
+            $vendorProfile->rejection_reason = $request->rejection_reason;
+        } else {
+            $vendorProfile->rejection_reason = null; // Clear if approved or permanently rejected
+        }
         $vendorProfile->save();
 
         if ($request->status === 'approved') {
@@ -51,7 +57,7 @@ class VendorRequestController extends Controller
                     'is_active' => true,
                 ]);
             }
-        } elseif ($request->status === 'rejected') {
+        } elseif (in_array($request->status, ['rejected', 'rejected_with_notes'])) {
             $user = $vendorProfile->user;
             if ($user->role === 'vendor') {
                 $user->role = 'user';
@@ -59,7 +65,7 @@ class VendorRequestController extends Controller
             }
         }
 
-        return redirect()->route('admin.vendors.requests.index')->with('success', 'Vendor request ' . $request->status . ' successfully.');
+        return redirect()->route('admin.vendors.requests.index')->with('success', 'Vendor request ' . str_replace('_', ' ', $request->status) . ' successfully.');
     }
 }
 

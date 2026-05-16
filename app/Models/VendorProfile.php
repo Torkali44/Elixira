@@ -22,6 +22,7 @@ class VendorProfile extends Model
         'payment_method',
         'verification_document',
         'status',
+        'rejection_reason',
     ];
 
     protected $casts = [

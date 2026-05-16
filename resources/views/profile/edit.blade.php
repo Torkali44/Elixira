@@ -546,6 +546,11 @@
                             <i class="fas fa-clock"></i>
                             <span style="color: #ffd36a;">Vendor Request Pending</span>
                         </a>
+                        @elseif(auth()->user()->vendorProfile->status === 'rejected_with_notes')
+                        <a href="{{ route('vendor.rejected') }}" class="account-link" style="border-color: rgba(255, 107, 107, 0.3); background: rgba(255, 107, 107, 0.05);">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <span style="color: #ff6b6b;">Action Required: Resubmit</span>
+                        </a>
                         @elseif(auth()->user()->vendorProfile->status === 'approved')
                         <a href="#" class="account-link">
                             <i class="fas fa-store"></i>

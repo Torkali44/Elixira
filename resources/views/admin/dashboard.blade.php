@@ -1,4 +1,4 @@
-@extends('layouts.admin')
+﻿@extends('layouts.admin')
 
 @section('content')
     <h2 class="mb-4">Dashboard Overview</h2>
@@ -147,7 +147,8 @@
                                             </span>
                                         </td>
                                         <td class="text-center text-muted pe-4 small">
-                                            {{ $order->created_at->format('M d, H:i') }}</td>
+                                            {{ $order->created_at->format('M d, H:i') }}
+                                        </td>
                                     </tr>
                                 @empty
                                     <tr>
@@ -191,7 +192,9 @@
                                     <div>
                                         <div class="fw-bold">{{ $user->name }}</div>
                                         <div class="d-flex align-items-center gap-2 mt-1">
-                                            <span class="badge {{ $user->role === 'admin' ? 'bg-primary' : ($user->role === 'vendor' ? 'bg-info' : 'bg-secondary') }} px-2 py-1" style="font-size: 0.65rem;">{{ ucfirst($user->role) }}</span>
+                                            <span
+                                                class="badge {{ $user->role === 'admin' ? 'bg-primary' : ($user->role === 'vendor' ? 'bg-info' : 'bg-secondary') }} px-2 py-1"
+                                                style="font-size: 0.65rem;">{{ ucfirst($user->role) }}</span>
                                             @if($user->role === 'vendor' && $user->vendorProfile && $user->vendorProfile->service_countries)
                                                 @foreach($user->vendorProfile->service_countries as $country)
                                                     @php
@@ -203,7 +206,8 @@
                                                         }
                                                     @endphp
                                                     @if($flagSrc)
-                                                        <img src="{{ $flagSrc }}" alt="{{ $country }}" width="18" height="12" style="border-radius: 2px;" title="{{ $country }}">
+                                                        <img src="{{ $flagSrc }}" alt="{{ $country }}" width="18" height="12"
+                                                            style="border-radius: 2px;" title="{{ $country }}">
                                                     @endif
                                                 @endforeach
                                             @else
