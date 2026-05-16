@@ -196,6 +196,7 @@
     </div>
 </div>
 
+@push('scripts')
 <script>
 function showRejectPopup() {
     Swal.fire({
@@ -281,5 +282,6 @@ function showRejectPopup() {
     });
 }
 </script>
+@endpush
 
 @endsection
