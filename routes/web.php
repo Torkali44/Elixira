@@ -47,6 +47,9 @@ Route::get('/dashboard', function () {
     if (auth()->user()->role === 'admin') {
         return redirect()->route('admin.dashboard');
     }
+    if (auth()->user()->role === 'vendor') {
+        return redirect()->route('vendor.dashboard');
+    }
     return redirect()->route('home');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
@@ -79,11 +82,15 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
         return redirect()->route('admin.dashboard');
     })->name('dashboard.redirect');
 
-    Route::get('/dashboard', function () {
-        return view('admin.dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [\App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
 
     Route::resource('categories', CategoryController::class);
+    
+    // Product Approvals
+    Route::get('items/pending', [\App\Http\Controllers\Admin\ProductApprovalController::class, 'index'])->name('items.pending');
+    Route::patch('items/{item}/approve', [\App\Http\Controllers\Admin\ProductApprovalController::class, 'approve'])->name('items.approve');
+    Route::patch('items/{item}/reject', [\App\Http\Controllers\Admin\ProductApprovalController::class, 'reject'])->name('items.reject');
+    
     Route::resource('items', ItemController::class);
     Route::delete('items/images/{image}', [ItemController::class, 'deleteImage'])->name('items.delete-image');
     Route::resource('users', \App\Http\Controllers\Admin\UserController::class)->only(['index', 'edit', 'update', 'destroy']);
@@ -110,6 +117,19 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
 
     // Brands Management
     Route::get('/brands', [\App\Http\Controllers\Admin\BrandController::class, 'index'])->name('brands.index');
+});
+
+// Vendor Routes (Protected)
+Route::prefix('vendor')->name('vendor.')->middleware(['auth', 'vendor'])->group(function () {
+    Route::get('/', function () {
+        return redirect()->route('vendor.dashboard');
+    })->name('dashboard.redirect');
+
+    Route::get('/dashboard', [\App\Http\Controllers\Vendor\DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/orders', [\App\Http\Controllers\Vendor\DashboardController::class, 'orders'])->name('orders');
+    
+    // Vendor Products
+    Route::resource('items', \App\Http\Controllers\Vendor\ItemController::class);
 });
 
 require __DIR__.'/auth.php';

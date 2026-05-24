@@ -93,6 +93,10 @@
                         <a href="{{ route('admin.dashboard') }}" class="elx-nav__btn elx-nav__btn--admin">
                             <i class="fas fa-cog"></i> <span>Admin</span>
                         </a>
+                    @elseif(auth()->user()->role === 'vendor')
+                        <a href="{{ route('vendor.dashboard') }}" class="elx-nav__btn elx-nav__btn--admin" style="background-color: #6a1b9a;">
+                            <i class="fas fa-store"></i> <span>Vendor Portal</span>
+                        </a>
                     @endif
                     <div class="elx-nav__profile" id="profileMenu">
                         <button type="button" class="elx-nav__profile-trigger" id="profileTrigger" aria-expanded="false" aria-controls="profileDropdown">
@@ -119,30 +123,7 @@
                                 <span>Profile Settings</span>
                                 <i class="fas fa-user"></i>
                             </a>
-                            <!-- <a href="{{ route('profile.orders.index') }}">
-                                <span>Previous Orders</span>
-                                <i class="fas fa-box-open"></i>
-                            </a> -->
-                            <!-- <a href="{{ route('profile.orders.index') }}">
-                                <span>Invoices</span>
-                                <i class="fas fa-file-invoice"></i>
-                            </a> -->
-                            <!-- <a href="{{ route('profile.avatar-options') }}">
-                                <span>Choose Avatar</span>
-                                <i class="fas fa-user-astronaut"></i>
-                            </a> -->
-                            <!-- <a href="{{ route('cart.index') }}">
-                                <span>Checkout</span>
-                                <i class="fas fa-credit-card"></i>
-                            </a> -->
-                            <!-- @if(auth()->user()->role === 'admin')
-                                <a href="{{ route('admin.dashboard') }}">
-                                    <span>Admin Panel</span>
-                                    <i class="fas fa-shield-alt"></i>
-                                </a>
-                            @endif -->
-
-                            <form method="POST" action="{{ route('logout') }}" class="elx-nav__profile-form">
+                               <form method="POST" action="{{ route('logout') }}" class="elx-nav__profile-form">
                                 @csrf
                                 <button type="submit" class="elx-nav__profile-logout">
                                     <span>Logout</span>
@@ -154,50 +135,6 @@
                 @else
                     <a href="{{ route('login') }}" class="elx-nav__btn elx-nav__btn--login">Join Us</a>
                 @endauth
-
-                <!-- بعد -->
-                                     
-<!-- @auth
-    @if(auth()->user()->role === 'admin')
-        <a href="{{ route('admin.dashboard') }}" class="elx-nav__btn elx-nav__btn--admin">
-            <i class="fas fa-cog"></i> <span>Admin</span>
-        </a>
-    @endif
-
-    
-    <div class="elx-nav__profile" id="profileMenu">
-        <button type="button" class="elx-nav__profile-trigger" id="profileTrigger">
-            <x-user-avatar :user="auth()->user()" size="34" />
-            <span>
-                <strong>{{ auth()->user()->name }}</strong>
-                <small>My Account</small>
-            </span>
-        </button>
-
-        <div class="elx-nav__profile-menu">
-            ...
-        </div>
-    </div>
-    
-
-    <form method="POST" action="{{ route('logout') }}">
-        @csrf
-        <button type="submit" class="elx-nav__btn elx-nav__btn--login">
-            Logout
-        </button>
-    </form>
-
-@else
-    <a href="{{ route('login') }}" class="elx-nav__btn elx-nav__btn--login">
-        Login
-    </a>
-
-    <a href="{{ route('register') }}" class="elx-nav__btn elx-nav__btn--login">
-        Join Us
-    </a>
-@endauth -->
-
-                <!-- ====================================================== -->
                 <button class="elx-nav__toggle" id="navToggle">
                     <span></span><span></span><span></span>
                 </button>

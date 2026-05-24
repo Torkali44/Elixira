@@ -41,6 +41,8 @@
                 @auth
                     @if(auth()->user()->role === 'admin')
                         <li><a href="{{ route('admin.dashboard') }}" class="text-primary fw-bold">Admin</a></li>
+                    @elseif(auth()->user()->role === 'vendor')
+                        <li><a href="{{ route('vendor.dashboard') }}" class="fw-bold" style="color: #6a1b9a;">Vendor Portal</a></li>
                     @endif
                     <li class="d-flex align-items-center gap-2">
                         <x-user-avatar :user="auth()->user()" size="32" />

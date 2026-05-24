@@ -552,7 +552,7 @@
                             <span style="color: #ff6b6b;">Action Required: Resubmit</span>
                         </a>
                         @elseif(auth()->user()->vendorProfile->status === 'approved')
-                        <a href="#" class="account-link">
+                        <a href="{{ route('vendor.dashboard') }}" class="account-link">
                             <i class="fas fa-store"></i>
                             <span style="color: #7ef0bf;">Vendor Dashboard</span>
                         </a>

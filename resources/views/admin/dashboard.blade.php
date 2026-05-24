@@ -1,8 +1,14 @@
-﻿@extends('layouts.admin')
+@extends('layouts.admin')
 
 @section('content')
-    <h2 class="mb-4">Dashboard Overview</h2>
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <h2 class="mb-0 fw-bold text-dark">Dashboard Overview</h2>
+        <span class="badge bg-light text-dark shadow-sm border py-2 px-3">
+            <i class="fas fa-calendar-alt text-primary me-2"></i> {{ now()->format('l, d M Y') }}
+        </span>
+    </div>
 
+    {{-- Counters row --}}
     <div class="row g-4 mb-4">
         <div class="col-md-3">
             <div class="card text-white h-100 shadow-sm"
@@ -10,8 +16,8 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="card-title mb-0 opacity-75">Categories</h6>
-                            <h2 class="mt-2 mb-0 fw-bold">{{ \App\Models\Category::count() }}</h2>
+                            <h6 class="card-title mb-0 opacity-75 text-uppercase" style="font-size: 0.75rem; letter-spacing: 1px;">Categories</h6>
+                            <h2 class="mt-2 mb-0 fw-bold">{{ $categoriesCount }}</h2>
                         </div>
                         <div class="p-3 rounded-circle" style="background: rgba(255,255,255,0.1);">
                             <i class="fas fa-layer-group fa-lg"></i>
@@ -31,8 +37,9 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="card-title mb-0 opacity-75">Products</h6>
-                            <h2 class="mt-2 mb-0 fw-bold">{{ \App\Models\Item::count() }}</h2>
+                            <h6 class="card-title mb-0 opacity-75 text-uppercase" style="font-size: 0.75rem; letter-spacing: 1px;">Total Products</h6>
+                            <h2 class="mt-2 mb-0 fw-bold">{{ $itemsCount }}</h2>
+                            <small class="opacity-75" style="font-size: 0.7rem;">{{ $itemsBreakdown['approved'] }} active</small>
                         </div>
                         <div class="p-3 rounded-circle" style="background: rgba(255,255,255,0.1);">
                             <i class="fas fa-box-open fa-lg"></i>
@@ -52,8 +59,9 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="card-title mb-0 opacity-75">Pending Orders</h6>
-                            <h2 class="mt-2 mb-0 fw-bold">{{ \App\Models\Order::where('status', 'pending')->count() }}</h2>
+                            <h6 class="card-title mb-0 opacity-75 text-uppercase" style="font-size: 0.75rem; letter-spacing: 1px;">Pending Orders</h6>
+                            <h2 class="mt-2 mb-0 fw-bold">{{ $pendingOrdersCount }}</h2>
+                            <small class="opacity-75" style="font-size: 0.7rem;">Out of {{ $ordersCount }} orders</small>
                         </div>
                         <div class="p-3 rounded-circle" style="background: rgba(255,255,255,0.1);">
                             <i class="fas fa-clock fa-lg"></i>
@@ -73,8 +81,9 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="card-title mb-0 opacity-75">Users</h6>
-                            <h2 class="mt-2 mb-0 fw-bold">{{ \App\Models\User::count() }}</h2>
+                            <h6 class="card-title mb-0 opacity-75 text-uppercase" style="font-size: 0.75rem; letter-spacing: 1px;">Total Users</h6>
+                            <h2 class="mt-2 mb-0 fw-bold">{{ $usersCount }}</h2>
+                            <small class="opacity-75" style="font-size: 0.7rem;">{{ $vendorsCount }} active sellers</small>
                         </div>
                         <div class="p-3 rounded-circle" style="background: rgba(255,255,255,0.1);">
                             <i class="fas fa-user-circle fa-lg"></i>
@@ -84,6 +93,163 @@
                 <div class="card-footer bg-transparent border-0 pb-3">
                     <a href="{{ route('admin.users.index') }}" class="text-white text-decoration-none small">Manage Users <i
                             class="fas fa-chevron-right ms-1" style="font-size: 0.7rem;"></i></a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Product Breakdown --}}
+    <div class="row g-4 mb-4">
+        <div class="col-md-12">
+            <div class="card border-0 shadow-sm" style="border-radius: 16px;">
+                <div class="card-body">
+                    <h6 class="fw-bold mb-3"><i class="fas fa-chart-pie text-primary me-2"></i> Product Approval & Status Breakdown</h6>
+                    <div class="progress" style="height: 24px; border-radius: 12px; overflow: hidden;">
+                        @php
+                            $totalItems = max($itemsCount, 1);
+                            $approvedPercent = round(($itemsBreakdown['approved'] / $totalItems) * 100);
+                            $pendingPercent = round(($itemsBreakdown['pending'] / $totalItems) * 100);
+                            $rejectedPercent = round(($itemsBreakdown['rejected'] / $totalItems) * 100);
+                        @endphp
+                        <div class="progress-bar bg-success" role="progressbar" style="width: {{ $approvedPercent }}%" 
+                            title="Approved Products ({{ $itemsBreakdown['approved'] }})">
+                            {{ $approvedPercent }}% Approved
+                        </div>
+                        <div class="progress-bar bg-warning text-dark" role="progressbar" style="width: {{ $pendingPercent }}%" 
+                            title="Pending Products ({{ $itemsBreakdown['pending'] }})">
+                            {{ $pendingPercent }}% Pending
+                        </div>
+                        <div class="progress-bar bg-danger" role="progressbar" style="width: {{ $rejectedPercent }}%" 
+                            title="Rejected Products ({{ $itemsBreakdown['rejected'] }})">
+                            {{ $rejectedPercent }}% Rejected
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-center gap-4 mt-3 flex-wrap">
+                        <span class="small text-muted"><i class="fas fa-circle text-success me-1"></i> Approved: <strong>{{ $itemsBreakdown['approved'] }}</strong></span>
+                        <span class="small text-muted"><i class="fas fa-circle text-warning me-1"></i> Pending: <strong>{{ $itemsBreakdown['pending'] }}</strong></span>
+                        <span class="small text-muted"><i class="fas fa-circle text-danger me-1"></i> Rejected: <strong>{{ $itemsBreakdown['rejected'] }}</strong></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Vendor Statistics & Top Sellers section --}}
+    <div class="row g-4 mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm" style="border-radius: 16px;">
+                <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 fw-bold"><i class="fas fa-store-alt text-primary me-2"></i> Top Sellers & Brand Performance</h5>
+                    <span class="badge bg-primary rounded-pill px-3 py-2">Total Vendors: {{ $vendorsCount }}</span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-4">Rank</th>
+                                    <th>Brand</th>
+                                    <th>Vendor Owner</th>
+                                    <th>Products Count</th>
+                                    <th>Units Sold</th>
+                                    <th>Total Revenue</th>
+                                    <th>Service Countries</th>
+                                    <th class="pe-4">Brand Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($topVendors as $index => $vendor)
+                                    @php
+                                        $rankColors = [
+                                            0 => ['#ffd700', 'Gold Rank (Top Seller)'],
+                                            1 => ['#c0c0c0', 'Silver Rank'],
+                                            2 => ['#cd7f32', 'Bronze Rank']
+                                        ];
+                                        $rankColor = $rankColors[$index] ?? null;
+                                    @endphp
+                                    <tr>
+                                        <td class="ps-4">
+                                            @if($rankColor)
+                                                <span class="fs-4 me-1" style="color: {{ $rankColor[0] }};" title="{{ $rankColor[1] }}">
+                                                    <i class="fas fa-crown"></i>
+                                                </span>
+                                                <strong style="color: {{ $rankColor[0] }}">{{ $index + 1 }}</strong>
+                                            @else
+                                                <span class="text-muted">{{ $index + 1 }}</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center gap-2">
+                                                @if($vendor->brand_logo)
+                                                    <img src="{{ asset('storage/' . $vendor->brand_logo) }}" class="rounded shadow-sm" style="width: 40px; height: 40px; object-fit: cover;">
+                                                @else
+                                                    <div class="bg-light rounded d-flex align-items-center justify-content-center border" style="width: 40px; height: 40px;">
+                                                        <i class="fas fa-store text-muted"></i>
+                                                    </div>
+                                                @endif
+                                                <div>
+                                                    <div class="fw-bold">{{ $vendor->brand_name }}</div>
+                                                    <a href="{{ route('brands.show', \App\Models\Brand::find($vendor->brand_id)?->slug ?? '') }}" target="_blank" class="small text-decoration-none text-cyan">View storefront <i class="fas fa-external-link-alt" style="font-size:0.65rem;"></i></a>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="fw-bold">{{ $vendor->vendor_name }}</div>
+                                            <small class="text-muted">{{ $vendor->vendor_email }}</small>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-secondary rounded-pill px-2 py-1">
+                                                {{ \App\Models\Brand::find($vendor->brand_id)?->items()->count() ?? 0 }} products
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <strong class="text-dark">{{ number_format($vendor->total_units_sold) }}</strong>
+                                        </td>
+                                        <td>
+                                            <strong class="text-success">﷼ {{ number_format($vendor->total_sales, 2) }}</strong>
+                                        </td>
+                                        <td>
+                                            @php
+                                                $brandModel = \App\Models\Brand::find($vendor->brand_id);
+                                            @endphp
+                                            @if($brandModel && $brandModel->service_countries)
+                                                <div class="d-flex gap-1 flex-wrap">
+                                                    @foreach($brandModel->service_countries as $country)
+                                                        @php
+                                                            $flagSrc = '';
+                                                            if (stripos($country, 'Saudi') !== false || stripos($country, 'KSA') !== false) {
+                                                                $flagSrc = asset('images/sa.png');
+                                                            } elseif (stripos($country, 'Emirates') !== false || stripos($country, 'UAE') !== false) {
+                                                                $flagSrc = asset('images/AE.png');
+                                                            }
+                                                        @endphp
+                                                        @if($flagSrc)
+                                                            <img src="{{ $flagSrc }}" alt="{{ $country }}" width="18" height="12"
+                                                                style="border-radius: 2px;" title="{{ $country }}">
+                                                        @else
+                                                            <span class="badge bg-light text-dark" style="font-size: 0.65rem;">{{ $country }}</span>
+                                                        @endif
+                                                    @endforeach
+                                                </div>
+                                            @else
+                                                <span class="text-muted small">—</span>
+                                            @endif
+                                        </td>
+                                        <td class="pe-4 text-muted small" style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                            {{ \App\Models\Brand::find($vendor->brand_id)?->description ?? 'No description provided.' }}
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="8" class="text-center py-5 text-muted">
+                                            <i class="fas fa-store-slash d-block mb-3" style="font-size: 2.5rem; opacity: 0.3;"></i>
+                                            No sales recorded for any vendor brand yet.
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -115,6 +281,7 @@
     @endphp
 
     <div class="row g-4">
+        {{-- Recent Orders --}}
         <div class="col-lg-7">
             <div class="card h-100 shadow-sm border-0" style="border-radius: 16px;">
                 <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
@@ -162,6 +329,7 @@
             </div>
         </div>
 
+        {{-- Users list --}}
         <div class="col-lg-5">
             <div class="card h-100 shadow-sm border-0" style="border-radius: 16px;">
                 <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
@@ -172,15 +340,15 @@
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <div>
                             <small class="text-muted d-block">All Users</small>
-                            <strong>{{ \App\Models\User::count() }}</strong>
+                            <strong>{{ $usersCount }}</strong>
                         </div>
                         <div>
                             <small class="text-muted d-block">Suspended users</small>
-                            <strong>{{ \App\Models\User::where('is_suspended', true)->count() }}</strong>
+                            <strong>{{ $suspendedUsersCount }}</strong>
                         </div>
                         <div>
                             <small class="text-muted d-block">Admins</small>
-                            <strong>{{ \App\Models\User::where('role', 'admin')->count() }}</strong>
+                            <strong>{{ $adminsCount }}</strong>
                         </div>
                     </div>
 
@@ -227,10 +395,11 @@
             </div>
         </div>
 
-        <div class="col-12">
+        {{-- Low Stock Items --}}
+        <div class="col-12 mt-4">
             <div class="card h-100 shadow-sm border-0" style="border-radius: 16px;">
                 <div class="card-header bg-white py-3 border-0">
-                    <h5 class="mb-0 fw-bold">Low Stock</h5>
+                    <h5 class="mb-0 fw-bold">Low Stock Alerts</h5>
                 </div>
                 <div class="card-body p-0">
                     <div class="list-group list-group-flush">
@@ -240,7 +409,7 @@
                                     <i class="fas fa-exclamation-triangle text-warning me-3"></i>
                                     <div>
                                         <h6 class="mb-0 fw-bold">{{ $lowStockItem->name }}</h6>
-                                        <small class="text-muted">Currently {{ $lowStockItem->stock }} in stock</small>
+                                        <small class="text-muted">Currently {{ $lowStockItem->stock }} in stock — Sold by <strong>{{ $lowStockItem->brandModel->name ?? $lowStockItem->brand ?? 'Elixira Store' }}</strong></small>
                                     </div>
                                 </div>
                                 <a href="{{ route('admin.items.edit', $lowStockItem->id) }}"

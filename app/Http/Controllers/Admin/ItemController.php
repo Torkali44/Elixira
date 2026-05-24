@@ -15,8 +15,25 @@ class ItemController extends Controller
 {
     public function index()
     {
-        $items = Item::with('category')->latest()->get();
+        $status = request('status');
+        $query = Item::with(['category', 'brandModel.vendorProfile.user'])->latest();
+        
+        if ($status && in_array($status, ['pending', 'approved', 'rejected'])) {
+            if ($status === 'rejected') {
+                $query->whereIn('status', ['rejected', 'rejected_with_notes']);
+            } else {
+                $query->where('status', $status);
+            }
+        }
+        
+        $items = $query->paginate(20);
         return view('admin.items.index', compact('items'));
+    }
+
+    public function show(Item $item)
+    {
+        $item->load('category', 'brandModel.vendorProfile.user', 'images');
+        return view('admin.items.show', compact('item'));
     }
 
     public function create()

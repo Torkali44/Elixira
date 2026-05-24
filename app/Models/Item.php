@@ -19,7 +19,9 @@ class Item extends Model
         'points',
         'image',
         'is_featured',
-        'long_description'
+        'long_description',
+        'status',
+        'rejection_reason',
     ];
 
     protected $casts = [
@@ -36,6 +38,18 @@ class Item extends Model
     public function brandModel(): BelongsTo
     {
         return $this->belongsTo(Brand::class, 'brand_id');
+    }
+
+    public function vendor()
+    {
+        return $this->hasOneThrough(User::class, Brand::class, 'id', 'id', 'brand_id', 'vendor_profile_id')
+                    ->join('vendor_profiles', 'vendor_profiles.id', '=', 'brands.vendor_profile_id')
+                    ->select('users.*'); // Actually, since we want User, it's a bit complex. Let's just create an accessor for the Vendor user.
+    }
+
+    public function getVendorAttribute()
+    {
+        return $this->brandModel?->vendorProfile?->user;
     }
 
     public function images()

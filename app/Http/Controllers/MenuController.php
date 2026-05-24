@@ -12,9 +12,9 @@ class MenuController extends Controller
     public function index()
     {
         $categories = Category::with(['items' => function($query) {
-            $query->with('category', 'brandModel');
+            $query->where('status', 'approved')->with('category', 'brandModel');
         }])->get();
-        $items = Item::with('category', 'brandModel')->get();
+        $items = Item::with('category', 'brandModel')->where('status', 'approved')->get();
         $privateOfferQuantities = $this->privateOfferQuantitiesForCurrentUser();
 
         return view('menu.index', compact('categories', 'items', 'privateOfferQuantities'));
@@ -23,15 +23,25 @@ class MenuController extends Controller
     public function show(Item $item)
     {
         $item->load('category', 'images', 'brandModel', 'ratings.user');
+        
+        // Find other approved products with the same name sold by different brands
+        $otherSellers = Item::with('brandModel')
+            ->where('name', $item->name)
+            ->where('id', '!=', $item->id)
+            ->where('status', 'approved')
+            ->get();
+
         $relatedItems = Item::with('category', 'brandModel')
             ->where('category_id', $item->category_id)
+            ->where('status', 'approved')
             ->where('id', '!=', $item->id)
+            ->whereNotIn('id', $otherSellers->pluck('id'))
             ->take(4)
             ->get();
             
         $privateOfferQuantities = $this->privateOfferQuantitiesForCurrentUser();
 
-        return view('menu.show', compact('item', 'relatedItems', 'privateOfferQuantities'));
+        return view('menu.show', compact('item', 'relatedItems', 'otherSellers', 'privateOfferQuantities'));
     }
 
     private function privateOfferQuantitiesForCurrentUser(): array

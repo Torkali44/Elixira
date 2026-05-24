@@ -93,6 +93,8 @@
 
                 $brandsLastViewed = session('brands_last_viewed_at');
                 $newBrandsCount = $brandsLastViewed ? \App\Models\Brand::where('created_at', '>', $brandsLastViewed)->count() : \App\Models\Brand::where('is_active', false)->count();
+
+                $pendingProductsCount = \App\Models\Item::where('status', 'pending')->count();
             @endphp
             <div class="mt-3">
                 <a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
@@ -100,6 +102,9 @@
                 </a>
                 <a href="{{ route('admin.categories.index') }}" class="{{ request()->routeIs('admin.categories.*') ? 'active' : '' }}">
                     <i class="fas fa-list me-2"></i> Categories
+                </a>
+                <a href="{{ route('admin.items.index') }}" class="{{ request()->routeIs('admin.items.index') || request()->routeIs('admin.items.edit') || request()->routeIs('admin.items.create') ? 'active' : '' }}">
+                    <i class="fas fa-boxes me-2"></i> All Products
                 </a>
                 <a href="{{ route('admin.users.index') }}" class="{{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
                     <i class="fas fa-users me-2"></i> Users Management
@@ -110,8 +115,12 @@
                         <span class="badge bg-danger rounded-pill ms-2">{{ $newOrdersCount }}</span>
                     @endif
                 </a>
-                <a href="{{ route('admin.items.index') }}" class="{{ request()->routeIs('admin.items.*') ? 'active' : '' }}">
-                    <i class="fas fa-boxes me-2"></i> Inventory & Products
+
+                <a href="{{ route('admin.items.pending') }}" class="{{ request()->routeIs('admin.items.pending') ? 'active' : '' }}">
+                    <i class="fas fa-clipboard-check me-2"></i> Product Approvals
+                    @if($pendingProductsCount > 0)
+                        <span class="badge bg-danger rounded-pill ms-2">{{ $pendingProductsCount }}</span>
+                    @endif
                 </a>
                 <a href="{{ route('admin.reports.index') }}" class="{{ request()->routeIs('admin.reports.*') ? 'active' : '' }}">
                     <i class="fas fa-chart-line me-2"></i> Reports (Detailed)

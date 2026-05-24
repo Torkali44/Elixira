@@ -237,6 +237,88 @@
                         <span style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">Organic Certified</span>
                     </div>
                 </div>
+
+                @if($otherSellers->count() > 0)
+                    <div style="margin-top: 3rem; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--elx-border); border-radius: var(--elx-radius-sm); padding: 2rem;">
+                        <h4 style="color: #fff; margin-bottom: 1.5rem; font-family: 'Bricolage Grotesque', sans-serif;">
+                            <i class="fas fa-store-alt text-cyan me-2"></i> Other Sellers for this Product
+                        </h4>
+                        <div style="display: flex; flex-direction: column; gap: 1.2rem;">
+                            @foreach($otherSellers as $sellerItem)
+                                <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; padding-bottom: 1.2rem; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                    <div style="display: flex; align-items: center; gap: 1rem;">
+                                        @if($sellerItem->brandModel && $sellerItem->brandModel->logo)
+                                            <img src="{{ asset('storage/' . $sellerItem->brandModel->logo) }}" style="width: 40px; height: 40px; border-radius: 8px; object-fit: cover;" alt="">
+                                        @else
+                                            <div style="width: 40px; height: 40px; background: rgba(255,255,255,0.05); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #fff;">
+                                                <i class="fas fa-store"></i>
+                                            </div>
+                                        @endif
+                                        <div>
+                                            <strong style="color: #fff; display: block;">
+                                                @if($sellerItem->brandModel)
+                                                    <a href="{{ route('brands.show', $sellerItem->brandModel->slug) }}" style="color: var(--elx-cyan); text-decoration: none;">
+                                                        {{ $sellerItem->brandModel->name }}
+                                                    </a>
+                                                @else
+                                                    {{ $sellerItem->brand }}
+                                                @endif
+                                            </strong>
+                                            
+                                            {{-- Country Flag --}}
+                                            @if($sellerItem->brandModel && $sellerItem->brandModel->service_countries)
+                                                <div style="display: flex; gap: 4px; margin-top: 4px;">
+                                                    @foreach($sellerItem->brandModel->service_countries as $country)
+                                                        @php
+                                                            $flagSrc = '';
+                                                            if (stripos($country, 'Saudi') !== false || stripos($country, 'KSA') !== false) {
+                                                                $flagSrc = asset('images/sa.png');
+                                                            } elseif (stripos($country, 'Emirates') !== false || stripos($country, 'UAE') !== false) {
+                                                                $flagSrc = asset('images/AE.png');
+                                                            }
+                                                        @endphp
+                                                        @if($flagSrc)
+                                                            <img src="{{ $flagSrc }}" style="width: 16px; height: 10px; border-radius: 1px;" alt="{{ $country }}" title="{{ $country }}">
+                                                        @endif
+                                                    @endforeach
+                                                </div>
+                                            @endif
+                                        </div>
+                                    </div>
+                                    
+                                    <div style="text-align: right;">
+                                        <div style="font-size: 1.15rem; font-weight: 700; color: #fff;">
+                                            ﷼ {{ number_format($sellerItem->price, 2) }}
+                                        </div>
+                                        @if($sellerItem->points > 0)
+                                            <small style="color: #00ff88; font-weight: 600;">
+                                                <i class="fas fa-star"></i> +{{ $sellerItem->points }} Points
+                                            </small>
+                                        @endif
+                                        <div style="font-size: 0.75rem; color: #aaa; margin-top: 2px;">
+                                            {{ $sellerItem->stock > 0 ? $sellerItem->stock . ' units left' : 'Out of stock' }}
+                                        </div>
+                                    </div>
+                                    
+                                    <div>
+                                        @if($sellerItem->stock > 0)
+                                            <form action="{{ route('cart.add') }}" method="POST" style="margin: 0;">
+                                                @csrf
+                                                <input type="hidden" name="item_id" value="{{ $sellerItem->id }}">
+                                                <input type="hidden" name="quantity" value="1">
+                                                <button type="submit" class="glow-rate-btn" style="background: rgba(74, 200, 246, 0.1); border: 1px solid rgba(74, 200, 246, 0.3); color: var(--elx-cyan); animation: none; padding: 0.4rem 1rem;">
+                                                    Buy from Vendor <i class="fas fa-chevron-right ms-1" style="font-size: 0.7rem;"></i>
+                                                </button>
+                                            </form>
+                                        @else
+                                            <span style="color: #ff8a8a; font-size: 0.85rem; font-weight: 600;">Out of Stock</span>
+                                        @endif
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
             </div>
         </div>
 

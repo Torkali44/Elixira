@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
@@ -31,6 +31,8 @@
                 @auth
                     @if(auth()->user()->role === 'admin')
                         <li><a href="{{ route('admin.dashboard') }}" class="text-primary fw-bold">Admin</a></li>
+                    @elseif(auth()->user()->role === 'vendor')
+                        <li><a href="{{ route('vendor.dashboard') }}" class="fw-bold" style="color: #6a1b9a;">Vendor Portal</a></li>
                     @endif
                     <li><a href="{{ route('profile.edit') }}" class="{{ request()->routeIs('profile.*') ? 'active' : '' }}">Account</a></li>
                     <li>

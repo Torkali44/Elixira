@@ -32,11 +32,11 @@
 
     {{-- Bottom Div: Info Split (Name/Price) with Gradient --}}
     <div class="elx-product-card__info">
-        <div class="elx-product-card__header">
-            <a href="{{ route('menu.show', $product->id) }}" style="text-decoration: none; color: inherit;" onclick="event.stopPropagation();">
+        <div class="elx-product-card__header" style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
+            <a href="{{ route('menu.show', $product->id) }}" style="text-decoration: none; color: inherit; max-width: 65%; word-wrap: break-word;" onclick="event.stopPropagation();">
                 <h3 class="elx-product-card__name">{{ $product->name }}</h3>
             </a>
-            <span class="elx-product-card__price">﷼ {{ number_format($product->price, 2) }}</span>
+            <span class="elx-product-card__price" style="flex-shrink: 0; white-space: nowrap;">﷼ {{ number_format($product->price, 2) }}</span>
         </div>
 
         {{-- Meta Info: Category, Brand, Points, Stock --}}
