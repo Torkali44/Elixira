@@ -69,9 +69,14 @@
                             @endif
                         </td>
                         <td class="pe-4 text-end">
-                            <a href="{{ route('brands.show', $brand->slug) }}" target="_blank" class="btn btn-sm btn-outline-secondary">
-                                <i class="fas fa-eye"></i>
-                            </a>
+                            <div class="btn-group btn-group-sm">
+                                <a href="{{ route('admin.brands.edit', $brand->id) }}" class="btn btn-outline-primary" title="Edit Brand">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{{ route('brands.show', $brand->slug) }}" target="_blank" class="btn btn-outline-secondary" title="View Store">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </div>
                         </td>
                     </tr>
                     @empty

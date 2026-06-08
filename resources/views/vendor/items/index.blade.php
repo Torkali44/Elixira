@@ -20,7 +20,6 @@
                             <th>Category</th>
                             <th>Price</th>
                             <th>Stock</th>
-                            <th>Ownership</th>
                             <th>Status</th>
                             <th>Actions</th>
                         </tr>
@@ -42,46 +41,40 @@
                                 <td>{{ number_format($item->price, 2) }}</td>
                                 <td>{{ $item->stock }}</td>
                                 <td>
-                                    @if($item->brand_id === $vendorBrandId)
-                                        <span class="badge bg-primary">My Product</span>
-                                    @else
-                                        <span class="badge bg-secondary">Other</span>
-                                    @endif
-                                </td>
-                                <td>
-                                    @if($item->status == 'approved')
+                                    @if($item->status === 'approved')
                                         <span class="badge bg-success">Approved</span>
-                                    @elseif($item->status == 'rejected')
+                                    @elseif($item->status === 'rejected')
                                         <span class="badge bg-danger" title="{{ $item->rejection_reason }}">Rejected</span>
                                         @if($item->rejection_reason)
                                             <small class="d-block text-danger mt-1">{{ $item->rejection_reason }}</small>
                                         @endif
+                                    @elseif($item->status === 'rejected_with_notes')
+                                        <span class="badge bg-warning text-dark">Needs Revision</span>
+                                        @if($item->rejection_reason)
+                                            <small class="d-block text-muted mt-1">{{ $item->rejection_reason }}</small>
+                                        @endif
                                     @else
-                                        <span class="badge bg-warning text-dark">Pending</span>
+                                        <span class="badge bg-info text-dark">Pending Approval</span>
                                     @endif
                                 </td>
                                 <td>
-                                    @if($item->brand_id === $vendorBrandId)
-                                        <div class="btn-group btn-group-sm">
-                                            <a href="{{ route('vendor.items.edit', $item) }}" class="btn btn-outline-secondary">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
-                                            <form action="{{ route('vendor.items.destroy', $item) }}" method="POST" class="d-inline" data-confirm="Are you sure you want to delete this product?">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-outline-danger rounded-end">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </form>
-                                        </div>
-                                    @else
-                                        <span class="text-muted"><i class="fas fa-lock" title="Cannot edit other vendor's product"></i></span>
-                                    @endif
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="{{ route('vendor.items.edit', $item) }}" class="btn btn-outline-secondary">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <form action="{{ route('vendor.items.destroy', $item) }}" method="POST" class="d-inline" data-confirm="Are you sure you want to delete this product?">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-outline-danger rounded-end">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="text-center py-4">
+                                <td colspan="6" class="text-center py-4">
                                     <div class="text-muted">
                                         <i class="fas fa-box-open fs-1 mb-3"></i>
                                         <p class="mb-0">You haven't added any products yet.</p>

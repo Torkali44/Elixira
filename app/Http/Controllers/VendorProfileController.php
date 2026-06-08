@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\VendorProfile;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class VendorProfileController extends Controller
 {
@@ -17,40 +18,48 @@ class VendorProfileController extends Controller
                 return redirect()->route('dashboard')->with('status', 'You are already an approved vendor.');
             } elseif ($user->vendorProfile->status === 'rejected') {
                 return redirect()->route('dashboard')->with('error', 'Your vendor application has been permanently rejected.');
-            } elseif ($user->vendorProfile->status === 'rejected_with_notes' && !request()->has('edit')) {
+            } elseif ($user->vendorProfile->status === 'rejected_with_notes' && ! request()->has('edit')) {
                 return redirect()->route('vendor.rejected');
             }
         }
-        
+
         return view('vendor.onboarding', [
-            'vendorProfile' => $user->vendorProfile ?? new VendorProfile()
+            'vendorProfile' => $user->vendorProfile ?? new VendorProfile,
         ]);
     }
 
     public function store(Request $request)
     {
-        $request->validate([
-            'brand_name' => 'required|string|max:255',
+        $isDraft = $request->action === 'draft';
+
+        $rules = [
+            'brand_name' => $isDraft ? 'nullable|string|max:255' : 'required|string|max:255',
             'brand_logo' => 'nullable|image|max:2048',
-            'brand_description' => 'required|string|max:1000',
+            'brand_description' => $isDraft ? 'nullable|string|max:1000' : 'required|string|max:1000',
             'instagram_link' => 'nullable|url|max:255',
             'tiktok_link' => 'nullable|url|max:255',
             'snapchat_link' => 'nullable|url|max:255',
             'store_link' => 'nullable|url|max:255',
             'store_link_description' => 'nullable|string|max:500',
-            'service_countries' => 'required|array',
-            'product_types' => 'required|array',
+            'service_countries' => $isDraft ? 'nullable|array' : 'required|array',
+            'product_types' => $isDraft ? 'nullable|array' : 'required|array',
             'verification_document' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:4096',
             'action' => 'required|in:draft,submit',
-        ]);
+        ];
+
+        if (! $isDraft) {
+            $rules['terms'] = 'required|accepted';
+        }
+
+        $request->validate($rules);
 
         $user = auth()->user();
-        
-        if ($user->vendorProfile && !in_array($user->vendorProfile->status, ['draft', 'rejected_with_notes'])) {
+
+        if ($user->vendorProfile && ! in_array($user->vendorProfile->status, ['draft', 'rejected_with_notes'])) {
             return redirect()->route('vendor.pending')->with('error', 'You have already submitted a request.');
         }
 
-        $profile = $user->vendorProfile ?? new VendorProfile();
+        $profile = $user->vendorProfile ?? new VendorProfile;
         $profile->user_id = $user->id;
         $profile->brand_name = $request->brand_name;
         $profile->brand_description = $request->brand_description;
@@ -65,14 +74,14 @@ class VendorProfileController extends Controller
 
         if ($request->hasFile('brand_logo')) {
             if ($profile->brand_logo) {
-                \Illuminate\Support\Facades\Storage::disk('public')->delete($profile->brand_logo);
+                Storage::disk('public')->delete($profile->brand_logo);
             }
             $profile->brand_logo = $request->file('brand_logo')->store('vendor_logos', 'public');
         }
 
         if ($request->hasFile('verification_document')) {
             if ($profile->verification_document) {
-                \Illuminate\Support\Facades\Storage::disk('public')->delete($profile->verification_document);
+                Storage::disk('public')->delete($profile->verification_document);
             }
             $profile->verification_document = $request->file('verification_document')->store('vendor_docs', 'public');
         }
@@ -95,7 +104,7 @@ class VendorProfileController extends Controller
     public function pending()
     {
         $user = auth()->user();
-        if (!$user->vendorProfile || $user->vendorProfile->status !== 'pending') {
+        if (! $user->vendorProfile || $user->vendorProfile->status !== 'pending') {
             return redirect()->route('vendor.onboarding');
         }
 
@@ -105,12 +114,12 @@ class VendorProfileController extends Controller
     public function rejected()
     {
         $user = auth()->user();
-        if (!$user->vendorProfile || $user->vendorProfile->status !== 'rejected_with_notes') {
+        if (! $user->vendorProfile || $user->vendorProfile->status !== 'rejected_with_notes') {
             return redirect()->route('vendor.onboarding');
         }
 
         return view('vendor.rejected', [
-            'vendorProfile' => $user->vendorProfile
+            'vendorProfile' => $user->vendorProfile,
         ]);
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Notification;
 use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -16,11 +17,11 @@ class OrderController extends Controller
 
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('customer_name', 'like', "%{$search}%")
-                  ->orWhere('customer_phone', 'like', "%{$search}%")
-                  ->orWhere('user_code', 'like', "%{$search}%")
-                  ->orWhere('id', 'like', "%{$search}%");
+                    ->orWhere('customer_phone', 'like', "%{$search}%")
+                    ->orWhere('user_code', 'like', "%{$search}%")
+                    ->orWhere('id', 'like', "%{$search}%");
             });
         }
 
@@ -32,7 +33,7 @@ class OrderController extends Controller
             if ($request->role === 'guest') {
                 $query->whereNull('user_id');
             } else {
-                $query->whereHas('user', function($q) use ($request) {
+                $query->whereHas('user', function ($q) use ($request) {
                     $q->where('role', $request->role);
                 });
             }
@@ -54,10 +55,10 @@ class OrderController extends Controller
         $avgExecutionTime = Order::where('status', 'delivered')
             ->whereNotNull('updated_at')
             ->get()
-            ->avg(function($order) {
+            ->avg(function ($order) {
                 return $order->created_at->diffInHours($order->updated_at);
             });
-        
+
         $stats['avg_execution_time'] = round($avgExecutionTime ?? 0, 1);
 
         $peaks = $this->orderPeakStats();
@@ -70,6 +71,7 @@ class OrderController extends Controller
     public function show(Order $order)
     {
         $order->load('orderItems.item');
+
         return view('admin.orders.show', compact('order'));
     }
 
@@ -80,6 +82,19 @@ class OrderController extends Controller
         ]);
 
         $order->update(['status' => $request->status]);
+
+        try {
+            if ($order->user) {
+                Notification::create([
+                    'user_id' => $order->user->id,
+                    'title' => 'Order Status Updated',
+                    'message' => 'Your order #'.$order->id.' status has been updated to "'.ucfirst($request->status).'".',
+                    'url' => route('profile.orders.show', $order->id),
+                ]);
+            }
+        } catch (\Throwable $e) {
+            \Log::error('Order status update notification failed: '.$e->getMessage());
+        }
 
         return redirect()->back()->with('success', 'The order status has been successfully updated.');
     }
@@ -134,7 +149,7 @@ class OrderController extends Controller
         }
 
         return [
-            'peak_hour' => $peakHour ? $peakHour->hour . ':00' : 'N/A',
+            'peak_hour' => $peakHour ? $peakHour->hour.':00' : 'N/A',
             'peak_day' => $peakDay ? $peakDay->day : 'N/A',
         ];
     }

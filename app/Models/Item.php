@@ -40,11 +40,16 @@ class Item extends Model
         return $this->belongsTo(Brand::class, 'brand_id');
     }
 
+    public function brand(): BelongsTo
+    {
+        return $this->belongsTo(Brand::class, 'brand_id');
+    }
+
     public function vendor()
     {
         return $this->hasOneThrough(User::class, Brand::class, 'id', 'id', 'brand_id', 'vendor_profile_id')
-                    ->join('vendor_profiles', 'vendor_profiles.id', '=', 'brands.vendor_profile_id')
-                    ->select('users.*'); // Actually, since we want User, it's a bit complex. Let's just create an accessor for the Vendor user.
+            ->join('vendor_profiles', 'vendor_profiles.id', '=', 'brands.vendor_profile_id')
+            ->select('users.*'); // Actually, since we want User, it's a bit complex. Let's just create an accessor for the Vendor user.
     }
 
     public function getVendorAttribute()
@@ -75,6 +80,7 @@ class Item extends Model
     public function getAverageRatingAttribute(): float
     {
         $avg = $this->ratings()->avg('rating') ?: 0;
+
         return round($avg * 2) / 2;
     }
 }

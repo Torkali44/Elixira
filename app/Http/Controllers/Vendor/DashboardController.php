@@ -3,14 +3,14 @@
 namespace App\Http\Controllers\Vendor;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\Item;
-use App\Models\Brand;
+use App\Models\Notification;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\User;
-use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -18,8 +18,8 @@ class DashboardController extends Controller
     {
         $user = auth()->user();
         $vendorProfile = $user->vendorProfile;
-        
-        if (!$vendorProfile || !$vendorProfile->brand) {
+
+        if (! $vendorProfile || ! $vendorProfile->brand) {
             return redirect()->route('home')->with('error', 'Brand not found.');
         }
 
@@ -30,8 +30,9 @@ class DashboardController extends Controller
         $stats = [
             'total_items' => Item::where('brand_id', $brandId)->count(),
             'pending_items' => Item::where('brand_id', $brandId)->where('status', 'pending')->count(),
+            'revision_items' => Item::where('brand_id', $brandId)->where('status', 'rejected_with_notes')->count(),
             'approved_items' => Item::where('brand_id', $brandId)->where('status', 'approved')->count(),
-            'rejected_items' => Item::where('brand_id', $brandId)->whereIn('status', ['rejected', 'rejected_with_notes'])->count(),
+            'rejected_items' => Item::where('brand_id', $brandId)->where('status', 'rejected')->count(),
         ];
 
         // Orders & Revenue Stats
@@ -66,7 +67,7 @@ class DashboardController extends Controller
             ->get();
 
         // Top Customers
-        $topCustomers = Order::whereIn('id', $orderIds)
+        $topCustomers = Order::whereIn('orders.id', $orderIds)
             ->join('order_items', 'orders.id', '=', 'order_items.order_id')
             ->whereIn('order_items.item_id', $vendorItemIds)
             ->select('orders.user_id', DB::raw('COUNT(DISTINCT orders.id) as order_count'), DB::raw('SUM(order_items.price * order_items.quantity) as total_spent'))
@@ -76,8 +77,9 @@ class DashboardController extends Controller
             ->get()
             ->map(function ($row) {
                 $row->user = User::find($row->user_id);
+
                 return $row;
-            })->filter(fn($row) => $row->user !== null);
+            })->filter(fn ($row) => $row->user !== null);
 
         // Monthly Sales (Last 6 months)
         $monthlySales = [];
@@ -87,7 +89,7 @@ class DashboardController extends Controller
             $revenue = OrderItem::whereIn('item_id', $vendorItemIds)
                 ->whereHas('order', function ($q) use ($date) {
                     $q->whereMonth('created_at', $date->month)
-                      ->whereYear('created_at', $date->year);
+                        ->whereYear('created_at', $date->year);
                 })
                 ->selectRaw('SUM(price * quantity) as total')
                 ->value('total') ?? 0;
@@ -111,8 +113,8 @@ class DashboardController extends Controller
     {
         $user = auth()->user();
         $vendorProfile = $user->vendorProfile;
-        
-        if (!$vendorProfile || !$vendorProfile->brand) {
+
+        if (! $vendorProfile || ! $vendorProfile->brand) {
             return redirect()->route('home')->with('error', 'Brand not found.');
         }
 
@@ -128,5 +130,70 @@ class DashboardController extends Controller
             ->paginate(20);
 
         return view('vendor.orders', compact('orders', 'vendorItemIds'));
+    }
+
+    public function showOrder(Order $order)
+    {
+        $user = auth()->user();
+        $vendorProfile = $user->vendorProfile;
+
+        if (! $vendorProfile || ! $vendorProfile->brand) {
+            abort(403);
+        }
+
+        $brandId = $vendorProfile->brand->id;
+        $vendorItemIds = Item::where('brand_id', $brandId)->pluck('id')->toArray();
+
+        // Check if the order contains at least one of this vendor's items
+        $hasVendorItems = $order->orderItems()->whereIn('item_id', $vendorItemIds)->exists();
+        if (! $hasVendorItems) {
+            abort(403);
+        }
+
+        // Eager load only the vendor's items
+        $order->load(['user', 'orderItems' => function ($q) use ($vendorItemIds) {
+            $q->whereIn('item_id', $vendorItemIds)->with('item');
+        }]);
+
+        return view('vendor.orders.show', compact('order', 'vendorItemIds'));
+    }
+
+    public function updateOrderStatus(Request $request, Order $order)
+    {
+        $user = auth()->user();
+        $vendorProfile = $user->vendorProfile;
+
+        if (! $vendorProfile || ! $vendorProfile->brand) {
+            abort(403);
+        }
+
+        $brandId = $vendorProfile->brand->id;
+        $vendorItemIds = Item::where('brand_id', $brandId)->pluck('id')->toArray();
+
+        $hasVendorItems = $order->orderItems()->whereIn('item_id', $vendorItemIds)->exists();
+        if (! $hasVendorItems) {
+            abort(403);
+        }
+
+        $request->validate([
+            'status' => 'required|in:pending,confirmed,preparing,ready,delivered,cancelled',
+        ]);
+
+        $order->update(['status' => $request->status]);
+
+        try {
+            if ($order->user) {
+                Notification::create([
+                    'user_id' => $order->user->id,
+                    'title' => 'Order Status Updated',
+                    'message' => 'Your order #'.$order->id.' status has been updated to "'.ucfirst($request->status).'".',
+                    'url' => route('profile.orders.show', $order->id),
+                ]);
+            }
+        } catch (\Throwable $e) {
+            \Log::error('Order status update notification failed: '.$e->getMessage());
+        }
+
+        return redirect()->back()->with('success', 'The order status has been successfully updated.');
     }
 }

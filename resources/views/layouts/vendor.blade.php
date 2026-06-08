@@ -57,15 +57,45 @@
                 <h4 class="m-0">Elixira</h4>
                 <small class="text-white-50">Vendor Portal</small>
             </div>
+            @php
+                $vendorProfile = auth()->user()->vendorProfile;
+                $vendorPendingOrdersCount = 0;
+                $vendorRejectedProductsCount = 0;
+                $vendorSpecialRequestsCount = 0;
+                if ($vendorProfile && $vendorProfile->brand) {
+                    $brandId = $vendorProfile->brand->id;
+                    $vendorItemIds = \App\Models\Item::where('brand_id', $brandId)->pluck('id');
+                    $vendorOrderIds = \App\Models\OrderItem::whereIn('item_id', $vendorItemIds)->pluck('order_id')->unique();
+                    
+                    $vendorPendingOrdersCount = \App\Models\Order::whereIn('id', $vendorOrderIds)->where('status', 'pending')->count();
+                    $vendorRejectedProductsCount = \App\Models\Item::where('brand_id', $brandId)->whereIn('status', ['rejected', 'rejected_with_notes'])->count();
+                    $vendorSpecialRequestsCount = \App\Models\SpecialRequest::whereIn('item_id', $vendorItemIds)->where('status', 'pending')->count();
+                }
+            @endphp
             <div class="mt-3">
                 <a href="{{ route('vendor.dashboard') }}" class="{{ request()->routeIs('vendor.dashboard') ? 'active' : '' }}">
                     <i class="fas fa-home me-2"></i> Dashboard
                 </a>
                 <a href="{{ route('vendor.items.index') }}" class="{{ request()->routeIs('vendor.items.*') ? 'active' : '' }}">
                     <i class="fas fa-boxes me-2"></i> My Products
+                    @if($vendorRejectedProductsCount > 0)
+                        <span class="badge bg-danger rounded-pill ms-2" title="Rejected Products">{{ $vendorRejectedProductsCount }}</span>
+                    @endif
                 </a>
                 <a href="{{ route('vendor.orders') }}" class="{{ request()->routeIs('vendor.orders') ? 'active' : '' }}">
                     <i class="fas fa-receipt me-2"></i> My Orders
+                    @if($vendorPendingOrdersCount > 0)
+                        <span class="badge bg-danger rounded-pill ms-2" title="Pending Orders">{{ $vendorPendingOrdersCount }}</span>
+                    @endif
+                </a>
+                <a href="{{ route('vendor.special-requests.index') }}" class="{{ request()->routeIs('vendor.special-requests.*') ? 'active' : '' }}">
+                    <i class="fas fa-magic me-2"></i> Special Requests
+                    @if($vendorSpecialRequestsCount > 0)
+                        <span class="badge bg-danger rounded-pill ms-2" title="Pending Special Requests">{{ $vendorSpecialRequestsCount }}</span>
+                    @endif
+                </a>
+                <a href="{{ route('vendor.brand.edit') }}" class="{{ request()->routeIs('vendor.brand.*') ? 'active' : '' }}">
+                    <i class="fas fa-store me-2"></i> My Brand
                 </a>
                 <a href="{{ route('home') }}" target="_blank" rel="noopener">
                     <i class="fas fa-external-link-alt me-2"></i> View storefront
@@ -83,10 +113,51 @@
                             <small class="text-muted">{{ Auth::user()->vendorProfile->brand_name ?? 'Vendor' }}</small>
                         </div>
                     </div>
-                    <form method="POST" action="{{ route('logout') }}" class="d-inline ms-auto">
-                        @csrf
-                        <button type="submit" class="btn btn-outline-danger btn-sm">Log out</button>
-                    </form>
+                    <div class="d-flex align-items-center gap-3 ms-auto">
+                        <!-- Notification Bell Dropdown -->
+                        <div class="dropdown me-3" id="vendorNotificationsMenu">
+                            <button class="btn btn-link position-relative text-dark p-2" type="button" id="vendorNotifDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="text-decoration: none; border-radius: 50%; background: #f1f3f5; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-bell fs-5"></i>
+                                @php $vendorUnreadNotifCount = auth()->user()->unreadNotifications()->count(); @endphp
+                                @if($vendorUnreadNotifCount > 0)
+                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger vendor-notif-badge" style="font-size: 0.7rem; padding: 0.25em 0.5em;">
+                                        {{ $vendorUnreadNotifCount }}
+                                    </span>
+                                @endif
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-end shadow border-0 py-0" aria-labelledby="vendorNotifDropdown" style="width: 320px; border-radius: 12px; overflow: hidden; max-height: 450px;">
+                                <div class="d-flex justify-content-between align-items-center p-3 border-bottom bg-light">
+                                    <h6 class="m-0 fw-bold">Notifications</h6>
+                                    @if($vendorUnreadNotifCount > 0)
+                                        <button onclick="markAllVendorNotificationsAsRead(event)" class="btn btn-link p-0 text-decoration-none text-primary vendor-clear-notif" style="font-size: 0.8rem; font-weight: 600;">Mark all as read</button>
+                                    @endif
+                                </div>
+                                <div class="vendor-notifications-list" style="max-height: 300px; overflow-y: auto;">
+                                    @forelse(auth()->user()->notifications()->take(10)->get() as $notif)
+                                        <div class="dropdown-item p-3 border-bottom vendor-notif-item {{ $notif->is_read ? 'bg-white' : 'bg-light border-start border-primary border-4' }}" 
+                                             onclick="handleVendorNotificationClick(event, '{{ route('notifications.read', $notif->id) }}', '{{ $notif->url ?? '#' }}')"
+                                             style="cursor: pointer; white-space: normal;">
+                                            <div class="d-flex justify-content-between align-items-start mb-1">
+                                                <strong class="vendor-notif-title text-dark" style="font-size: 0.85rem; font-weight: {{ $notif->is_read ? 'normal' : 'bold' }};">{{ $notif->title }}</strong>
+                                                <small class="text-muted" style="font-size: 0.7rem;">{{ $notif->created_at->diffForHumans() }}</small>
+                                            </div>
+                                            <p class="text-muted mb-0" style="font-size: 0.8rem; line-height: 1.3;">{{ $notif->message }}</p>
+                                        </div>
+                                    @empty
+                                        <div class="p-4 text-center text-muted">
+                                            <i class="fas fa-bell-slash d-block fs-3 mb-2 opacity-50"></i>
+                                            No notifications yet.
+                                        </div>
+                                    @endforelse
+                                </div>
+                            </div>
+                        </div>
+
+                        <form method="POST" action="{{ route('logout') }}" class="d-inline">
+                            @csrf
+                            <button type="submit" class="btn btn-outline-danger btn-sm">Log out</button>
+                        </form>
+                    </div>
                 </div>
             </nav>
 
@@ -115,6 +186,50 @@
                 confirmButtonText: 'OK'
             });
         @endif
+
+        function markAllVendorNotificationsAsRead(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            fetch("{{ route('notifications.read-all') }}", {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    const badge = document.querySelector('.vendor-notif-badge');
+                    if (badge) badge.remove();
+                    document.querySelectorAll('.vendor-notif-item').forEach(item => {
+                        item.classList.remove('bg-light', 'border-start', 'border-primary', 'border-4');
+                        item.classList.add('bg-white');
+                        const title = item.querySelector('.vendor-notif-title');
+                        if (title) {
+                            title.style.fontWeight = 'normal';
+                        }
+                    });
+                    const clearBtn = document.querySelector('.vendor-clear-notif');
+                    if (clearBtn) clearBtn.remove();
+                }
+            });
+        }
+
+        function handleVendorNotificationClick(event, readUrl, redirectUrl) {
+            event.preventDefault();
+            event.stopPropagation();
+            
+            fetch(readUrl, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                }
+            }).finally(() => {
+                window.location.href = redirectUrl;
+            });
+        }
 
         document.querySelectorAll('form[data-confirm]').forEach((form) => {
             form.addEventListener('submit', function (event) {

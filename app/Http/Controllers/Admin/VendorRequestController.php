@@ -3,21 +3,24 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Models\VendorProfile;
 use App\Models\Brand;
+use App\Models\Notification;
+use App\Models\VendorProfile;
+use Illuminate\Http\Request;
 
 class VendorRequestController extends Controller
 {
     public function index()
     {
         $requests = VendorProfile::with('user')->whereIn('status', ['pending', 'approved', 'rejected', 'rejected_with_notes'])->latest()->paginate(15);
+
         return view('admin.vendors.requests.index', compact('requests'));
     }
 
     public function show(VendorProfile $vendorProfile)
     {
         $vendorProfile->load('user');
+
         return view('admin.vendors.requests.show', compact('vendorProfile'));
     }
 
@@ -42,7 +45,7 @@ class VendorRequestController extends Controller
             $user->save();
 
             // Create Brand from VendorProfile data if not exists
-            if (!$vendorProfile->brand) {
+            if (! $vendorProfile->brand) {
                 Brand::create([
                     'vendor_profile_id' => $vendorProfile->id,
                     'name' => $vendorProfile->brand_name,
@@ -65,7 +68,23 @@ class VendorRequestController extends Controller
             }
         }
 
-        return redirect()->route('admin.vendors.requests.index')->with('success', 'Vendor request ' . str_replace('_', ' ', $request->status) . ' successfully.');
+        try {
+            $user = $vendorProfile->user;
+            if ($user) {
+                $statusLabel = $request->status === 'approved' ? 'Approved' : ($request->status === 'rejected' ? 'Rejected' : 'Rejected with Notes');
+                $reason = $vendorProfile->rejection_reason ? ' Reason: '.$vendorProfile->rejection_reason : '';
+                $url = $request->status === 'approved' ? route('vendor.dashboard') : route('vendor.onboarding');
+                Notification::create([
+                    'user_id' => $user->id,
+                    'title' => 'Vendor Request '.$statusLabel,
+                    'message' => 'Your vendor profile request status is now '.$statusLabel.'.'.$reason,
+                    'url' => $url,
+                ]);
+            }
+        } catch (\Throwable $e) {
+            \Log::error('Vendor request notification failed: '.$e->getMessage());
+        }
+
+        return redirect()->route('admin.vendors.requests.index')->with('success', 'Vendor request '.str_replace('_', ' ', $request->status).' successfully.');
     }
 }
-

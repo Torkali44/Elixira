@@ -1,18 +1,28 @@
 <?php
 
+use App\Http\Controllers\Admin\AvatarOptionController;
 use App\Http\Controllers\Admin\CategoryController;
-use App\Http\Controllers\Admin\HomeSectionController;
+use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ItemController;
+use App\Http\Controllers\Admin\NewsletterController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
-use App\Http\Controllers\Admin\ReservationController as AdminReservationController;
+use App\Http\Controllers\Admin\ProductApprovalController; // Breeze
+use App\Http\Controllers\Admin\ReportController;
+use App\Http\Controllers\Admin\ReviewController;
+use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\VendorRequestController;
+use App\Http\Controllers\BrandController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MenuController;
-use App\Http\Controllers\ProfileController; // Breeze
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\RatingController;
 use App\Http\Controllers\ReservationController;
+use App\Http\Controllers\SpecialRequestController;
 use App\Http\Controllers\TestimonialController;
-use App\Http\Controllers\Admin\ReviewController;
-use App\Http\Controllers\Admin\AvatarOptionController;
+use App\Http\Controllers\VendorProfileController;
 use Illuminate\Support\Facades\Route;
 
 // Public Routes
@@ -30,17 +40,19 @@ Route::patch('/cart/update', [CartController::class, 'update'])->name('cart.upda
 Route::delete('/cart/remove', [CartController::class, 'remove'])->name('cart.remove');
 Route::post('/checkout', [CartController::class, 'checkout'])->name('checkout');
 
-Route::get('/track-order', [\App\Http\Controllers\OrderController::class, 'track'])->name('orders.track');
+Route::get('/track-order', [OrderController::class, 'track'])->name('orders.track');
 
 Route::get('/testimonials', [TestimonialController::class, 'index'])->name('testimonials.index');
 Route::post('/testimonials', [TestimonialController::class, 'store'])->name('testimonials.store');
 
 Route::post('/reservation', [ReservationController::class, 'store'])->name('reservation.store');
 Route::post('/newsletter/subscribe', [TestimonialController::class, 'subscribe'])->name('newsletter.subscribe');
-Route::post('/special-requests', [\App\Http\Controllers\SpecialRequestController::class, 'store'])->name('special-requests.store');
+Route::post('/special-requests', [SpecialRequestController::class, 'store'])->name('special-requests.store');
 
-Route::get('/brands', [\App\Http\Controllers\BrandController::class, 'index'])->name('brands.index');
-Route::get('/brands/{brand:slug}', [\App\Http\Controllers\BrandController::class, 'show'])->name('brands.show');
+Route::get('/brands', [BrandController::class, 'index'])->name('brands.index');
+Route::get('/brands/{brand:slug}', [BrandController::class, 'show'])->name('brands.show');
+
+Route::view('/vendor/terms', 'vendor.terms')->name('vendor.terms');
 
 // Breeze Auth Routes
 Route::get('/dashboard', function () {
@@ -50,6 +62,7 @@ Route::get('/dashboard', function () {
     if (auth()->user()->role === 'vendor') {
         return redirect()->route('vendor.dashboard');
     }
+
     return redirect()->route('home');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
@@ -68,13 +81,17 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile/addresses/{address}/main', [ProfileController::class, 'setMainAddress'])->name('profile.addresses.main');
 
     // Vendor Onboarding
-    Route::get('/vendor/onboarding', [\App\Http\Controllers\VendorProfileController::class, 'create'])->name('vendor.onboarding');
-    Route::post('/vendor/onboarding', [\App\Http\Controllers\VendorProfileController::class, 'store'])->name('vendor.store');
-    Route::get('/vendor/pending', [\App\Http\Controllers\VendorProfileController::class, 'pending'])->name('vendor.pending');
-    Route::get('/vendor/rejected', [\App\Http\Controllers\VendorProfileController::class, 'rejected'])->name('vendor.rejected');
+    Route::get('/vendor/onboarding', [VendorProfileController::class, 'create'])->name('vendor.onboarding');
+    Route::post('/vendor/onboarding', [VendorProfileController::class, 'store'])->name('vendor.store');
+    Route::get('/vendor/pending', [VendorProfileController::class, 'pending'])->name('vendor.pending');
+    Route::get('/vendor/rejected', [VendorProfileController::class, 'rejected'])->name('vendor.rejected');
+
+    // Notifications
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
+    Route::post('/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
 });
 
-Route::post('/ratings', [\App\Http\Controllers\RatingController::class, 'store'])->name('ratings.store');
+Route::post('/ratings', [RatingController::class, 'store'])->name('ratings.store');
 
 // Admin Routes (Protected)
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function () {
@@ -82,41 +99,50 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
         return redirect()->route('admin.dashboard');
     })->name('dashboard.redirect');
 
-    Route::get('/dashboard', [\App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::resource('categories', CategoryController::class);
-    
+
     // Product Approvals
-    Route::get('items/pending', [\App\Http\Controllers\Admin\ProductApprovalController::class, 'index'])->name('items.pending');
-    Route::patch('items/{item}/approve', [\App\Http\Controllers\Admin\ProductApprovalController::class, 'approve'])->name('items.approve');
-    Route::patch('items/{item}/reject', [\App\Http\Controllers\Admin\ProductApprovalController::class, 'reject'])->name('items.reject');
-    
+    Route::patch('items/{item}/approve', [ProductApprovalController::class, 'approve'])->name('items.approve');
+    Route::patch('items/{item}/reject', [ProductApprovalController::class, 'reject'])->name('items.reject');
+
     Route::resource('items', ItemController::class);
     Route::delete('items/images/{image}', [ItemController::class, 'deleteImage'])->name('items.delete-image');
-    Route::resource('users', \App\Http\Controllers\Admin\UserController::class)->only(['index', 'edit', 'update', 'destroy']);
-    Route::patch('users/{user}/suspend', [\App\Http\Controllers\Admin\UserController::class, 'suspend'])->name('users.suspend');
-    
+    Route::resource('users', UserController::class)->only(['index', 'edit', 'update', 'destroy']);
+    Route::patch('users/{user}/suspend', [UserController::class, 'suspend'])->name('users.suspend');
+
     Route::get('orders', [AdminOrderController::class, 'index'])->name('orders.index');
     Route::get('orders/{order}', [AdminOrderController::class, 'show'])->name('orders.show');
     Route::patch('orders/{order}', [AdminOrderController::class, 'update'])->name('orders.update');
 
-    Route::get('reports', [\App\Http\Controllers\Admin\ReportController::class, 'index'])->name('reports.index');
+    Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
+    Route::get('reports/orders', [ReportController::class, 'orders'])->name('reports.orders');
+    Route::get('reports/products', [ReportController::class, 'products'])->name('reports.products');
+    Route::get('reports/vendors', [ReportController::class, 'vendors'])->name('reports.vendors');
+    Route::get('reports/brands', [ReportController::class, 'brands'])->name('reports.brands');
+    Route::get('reports/financials', [ReportController::class, 'financials'])->name('reports.financials');
 
     Route::resource('reviews', ReviewController::class)->only(['index', 'destroy', 'create', 'store']);
     Route::patch('reviews/{review}/status', [ReviewController::class, 'updateStatus'])->name('reviews.updateStatus');
     Route::patch('avatar-options/{avatarOption}/toggle', [AvatarOptionController::class, 'toggle'])->name('avatar-options.toggle');
     Route::resource('avatar-options', AvatarOptionController::class)->except(['show']);
 
-    Route::get('special-requests', [\App\Http\Controllers\SpecialRequestController::class, 'index'])->name('special-requests.index');
-    Route::patch('special-requests/{specialRequest}/status', [\App\Http\Controllers\SpecialRequestController::class, 'updateStatus'])->name('special-requests.updateStatus');
-    Route::post('special-requests/{specialRequest}/assign-offer', [\App\Http\Controllers\SpecialRequestController::class, 'assignOffer'])->name('special-requests.assign-offer');
+    Route::get('special-requests', [SpecialRequestController::class, 'index'])->name('special-requests.index');
+    Route::patch('special-requests/{specialRequest}/status', [SpecialRequestController::class, 'updateStatus'])->name('special-requests.updateStatus');
+    Route::post('special-requests/{specialRequest}/assign-offer', [SpecialRequestController::class, 'assignOffer'])->name('special-requests.assign-offer');
 
-    Route::get('vendors/requests', [\App\Http\Controllers\Admin\VendorRequestController::class, 'index'])->name('vendors.requests.index');
-    Route::get('vendors/requests/{vendorProfile}', [\App\Http\Controllers\Admin\VendorRequestController::class, 'show'])->name('vendors.requests.show');
-    Route::patch('vendors/requests/{vendorProfile}', [\App\Http\Controllers\Admin\VendorRequestController::class, 'update'])->name('vendors.requests.update');
+    Route::get('vendors/requests', [VendorRequestController::class, 'index'])->name('vendors.requests.index');
+    Route::get('vendors/requests/{vendorProfile}', [VendorRequestController::class, 'show'])->name('vendors.requests.show');
+    Route::patch('vendors/requests/{vendorProfile}', [VendorRequestController::class, 'update'])->name('vendors.requests.update');
 
     // Brands Management
-    Route::get('/brands', [\App\Http\Controllers\Admin\BrandController::class, 'index'])->name('brands.index');
+    Route::resource('brands', App\Http\Controllers\Admin\BrandController::class)->only(['index', 'edit', 'update']);
+
+    // Newsletter Subscribers
+    Route::get('subscribers', [NewsletterController::class, 'index'])->name('subscribers.index');
+    Route::delete('subscribers/{subscriber}', [NewsletterController::class, 'destroy'])->name('subscribers.destroy');
+    Route::post('subscribers/send-mail', [NewsletterController::class, 'sendMail'])->name('subscribers.sendMail');
 });
 
 // Vendor Routes (Protected)
@@ -125,11 +151,24 @@ Route::prefix('vendor')->name('vendor.')->middleware(['auth', 'vendor'])->group(
         return redirect()->route('vendor.dashboard');
     })->name('dashboard.redirect');
 
-    Route::get('/dashboard', [\App\Http\Controllers\Vendor\DashboardController::class, 'index'])->name('dashboard');
-    Route::get('/orders', [\App\Http\Controllers\Vendor\DashboardController::class, 'orders'])->name('orders');
-    
+    Route::get('/dashboard', [App\Http\Controllers\Vendor\DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/orders', [App\Http\Controllers\Vendor\DashboardController::class, 'orders'])->name('orders');
+
     // Vendor Products
-    Route::resource('items', \App\Http\Controllers\Vendor\ItemController::class);
+    Route::resource('items', App\Http\Controllers\Vendor\ItemController::class);
+
+    // Vendor Orders Details
+    Route::get('/orders/{order}', [App\Http\Controllers\Vendor\DashboardController::class, 'showOrder'])->name('orders.show');
+    Route::patch('/orders/{order}', [App\Http\Controllers\Vendor\DashboardController::class, 'updateOrderStatus'])->name('orders.update');
+
+    // Vendor Special Requests
+    Route::get('special-requests', [App\Http\Controllers\Vendor\SpecialRequestController::class, 'index'])->name('special-requests.index');
+    Route::patch('special-requests/{specialRequest}/status', [App\Http\Controllers\Vendor\SpecialRequestController::class, 'updateStatus'])->name('special-requests.updateStatus');
+    Route::post('special-requests/{specialRequest}/assign-offer', [App\Http\Controllers\Vendor\SpecialRequestController::class, 'assignOffer'])->name('special-requests.assign-offer');
+
+    // Vendor Brand Management
+    Route::get('brand', [App\Http\Controllers\Vendor\BrandController::class, 'edit'])->name('brand.edit');
+    Route::put('brand', [App\Http\Controllers\Vendor\BrandController::class, 'update'])->name('brand.update');
 });
 
 require __DIR__.'/auth.php';

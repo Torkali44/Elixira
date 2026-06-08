@@ -10,7 +10,12 @@
         <h2 class="mb-1"> Vendor Application Details </h2>
         <p class="text-muted mb-0">Review {{ $vendorProfile->brand_name }} application.</p>
     </div>
-    <div>
+    <div class="d-flex flex-wrap align-items-center gap-2">
+        @if($vendorProfile->brand)
+            <a href="{{ route('admin.brands.edit', $vendorProfile->brand) }}" class="btn btn-outline-primary">
+                <i class="fas fa-store me-2"></i> Edit Vendor Brand
+            </a>
+        @endif
         @if($vendorProfile->status === 'pending')
             <button type="button" class="btn btn-outline-danger" onclick="showRejectPopup()">
                 <i class="fas fa-times"></i> Reject

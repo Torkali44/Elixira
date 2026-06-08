@@ -22,6 +22,7 @@
                             <th>Your Revenue</th>
                             <th>Status</th>
                             <th class="text-center">Date</th>
+                            <th class="text-end pe-4">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -79,10 +80,15 @@
                                     {{ $order->created_at->format('M d, Y') }}<br>
                                     <small>{{ $order->created_at->format('H:i') }}</small>
                                 </td>
+                                <td class="text-end pe-4">
+                                    <a href="{{ route('vendor.orders.show', $order->id) }}" class="btn btn-sm btn-outline-primary" style="border-radius: 8px;">
+                                        <i class="fas fa-eye me-1"></i> Details
+                                    </a>
+                                </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="text-center py-5 text-muted">
+                                <td colspan="8" class="text-center py-5 text-muted">
                                     <i class="fas fa-inbox d-block mb-2" style="font-size: 2rem; opacity: 0.3;"></i>
                                     <p class="mb-0">No orders yet.</p>
                                 </td>

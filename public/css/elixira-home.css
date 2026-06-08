@@ -381,6 +381,7 @@ html.elx-animate-scroll [data-animate].animate-in {
     border: 1px solid rgba(255, 255, 255, 0.08);
     box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
     backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     opacity: 0;
     pointer-events: none;
     transform: translateY(-10px);
@@ -466,6 +467,7 @@ html.elx-animate-scroll [data-animate].animate-in {
     transition: var(--elx-transition);
     font-family: var(--elx-font);
     backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }
 
 .elx-nav__btn:hover {
@@ -650,6 +652,7 @@ html.elx-animate-scroll [data-animate].animate-in {
 .elx-btn--glass {
     background: var(--elx-glass);
     backdrop-filter: blur(42px);
+    -webkit-backdrop-filter: blur(42px);
     border-color: var(--elx-border);
     color: var(--elx-white);
     box-shadow:
@@ -690,6 +693,7 @@ html.elx-animate-scroll [data-animate].animate-in {
     border-radius: 100px;
     background: var(--elx-glass);
     backdrop-filter: blur(46px);
+    -webkit-backdrop-filter: blur(46px);
     border: 1px solid rgba(39, 80, 99, 0.32);
     transition: var(--elx-transition);
     box-shadow:
@@ -974,6 +978,7 @@ html.elx-animate-scroll [data-animate].animate-in {
     border-radius: 100px;
     background: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 254, 168, 0.15);
     font-size: 0.7rem;
     font-weight: 600;
@@ -1134,6 +1139,7 @@ html.elx-animate-scroll [data-animate].animate-in {
     border-radius: var(--elx-radius-sm);
     background: var(--elx-glass);
     backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
     border: 1px solid var(--elx-border);
     text-align: center;
     transition: var(--elx-transition);
@@ -1340,6 +1346,7 @@ html.elx-animate-scroll [data-animate].animate-in {
         height: 100vh;
         background: rgba(6, 15, 20, 0.97);
         backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
         flex-direction: column;
         justify-content: center;
         align-items: center;

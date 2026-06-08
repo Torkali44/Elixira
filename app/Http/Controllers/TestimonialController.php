@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\AvatarOption;
+use App\Models\NewsletterSubscriber;
+use App\Models\Notification;
 use App\Models\Review;
+use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rule;
 
@@ -13,7 +16,7 @@ class TestimonialController extends Controller
     public function index(Request $request)
     {
         $tab = $request->query('tab', 'direct');
-        
+
         $reviews = Review::where('status', 'approved')
             ->where('type', $tab)
             ->latest()
@@ -54,6 +57,22 @@ class TestimonialController extends Controller
                 'content' => $request->content,
                 'status' => 'pending',
             ]);
+
+            // Notify Admins
+            try {
+                $admins = User::where('role', 'admin')->get();
+                foreach ($admins as $admin) {
+                    Notification::create([
+                        'user_id' => $admin->id,
+                        'title' => 'New Review/Comment',
+                        'message' => 'A new review has been submitted by '.$request->name.' and is pending approval.',
+                        'url' => route('admin.reviews.index'),
+                        'is_read' => false,
+                    ]);
+                }
+            } catch (\Throwable $e2) {
+                \Log::error('Review notification failed: '.$e2->getMessage());
+            }
         } catch (\Throwable $e) {
             report($e);
 
@@ -77,17 +96,19 @@ class TestimonialController extends Controller
         $email = $request->email;
 
         try {
+            NewsletterSubscriber::firstOrCreate(['email' => $email]);
+
             Mail::raw("Thank you for subscribing to Elixira's Whisper! Stay tuned for exclusive launches and wellness tips.", function ($message) use ($email) {
                 $message->to($email)
                     ->subject('Welcome to Elixira — The Whisper');
             });
 
-            Mail::raw("A new user has subscribed to the newsletter: " . $email, function ($message) {
+            Mail::raw('A new user has subscribed to the newsletter: '.$email, function ($message) {
                 $message->to('admin@elixira.com')
                     ->subject('New Newsletter Subscriber');
             });
         } catch (\Exception $e) {
-            // Log error
+            \Log::error('Newsletter subscription failed: '.$e->getMessage());
         }
 
         return redirect()->back()->with('success', 'You have successfully joined The Whisper community!');

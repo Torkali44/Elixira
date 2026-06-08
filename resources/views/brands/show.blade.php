@@ -104,6 +104,11 @@
         font-weight: 700;
     }
 
+    @keyframes brand-float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+
     .brand-vendor-bar {
         display: flex;
         align-items: center;
@@ -116,6 +121,16 @@
         border: 1px solid rgba(74, 200, 246, 0.2);
         box-shadow: 0 4px 20px rgba(0,0,0,0.5), inset 0 0 15px rgba(74, 200, 246, 0.05);
         margin: 0 auto 2rem;
+        transition: border-color 0.35s ease, box-shadow 0.35s ease, background 0.35s ease;
+    }
+
+    .brand-vendor-bar:hover {
+        border-color: rgba(74, 200, 246, 0.55);
+        background: rgba(0, 0, 0, 0.52);
+        box-shadow:
+            0 0 28px rgba(74, 200, 246, 0.25),
+            0 8px 32px rgba(0, 0, 0, 0.55),
+            inset 0 0 24px rgba(74, 200, 246, 0.12);
     }
 
     .brand-vendor-info {
@@ -172,6 +187,8 @@
     .brand-social-link:hover {
         background: rgba(74, 200, 246, 0.2);
         color: var(--elx-cyan);
+        box-shadow: 0 0 14px rgba(74, 200, 246, 0.35);
+        animation: brand-float 1.1s ease-in-out infinite;
     }
 
     .brand-store-link {
@@ -183,10 +200,11 @@
         font-weight: 600;
         text-decoration: none;
         margin-right: 1rem;
+        transition: color 0.3s ease, text-shadow 0.3s ease;
     }
 
     .brand-store-link:hover {
-        text-shadow: 0 0 8px rgba(74, 200, 246, 0.6);
+        text-shadow: 0 0 10px rgba(74, 200, 246, 0.65);
     }
 
     .brand-description {
@@ -446,7 +464,14 @@
             @if($brand->ratings->count() > 0)
                 <div class="reviews-grid">
                     @foreach($brand->ratings as $rating)
-                        <div class="review-card">
+                        @php
+                            $isReviewExpandable = \Illuminate\Support\Str::length((string) $rating->comment) > 180;
+                        @endphp
+                        <div class="review-card"
+                            data-expandable="{{ $isReviewExpandable ? '1' : '0' }}"
+                            data-review-name="{{ $rating->user ? $rating->user->name : 'Guest' }}"
+                            data-review-rating="{{ $rating->rating }}"
+                            data-review-content="{{ e($rating->comment) }}">
                             <div class="review-header">
                                 <div class="d-flex align-items-center gap-3">
                                     <div class="review-avatar">
@@ -478,7 +503,10 @@
                             </div>
                             @if($rating->comment)
                                 <div class="review-body">
-                                    <p>{{ $rating->comment }}</p>
+                                    <p class="brand-review-message">{{ $rating->comment }}</p>
+                                    @if($isReviewExpandable)
+                                        <div class="brand-review-read-more">Tap to read full review ...</div>
+                                    @endif
                                 </div>
                             @endif
                         </div>
@@ -749,7 +777,7 @@
 
     @keyframes pulse-glow {
         0% { box-shadow: 0 0 0 0 rgba(0, 229, 255, 0.4); }
-        70% { box-shadow: 0 0 0 10px rgba(0, 229, 255, 0); }
+        70% { box-shadow: 0 0 0 5px rgba(0, 229, 255, 0); }
         100% { box-shadow: 0 0 0 0 rgba(0, 229, 255, 0); }
     }
 
@@ -769,9 +797,31 @@
         transition: transform 0.3s ease, border-color 0.3s ease;
     }
 
+    .review-card[data-expandable="1"] {
+        cursor: pointer;
+    }
+
     .review-card:hover {
         transform: translateY(-5px);
         border-color: rgba(0, 229, 255, 0.2);
+    }
+
+    .brand-review-message {
+        display: -webkit-box;
+        -webkit-line-clamp: 6;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .brand-review-read-more {
+        margin-top: 0.75rem;
+        text-align: center;
+        color: #4ac8f6;
+        font-size: 0.82rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
     }
 
     .review-header {
@@ -841,4 +891,37 @@
         border: 1px dashed rgba(255, 255, 255, 0.1);
     }
 </style>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const escapeHtml = (unsafeText) => {
+            const div = document.createElement('div');
+            div.textContent = unsafeText;
+            return div.innerHTML;
+        };
+
+        document.querySelectorAll('.review-card[data-expandable="1"]').forEach((card) => {
+            card.addEventListener('click', () => {
+                const reviewerName = card.dataset.reviewName || 'Customer';
+                const reviewContent = card.dataset.reviewContent || '';
+                const reviewRating = Number(card.dataset.reviewRating || 0);
+                const stars = '★'.repeat(reviewRating) + '☆'.repeat(Math.max(0, 5 - reviewRating));
+
+                Swal.fire({
+                    title: escapeHtml(reviewerName),
+                    html: `
+                        <div style="text-align: start;">
+                            <div style="color:#4ac8f6; font-size:1.1rem; letter-spacing:2px; margin-bottom:12px;">${stars}</div>
+                            <div style="line-height:1.9; color:#eaf4f8; font-size:1rem; white-space:pre-wrap;">${escapeHtml(reviewContent)}</div>
+                        </div>
+                    `,
+                    background: '#0d1a20',
+                    color: '#eaf4f8',
+                    width: 640,
+                    confirmButtonText: 'Close',
+                    confirmButtonColor: '#4ac8f6',
+                });
+            });
+        });
+    });
+</script>
 @endsection

@@ -438,13 +438,13 @@
             <div class="elx-newsletter__box" data-animate>
                 <h2>Unlock exclusive launches, curated tips, and membersâ€‘only offers.</h2>
                 <p class="elx-newsletter__sub">No Spam, Good Stuff Only!</p>
-                <div class="elx-newsletter__form display: flex; gap: 15px; ">
+                <div style="max-width: 600px; margin: 0 auto;">
                     <form action="{{ route('newsletter.subscribe') }}" method="POST"
-                        style="display: flex; width: 100%; gap: 10px;">
+                        style="display: flex; width: 100%; gap: 15px;">
                         @csrf
                         <input type="email" name="email" placeholder="Your email address" class="elx-newsletter__input"
-                            required style="flex: 1; margin-right: 15px;">
-                        <button type="submit" class="elx-newsletter__btn" >Receive the Whisper</button>
+                            required style="flex: 1; background: rgba(0, 0, 0, 0.3); border: 1px solid var(--elx-border); border-radius: 100px; padding: 0.9rem 1.5rem;">
+                        <button type="submit" class="elx-newsletter__btn" style="border-radius: 100px; padding: 0.9rem 2rem;">Receive the Whisper</button>
                     </form>
                 </div>
             </div>

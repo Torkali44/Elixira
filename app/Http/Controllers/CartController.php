@@ -7,10 +7,12 @@ use App\Http\Requests\CheckoutRequest;
 use App\Http\Requests\RemoveFromCartRequest;
 use App\Http\Requests\UpdateCartRequest;
 use App\Models\Item;
+use App\Models\Notification;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\SpecialItemOffer;
 use App\Models\User;
+use App\Models\UserAddress;
 use Illuminate\Support\Facades\DB;
 
 class CartController extends Controller
@@ -53,10 +55,10 @@ class CartController extends Controller
             }
 
             if ($request->ajax() || $request->wantsJson()) {
-                return response()->json(['success' => false, 'message' => 'Only ' . $remaining . ' more unit(s) available. You already have ' . $existingQty . ' in your cart.']);
+                return response()->json(['success' => false, 'message' => 'Only '.$remaining.' more unit(s) available. You already have '.$existingQty.' in your cart.']);
             }
 
-            return redirect()->back()->with('error', 'Only ' . $remaining . ' more unit(s) available. You already have ' . $existingQty . ' in your cart.');
+            return redirect()->back()->with('error', 'Only '.$remaining.' more unit(s) available. You already have '.$existingQty.' in your cart.');
         }
 
         if (isset($cart[$item->id])) {
@@ -84,7 +86,7 @@ class CartController extends Controller
     {
         $cart = session()->get('cart', []);
 
-        if (!isset($cart[$request->id])) {
+        if (! isset($cart[$request->id])) {
             return response()->json(['success' => false, 'message' => 'Item not found in cart.'], 404);
         }
 
@@ -95,7 +97,7 @@ class CartController extends Controller
         if ($item && $request->quantity > $maxAllowed) {
             return response()->json([
                 'success' => false,
-                'message' => 'Only ' . $maxAllowed . ' units available for your account.',
+                'message' => 'Only '.$maxAllowed.' units available for your account.',
             ], 422);
         }
 
@@ -110,7 +112,7 @@ class CartController extends Controller
         $id = $request->id;
         $cart = session()->get('cart', []);
 
-        if (!isset($cart[$id])) {
+        if (! isset($cart[$id])) {
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json(['success' => false, 'message' => 'Item not found in cart.'], 404);
             }
@@ -140,7 +142,7 @@ class CartController extends Controller
             $item = Item::find($id);
             $maxAllowed = $item ? $item->stock + $this->availablePrivateQuantity($request->user(), (int) $id) : 0;
 
-            if (!$item || $details['quantity'] > $maxAllowed) {
+            if (! $item || $details['quantity'] > $maxAllowed) {
                 $name = $item ? $item->name : 'Unknown product';
                 $available = $item ? $maxAllowed : 0;
 
@@ -150,7 +152,7 @@ class CartController extends Controller
 
         $total = collect($cart)->sum(fn (array $details) => $details['price'] * $details['quantity']);
 
-        $fullPhone = $request->country_code . ltrim($request->phone_number, '0');
+        $fullPhone = $request->country_code.ltrim($request->phone_number, '0');
         $authenticatedUser = $request->user();
         $resolvedUserCode = $request->filled('user_code')
             ? $request->user_code
@@ -172,11 +174,11 @@ class CartController extends Controller
             if ($authenticatedUser) {
                 $updates = [];
 
-                if (!$authenticatedUser->phone) {
+                if (! $authenticatedUser->phone) {
                     $updates['phone'] = $fullPhone;
                 }
 
-                if (!$authenticatedUser->user_code && $resolvedUserCode) {
+                if (! $authenticatedUser->user_code && $resolvedUserCode) {
                     $exists = User::where('user_code', $resolvedUserCode)->where('id', '!=', $authenticatedUser->id)->exists();
                     if ($exists) {
                         return redirect()
@@ -189,18 +191,18 @@ class CartController extends Controller
                     $updates['user_code'] = $resolvedUserCode;
                 }
 
-                if (!empty($updates)) {
+                if (! empty($updates)) {
                     $authenticatedUser->update($updates);
                 }
-                
+
                 if ($request->filled('address') && $request->has('save_address')) {
-                    $addr = \App\Models\UserAddress::firstOrCreate([
+                    $addr = UserAddress::firstOrCreate([
                         'user_id' => $authenticatedUser->id,
                         'address' => $request->address,
                     ]);
-                    
+
                     if ($request->has('is_main_address')) {
-                        \App\Models\UserAddress::where('user_id', $authenticatedUser->id)->update(['is_main' => false]);
+                        UserAddress::where('user_id', $authenticatedUser->id)->update(['is_main' => false]);
                         $addr->update(['is_main' => true]);
                     }
                 }
@@ -243,27 +245,60 @@ class CartController extends Controller
                 }
             }
 
+            // Create notifications for customer and vendors
+            try {
+                if ($authenticatedUser) {
+                    Notification::create([
+                        'user_id' => $authenticatedUser->id,
+                        'title' => 'Order Placed Successfully',
+                        'message' => 'Your order #'.$order->id.' has been placed successfully and is pending confirmation.',
+                        'url' => route('profile.orders.show', $order->id),
+                    ]);
+                }
+
+                $vendorsToNotify = [];
+                foreach ($cart as $itemId => $details) {
+                    $item = Item::find($itemId);
+                    if ($item && $item->vendor) {
+                        $vendorsToNotify[$item->vendor->id] = $item->vendor;
+                    }
+                }
+
+                foreach ($vendorsToNotify as $vendorId => $vendor) {
+                    Notification::create([
+                        'user_id' => $vendorId,
+                        'title' => 'New Order Received',
+                        'message' => 'You have a new order #'.$order->id.' containing your products.',
+                        'url' => route('vendor.orders'),
+                    ]);
+                }
+            } catch (\Throwable $e) {
+                // Log and ignore to prevent checkout failure
+                \Log::error('Checkout notification failed: '.$e->getMessage());
+            }
+
             DB::commit();
             session()->forget('cart');
 
             return redirect()->route('orders.track', [
                 'order_id' => $order->id,
                 'phone' => $order->customer_phone,
-            ])->with('success', 'Thank you! Your order #' . $order->id . ' has been placed.');
+            ])->with('success', 'Thank you! Your order #'.$order->id.' has been placed.');
         } catch (\Throwable $exception) {
             DB::rollBack();
-            \Log::error('Checkout Error: ' . $exception->getMessage(), [
+            \Log::error('Checkout Error: '.$exception->getMessage(), [
                 'file' => $exception->getFile(),
                 'line' => $exception->getLine(),
-                'trace' => $exception->getTraceAsString()
+                'trace' => $exception->getTraceAsString(),
             ]);
-            return redirect()->back()->withInput()->with('error', 'Something went wrong while placing your order: ' . $exception->getMessage());
+
+            return redirect()->back()->withInput()->with('error', 'Something went wrong while placing your order: '.$exception->getMessage());
         }
     }
 
     private function availablePrivateQuantity(?User $user, int $itemId): int
     {
-        if (!$user) {
+        if (! $user) {
             return 0;
         }
 
@@ -291,7 +326,7 @@ class CartController extends Controller
 
     private function consumePrivateOffers(?User $user, int $itemId, int $quantity): void
     {
-        if (!$user || $quantity <= 0) {
+        if (! $user || $quantity <= 0) {
             return;
         }
 

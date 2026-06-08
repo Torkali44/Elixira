@@ -71,29 +71,33 @@
 
             <div class="card shadow-sm">
                 <div class="card-header bg-white">
-                    <h5 class="mb-0">Update status</h5>
+                    <h5 class="mb-0">Order status</h5>
                 </div>
                 <div class="card-body">
-                    <form action="{{ route('admin.orders.update', $order->id) }}" method="POST">
-                        @csrf
-                        @method('PATCH')
-                        <div class="mb-3">
-                            <label class="form-label">Order status</label>
-                            <select name="status" class="form-select">
-                                <option value="pending" {{ $order->status == 'pending' ? 'selected' : '' }}>Pending</option>
-                                <option value="confirmed" {{ $order->status == 'confirmed' ? 'selected' : '' }}>Confirmed
-                                </option>
-                                <option value="preparing" {{ $order->status == 'preparing' ? 'selected' : '' }}>Preparing
-                                </option>
-                                <option value="ready" {{ $order->status == 'ready' ? 'selected' : '' }}>Ready to ship</option>
-                                <option value="delivered" {{ $order->status == 'delivered' ? 'selected' : '' }}>Delivered
-                                </option>
-                                <option value="cancelled" {{ $order->status == 'cancelled' ? 'selected' : '' }}>Cancelled
-                                </option>
-                            </select>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100">Save</button>
-                    </form>
+                    @php
+                        $badge = match ($order->status) {
+                            'pending' => 'warning text-dark',
+                            'confirmed' => 'info',
+                            'preparing' => 'primary',
+                            'ready' => 'success',
+                            'delivered' => 'success',
+                            'cancelled' => 'danger',
+                            default => 'secondary',
+                        };
+                        $label = match ($order->status) {
+                            'pending' => 'Pending',
+                            'confirmed' => 'Confirmed',
+                            'preparing' => 'Preparing',
+                            'ready' => 'Ready to ship',
+                            'delivered' => 'Delivered',
+                            'cancelled' => 'Cancelled',
+                            default => ucfirst($order->status),
+                        };
+                    @endphp
+                    <div class="d-flex align-items-center justify-content-between">
+                        <span class="fw-bold">Status:</span>
+                        <span class="badge bg-{{ $badge }} fs-6 px-3 py-2 rounded-pill">{{ $label }}</span>
+                    </div>
                 </div>
             </div>
         </div>

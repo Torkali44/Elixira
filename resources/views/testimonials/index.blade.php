@@ -576,8 +576,8 @@
                                 </div>
                                 <div class="form-group">
                                     <label class="form-label">Email Address</label>
-                                    <input type="email" name="email" class="form-input" placeholder="e.g. duke@elixira.com"
-                                        value="{{ old('email') }}" required>
+                                    <input type="email" name="email" class="form-input" placeholder="e.g. duke@elixira.com (optional)"
+                                        value="{{ old('email') }}">
                                 </div>
                             </div>
                             <div class="form-row">

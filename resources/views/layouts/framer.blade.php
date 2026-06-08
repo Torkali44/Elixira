@@ -45,6 +45,14 @@
             color: #4ac8f6 !important;
             transform: translateX(5px);
         }
+
+        /* Notifications Dropdown Toggle */
+        #notificationsMenu.open .elx-nav__notifications-dropdown {
+            display: block !important;
+        }
+        .elx-nav__notifications-item:hover {
+            background: rgba(255, 255, 255, 0.08) !important;
+        }
     </style>
     @yield('head')
 </head>
@@ -79,6 +87,49 @@
             </ul>
 
             <div class="elx-nav__actions">
+                @auth
+                    <div class="elx-nav__notifications-wrapper" id="notificationsMenu" style="position: relative; margin-right: 0.5rem;">
+                        <button type="button" class="elx-nav__notifications-trigger" id="notificationsTrigger" aria-expanded="false" aria-controls="notificationsDropdown" style="background: none; border: none; color: #fff; font-size: 1.35rem; cursor: pointer; position: relative; padding: 5px; display: flex; align-items: center; justify-content: center; height: 42px; width: 42px; border-radius: 50%; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.1); transition: var(--elx-transition);">
+                            <i class="fas fa-bell"></i>
+                            @php $unreadCount = auth()->user()->unreadNotifications()->count(); @endphp
+                            @if($unreadCount > 0)
+                                <span class="elx-nav__notifications-badge" style="position: absolute; top: -4px; right: -4px; background-color: #dc3545; color: white; font-size: 0.65rem; font-weight: bold; border-radius: 50%; padding: 2px 5px; min-width: 17px; text-align: center; line-height: 1;">{{ $unreadCount }}</span>
+                            @endif
+                        </button>
+                        <div class="elx-nav__notifications-dropdown" id="notificationsDropdown" style="position: absolute; right: 0; top: calc(100% + 0.8rem); width: 320px; background: #13252d; border: 1px solid rgba(20, 204, 255, 0.15); border-radius: 24px; box-shadow: 0 24px 80px rgba(0,0,0,0.5); display: none; z-index: 1100; overflow: hidden; font-family: var(--elx-font);">
+                            <div class="elx-nav__notifications-head" style="display: flex; justify-content: space-between; align-items: center; padding: 16px; border-bottom: 1px solid rgba(255,255,255,0.08); background: rgba(0,0,0,0.15);">
+                                <strong style="color: #fff; font-size: 0.95rem;">Notifications</strong>
+                                @if($unreadCount > 0)
+                                    <button onclick="markAllNotificationsAsRead(event)" class="elx-nav__notifications-clear" style="background: none; border: none; color: #4ac8f6; font-size: 0.8rem; cursor: pointer; padding: 0; font-weight: 500;">Mark all as read</button>
+                                @endif
+                            </div>
+                            <div class="elx-nav__notifications-list" style="max-height: 350px; overflow-y: auto;">
+                                @forelse(auth()->user()->notifications()->take(10)->get() as $notif)
+                                    <div class="elx-nav__notifications-item {{ $notif->is_read ? '' : 'unread' }}" 
+                                         onclick="handleNotificationClick(event, '{{ route('notifications.read', $notif->id) }}', '{{ $notif->url ?? '#' }}')"
+                                         style="padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.08); cursor: pointer; transition: background 0.25s; background: {{ $notif->is_read ? 'rgba(0, 0, 0, 0.2)' : 'rgba(74, 200, 246, 0.12)' }}; text-align: left;">
+                                        <div style="display: flex; align-items: start; gap: 8px;">
+                                            @if(!$notif->is_read)
+                                                <span class="unread-dot" style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background-color: #4ac8f6; box-shadow: 0 0 8px #4ac8f6; margin-top: 6px; flex-shrink: 0;"></span>
+                                            @endif
+                                            <div style="flex-grow: 1;">
+                                                <div class="notif-title" style="color: {{ $notif->is_read ? '#8fa4af' : '#4ac8f6' }}; font-weight: {{ $notif->is_read ? 'normal' : 'bold' }}; font-size: 0.9rem; margin-bottom: 4px;">{{ $notif->title }}</div>
+                                                <div class="notif-message" style="color: rgba(255,255,255,0.6); font-size: 0.8rem; line-height: 1.4; margin-bottom: 6px;">{{ $notif->message }}</div>
+                                                <div class="notif-time" style="color: rgba(255,255,255,0.35); font-size: 0.7rem;">{{ $notif->created_at->diffForHumans() }}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @empty
+                                    <div class="elx-nav__notifications-empty" style="padding: 32px 16px; text-align: center; color: rgba(255,255,255,0.4); font-size: 0.85rem;">
+                                        <i class="fas fa-bell-slash" style="display: block; font-size: 1.8rem; margin-bottom: 10px; opacity: 0.4;"></i>
+                                        No notifications yet.
+                                    </div>
+                                @endforelse
+                            </div>
+                        </div>
+                    </div>
+                @endauth
+
                 <a href="{{ route('cart.index') }}" class="elx-nav__cart" title="Cart">
                     <i class="fas fa-shopping-bag"></i>
                     @php $cartCount = count(session('cart', [])); @endphp
@@ -307,6 +358,19 @@
             event.stopPropagation();
             profileMenu.classList.toggle('open');
             profileTrigger.setAttribute('aria-expanded', profileMenu.classList.contains('open') ? 'true' : 'false');
+            // Close notifications menu if open
+            notificationsMenu?.classList.remove('open');
+        });
+
+        const notificationsMenu = document.getElementById('notificationsMenu');
+        const notificationsTrigger = document.getElementById('notificationsTrigger');
+        notificationsTrigger?.addEventListener('click', (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            notificationsMenu.classList.toggle('open');
+            notificationsTrigger.setAttribute('aria-expanded', notificationsMenu.classList.contains('open') ? 'true' : 'false');
+            // Close profile menu if open
+            profileMenu?.classList.remove('open');
         });
 
         document.addEventListener('click', (event) => {
@@ -314,7 +378,58 @@
                 profileMenu.classList.remove('open');
                 profileTrigger?.setAttribute('aria-expanded', 'false');
             }
+            if (notificationsMenu && !notificationsMenu.contains(event.target)) {
+                notificationsMenu.classList.remove('open');
+                notificationsTrigger?.setAttribute('aria-expanded', 'false');
+            }
         });
+
+        function markAllNotificationsAsRead(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            fetch("{{ route('notifications.read-all') }}", {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    const badge = document.querySelector('.elx-nav__notifications-badge');
+                    if (badge) badge.remove();
+                    document.querySelectorAll('.elx-nav__notifications-item').forEach(item => {
+                        item.style.background = 'rgba(0, 0, 0, 0.2)';
+                        item.classList.remove('unread');
+                        const title = item.querySelector('.notif-title');
+                        if (title) {
+                            title.style.color = '#8fa4af';
+                            title.style.fontWeight = 'normal';
+                        }
+                        const dot = item.querySelector('.unread-dot');
+                        if (dot) dot.remove();
+                    });
+                    const clearBtn = document.querySelector('.elx-nav__notifications-clear');
+                    if (clearBtn) clearBtn.remove();
+                }
+            });
+        }
+
+        function handleNotificationClick(event, readUrl, redirectUrl) {
+            event.preventDefault();
+            event.stopPropagation();
+            
+            fetch(readUrl, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                }
+            }).finally(() => {
+                window.location.href = redirectUrl;
+            });
+        }
 
         const nav = document.getElementById('elxNav');
         if (nav && !nav.classList.contains('scrolled-permanent')) {

@@ -2,14 +2,29 @@
 
 @section('content')
 <div class="container-fluid">
+    @if(auth()->user()->vendorProfile?->brand && !auth()->user()->vendorProfile->brand->is_active)
+        <div class="alert alert-danger border-0 shadow-sm d-flex align-items-start gap-3 mb-4" style="border-radius: 12px;">
+            <i class="fas fa-store-slash mt-1"></i>
+            <div>
+                <strong>Your brand storefront is inactive.</strong>
+                <div class="small mt-1">Public customers cannot access your store page. Visit <a href="{{ route('vendor.brand.edit') }}" class="alert-link">My Brand</a> for details.</div>
+            </div>
+        </div>
+    @endif
+
     {{-- Header --}}
-    <div class="row mb-4">
-        <div class="col-12">
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-9">
             <h2 class="mb-1">Vendor Dashboard</h2>
             <h4 class="text-primary mb-2">
                 <i class="fas fa-store me-2"></i> {{ auth()->user()->vendorProfile->brand_name ?? 'Your Brand' }}
             </h4>
-            <p class="text-muted">Welcome to your store overview — Track sales, orders, and customers.</p>
+            <p class="text-muted mb-0">Welcome to your store overview — Track sales, orders, and customers.</p>
+        </div>
+        <div class="col-md-3 text-md-end d-print-none mt-3 mt-md-0">
+            <button onclick="window.print()" class="btn btn-outline-primary px-3 py-2" style="border-radius: 8px; border-color: #2D1325; color: #2D1325; font-weight: 600; background: transparent; transition: all 0.2s;">
+                <i class="fas fa-print me-2"></i> Print Dashboard
+            </button>
         </div>
     </div>
 
@@ -65,7 +80,26 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="text-muted text-uppercase mb-1" style="font-size: 0.7rem; letter-spacing: 1px;">Rejected</h6>
+                            <h6 class="text-muted text-uppercase mb-1" style="font-size: 0.7rem; letter-spacing: 1px;">Needs Revision</h6>
+                            <h2 class="mb-0 fw-bold text-warning">{{ $stats['revision_items'] }}</h2>
+                        </div>
+                        <div class="p-3 rounded-circle" style="background: rgba(245, 158, 11, 0.08);">
+                            <i class="fas fa-edit text-warning fa-lg"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if($stats['rejected_items'] > 0)
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100" style="border-radius: 16px;">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted text-uppercase mb-1" style="font-size: 0.7rem; letter-spacing: 1px;">Permanently Rejected</h6>
                             <h2 class="mb-0 fw-bold text-danger">{{ $stats['rejected_items'] }}</h2>
                         </div>
                         <div class="p-3 rounded-circle" style="background: rgba(239, 68, 68, 0.08);">
@@ -76,6 +110,7 @@
             </div>
         </div>
     </div>
+    @endif
 
     {{-- Row 2: Revenue Stats --}}
     <div class="row g-4 mb-4">

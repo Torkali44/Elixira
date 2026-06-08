@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Brand;
-use App\Models\Item;
 use App\Models\SpecialItemOffer;
 use Illuminate\Http\Request;
 
@@ -25,7 +24,17 @@ class BrandController extends Controller
 
     public function show(Brand $brand)
     {
-        if (!$brand->is_active) {
+        if (! $brand->is_active) {
+            $user = auth()->user();
+            $isOwner = $user
+                && $brand->vendorProfile
+                && (int) $brand->vendorProfile->user_id === (int) $user->id;
+            $isAdmin = $user && $user->role === 'admin';
+
+            if ($isOwner || $isAdmin) {
+                return view('brands.inactive', compact('brand', 'isOwner', 'isAdmin'));
+            }
+
             abort(404);
         }
 
@@ -49,7 +58,7 @@ class BrandController extends Controller
     {
         $user = auth()->user();
 
-        if (!$user) {
+        if (! $user) {
             return [];
         }
 

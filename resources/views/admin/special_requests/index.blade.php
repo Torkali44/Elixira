@@ -4,12 +4,40 @@
 
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
     <div>
-        <h2 class="mb-1"> Special Requests </h2>
-        <p class="text-muted mb-0">Manage special requests for out-of-stock items.</p>
+        <h2 class="mb-1">Special Requests</h2>
+        <p class="text-muted mb-0">Overview of special requests for out-of-stock items.</p>
     </div>
 </div>
 
-<div class="card border-0 shadow-sm">
+{{-- Statistics Dashboard --}}
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="card border-0 shadow-sm text-center p-3" style="border-radius: 12px;">
+            <div class="fw-bold fs-4 text-primary">{{ $totalRequests }}</div>
+            <div class="text-muted small">Total Requests</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card border-0 shadow-sm text-center p-3" style="border-radius: 12px;">
+            <div class="fw-bold fs-4 text-warning">{{ $pendingRequestsCount }}</div>
+            <div class="text-muted small">Pending</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card border-0 shadow-sm text-center p-3" style="border-radius: 12px;">
+            <div class="fw-bold fs-4 text-success">{{ $notifiedRequestsCount }}</div>
+            <div class="text-muted small">Notified / Completed</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card border-0 shadow-sm text-center p-3" style="border-radius: 12px; height: 100%; display: flex; flex-direction: column; justify-content: center;">
+            <div class="fw-bold text-truncate text-dark" style="font-size: 1.05rem;" title="{{ $topProductName }}">{{ $topProductName }}</div>
+            <div class="text-muted small">Top Requested ({{ $topProductCount }} qty)</div>
+        </div>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm" style="border-radius: 16px;">
     <div class="card-body">
         <div class="table-responsive">
             <table class="table align-middle">
@@ -18,12 +46,11 @@
                         <th>Product</th>
                         <th>User</th>
                         <th>Country</th>
-                        <th>WhatsApp</th>
+                        <th>Phone</th>
                         <th>Email</th>
                         <th>Date</th>
                         <th>Status</th>
                         <th>Private Offers</th>
-                        <th class="text-end">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -40,7 +67,7 @@
                                             </div>
                                         @endif
                                         <div>
-                                            <div class="fw-bold">{{ $request->item->name }}</div>
+                                            <div class="fw-bold text-dark">{{ $request->item->name }}</div>
                                         </div>
                                     </div>
                                 @else
@@ -65,13 +92,15 @@
                                         $country = 'images/sa.png';
                                     }
                                 @endphp
-                                <img src="{{ asset($country) }}" alt="Country" width="22" height="16" style="flex-shrink: 0; object-fit: cover; border-radius: 2px; box-shadow: 0 0 0 1px rgba(0,0,0,.08);">
+                                @if($country)
+                                    <img src="{{ asset($country) }}" alt="Country" width="22" height="16" style="flex-shrink: 0; object-fit: cover; border-radius: 2px; box-shadow: 0 0 0 1px rgba(0,0,0,.08);">
+                                @else
+                                    <span class="text-muted small">N/A</span>
+                                @endif
                             </td>
                             
                             <td>
-                                <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $request->phone) }}?text={{ urlencode('مرحباً، المنتج (' . ($request->item ? $request->item->name : 'الذي طلبته') . ') متوفر الآن في Elixira!') }}" target="_blank" class="btn btn-sm btn-success">
-                                    <i class="fab fa-whatsapp"></i> {{ $request->phone }}
-                                </a>
+                                <span class="text-muted">{{ $request->phone }}</span>
                             </td>
 
                             <td>{{ $request->email ?: '—' }}</td>
@@ -102,30 +131,6 @@
                                 @else
                                     <span class="text-muted small">No offer yet</span>
                                 @endif
-                            </td>
-                            <td class="text-end">
-                                <form action="{{ route('admin.special-requests.assign-offer', $request) }}" method="POST" class="d-inline-flex align-items-center gap-1 me-1">
-                                    @csrf
-                                    <input type="number" name="quantity" value="1" min="1" max="20" class="form-control form-control-sm" style="width: 72px;">
-                                    <button type="submit" class="btn btn-sm btn-primary" title="Assign private offer">
-                                        <i class="fas fa-user-lock"></i>
-                                    </button>
-                                </form>
-                                <form action="{{ route('admin.special-requests.updateStatus', $request) }}" method="POST" class="d-inline">
-                                    @csrf
-                                    @method('PATCH')
-                                    @if($request->status === 'pending')
-                                        <input type="hidden" name="status" value="notified">
-                                        <button type="submit" class="btn btn-sm btn-outline-success" title="Mark as Notified">
-                                            <i class="fas fa-check"></i>
-                                        </button>
-                                    @else
-                                        <input type="hidden" name="status" value="pending">
-                                        <button type="submit" class="btn btn-sm btn-outline-warning" title="Mark as Pending">
-                                            <i class="fas fa-undo"></i>
-                                        </button>
-                                    @endif
-                                </form>
                             </td>
                         </tr>
                     @empty

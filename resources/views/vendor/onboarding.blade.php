@@ -257,7 +257,7 @@
                     <div class="vendor-form-section" :class="{ 'active': step === 1 }">
                         <div class="vendor-input-group">
                             <label class="vendor-label">Brand Name *</label>
-                            <input type="text" name="brand_name" class="vendor-input" value="{{ old('brand_name', $vendorProfile->brand_name) }}" required>
+                            <input type="text" name="brand_name" class="vendor-input" value="{{ old('brand_name', $vendorProfile->brand_name) }}">
                             @error('brand_name')<div class="vendor-error">{{ $message }}</div>@enderror
                         </div>
 
@@ -278,7 +278,7 @@
 
                         <div class="vendor-input-group">
                             <label class="vendor-label">Short Description *</label>
-                            <textarea name="brand_description" class="vendor-textarea" rows="4" required placeholder="Tell us about your brand...">{{ old('brand_description', $vendorProfile->brand_description) }}</textarea>
+                            <textarea name="brand_description" class="vendor-textarea" rows="4" placeholder="Tell us about your brand...">{{ old('brand_description', $vendorProfile->brand_description) }}</textarea>
                             @error('brand_description')<div class="vendor-error">{{ $message }}</div>@enderror
                         </div>
 
@@ -393,8 +393,8 @@
 
                         <div class="vendor-input-group" style="margin-top: 2rem;">
                             <label class="vendor-checkbox">
-                                <input type="checkbox" required>
-                                <span>I agree to the <a href="#" style="color: var(--elx-cyan); text-decoration: underline;">Vendor Terms and Conditions</a>.</span>
+                                <input type="checkbox" name="terms" value="1" @checked(old('terms'))>
+                                <span>I agree to the <a href="{{ route('vendor.terms') }}" target="_blank" style="color: var(--elx-cyan); text-decoration: underline;">Vendor Terms and Conditions</a>.</span>
                             </label>
                         </div>
                         
@@ -427,15 +427,6 @@
         return {
             step: {{ $errors->any() ? 1 : 1 }},
             nextStep() {
-                // Basic validation for step 1
-                if (this.step === 1) {
-                    const brandName = document.querySelector('input[name="brand_name"]').value;
-                    const desc = document.querySelector('textarea[name="brand_description"]').value;
-                    if (!brandName || !desc) {
-                        alert('Please fill out the required fields (Brand Name and Description).');
-                        return;
-                    }
-                }
                 this.step++;
             }
         }

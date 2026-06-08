@@ -115,18 +115,14 @@
                         <span class="badge bg-danger rounded-pill ms-2">{{ $newOrdersCount }}</span>
                     @endif
                 </a>
-
-                <a href="{{ route('admin.items.pending') }}" class="{{ request()->routeIs('admin.items.pending') ? 'active' : '' }}">
-                    <i class="fas fa-clipboard-check me-2"></i> Product Approvals
-                    @if($pendingProductsCount > 0)
-                        <span class="badge bg-danger rounded-pill ms-2">{{ $pendingProductsCount }}</span>
-                    @endif
-                </a>
                 <a href="{{ route('admin.reports.index') }}" class="{{ request()->routeIs('admin.reports.*') ? 'active' : '' }}">
                     <i class="fas fa-chart-line me-2"></i> Reports (Detailed)
                 </a>
                 <a href="{{ route('admin.reviews.index') }}" class="{{ request()->routeIs('admin.reviews.*') ? 'active' : '' }}">
                     <i class="fas fa-star me-2"></i> Testimonials & Reviews
+                </a>
+                <a href="{{ route('admin.subscribers.index') }}" class="{{ request()->routeIs('admin.subscribers.*') ? 'active' : '' }}">
+                    <i class="fas fa-envelope-open-text me-2"></i> Newsletter Subscribers
                 </a>
                 <a href="{{ route('admin.avatar-options.index') }}" class="{{ request()->routeIs('admin.avatar-options.*') ? 'active' : '' }}">
                     <i class="fas fa-user-astronaut me-2"></i> Avatar Management
