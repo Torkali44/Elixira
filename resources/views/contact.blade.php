@@ -1,6 +1,6 @@
 ﻿@extends('layouts.framer')
 
-@section('title', 'Contact Us - Elixira')
+@section('title', __('contact.page_title'))
 
 @section('head')
 <style>
@@ -41,65 +41,67 @@
         color: var(--elx-cyan);
         width: 40px;
     }
+    @media (max-width: 767.98px) {
+        .elx-insights__grid {
+            grid-template-columns: 1fr !important;
+        }
+    }
 </style>
 @endsection
 
 @section('content')
 <div class="page-content">
     <div class="elx-container">
-        {{-- Section Header --}}
         <div class="elx-section__header" data-animate>
             <h1 class="elx-hero__title">
-                <span class="elx-hero__title-gradient">Get In Touch</span>
+                <span class="elx-hero__title-gradient">{{ __('contact.hero_title') }}</span>
             </h1>
-            <p class="elx-hero__subtitle">We'd love to hear from you and help with your natural glow journey</p>
+            <p class="elx-hero__subtitle">{{ __('contact.hero_subtitle') }}</p>
         </div>
 
         <div class="elx-insights__grid" style="grid-template-columns: 1fr 1.5fr; gap: 2rem;">
-            {{-- Contact Information --}}
             <div data-animate>
                 <div class="contact-card">
-                    <h3 class="elx-product-card__name" style="font-size: 1.5rem; margin-bottom: 2rem; color: var(--elx-accent);">Information</h3>
-                    
+                    <h3 class="elx-product-card__name" style="font-size: 1.5rem; margin-bottom: 2rem; color: var(--elx-accent);">{{ __('contact.info_title') }}</h3>
+
                     <div class="info-item mb-4 d-flex align-items-start">
                         <i class="fas fa-map-marker-alt mt-1"></i>
                         <div>
-                            <h5 style="color: var(--elx-white); margin-bottom: 0.3rem;">Our Location</h5>
-                            <p style="color: var(--elx-gray); font-size: 0.9rem;">123 Wellness Ave, New York, NY 10001, USA</p>
+                            <h5 style="color: var(--elx-white); margin-bottom: 0.3rem;">{{ __('contact.location_title') }}</h5>
+                            <p style="color: var(--elx-gray); font-size: 0.9rem;">{{ __('contact.location_value') }}</p>
                         </div>
                     </div>
 
                     <div class="info-item mb-4 d-flex align-items-start">
                         <i class="fas fa-phone mt-1"></i>
                         <div>
-                            <h5 style="color: var(--elx-white); margin-bottom: 0.3rem;">Call Us</h5>
-                            <p style="color: var(--elx-gray); font-size: 0.9rem;">+1 (555) 123-4567</p>
+                            <h5 style="color: var(--elx-white); margin-bottom: 0.3rem;">{{ __('contact.phone_title') }}</h5>
+                            <p style="color: var(--elx-gray); font-size: 0.9rem;">{{ __('contact.phone_value') }}</p>
                         </div>
                     </div>
 
                     <div class="info-item mb-4 d-flex align-items-start">
                         <i class="fas fa-envelope mt-1"></i>
                         <div>
-                            <h5 style="color: var(--elx-white); margin-bottom: 0.3rem;">Email Address</h5>
-                            <p style="color: var(--elx-gray); font-size: 0.9rem;">info@elixira.com</p>
+                            <h5 style="color: var(--elx-white); margin-bottom: 0.3rem;">{{ __('contact.email_title') }}</h5>
+                            <p style="color: var(--elx-gray); font-size: 0.9rem;">{{ __('contact.email_value') }}</p>
                         </div>
                     </div>
 
                     <div class="info-item d-flex align-items-start">
                         <i class="fas fa-clock mt-1"></i>
                         <div>
-                            <h5 style="color: var(--elx-white); margin-bottom: 0.3rem;">Business Hours</h5>
-                            <p style="color: var(--elx-gray); font-size: 0.9rem;">Mon-Fri: 9:00 AM - 6:00 PM</p>
+                            <h5 style="color: var(--elx-white); margin-bottom: 0.3rem;">{{ __('contact.hours_title') }}</h5>
+                            <p style="color: var(--elx-gray); font-size: 0.9rem;">{{ __('contact.hours_value') }}</p>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {{-- Contact Form --}}
             <div data-animate>
                 <div class="contact-card">
-                    <h3 class="elx-product-card__name" style="font-size: 1.5rem; margin-bottom: 2rem; color: var(--elx-accent);">Send A Message</h3>
-                    
+                    <h3 class="elx-product-card__name" style="font-size: 1.5rem; margin-bottom: 2rem; color: var(--elx-accent);">{{ __('contact.form_title') }}</h3>
+
                     @if(Session::has('success'))
                         <div style="background: rgba(74, 200, 246, 0.1); color: var(--elx-cyan); padding: 1rem; border-radius: 10px; margin-bottom: 1.5rem; border: 1px solid var(--elx-cyan);">
                             {{ Session::get('success') }}
@@ -109,14 +111,14 @@
                     <form action="#" method="POST">
                         @csrf
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                            <input type="text" class="form-input" name="name" placeholder="Full Name" required>
-                            <input type="email" class="form-input" name="email" placeholder="Email Address" required>
+                            <input type="text" class="form-input" name="name" placeholder="{{ __('contact.form_name') }}" required>
+                            <input type="email" class="form-input" name="email" placeholder="{{ __('contact.form_email') }}" required>
                         </div>
-                        <input type="text" class="form-input" name="subject" placeholder="Subject" required>
-                        <textarea class="form-input form-textarea" name="message" rows="5" placeholder="Your Message" required></textarea>
-                        
+                        <input type="text" class="form-input" name="subject" placeholder="{{ __('contact.form_subject') }}" required>
+                        <textarea class="form-input form-textarea" name="message" rows="5" placeholder="{{ __('contact.form_message') }}" required></textarea>
+
                         <button type="submit" class="elx-btn elx-btn--primary" style="width: 100%; justify-content: center; padding: 1rem;">
-                            Send Message
+                            {{ __('contact.form_submit') }}
                         </button>
                     </form>
                 </div>
@@ -125,7 +127,6 @@
     </div>
 </div>
 
-{{-- Map --}}
 <section class="map-section" data-animate style="margin-top: 6rem; line-height: 0;">
     <iframe
         src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d193595.15830869428!2d-74.119763973046!3d40.69766374874431!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c24fa5d33f083b%3A0xc80b8f06e177fe62!2sNew%20York%2C%20NY%2C%20USA!5e0!3m2!1sen!2s!4v1647856485648!5m2!1sen!2s"

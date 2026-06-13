@@ -3,8 +3,8 @@
 @section('content')
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
     <div>
-        <h2 class="mb-1">Users Management</h2>
-        <p class="text-muted mb-0">Manage user avatars, member data, and account status from one place.</p>
+        <h2 class="mb-1">{{ __('admin.users_page.title') }}</h2>
+        <p class="text-muted mb-0">{{ __('admin.users_page.subtitle') }}</p>
     </div>
 </div>
 
@@ -12,7 +12,7 @@
     <div class="col-md-3">
         <div class="card border-0 shadow-sm h-100">
             <div class="card-body">
-                <small class="text-muted text-uppercase">Total Users</small>
+                <small class="text-muted text-uppercase">{{ __('admin.users_page.total_users') }}</small>
                 <h3 class="mt-2 mb-0">{{ $stats['total'] }}</h3>
             </div>
         </div>
@@ -20,7 +20,7 @@
     <div class="col-md-3">
         <div class="card border-0 shadow-sm h-100">
             <div class="card-body">
-                <small class="text-muted text-uppercase">Admins</small>
+                <small class="text-muted text-uppercase">{{ __('admin.users_page.admins') }}</small>
                 <h3 class="mt-2 mb-0">{{ $stats['admins'] }}</h3>
             </div>
         </div>
@@ -28,7 +28,7 @@
     <div class="col-md-3">
         <div class="card border-0 shadow-sm h-100">
             <div class="card-body">
-                <small class="text-muted text-uppercase">Vendors</small>
+                <small class="text-muted text-uppercase">{{ __('admin.users_page.vendors') }}</small>
                 <h3 class="mt-2 mb-0">{{ $stats['vendors'] }}</h3>
             </div>
         </div>
@@ -36,7 +36,7 @@
     <div class="col-md-3">
         <div class="card border-0 shadow-sm h-100">
             <div class="card-body">
-                <small class="text-muted text-uppercase">Suspended</small>
+                <small class="text-muted text-uppercase">{{ __('admin.users_page.suspended') }}</small>
                 <h3 class="mt-2 mb-0">{{ $stats['suspended'] }}</h3>
             </div>
         </div>
@@ -47,23 +47,22 @@
     <div class="card-body">
         <form action="{{ route('admin.users.index') }}" method="GET" class="row g-3 align-items-end">
             <div class="col-md-6">
-                <label for="search" class="form-label">Search</label>
-                <input type="text" id="search" name="search" class="form-control" placeholder="Name, email, phone, or member code" value="{{ request('search') }}">
+                <label for="search" class="form-label">{{ __('admin.users_page.search') }}</label>
+                <input type="text" id="search" name="search" class="form-control" placeholder="{{ __('admin.users_page.search_placeholder') }}" value="{{ request('search') }}">
             </div>
             <div class="col-md-2">
-                <label for="role" class="form-label">Role</label>
+                <label for="role" class="form-label">{{ __('admin.users_page.role') }}</label>
                 <select id="role" name="role" class="form-select">
-                    <option value="">All roles</option>
-                    <option value="admin" @selected(request('role') === 'admin')>Admin</option>
-                    <option value="vendor" @selected(request('role') === 'vendor')>Vendor</option>
-                    <option value="user" @selected(request('role') === 'user')>User</option>
-
+                    <option value="">{{ __('admin.users_page.all_roles') }}</option>
+                    <option value="admin" @selected(request('role') === 'admin')>{{ __('admin.users_page.admins') }}</option>
+                    <option value="vendor" @selected(request('role') === 'vendor')>{{ __('admin.users_page.vendors') }}</option>
+                    <option value="user" @selected(request('role') === 'user')>{{ __('admin.users_page.user') }}</option>
                 </select>
             </div>
             
             <div class="col-md-2 d-flex gap-2">
-                <button type="submit" class="btn btn-primary w-100">Filter</button>
-                <a href="{{ route('admin.users.index') }}" class="btn btn-outline-secondary">Reset</a>
+                <button type="submit" class="btn btn-primary w-100">{{ __('admin.users_page.filter') }}</button>
+                <a href="{{ route('admin.users.index') }}" class="btn btn-outline-secondary">{{ __('admin.users_page.reset') }}</a>
             </div>
         </form>
     </div>
@@ -75,14 +74,14 @@
             <table class="table align-middle">
                 <thead>
                     <tr>
-                        <th>User</th>
-                        <th>Country</th>
-                        <th>Role</th>
-                        <th>Phone</th>
-                        <th>Email</th>
-                        <th>Code</th>
-                        <th>Status</th>
-                        <th class="text-end">Actions</th>
+                        <th>{{ __('admin.users_page.user') }}</th>
+                        <th>{{ __('admin.users_page.country') }}</th>
+                        <th>{{ __('admin.users_page.role') }}</th>
+                        <th>{{ __('admin.users_page.phone') }}</th>
+                        <th>{{ __('admin.users_page.email') }}</th>
+                        <th>{{ __('admin.users_page.code') }}</th>
+                        <th>{{ __('admin.users_page.status') }}</th>
+                        <th class="text-end">{{ __('admin.users_page.actions') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -119,7 +118,7 @@
                                     </div>
                                     @if($user->birth_date)
                                         <small class="text-muted">
-                                            {{ \Carbon\Carbon::parse($user->birth_date)->age }} years old
+                                            {{ __('admin.users_page.years_old', ['age' => \Carbon\Carbon::parse($user->birth_date)->age]) }}
                                         </small>
                                     @endif
                                 </div>
@@ -127,11 +126,11 @@
 
                             <td>
                                 @if($user->role === 'admin')
-                                    <span class="badge bg-primary">Admin</span>
+                                    <span class="badge bg-primary">{{ __('admin.users_page.admins') }}</span>
                                 @elseif($user->role === 'vendor')
-                                    <span class="badge bg-info">Vendor</span>
+                                    <span class="badge bg-info">{{ __('admin.users_page.vendors') }}</span>
                                 @else
-                                    <span class="badge bg-secondary">User</span>
+                                    <span class="badge bg-secondary">{{ __('admin.users_page.user') }}</span>
                                 @endif
                             </td>
                             <td>{{ $user->phone ?? '-' }}</td>
@@ -139,9 +138,9 @@
                             <td>{{ $user->user_code ?? '-' }}</td>
                             <td>
                                 @if($user->is_suspended)
-                                    <span class="badge bg-danger">Suspended</span>
+                                    <span class="badge bg-danger">{{ __('admin.users_page.suspended') }}</span>
                                 @else
-                                    <span class="badge bg-success">Active</span>
+                                    <span class="badge bg-success">{{ __('admin.users_page.active') }}</span>
                                 @endif
                             </td>
                             <td class="text-end">
@@ -155,11 +154,11 @@
                                             @csrf
                                             @method('PATCH')
                                             <button type="submit" class="btn btn-sm {{ $user->is_suspended ? 'btn-success' : 'btn-warning' }}">
-                                                {{ $user->is_suspended ? 'Activate' : 'Suspend' }}
+                                                {{ $user->is_suspended ? __('admin.users_page.activate') : __('admin.users_page.suspend') }}
                                             </button>
                                         </form>
 
-                                        <form action="{{ route('admin.users.destroy', $user) }}" method="POST" class="d-inline" data-confirm="Are you sure you want to delete this user? This action cannot be undone.">
+                                        <form action="{{ route('admin.users.destroy', $user) }}" method="POST" class="d-inline" data-confirm="{{ __('admin.users_page.delete_confirm') }}">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="btn btn-sm btn-danger">
@@ -168,7 +167,7 @@
                                         </form>
                                     @else
                                         <button type="button" class="btn btn-sm btn-light text-muted" disabled>
-                                            Protected
+                                            {{ __('admin.users_page.protected') }}
                                         </button>
                                     @endif
                                 </div>
@@ -176,7 +175,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="text-center py-4 text-muted">No users found.</td>
+                            <td colspan="8" class="text-center py-4 text-muted">{{ __('admin.users_page.empty') }}</td>
                         </tr>
                     @endforelse
                 </tbody>

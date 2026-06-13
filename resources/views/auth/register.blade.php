@@ -1,6 +1,6 @@
 @extends('layouts.framer')
 
-@section('title', 'Register - Elixira')
+@section('title', app()->getLocale() === 'ar' ? 'إنشاء حساب - Elixira' : 'Register - Elixira')
 
 @section('head')
 <style>
@@ -11,6 +11,8 @@
         min-height: 100vh;
         display: flex;
         align-items: center;
+        padding-top: 100px;
+        padding-bottom: 60px;
     }
     .auth-card {
         background: var(--elx-glass);
@@ -49,42 +51,42 @@
     <div class="elx-container">
         <div class="auth-card" data-animate>
             <div style="text-align: center; margin-bottom: 2rem;">
-                <h1 style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 2.5rem; margin-bottom: 0.5rem; color: var(--elx-accent);">Join Elixira</h1>
-                <p style="color: var(--elx-gray);">Create an account for faster checkout and exclusive offers.</p>
+                <h1 style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 2.5rem; margin-bottom: 0.5rem; color: var(--elx-accent);">{{ __('app.auth.register_title') }}</h1>
+                <p style="color: var(--elx-gray);">{{ __('app.auth.register_subtitle') }}</p>
             </div>
 
             <form method="POST" action="{{ route('register') }}" enctype="multipart/form-data">
                 @csrf
 
-                <label class="auth-label">Full Name</label>
+                <label class="auth-label">{{ __('app.auth.full_name') }}</label>
                 <input type="text" name="name" class="form-input" value="{{ old('name') }}" required autofocus autocomplete="name">
                 <x-input-error :messages="$errors->get('name')" style="color: #ff8a8a; font-size: 0.8rem; margin-bottom: 0.5rem;" />
 
-                <label class="auth-label">Email Address</label>
+                <label class="auth-label">{{ __('app.auth.email') }}</label>
                 <input type="email" name="email" class="form-input" value="{{ old('email') }}" required autocomplete="username">
                 <x-input-error :messages="$errors->get('email')" style="color: #ff8a8a; font-size: 0.8rem; margin-bottom: 0.5rem;" />
-               
-                <label class="auth-label">Password</label>
+
+                <label class="auth-label">{{ __('app.auth.password') }}</label>
                 <input type="password" name="password" class="form-input" required autocomplete="new-password">
                 <x-input-error :messages="$errors->get('password')" style="color: #ff8a8a; font-size: 0.8rem; margin-bottom: 0.5rem;" />
 
-                <label class="auth-label">Confirm Password</label>
+                <label class="auth-label">{{ __('app.auth.confirm_password') }}</label>
                 <input type="password" name="password_confirmation" class="form-input" required autocomplete="new-password">
                 <x-input-error :messages="$errors->get('password_confirmation')" style="color: #ff8a8a; font-size: 0.8rem; margin-bottom: 1rem;" />
 
-                <label class="auth-label">Account Type</label>
+                <label class="auth-label">{{ __('app.auth.account_type') }}</label>
                 <select name="account_type" id="account_type" class="form-input" required onchange="toggleVendorFields()" style="background-color: #13252d; color: white;">
-                    <option value="customer" {{ old('account_type') === 'customer' ? 'selected' : '' }} style="background-color: #13252d;">Customer</option>
-                    <option value="vendor" {{ old('account_type') === 'vendor' ? 'selected' : '' }} style="background-color: #13252d;">Vendor</option>
+                    <option value="customer" {{ old('account_type') === 'customer' ? 'selected' : '' }} style="background-color: #13252d;">{{ __('app.auth.customer') }}</option>
+                    <option value="vendor" {{ old('account_type') === 'vendor' ? 'selected' : '' }} style="background-color: #13252d;">{{ __('app.auth.vendor') }}</option>
                 </select>
                 <x-input-error :messages="$errors->get('account_type')" style="color: #ff8a8a; font-size: 0.8rem; margin-bottom: 0.5rem;" />
 
                 <div id="vendor_fields" style="display: {{ old('account_type') === 'vendor' ? 'block' : 'none' }}; margin-top: 1rem; padding: 1.5rem; background: rgba(0,0,0,0.2); border-radius: 12px; border: 1px dashed rgba(74, 200, 246, 0.3);">
                     <div style="color: var(--elx-cyan); font-size: 0.85rem; margin-bottom: 1rem;">
-                        <i class="fas fa-store"></i> You will be directed to complete your vendor profile after registration.
+                        <i class="fas fa-store"></i> {{ __('app.auth.vendor_hint') }}
                     </div>
-                    <label class="auth-label" style="margin-top: 0;">Brand Name *</label>
-                    <input type="text" name="brand_name" id="brand_name" class="form-input" value="{{ old('brand_name') }}" placeholder="Enter your brand name">
+                    <label class="auth-label" style="margin-top: 0;">{{ __('app.auth.brand_name') }}</label>
+                    <input type="text" name="brand_name" id="brand_name" class="form-input" value="{{ old('brand_name') }}" placeholder="{{ __('app.auth.brand_placeholder') }}">
                     <x-input-error :messages="$errors->get('brand_name')" style="color: #ff8a8a; font-size: 0.8rem; margin-bottom: 0.5rem;" />
                 </div>
 
@@ -93,7 +95,7 @@
                         const type = document.getElementById('account_type').value;
                         const fields = document.getElementById('vendor_fields');
                         const brandInput = document.getElementById('brand_name');
-                        
+
                         if (type === 'vendor') {
                             fields.style.display = 'block';
                             brandInput.required = true;
@@ -103,21 +105,22 @@
                             brandInput.value = '';
                         }
                     }
-                    
+
                     // Run on load to set initial state
                     document.addEventListener('DOMContentLoaded', toggleVendorFields);
                 </script>
 
                 <button type="submit" class="elx-btn elx-btn--primary" style="width: 100%; justify-content: center; padding: 1rem; margin-top: 1.5rem;">
-                    Create Account
+                    {{ __('app.auth.create_account') }}
                 </button>
 
                 <div style="margin-top: 2rem; text-align: center; font-size: 0.85rem;">
-                    <span style="color: var(--elx-gray);">Already have an account?</span>
-                    <a href="{{ route('login') }}" style="color: var(--elx-cyan); text-decoration: none; font-weight: 700; margin-left: 0.5rem;">Log in</a>
+                    <span style="color: var(--elx-gray);">{{ __('app.auth.has_account') }}</span>
+                    <a href="{{ route('login') }}" style="color: var(--elx-cyan); text-decoration: none; font-weight: 700; margin-left: 0.5rem;">{{ __('app.auth.login_btn') }}</a>
                 </div>
             </form>
         </div>
     </div>
 </div>
 @endsection
+

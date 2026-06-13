@@ -2,7 +2,7 @@
 
 @section('content')
     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-        <h2 class="mb-0 fw-bold text-dark">Dashboard Overview</h2>
+        <h2 class="mb-0 fw-bold">{{ __('admin.dashboard.title') }}</h2>
         <span class="badge bg-light text-dark shadow-sm border py-2 px-3">
             <i class="fas fa-calendar-alt text-primary me-2"></i> {{ now()->format('l, d M Y') }}
         </span>
@@ -139,22 +139,22 @@
         <div class="col-12">
             <div class="card border-0 shadow-sm" style="border-radius: 16px;">
                 <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0 fw-bold"><i class="fas fa-store-alt text-primary me-2"></i> Top Sellers & Brand Performance</h5>
-                    <span class="badge bg-primary rounded-pill px-3 py-2">Total Vendors: {{ $vendorsCount }}</span>
+                    <h5 class="mb-0 fw-bold"><i class="fas fa-store-alt text-primary me-2"></i> {{ __('admin.dashboard.top_sellers_table') }}</h5>
+                    <span class="badge bg-primary rounded-pill px-3 py-2">{{ __('admin.dashboard.total_vendors', ['count' => $vendorsCount]) }}</span>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
                         <table class="table table-hover align-middle mb-0">
                             <thead class="table-light">
                                 <tr>
-                                    <th class="ps-4">Rank</th>
-                                    <th>Brand</th>
-                                    <th>Vendor Owner</th>
-                                    <th>Products Count</th>
-                                    <th>Units Sold</th>
-                                    <th>Total Revenue</th>
-                                    <th>Service Countries</th>
-                                    <th class="pe-4">Brand Description</th>
+                                    <th class="ps-4">{{ __('admin.dashboard.rank') }}</th>
+                                    <th>{{ __('admin.dashboard.brand') }}</th>
+                                    <th>{{ __('admin.dashboard.vendor_owner') }}</th>
+                                    <th>{{ __('admin.dashboard.products_count') }}</th>
+                                    <th>{{ __('admin.dashboard.units_sold') }}</th>
+                                    <th>{{ __('admin.dashboard.total_revenue') }}</th>
+                                    <th>{{ __('admin.dashboard.service_countries') }}</th>
+                                    <th class="pe-4">{{ __('admin.dashboard.brand_description') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -269,12 +269,12 @@
         };
         $adminStatusLabel = function ($status) {
             return match ($status) {
-                'pending' => 'Pending',
-                'confirmed' => 'Confirmed',
-                'preparing' => 'Preparing',
-                'ready' => 'Ready to ship',
-                'delivered' => 'Delivered',
-                'cancelled' => 'Cancelled',
+                'pending' => __('admin.dashboard.status_pending'),
+                'confirmed' => __('admin.dashboard.status_confirmed'),
+                'preparing' => __('admin.dashboard.status_preparing'),
+                'ready' => __('admin.dashboard.status_ready'),
+                'delivered' => __('admin.dashboard.status_delivered'),
+                'cancelled' => __('admin.dashboard.status_cancelled'),
                 default => ucfirst($status),
             };
         };
@@ -285,20 +285,19 @@
         <div class="col-lg-7">
             <div class="card h-100 shadow-sm border-0" style="border-radius: 16px;">
                 <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0 fw-bold">Recent Orders</h5>
-                    <a href="{{ route('admin.orders.index') }}" class="btn btn-sm btn-light text-primary fw-bold">All
-                        Orders</a>
+                    <h5 class="mb-0 fw-bold">{{ __('admin.dashboard.recent_orders') }}</h5>
+                    <a href="{{ route('admin.orders.index') }}" class="btn btn-sm btn-light text-primary fw-bold">{{ __('admin.dashboard.all_orders') }}</a>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
                         <table class="table table-hover align-middle mb-0">
                             <thead class="table-light">
                                 <tr>
-                                    <th class="ps-4">Order ID</th>
-                                    <th>Customer</th>
-                                    <th>Total</th>
-                                    <th>Status</th>
-                                    <th class="text-center pe-4">Date</th>
+                                    <th class="ps-4">{{ __('admin.dashboard.order_id') }}</th>
+                                    <th>{{ __('admin.dashboard.customer') }}</th>
+                                    <th>{{ __('admin.dashboard.total') }}</th>
+                                    <th>{{ __('admin.dashboard.status') }}</th>
+                                    <th class="text-center pe-4">{{ __('admin.dashboard.date') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -333,8 +332,8 @@
         <div class="col-lg-5">
             <div class="card h-100 shadow-sm border-0" style="border-radius: 16px;">
                 <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0 fw-bold">Users Control Center</h5>
-                    <a href="{{ route('admin.users.index') }}" class="btn btn-sm btn-outline-primary">View All</a>
+                    <h5 class="mb-0 fw-bold">{{ __('admin.dashboard.users_control') }}</h5>
+                    <a href="{{ route('admin.users.index') }}" class="btn btn-sm btn-outline-primary">{{ __('admin.dashboard.view_all') }}</a>
                 </div>
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-3">
@@ -399,7 +398,7 @@
         <div class="col-12 mt-4">
             <div class="card h-100 shadow-sm border-0" style="border-radius: 16px;">
                 <div class="card-header bg-white py-3 border-0">
-                    <h5 class="mb-0 fw-bold">Low Stock Alerts</h5>
+                    <h5 class="mb-0 fw-bold">{{ __('admin.dashboard.low_stock_alerts') }}</h5>
                 </div>
                 <div class="card-body p-0">
                     <div class="list-group list-group-flush">

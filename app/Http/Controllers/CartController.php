@@ -7,12 +7,12 @@ use App\Http\Requests\CheckoutRequest;
 use App\Http\Requests\RemoveFromCartRequest;
 use App\Http\Requests\UpdateCartRequest;
 use App\Models\Item;
-use App\Models\Notification;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\SpecialItemOffer;
 use App\Models\User;
 use App\Models\UserAddress;
+use App\Support\UserNotifier;
 use Illuminate\Support\Facades\DB;
 
 class CartController extends Controller
@@ -219,6 +219,8 @@ class CartController extends Controller
                 'notes' => $request->notes,
             ]);
 
+            $totalRewardPoints = 0;
+
             foreach ($cart as $id => $details) {
                 OrderItem::create([
                     'order_id' => $order->id,
@@ -241,19 +243,25 @@ class CartController extends Controller
                         $this->consumePrivateOffers($authenticatedUser, (int) $item->id, $privateUnitsUsed);
                     }
 
+                    // Increment item popularity counter (old "points" field)
                     $item->increment('points', 1);
+
+                    // Accumulate reward points for the user
+                    $totalRewardPoints += ($item->reward_points ?? 0) * (int) $details['quantity'];
                 }
+            }
+
+            // Award accumulated reward points to the authenticated user
+            if ($authenticatedUser && $totalRewardPoints > 0) {
+                $authenticatedUser->increment('total_points', $totalRewardPoints);
             }
 
             // Create notifications for customer and vendors
             try {
                 if ($authenticatedUser) {
-                    Notification::create([
-                        'user_id' => $authenticatedUser->id,
-                        'title' => 'Order Placed Successfully',
-                        'message' => 'Your order #'.$order->id.' has been placed successfully and is pending confirmation.',
-                        'url' => route('profile.orders.show', $order->id),
-                    ]);
+                    UserNotifier::send($authenticatedUser->id, 'order_placed', [
+                        'order' => (string) $order->id,
+                    ], route('profile.orders.show', $order->id));
                 }
 
                 $vendorsToNotify = [];
@@ -265,12 +273,9 @@ class CartController extends Controller
                 }
 
                 foreach ($vendorsToNotify as $vendorId => $vendor) {
-                    Notification::create([
-                        'user_id' => $vendorId,
-                        'title' => 'New Order Received',
-                        'message' => 'You have a new order #'.$order->id.' containing your products.',
-                        'url' => route('vendor.orders'),
-                    ]);
+                    UserNotifier::send($vendorId, 'new_order_vendor', [
+                        'order' => (string) $order->id,
+                    ], route('vendor.orders'));
                 }
             } catch (\Throwable $e) {
                 // Log and ignore to prevent checkout failure

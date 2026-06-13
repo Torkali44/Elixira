@@ -222,7 +222,7 @@
                         </div>
 
                         <button type="submit" class="elx-btn elx-btn--primary" style="width: 100%; justify-content: center; padding: 1.2rem; font-size: 1.2rem;">
-                            <i class="fas fa-shopping-cart"></i> Add to Cart
+                            <i class="fas fa-shopping-cart"></i> {{ __('home.add_to_cart') }}
                         </button>
                     </form>
                 @endif

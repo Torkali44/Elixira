@@ -12,11 +12,16 @@ class Item extends Model
         'category_id',
         'brand_id',
         'name',
+        'name_en',
+        'name_ar',
         'brand',
         'description',
+        'description_en',
+        'description_ar',
         'price',
         'stock',
         'points',
+        'reward_points',
         'image',
         'is_featured',
         'long_description',
@@ -82,5 +87,27 @@ class Item extends Model
         $avg = $this->ratings()->avg('rating') ?: 0;
 
         return round($avg * 2) / 2;
+    }
+
+    /**
+     * Get localised name — falls back to 'name' for legacy rows.
+     */
+    public function getLocalNameAttribute(): string
+    {
+        if (app()->getLocale() === 'ar') {
+            return $this->name_ar ?: $this->name;
+        }
+        return $this->name_en ?: $this->name;
+    }
+
+    /**
+     * Get localised description.
+     */
+    public function getLocalDescriptionAttribute(): ?string
+    {
+        if (app()->getLocale() === 'ar') {
+            return $this->description_ar ?: $this->description;
+        }
+        return $this->description_en ?: $this->description;
     }
 }

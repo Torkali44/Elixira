@@ -43,7 +43,7 @@
         </div>
 
         <div style="display:flex; gap:.75rem; margin-bottom:1.2rem;">
-            <a href="{{ route('profile.edit') }}" class="elx-btn elx-btn--glass">Back To Account</a>
+            <a href="{{ route('profile.edit') }}" class="elx-btn elx-btn--glass">{{ __('profile_page.back_to_account') }}</a>
             <a href="{{ route('orders.track') }}" class="elx-btn elx-btn--glass">Track By Phone</a>
         </div>
 
@@ -88,7 +88,7 @@
             <div class="orders-card">
                 <h3>No orders linked to this account yet.</h3>
                 <p style="color:var(--elx-gray);">Once you place an order while signed in, it will appear here automatically.</p>
-                <a href="{{ route('menu.index') }}" class="elx-btn elx-btn--primary">Start Shopping</a>
+                <a href="{{ route('menu.index') }}" class="elx-btn elx-btn--primary">{{ __('profile_page.start_shopping') }}</a>
             </div>
         @endif
     </div>

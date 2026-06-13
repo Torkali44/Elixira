@@ -27,10 +27,13 @@ class User extends Authenticatable
         'gender',
         'phone',
         'user_code',
+        'total_points',
         'avatar',
         'avatar_option_id',
         'password',
         'role',
+        'theme',
+        'locale',
     ];
 
     /**

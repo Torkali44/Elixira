@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Brand;
-use App\Models\Notification;
 use App\Models\VendorProfile;
+use App\Support\UserNotifier;
 use Illuminate\Http\Request;
 
 class VendorRequestController extends Controller
@@ -71,15 +71,13 @@ class VendorRequestController extends Controller
         try {
             $user = $vendorProfile->user;
             if ($user) {
-                $statusLabel = $request->status === 'approved' ? 'Approved' : ($request->status === 'rejected' ? 'Rejected' : 'Rejected with Notes');
-                $reason = $vendorProfile->rejection_reason ? ' Reason: '.$vendorProfile->rejection_reason : '';
                 $url = $request->status === 'approved' ? route('vendor.dashboard') : route('vendor.onboarding');
-                Notification::create([
-                    'user_id' => $user->id,
-                    'title' => 'Vendor Request '.$statusLabel,
-                    'message' => 'Your vendor profile request status is now '.$statusLabel.'.'.$reason,
-                    'url' => $url,
-                ]);
+                UserNotifier::send($user->id, 'vendor_request_updated', [
+                    'status' => $request->status,
+                    'reason' => $vendorProfile->rejection_reason
+                        ? __('notifications.vendor_reason', ['reason' => $vendorProfile->rejection_reason])
+                        : '',
+                ], $url);
             }
         } catch (\Throwable $e) {
             \Log::error('Vendor request notification failed: '.$e->getMessage());

@@ -2,8 +2,8 @@
 
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-    <h2 class="mb-0">Categories</h2>
-    <a href="{{ route('admin.categories.create') }}" class="btn btn-primary"><i class="fas fa-plus me-2"></i> Add category</a>
+    <h2 class="mb-0">{{ __('admin.categories_page.title') }}</h2>
+    <a href="{{ route('admin.categories.create') }}" class="btn btn-primary"><i class="fas fa-plus me-2"></i> {{ __('admin.categories_page.add_category') }}</a>
 </div>
 
 <div class="card shadow-sm">
@@ -13,10 +13,10 @@
                 <thead class="table-light">
                     <tr>
                         <th>#</th>
-                        <th>Image</th>
-                        <th>Name</th>
-                        <th>Description</th>
-                        <th>Products</th>
+                        <th>{{ __('admin.categories_page.image') }}</th>
+                        <th>{{ __('admin.categories_page.name') }}</th>
+                        <th>{{ __('admin.categories_page.description') }}</th>
+                        <th>{{ __('admin.categories_page.products') }}</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -37,7 +37,7 @@
                         <td>
                             <div class="btn-group">
                                 <a href="{{ route('admin.categories.edit', $category->id) }}" class="btn btn-sm btn-outline-primary"><i class="fas fa-edit"></i></a>
-                                <form action="{{ route('admin.categories.destroy', $category->id) }}" method="POST" class="d-inline" data-confirm="Delete this category?">
+                                <form action="{{ route('admin.categories.destroy', $category->id) }}" method="POST" class="d-inline" data-confirm="{{ __('admin.categories_page.delete_confirm') }}">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
@@ -47,7 +47,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" class="text-center py-4">No categories yet. Seed or add skincare categories here.</td>
+                        <td colspan="6" class="text-center py-4">{{ __('admin.categories_page.empty') }}</td>
                     </tr>
                     @endforelse
                 </tbody>

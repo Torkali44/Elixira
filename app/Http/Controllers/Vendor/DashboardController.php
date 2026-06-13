@@ -4,10 +4,10 @@ namespace App\Http\Controllers\Vendor;
 
 use App\Http\Controllers\Controller;
 use App\Models\Item;
-use App\Models\Notification;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\User;
+use App\Support\UserNotifier;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -183,12 +183,10 @@ class DashboardController extends Controller
 
         try {
             if ($order->user) {
-                Notification::create([
-                    'user_id' => $order->user->id,
-                    'title' => 'Order Status Updated',
-                    'message' => 'Your order #'.$order->id.' status has been updated to "'.ucfirst($request->status).'".',
-                    'url' => route('profile.orders.show', $order->id),
-                ]);
+                UserNotifier::send($order->user->id, 'order_status_updated', [
+                    'order' => (string) $order->id,
+                    'status' => $request->status,
+                ], route('profile.orders.show', $order->id));
             }
         } catch (\Throwable $e) {
             \Log::error('Order status update notification failed: '.$e->getMessage());

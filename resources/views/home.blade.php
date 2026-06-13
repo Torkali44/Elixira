@@ -1,6 +1,6 @@
 @extends('layouts.framer')
 
-@section('title', 'Elixira - Superfoods, Science & Self-Care')
+@section('title', __('home.page_title'))
 
 @section('nav-class', '')  
 
@@ -30,17 +30,15 @@
         <div class="elx-hero__content" data-animate style="text-align: center; max-width: 900px; padding: 2rem;">
             <h1 class="elx-hero__title">
                 <span class="elx-hero__title-gradient"
-                    style="background-image: linear-gradient(0deg, #4ac8f6 0%, #ffddbd 100%); -webkit-background-clip: text; color: transparent;">Welcome
-                    to Elixira</span>
+                    style="background-image: linear-gradient(0deg, #4ac8f6 0%, #ffddbd 100%); -webkit-background-clip: text; color: transparent;">{{ __('home.hero_title') }}</span>
             </h1>
             <p class="elx-hero__subtitle"
                 style="color: rgba(255,255,255,0.76); font-size: 1.25rem; line-height: 1.6; margin: 1.5rem 0 2rem;">
-                A blend of<br>superfoods, science, and self-care rituals that restores your glow,<br>balance your energy,
-                and elevate your daily wellbeing...
+                {{ __('home.hero_subtitle') }}
             </p>
             <div class="elx-hero__actions" style="display: flex; gap: 1rem; justify-content: center;">
-                <a href="{{ route('menu.index') }}" class="elx-btn elx-btn--primary">Enter Store</a>
-                <a href="{{ route('cart.index') }}" class="elx-btn elx-btn--glass">Go Cart</a>
+                <a href="{{ route('menu.index') }}" class="elx-btn elx-btn--primary">{{ __('home.enter_store') }}</a>
+                <a href="{{ route('cart.index') }}" class="elx-btn elx-btn--glass">{{ __('home.go_cart') }}</a>
             </div>
         </div>
     </section>
@@ -68,7 +66,7 @@
                             </div>
                             <div class="elx-category-pill__info">
                                 <h3>{{ $category->name }}</h3>
-                                <span>{{ $category->items_count }} products</span>
+                                <span>{{ __('home.products_count', ['count' => $category->items_count]) }}</span>
                             </div>
                         </a>
                     @endforeach
@@ -170,7 +168,7 @@
     <section class="elx-section elx-products" id="products" style="background-color: #13252d; padding: 6rem 0;">
         <div class="elx-container">
             <div class="elx-section__header" data-animate style="text-align: center; margin-bottom: 4rem;">
-                <h2 class="elx-section__title">Our Signature Selection</h2>
+                <h2 class="elx-section__title">{{ __('home.signature_selection') }}</h2>
             </div>
 
             @if($featuredItems->count() > 0)
@@ -185,8 +183,8 @@
                 <div class="elx-products__empty" data-animate style="text-align: center; color: white;">
                     <div class="elx-products__empty-icon"><i class="fas fa-box-open"
                             style="font-size: 3rem; margin-bottom: 1rem;"></i></div>
-                    <h3>Coming Soon</h3>
-                    <p>Pure herbs and handcrafted blends are on their way.</p>
+                    <h3>{{ __('home.coming_soon') }}</h3>
+                    <p>{{ __('home.coming_soon_desc') }}</p>
                 </div>
             @endif
         </div>
@@ -196,27 +194,27 @@
         <div class="elx-container">
             <div class="elx-insights__grid" data-animate>
                 <div class="elx-insights__text">
-                    <span class="elx-insights__label">Brand Insights</span>
-                    <h2>Explore</h2>
-                    <p>Clean, potent, and beautifully crafted formulas - rooted in nature, guided by modern wellness.</p>
-                    <a href="{{ route('menu.index') }}" class="elx-btn elx-btn--primary">Discover More</a>
+                    <span class="elx-insights__label">{{ __('home.brand_insights') }}</span>
+                    <h2>{{ __('home.explore_title') }}</h2>
+                    <p>{{ __('home.explore_desc') }}</p>
+                    <a href="{{ route('menu.index') }}" class="elx-btn elx-btn--primary">{{ __('home.discover_more') }}</a>
                 </div>
                 <div class="elx-insights__stats">
                     <div class="elx-stat-card">
                         <span class="elx-stat-card__number">{{ \App\Models\Item::count() }}</span>
-                        <span class="elx-stat-card__label">Products</span>
+                        <span class="elx-stat-card__label">{{ __('home.stat_products') }}</span>
                     </div>
                     <div class="elx-stat-card">
                         <span class="elx-stat-card__number">{{ \App\Models\Category::count() }}</span>
-                        <span class="elx-stat-card__label">Categories</span>
+                        <span class="elx-stat-card__label">{{ __('home.stat_categories') }}</span>
                     </div>
                     <div class="elx-stat-card">
                         <span class="elx-stat-card__number">5</span>
-                        <span class="elx-stat-card__label">Star Rating</span>
+                        <span class="elx-stat-card__label">{{ __('home.stat_rating') }}</span>
                     </div>
                     <div class="elx-stat-card">
                         <span class="elx-stat-card__number">∞</span>
-                        <span class="elx-stat-card__label">Wellness</span>
+                        <span class="elx-stat-card__label">{{ __('home.stat_wellness') }}</span>
                     </div>
                 </div>
             </div>
@@ -344,7 +342,7 @@
             <div class="elx-container">
                 <h2 class="elx-section__title"
                     style="text-align: center; color: #4ac8f6; margin-bottom: 4rem; font-family: 'Istok Web', sans-serif;">What
-                    Our Community Says</h2>
+                    {{ __('home.community_title') }}</h2>
 
                 <div class="testimonial-carousel-container">
                     <button class="carousel-btn prev" id="carouselPrev"><i class="fas fa-chevron-left"></i></button>
@@ -388,7 +386,7 @@
                                             </p>
                                         </div>
                                         @if($isHomeExpandable)
-                                            <div class="home-testimonial-read-more">Tap to read full comment ...</div>
+                                            <div class="home-testimonial-read-more">{{ __('home.tap_read_more') }}</div>
                                         @endif
 
                                         <!-- Footer: User Info -->
@@ -420,12 +418,12 @@
                 <div style="text-align: center; margin-top: 4rem;">
                     <a href="{{ route('testimonials.index', ['tab' => 'write']) }}" class="elx-btn elx-btn--glass"
                         style="padding: 15px 40px; border-radius: 30px; margin-right: 20px;">
-                          Write Review <!--<i class="fas fa-arrow-right" style="margin-left: 10px;"></i> -->
+                          {{ __('home.write_review') }}
                     </a>
 
                     <a href="{{ route('testimonials.index', ['tab' => 'direct']) }}" class="elx-btn elx-btn--glass"
                         style="padding: 15px 40px; border-radius: 30px;">
-                         All Review <i class="fas fa-arrow-right" style="margin-left: 10px;"></i>
+                         {{ __('home.all_reviews') }} <i class="fas fa-arrow-right" style="margin-left: 10px;"></i>
                     </a>
                 </div>
                 
@@ -436,15 +434,15 @@
     <section class="elx-section elx-newsletter" id="newsletter">
         <div class="elx-container">
             <div class="elx-newsletter__box" data-animate>
-                <h2>Unlock exclusive launches, curated tips, and membersâ€‘only offers.</h2>
-                <p class="elx-newsletter__sub">No Spam, Good Stuff Only!</p>
+                <h2>{{ __('home.newsletter_title') }}</h2>
+                <p class="elx-newsletter__sub">{{ __('home.newsletter_sub') }}</p>
                 <div style="max-width: 600px; margin: 0 auto;">
                     <form action="{{ route('newsletter.subscribe') }}" method="POST"
                         style="display: flex; width: 100%; gap: 15px;">
                         @csrf
-                        <input type="email" name="email" placeholder="Your email address" class="elx-newsletter__input"
+                        <input type="email" name="email" placeholder="{{ __('home.newsletter_placeholder') }}" class="elx-newsletter__input"
                             required style="flex: 1; background: rgba(0, 0, 0, 0.3); border: 1px solid var(--elx-border); border-radius: 100px; padding: 0.9rem 1.5rem;">
-                        <button type="submit" class="elx-newsletter__btn" style="border-radius: 100px; padding: 0.9rem 2rem;">Receive the Whisper</button>
+                        <button type="submit" class="elx-newsletter__btn" style="border-radius: 100px; padding: 0.9rem 2rem;">{{ __('home.newsletter_btn') }}</button>
                     </form>
                 </div>
             </div>

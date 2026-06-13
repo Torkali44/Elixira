@@ -5,10 +5,10 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreItemRequest;
 use App\Http\Requests\Admin\UpdateItemRequest;
+use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Item;
 use App\Models\ItemImage;
-use App\Models\Brand;
 use Illuminate\Support\Facades\Storage;
 
 class ItemController extends Controller
@@ -17,22 +17,30 @@ class ItemController extends Controller
     {
         $status = request('status');
         $query = Item::with(['category', 'brandModel.vendorProfile.user'])->latest();
-        
-        if ($status && in_array($status, ['pending', 'approved', 'rejected'])) {
-            if ($status === 'rejected') {
-                $query->whereIn('status', ['rejected', 'rejected_with_notes']);
-            } else {
-                $query->where('status', $status);
-            }
+
+        if ($status === 'new') {
+            // New = pending items added in the last 24 hours
+            $query->where('status', 'pending')
+                ->where('created_at', '>=', now()->subHours(24));
+        } elseif ($status === 'pending') {
+            // Pending = pending items older than 24 hours
+            $query->where('status', 'pending')
+                ->where('created_at', '<', now()->subHours(24));
+        } elseif ($status === 'approved') {
+            $query->where('status', 'approved');
+        } elseif ($status === 'rejected') {
+            $query->whereIn('status', ['rejected', 'rejected_with_notes']);
         }
-        
+
         $items = $query->paginate(20);
+
         return view('admin.items.index', compact('items'));
     }
 
     public function show(Item $item)
     {
         $item->load('category', 'brandModel.vendorProfile.user', 'images');
+
         return view('admin.items.show', compact('item'));
     }
 
@@ -40,6 +48,7 @@ class ItemController extends Controller
     {
         $categories = Category::all();
         $brands = Brand::where('is_active', true)->orderBy('name')->get();
+
         return view('admin.items.create', compact('categories', 'brands'));
     }
 
@@ -68,6 +77,7 @@ class ItemController extends Controller
     {
         $categories = Category::all();
         $brands = Brand::where('is_active', true)->orderBy('name')->get();
+
         return view('admin.items.edit', compact('item', 'categories', 'brands'));
     }
 
@@ -112,6 +122,7 @@ class ItemController extends Controller
     {
         Storage::disk('public')->delete($image->image);
         $image->delete();
+
         return redirect()->back()->with('success', 'Image removed from gallery.');
     }
 }

@@ -3,8 +3,8 @@
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-        <h2 class="mb-1 fw-bold">Newsletter Subscribers</h2>
-        <p class="text-muted mb-0">Manage newsletter subscriptions and send bulk emails.</p>
+        <h2 class="mb-1 fw-bold">{{ __('admin.subscribers_page.title') }}</h2>
+        <p class="text-muted mb-0">{{ __('admin.subscribers_page.subtitle') }}</p>
     </div>
 </div>
 
@@ -16,11 +16,11 @@
         <div class="col-lg-7 mb-4">
             <div class="card border-0 shadow-sm" style="border-radius: 16px;">
                 <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
-                    <h5 class="fw-bold m-0 text-dark">Subscribers List ({{ $subscribers->total() }})</h5>
+                    <h5 class="fw-bold m-0 text-dark">{{ __('admin.subscribers_page.list_title', ['count' => $subscribers->total()]) }}</h5>
                     <div class="form-check m-0">
                         <input class="form-check-input" type="checkbox" id="selectAll">
                         <label class="form-check-label fw-bold text-primary" for="selectAll" style="cursor: pointer;">
-                            Select All
+                            {{ __('admin.subscribers_page.select_all') }}
                         </label>
                     </div>
                 </div>
@@ -30,9 +30,9 @@
                             <thead class="table-light">
                                 <tr>
                                     <th class="ps-4" style="width: 50px;"></th>
-                                    <th>Email Address</th>
-                                    <th>Subscribed On</th>
-                                    <th class="text-end pe-4">Actions</th>
+                                    <th>{{ __('admin.subscribers_page.col_email') }}</th>
+                                    <th>{{ __('admin.subscribers_page.col_date') }}</th>
+                                    <th class="text-end pe-4">{{ __('admin.subscribers_page.col_actions') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -48,7 +48,7 @@
                                         {{ $sub->created_at->format('M d, Y h:i A') }}
                                     </td>
                                     <td class="text-end pe-4">
-                                        <button type="submit" form="deleteForm{{ $sub->id }}" class="btn btn-sm btn-outline-danger" title="Remove Subscriber">
+                                        <button type="submit" form="deleteForm{{ $sub->id }}" class="btn btn-sm btn-outline-danger" title="{{ __('admin.subscribers_page.remove_subscriber') }}">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </td>
@@ -57,7 +57,7 @@
                                 <tr>
                                     <td colspan="4" class="text-center py-5 text-muted">
                                         <i class="fas fa-envelope-open-text d-block mb-3" style="font-size: 2.5rem; opacity: 0.3;"></i>
-                                        No subscribers found.
+                                        {{ __('admin.subscribers_page.empty') }}
                                     </td>
                                 </tr>
                                 @endforelse
@@ -75,31 +75,31 @@
         <div class="col-lg-5">
             <div class="card border-0 shadow-sm sticky-lg-top" style="border-radius: 16px; top: 20px; z-index: 100;">
                 <div class="card-header bg-white border-0 py-3">
-                    <h5 class="fw-bold m-0 text-dark">Compose Bulk Email</h5>
+                    <h5 class="fw-bold m-0 text-dark">{{ __('admin.subscribers_page.compose_title') }}</h5>
                 </div>
                 <div class="card-body">
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Selected Recipients</label>
+                        <label class="form-label fw-bold">{{ __('admin.subscribers_page.selected_recipients') }}</label>
                         <div class="p-2 border rounded bg-light text-muted small" id="recipientCount">
-                            0 subscribers selected.
+                            {{ __('admin.subscribers_page.selected_count', ['count' => 0]) }}
                         </div>
                         <div class="form-text text-danger" id="selectionError" style="display: none;">
-                            Please select at least one subscriber from the list.
+                            {{ __('admin.subscribers_page.selection_error') }}
                         </div>
                     </div>
 
                     <div class="mb-3">
-                        <label for="subject" class="form-label fw-bold">Email Subject</label>
-                        <input type="text" id="subject" name="subject" class="form-control" placeholder="e.g. Welcome to Elixira's Whisper" required>
+                        <label for="subject" class="form-label fw-bold">{{ __('admin.subscribers_page.subject') }}</label>
+                        <input type="text" id="subject" name="subject" class="form-control" placeholder="{{ __('admin.subscribers_page.subject_placeholder') }}" required>
                     </div>
 
                     <div class="mb-3">
-                        <label for="content" class="form-label fw-bold">Email Content (Plain Text)</label>
-                        <textarea id="content" name="content" class="form-control" rows="10" placeholder="Type your message here..." required></textarea>
+                        <label for="content" class="form-label fw-bold">{{ __('admin.subscribers_page.content') }}</label>
+                        <textarea id="content" name="content" class="form-control" rows="10" placeholder="{{ __('admin.subscribers_page.content_placeholder') }}" required></textarea>
                     </div>
 
                     <button type="submit" class="btn btn-primary w-100" id="sendBtn">
-                        <i class="fas fa-paper-plane me-2"></i> Send Bulk Email
+                        <i class="fas fa-paper-plane me-2"></i> {{ __('admin.subscribers_page.send_btn') }}
                     </button>
                 </div>
             </div>
@@ -109,7 +109,7 @@
 
 <!-- External Delete Forms to avoid nesting form tags -->
 @foreach($subscribers as $sub)
-<form id="deleteForm{{ $sub->id }}" action="{{ route('admin.subscribers.destroy', $sub->id) }}" method="POST" data-confirm="Are you sure you want to delete {{ $sub->email }} from the subscriber list?">
+<form id="deleteForm{{ $sub->id }}" action="{{ route('admin.subscribers.destroy', $sub->id) }}" method="POST" data-confirm="{{ __('admin.subscribers_page.delete_confirm', ['email' => $sub->email]) }}">
     @csrf
     @method('DELETE')
 </form>
@@ -128,7 +128,7 @@
 
         function updateRecipientCount() {
             const checkedCount = document.querySelectorAll('.subscriber-checkbox:checked').length;
-            recipientCount.textContent = `${checkedCount} subscriber(s) selected.`;
+            recipientCount.textContent = '{{ __('admin.subscribers_page.selected_count', ['count' => ':count']) }}'.replace(':count', checkedCount);
             if (checkedCount > 0) {
                 selectionError.style.display = 'none';
             }
@@ -166,7 +166,7 @@
             const content = document.getElementById('content').value.trim();
 
             if (!subject || !content) {
-                alert('Please fill in both Subject and Content fields.');
+                alert('{{ __('admin.subscribers_page.fill_fields_alert') }}');
                 return;
             }
 

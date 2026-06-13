@@ -461,21 +461,21 @@
         <div class="account-hero" data-animate>
             <div class="account-hero__copy">
                 <h1 class="elx-hero__title">
-                    <span class="elx-hero__title-gradient">My Account</span>
+                    <span class="elx-hero__title-gradient">{{ __('profile_page.hero_title') }}</span>
                 </h1>
-                <p>Manage your details, keep your member code ready for checkout, and review every order from one place.</p>
+                <p>{{ __('profile_page.hero_subtitle') }}</p>
             </div>
 
             <div class="account-hero__actions">
-                <a href="#details" class="elx-btn elx-btn--glass">Edit Details</a>
-                <a href="{{ route('profile.orders.index') }}" class="elx-btn elx-btn--glass">My Orders</a>
-                <a href="{{ route('menu.index') }}" class="elx-btn elx-btn--primary">Shop Now</a>
+                <a href="#details" class="elx-btn elx-btn--glass">{{ __('profile_page.edit_details') }}</a>
+                <a href="{{ route('profile.orders.index') }}" class="elx-btn elx-btn--glass">{{ __('profile_page.my_orders') }}</a>
+                <a href="{{ route('menu.index') }}" class="elx-btn elx-btn--primary">{{ __('profile_page.shop_now') }}</a>
             </div>
         </div>
 
         @if (session('status') === 'profile-updated' || session('status') === 'password-updated')
             <div class="account-success" data-animate>
-                Your account changes were saved successfully.
+                {{ __('profile_page.saved_success') }}
             </div>
         @endif
 
@@ -488,7 +488,7 @@
                         <div>
                             <div class="account-pill">
                                 <i class="fas fa-user-circle"></i>
-                                <span>{{ $user->role === 'admin' ? 'Administrator' : 'Member' }}</span>
+                                <span>{{ $user->role === 'admin' ? __('profile_page.administrator') : __('profile_page.member') }}</span>
                             </div>
                             <h2 style="margin: 0.9rem 0 0.25rem; font-size: 1.5rem;">{{ $user->name }}</h2>
                             <p class="account-muted">{{ $user->email }}</p>
@@ -498,19 +498,19 @@
                     <div class="account-grid">
                         <div class="account-stat">
                             <span class="account-stat__value">{{ $accountStats['total_orders'] }}</span>
-                            <span class="account-stat__label">Orders</span>
+                            <span class="account-stat__label">{{ __('profile_page.orders') }}</span>
                         </div>
                         <div class="account-stat">
                             <span class="account-stat__value">{{ $accountStats['active_orders'] }}</span>
-                            <span class="account-stat__label">In Progress</span>
+                            <span class="account-stat__label">{{ __('profile_page.in_progress') }}</span>
                         </div>
                         <div class="account-stat">
                             <span class="account-stat__value">{{ $accountStats['delivered_orders'] }}</span>
-                            <span class="account-stat__label">Delivered</span>
+                            <span class="account-stat__label">{{ __('profile_page.delivered') }}</span>
                         </div>
                         <div class="account-stat">
                             <span class="account-stat__value">﷼ {{ number_format((float) $accountStats['total_spent'], 2) }}</span>
-                            <span class="account-stat__label">Spent</span>
+                            <span class="account-stat__label">{{ __('profile_page.spent') }}</span>
                         </div>
                     </div>
 
@@ -521,30 +521,30 @@
                         </a> -->
                         <a href="#addresses" class="account-link">
                             <i class="fas fa-map-marker-alt"></i>
-                            <span>Manage addresses</span>
+                            <span>{{ __('profile_page.manage_addresses') }}</span>
                         </a>
                         <a href="{{ route('profile.orders.index') }}" class="account-link">
                             <i class="fas fa-box-open"></i>
-                            <span>View previous orders</span>
+                            <span>{{ __('profile_page.view_orders') }}</span>
                         </a>
                         <a href="{{ route('profile.avatar-options') }}" class="account-link">
                             <i class="fas fa-image-portrait"></i>
-                            <span>Choose avatar</span>
+                            <span>{{ __('profile_page.choose_avatar') }}</span>
                         </a>
                         <a href="{{ route('orders.track') }}" class="account-link">
                             <i class="fas fa-location-arrow"></i>
-                            <span>Track by phone</span>
+                            <span>{{ __('profile_page.track_by_phone') }}</span>
                         </a>
                         
                         @if(!auth()->user()->vendorProfile || auth()->user()->vendorProfile->status === 'draft')
                         <a href="{{ route('vendor.onboarding') }}" class="account-link" style="border-color: rgba(74, 200, 246, 0.3); background: rgba(74, 200, 246, 0.05);">
                             <i class="fas fa-store"></i>
-                            <span style="color: var(--elx-cyan);">Become a Vendor</span>
+                            <span style="color: var(--elx-cyan);">{{ __('profile_page.become_vendor') }}</span>
                         </a>
                         @elseif(auth()->user()->vendorProfile->status === 'pending')
                         <a href="{{ route('vendor.pending') }}" class="account-link">
                             <i class="fas fa-clock"></i>
-                            <span style="color: #ffd36a;">Vendor Request Pending</span>
+                            <span style="color: #ffd36a;">{{ __('profile_page.vendor_pending') }}</span>
                         </a>
                         @elseif(auth()->user()->vendorProfile->status === 'rejected_with_notes')
                         <a href="{{ route('vendor.rejected') }}" class="account-link" style="border-color: rgba(255, 107, 107, 0.3); background: rgba(255, 107, 107, 0.05);">

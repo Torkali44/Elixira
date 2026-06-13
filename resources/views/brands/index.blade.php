@@ -98,14 +98,14 @@
     <div class="elx-container">
         <div class="elx-section__header" data-animate>
             <h1 class="elx-hero__title">
-                <span class="elx-hero__title-gradient">Our Brands</span>
+                <span class="elx-hero__title-gradient">{{ __('brands_page.hero_title') }}</span>
             </h1>
-            <p class="elx-hero__subtitle" style="margin-bottom: 0;">Explore trusted vendors and their natural product collections</p>
+            <p class="elx-hero__subtitle" style="margin-bottom: 0;">{{ __('brands_page.hero_subtitle') }}</p>
         </div>
 
         {{-- Country Filter --}}
         <div class="brands-filter" data-animate>
-            <a href="{{ route('brands.index') }}" class="{{ !request('country') ? 'active' : '' }}">All</a>
+            <a href="{{ route('brands.index') }}" class="{{ !request('country') ? 'active' : '' }}">{{ __('brands_page.filter_all') }}</a>
             <a href="{{ route('brands.index', ['country' => 'UAE']) }}" class="{{ request('country') === 'UAE' ? 'active' : '' }}">UAE</a>
             <a href="{{ route('brands.index', ['country' => 'KSA']) }}" class="{{ request('country') === 'KSA' ? 'active' : '' }}">Saudi Arabia</a>
         </div>

@@ -1,6 +1,6 @@
 @extends('layouts.framer')
 
-@section('title', 'Our Collections - Elixira')
+@section('title', __('shop.page_title'))
 
 @section('content')
 <div class="page-content">
@@ -8,14 +8,14 @@
         {{-- Section Header --}}
         <div class="elx-section__header" data-animate>
             <h1 class="elx-hero__title">
-                <span class="elx-hero__title-gradient">Our Collections</span>
+                <span class="elx-hero__title-gradient">{{ __('shop.hero_title') }}</span>
             </h1>
-            <p class="elx-hero__subtitle" style="margin-bottom: 0;">Discover our pure and natural product ranges</p>
+            <p class="elx-hero__subtitle" style="margin-bottom: 0;">{{ __('shop.hero_subtitle') }}</p>
         </div>
 
         {{-- Category Filter --}}
         <div class="menu-filter text-center mb-5" data-animate style="margin-bottom: 4rem;">
-            <button class="filter-btn active" data-filter="all">All</button>
+            <button class="filter-btn active" data-filter="all">{{ __('shop.filter_all') }}</button>
             @foreach($categories as $category)
                 <button class="filter-btn" data-filter=".cat-{{ $category->id }}">{{ $category->name }}</button>
             @endforeach

@@ -1,6 +1,6 @@
-﻿@extends('layouts.framer')
+@extends('layouts.framer')
 
-@section('title', 'Log in - Elixira')
+@section('title', app()->getLocale() === 'ar' ? 'تسجيل الدخول - Elixira' : 'Log in - Elixira')
 
 @section('head')
 <style>
@@ -11,6 +11,8 @@
         min-height: 100vh;
         display: flex;
         align-items: center;
+        padding-top: 100px;
+        padding-bottom: 60px;
     }
     .auth-card {
         background: var(--elx-glass);
@@ -49,8 +51,8 @@
     <div class="elx-container">
         <div class="auth-card" data-animate>
             <div style="text-align: center; margin-bottom: 2rem;">
-                <h1 style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 2.5rem; margin-bottom: 0.5rem; color: var(--elx-accent);">Welcome back</h1>
-                <p style="color: var(--elx-gray);">Sign in to manage your account or continue shopping.</p>
+                <h1 style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 2.5rem; margin-bottom: 0.5rem; color: var(--elx-accent);">{{ __('app.auth.login_title') }}</h1>
+                <p style="color: var(--elx-gray);">{{ __('app.auth.login_subtitle') }}</p>
             </div>
 
             <x-auth-session-status class="mb-4" style="color: var(--elx-cyan); text-align: center;" :status="session('status')" />
@@ -58,31 +60,32 @@
             <form method="POST" action="{{ route('login') }}">
                 @csrf
 
-                <label class="auth-label">Email Address</label>
+                <label class="auth-label">{{ __('app.auth.email') }}</label>
                 <input type="email" name="email" class="form-input" value="{{ old('email') }}" required autofocus autocomplete="username">
                 <x-input-error :messages="$errors->get('email')" style="color: #ff8a8a; font-size: 0.8rem; margin-bottom: 1rem;" />
 
-                <label class="auth-label">Password</label>
+                <label class="auth-label">{{ __('app.auth.password') }}</label>
                 <input type="password" name="password" class="form-input" required autocomplete="current-password">
                 <x-input-error :messages="$errors->get('password')" style="color: #ff8a8a; font-size: 0.8rem; margin-bottom: 1rem;" />
 
                 <div style="display: flex; align-items: center; gap: 0.5rem; margin: 1.5rem 0;">
                     <input id="remember_me" type="checkbox" name="remember" style="accent-color: var(--elx-cyan);">
-                    <label for="remember_me" style="color: var(--elx-gray); font-size: 0.9rem;">Remember me</label>
+                    <label for="remember_me" style="color: var(--elx-gray); font-size: 0.9rem;">{{ __('app.auth.remember_me') }}</label>
                 </div>
 
                 <button type="submit" class="elx-btn elx-btn--primary" style="width: 100%; justify-content: center; padding: 1rem;">
-                    Log in
+                    {{ __('app.auth.login_btn') }}
                 </button>
 
                 <div style="margin-top: 2rem; display: flex; justify-content: space-between; font-size: 0.85rem;">
                     @if (Route::has('password.request'))
-                        <a href="{{ route('password.request') }}" style="color: var(--elx-gray); text-decoration: none;">Forgot password?</a>
+                        <a href="{{ route('password.request') }}" style="color: var(--elx-gray); text-decoration: none;">{{ __('app.auth.forgot_password') }}</a>
                     @endif
-                    <a href="{{ route('register') }}" style="color: var(--elx-cyan); text-decoration: none; font-weight: 700;">Create an account</a>
+                    <a href="{{ route('register') }}" style="color: var(--elx-cyan); text-decoration: none; font-weight: 700;">{{ __('app.auth.create_account') }}</a>
                 </div>
             </form>
         </div>
     </div>
 </div>
 @endsection
+

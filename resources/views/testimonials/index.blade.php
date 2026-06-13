@@ -1,6 +1,6 @@
 @extends('layouts.framer')
 
-@section('title', 'Testimonials - Elixira')
+@section('title', __('testimonials_page.page_title'))
 
 @section('content')
     <style>
@@ -413,7 +413,7 @@
 
     <div class="testimonials-page">
         <div class="testimonials-header">
-            <h1 class="testimonials-title">Testimonials</h1>
+            <h1 class="testimonials-title">{{ __('testimonials_page.hero_title') }}</h1>
             <ul class="testimonials-tabs">
                 <li><a href="{{ route('testimonials.index', ['tab' => 'direct']) }}"
                         class="{{ $tab == 'direct' ? 'active' : '' }}">Direct</a></li>

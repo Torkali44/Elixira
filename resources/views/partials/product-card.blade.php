@@ -78,7 +78,7 @@
             @if($isOutOfStock)
                     <button type="button" class="elx-product-card__add-btn"
                         onclick="event.stopPropagation(); showSpecialRequestModal({{ $product->id }}, '{{ addslashes($product->name) }}')" style="position: relative; z-index: 20; background: rgba(255, 77, 77, 0.1); color: #ff4d4d; border-color: rgba(255, 77, 77, 0.3);">
-                    <i class="fas fa-hand-holding-heart"></i> Private order
+                    <i class="fas fa-hand-holding-heart"></i> {{ __('home.private_order') }}
                 </button>
             @else
                 <form action="{{ route('cart.add') }}" method="POST" onclick="event.stopPropagation();" style="position: relative; z-index: 20;">
@@ -86,7 +86,7 @@
                     <input type="hidden" name="item_id" value="{{ $product->id }}">
                     <input type="hidden" name="quantity" value="1">
                     <button type="button" class="elx-product-card__add-btn" onclick="addToCartAjax(this, event);" style="position: relative; z-index: 20;">
-                        <i class="fas fa-cart-plus"></i> {{ $product->stock > 0 ? 'Add to Cart' : 'Special Item' }}
+                        <i class="fas fa-cart-plus"></i> {{ $product->stock > 0 ? __('home.add_to_cart') : __('home.special_item') }}
                     </button>
                 </form>
             @endif

@@ -4,9 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\AvatarOption;
 use App\Models\NewsletterSubscriber;
-use App\Models\Notification;
 use App\Models\Review;
 use App\Models\User;
+use App\Support\UserNotifier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rule;
@@ -62,13 +62,9 @@ class TestimonialController extends Controller
             try {
                 $admins = User::where('role', 'admin')->get();
                 foreach ($admins as $admin) {
-                    Notification::create([
-                        'user_id' => $admin->id,
-                        'title' => 'New Review/Comment',
-                        'message' => 'A new review has been submitted by '.$request->name.' and is pending approval.',
-                        'url' => route('admin.reviews.index'),
-                        'is_read' => false,
-                    ]);
+                    UserNotifier::send($admin->id, 'new_review', [
+                        'name' => $request->name,
+                    ], route('admin.reviews.index'));
                 }
             } catch (\Throwable $e2) {
                 \Log::error('Review notification failed: '.$e2->getMessage());

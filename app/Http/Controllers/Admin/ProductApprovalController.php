@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Item;
-use App\Models\Notification;
+use App\Support\UserNotifier;
 use Illuminate\Http\Request;
 
 class ProductApprovalController extends Controller
@@ -26,12 +26,9 @@ class ProductApprovalController extends Controller
         try {
             $vendor = $item->vendor;
             if ($vendor) {
-                Notification::create([
-                    'user_id' => $vendor->id,
-                    'title' => 'Product Approved',
-                    'message' => 'Your product "'.$item->name.'" has been approved by the admin and is now live.',
-                    'url' => route('vendor.items.index'),
-                ]);
+                UserNotifier::send($vendor->id, 'product_approved', [
+                    'product' => $item->name,
+                ], route('vendor.items.index'));
             }
         } catch (\Throwable $e) {
             \Log::error('Product approval notification failed: '.$e->getMessage());
@@ -57,13 +54,12 @@ class ProductApprovalController extends Controller
         try {
             $vendor = $item->vendor;
             if ($vendor) {
-                $reason = $request->rejection_reason ? ' Reason: '.$request->rejection_reason : '';
-                Notification::create([
-                    'user_id' => $vendor->id,
-                    'title' => 'Product Rejected',
-                    'message' => 'Your product "'.$item->name.'" has been rejected.'.$reason,
-                    'url' => route('vendor.items.edit', $item->id),
-                ]);
+                UserNotifier::send($vendor->id, 'product_rejected', [
+                    'product' => $item->name,
+                    'reason' => $request->rejection_reason
+                        ? __('notifications.rejection_reason', ['reason' => $request->rejection_reason])
+                        : '',
+                ], route('vendor.items.edit', $item->id));
             }
         } catch (\Throwable $e) {
             \Log::error('Product rejection notification failed: '.$e->getMessage());

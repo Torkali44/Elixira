@@ -1,10 +1,19 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
 
 <head>
     <meta charset="UTF-8">
     <script>
         document.documentElement.classList.add('elx-animate-scroll');
+        // Immediately apply saved theme to prevent FOUC
+        (function() {
+            var theme = @json($userTheme ?? session('theme', 'dark'));
+            if (theme === 'light') {
+                document.body.classList.add('light-mode');
+            }
+            localStorage.setItem('elx-theme', theme);
+            localStorage.setItem('theme', theme);
+        })();
     </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Elixira - Superfoods & Wellness')</title>
@@ -20,6 +29,7 @@
     {{-- Icons & Styles --}}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="{{ asset('css/elixira-home.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/theme.css') }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -53,6 +63,156 @@
         .elx-nav__notifications-item:hover {
             background: rgba(255, 255, 255, 0.08) !important;
         }
+
+        /* ─── Nav Dropdown Menus ─── */
+        .elx-nav__dropdown {
+            position: relative;
+        }
+        .elx-nav__dropdown-menu {
+            position: absolute;
+            top: calc(100% + 0.6rem);
+            left: 50%;
+            transform: translateX(-50%);
+            min-width: 180px;
+            padding: 0.5rem;
+            border-radius: 16px;
+            background: rgba(6, 15, 20, 0.97);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 16px 50px rgba(0,0,0,0.4);
+            backdrop-filter: blur(20px);
+            opacity: 0;
+            pointer-events: none;
+            transform: translateX(-50%) translateY(-8px);
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            z-index: 1050;
+        }
+        .elx-nav__dropdown:hover .elx-nav__dropdown-menu,
+        .elx-nav__dropdown.open .elx-nav__dropdown-menu {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateX(-50%) translateY(0);
+        }
+        .elx-nav__dropdown-menu a {
+            display: block;
+            padding: 0.65rem 1rem;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.8);
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+        .elx-nav__dropdown-menu a:hover,
+        .elx-nav__dropdown-menu a.active {
+            background: rgba(74, 200, 246, 0.1);
+            color: #fff;
+        }
+        .elx-nav__dropdown > a .fa-chevron-down {
+            font-size: 0.6rem;
+            margin-left: 4px;
+            transition: transform 0.2s ease;
+        }
+        .elx-nav__dropdown:hover > a .fa-chevron-down {
+            transform: rotate(180deg);
+        }
+
+        /* ─── Theme & Lang Toggle Buttons ─── */
+        .elx-nav__icon-btn {
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+        .elx-nav__icon-btn:hover {
+            background: rgba(74, 200, 246, 0.15);
+            border-color: var(--elx-cyan);
+            color: var(--elx-cyan);
+            transform: scale(1.08);
+        }
+        .elx-nav__lang-btn {
+            width: auto;
+            padding: 0 0.85rem;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            border-radius: 100px;
+            height: 38px;
+        }
+
+        /* ─── Light Theme Override ─── */
+        body.light-mode {
+            --elx-dark: #f5f7fa;
+            --elx-darker: #eef1f5;
+            --elx-primary: #f0f4f8;
+            --elx-white: #1a2a33;
+            --elx-gray: #5a6a75;
+            --elx-light: #3a5565;
+            --elx-glass: #ffffff;
+            --elx-glass-strong: rgba(255,255,255,0.95);
+            --elx-border: rgba(0,0,0,0.08);
+        }
+        body.light-mode {
+            background: #eef1f5;
+            color: #1a2a33;
+        }
+        body.light-mode .elx-nav.scrolled {
+            background: rgba(255,255,255,0.92);
+            box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+        }
+        body.light-mode .elx-nav__links a {
+            color: rgba(26,42,51,0.7);
+        }
+        body.light-mode .elx-nav__links a:hover,
+        body.light-mode .elx-nav__links a.active {
+            color: #1a2a33;
+        }
+        body.light-mode .elx-nav__cart,
+        body.light-mode .elx-nav__icon-btn {
+            background: rgba(0,0,0,0.04);
+            border-color: rgba(0,0,0,0.1);
+            color: #1a2a33;
+        }
+        body.light-mode .elx-nav__profile-trigger {
+            background: rgba(0,0,0,0.04);
+            border-color: rgba(0,0,0,0.1);
+            color: #1a2a33;
+        }
+        body.light-mode .elx-nav__profile-menu,
+        body.light-mode .elx-nav__dropdown-menu {
+            background: rgba(255,255,255,0.98);
+            border-color: rgba(0,0,0,0.08);
+            box-shadow: 0 16px 50px rgba(0,0,0,0.12);
+        }
+        body.light-mode .elx-nav__dropdown-menu a {
+            color: rgba(26,42,51,0.75);
+        }
+        body.light-mode .elx-nav__dropdown-menu a:hover {
+            background: rgba(74, 200, 246, 0.08);
+            color: #1a2a33;
+        }
+        body.light-mode .elx-nav__profile-head strong { color: #1a2a33; }
+        body.light-mode .elx-nav__profile-head span { color: #5a6a75; }
+        body.light-mode .elx-nav__profile-menu a,
+        body.light-mode .elx-nav__profile-menu button { color: rgba(26,42,51,0.8); }
+        body.light-mode .elx-nav__profile-menu a:hover,
+        body.light-mode .elx-nav__profile-menu button:hover { background: rgba(0,0,0,0.04); color: #1a2a33; }
+        body.light-mode .elx-footer { background-color: #dce3ea !important; }
+        body.light-mode .elx-footer__inner { background: #dce3ea !important; border-color: rgba(0,0,0,0.06) !important; }
+        body.light-mode .elx-nav__notifications-dropdown { background: #fff !important; border-color: rgba(0,0,0,0.1) !important; }
+        body.light-mode .elx-nav__notifications-head { background: rgba(0,0,0,0.02) !important; border-color: rgba(0,0,0,0.06) !important; }
+        body.light-mode .elx-nav__notifications-head strong { color: #1a2a33 !important; }
+        body.light-mode .elx-nav__profile-meta strong,
+        body.light-mode .elx-nav__profile-meta small { color: #1a2a33 !important; }
+        body.light-mode .elx-hero__subtitle { color: #3d4f5c !important; }
+        body.light-mode .page-content { color: #13252d; }
     </style>
     @yield('head')
 </head>
@@ -67,26 +227,30 @@
             </a>
 
             <ul class="elx-nav__links" id="navLinks">
-                <li><a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'active' : '' }}">Home</a></li>
+                <li><a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'active' : '' }}">{{ __('app.home') }}</a></li>
                 <li><a href="{{ route('menu.index') }}"
-                        class="{{ request()->routeIs('menu.*') ? 'active' : '' }}">Shop</a></li>
-                <li><a href="{{ route('brands.index') }}"
-                        class="{{ request()->routeIs('brands.*') ? 'active' : '' }}">Brands</a></li>
-                <li><a href="{{ route('about') }}" class="{{ request()->routeIs('about') ? 'active' : '' }}">About</a>
+                        class="{{ request()->routeIs('menu.*') ? 'active' : '' }}">{{ __('app.shop') }}</a></li>
+                <li class="elx-nav__dropdown">
+                    <a href="{{ route('about') }}" class="{{ request()->routeIs('about') || request()->routeIs('brands.*') || request()->routeIs('faqs.*') ? 'active' : '' }}">{{ __('app.about') }} <i class="fas fa-chevron-down"></i></a>
+                    <div class="elx-nav__dropdown-menu">
+                        <a href="{{ route('about') }}" class="{{ request()->routeIs('about') ? 'active' : '' }}">{{ __('app.about_us') }}</a>
+                        <a href="{{ route('brands.index') }}" class="{{ request()->routeIs('brands.*') ? 'active' : '' }}">{{ __('app.brands') }}</a>
+                        <a href="{{ route('faqs.index') }}" class="{{ request()->routeIs('faqs.*') ? 'active' : '' }}">{{ __('app.faqs') }}</a>
+                    </div>
                 </li>
-                <li><a href="{{ route('testimonials.index') }}" class="{{ request()->routeIs('testimonials.*') ? 'active' : '' }}">Testimonials</a></li>
-                <li><a href="{{ route('contact') }}"
-                        class="{{ request()->routeIs('contact') ? 'active' : '' }}">Contact</a></li>
+                <li><a href="{{ route('testimonials.index') }}" class="{{ request()->routeIs('testimonials.*') ? 'active' : '' }}">{{ __('app.testimonials') }}</a></li>
+                <li class="elx-nav__dropdown">
+                    <a href="{{ route('contact') }}" class="{{ request()->routeIs('contact') || request()->routeIs('blogs.*') ? 'active' : '' }}">{{ __('app.contact') }} <i class="fas fa-chevron-down"></i></a>
+                    <div class="elx-nav__dropdown-menu">
+                        <a href="{{ route('contact') }}" class="{{ request()->routeIs('contact') ? 'active' : '' }}">{{ __('app.contact_us') }}</a>
+                        <a href="{{ route('blogs.index') }}" class="{{ request()->routeIs('blogs.*') ? 'active' : '' }}">{{ __('app.blogs') }}</a>
+                    </div>
+                </li>
                 <li><a href="{{ route('orders.track') }}"
-                        class="{{ request()->routeIs('orders.*') ? 'active' : '' }}">Track Order</a></li>
-                @auth
-                    <li><a href="{{ route('profile.orders.index') }}"
-                            class="{{ request()->routeIs('profile.orders.*') ? 'active' : '' }}">My Orders</a>
-                    </li>
-                @endauth
+                        class="{{ request()->routeIs('orders.*') ? 'active' : '' }}">{{ __('app.track_order') }}</a></li>
             </ul>
 
-            <div class="elx-nav__actions">
+            <div class="elx-nav__actions" style="gap: 0.6rem;">
                 @auth
                     <div class="elx-nav__notifications-wrapper" id="notificationsMenu" style="position: relative; margin-right: 0.5rem;">
                         <button type="button" class="elx-nav__notifications-trigger" id="notificationsTrigger" aria-expanded="false" aria-controls="notificationsDropdown" style="background: none; border: none; color: #fff; font-size: 1.35rem; cursor: pointer; position: relative; padding: 5px; display: flex; align-items: center; justify-content: center; height: 42px; width: 42px; border-radius: 50%; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.1); transition: var(--elx-transition);">
@@ -98,9 +262,9 @@
                         </button>
                         <div class="elx-nav__notifications-dropdown" id="notificationsDropdown" style="position: absolute; right: 0; top: calc(100% + 0.8rem); width: 320px; background: #13252d; border: 1px solid rgba(20, 204, 255, 0.15); border-radius: 24px; box-shadow: 0 24px 80px rgba(0,0,0,0.5); display: none; z-index: 1100; overflow: hidden; font-family: var(--elx-font);">
                             <div class="elx-nav__notifications-head" style="display: flex; justify-content: space-between; align-items: center; padding: 16px; border-bottom: 1px solid rgba(255,255,255,0.08); background: rgba(0,0,0,0.15);">
-                                <strong style="color: #fff; font-size: 0.95rem;">Notifications</strong>
+                                <strong style="color: #fff; font-size: 0.95rem;">{{ __('app.notifications') }}</strong>
                                 @if($unreadCount > 0)
-                                    <button onclick="markAllNotificationsAsRead(event)" class="elx-nav__notifications-clear" style="background: none; border: none; color: #4ac8f6; font-size: 0.8rem; cursor: pointer; padding: 0; font-weight: 500;">Mark all as read</button>
+                                    <button onclick="markAllNotificationsAsRead(event)" class="elx-nav__notifications-clear" style="background: none; border: none; color: #4ac8f6; font-size: 0.8rem; cursor: pointer; padding: 0; font-weight: 500;">{{ __('app.mark_all_read') }}</button>
                                 @endif
                             </div>
                             <div class="elx-nav__notifications-list" style="max-height: 350px; overflow-y: auto;">
@@ -113,8 +277,8 @@
                                                 <span class="unread-dot" style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background-color: #4ac8f6; box-shadow: 0 0 8px #4ac8f6; margin-top: 6px; flex-shrink: 0;"></span>
                                             @endif
                                             <div style="flex-grow: 1;">
-                                                <div class="notif-title" style="color: {{ $notif->is_read ? '#8fa4af' : '#4ac8f6' }}; font-weight: {{ $notif->is_read ? 'normal' : 'bold' }}; font-size: 0.9rem; margin-bottom: 4px;">{{ $notif->title }}</div>
-                                                <div class="notif-message" style="color: rgba(255,255,255,0.6); font-size: 0.8rem; line-height: 1.4; margin-bottom: 6px;">{{ $notif->message }}</div>
+                                                <div class="notif-title" style="color: {{ $notif->is_read ? '#8fa4af' : '#4ac8f6' }}; font-weight: {{ $notif->is_read ? 'normal' : 'bold' }}; font-size: 0.9rem; margin-bottom: 4px;">{{ $notif->display_title }}</div>
+                                                <div class="notif-message" style="color: rgba(255,255,255,0.6); font-size: 0.8rem; line-height: 1.4; margin-bottom: 6px;">{{ $notif->display_message }}</div>
                                                 <div class="notif-time" style="color: rgba(255,255,255,0.35); font-size: 0.7rem;">{{ $notif->created_at->diffForHumans() }}</div>
                                             </div>
                                         </div>
@@ -122,13 +286,25 @@
                                 @empty
                                     <div class="elx-nav__notifications-empty" style="padding: 32px 16px; text-align: center; color: rgba(255,255,255,0.4); font-size: 0.85rem;">
                                         <i class="fas fa-bell-slash" style="display: block; font-size: 1.8rem; margin-bottom: 10px; opacity: 0.4;"></i>
-                                        No notifications yet.
+                                        {{ __('app.no_notifications') }}
                                     </div>
                                 @endforelse
                             </div>
                         </div>
                     </div>
                 @endauth
+
+                {{-- Dark Mode Toggle --}}
+                <button type="button" class="elx-nav__icon-btn" id="themeToggle" title="Toggle theme">
+                    <i class="fas fa-moon" id="themeIcon"></i>
+                </button>
+
+                {{-- Language Toggle --}}
+                @if(app()->getLocale() === 'ar')
+                    <a href="{{ route('lang.switch', 'en') }}" class="elx-nav__icon-btn elx-nav__lang-btn" title="Switch to English">EN</a>
+                @else
+                    <a href="{{ route('lang.switch', 'ar') }}" class="elx-nav__icon-btn elx-nav__lang-btn" title="التبديل إلى العربية">ع</a>
+                @endif
 
                 <a href="{{ route('cart.index') }}" class="elx-nav__cart" title="Cart">
                     <i class="fas fa-shopping-bag"></i>
@@ -142,11 +318,11 @@
                @auth
                     @if(auth()->user()->role === 'admin')
                         <a href="{{ route('admin.dashboard') }}" class="elx-nav__btn elx-nav__btn--admin">
-                            <i class="fas fa-cog"></i> <span>Admin</span>
+                            <i class="fas fa-cog"></i> <span>{{ __('app.admin_btn') }}</span>
                         </a>
                     @elseif(auth()->user()->role === 'vendor')
                         <a href="{{ route('vendor.dashboard') }}" class="elx-nav__btn elx-nav__btn--admin" style="background-color: #6a1b9a;">
-                            <i class="fas fa-store"></i> <span>Vendor Portal</span>
+                            <i class="fas fa-store"></i> <span>{{ __('app.vendor_portal') }}</span>
                         </a>
                     @endif
                     <div class="elx-nav__profile" id="profileMenu">
@@ -154,7 +330,7 @@
                             <x-user-avatar :user="auth()->user()" size="34" class="elx-nav__profile-avatar" />
                             <span class="elx-nav__profile-meta">
                                 <strong>{{ \Illuminate\Support\Str::limit(auth()->user()->name, 16) }}</strong>
-                                <small>My Account</small>
+                                <small>{{ __('app.my_account') }}</small>
                             </span>
                             <i class="fas fa-chevron-down"></i>
                         </button>
@@ -171,20 +347,24 @@
                             </div>
 
                             <a href="{{ route('profile.edit') }}">
-                                <span>Profile Settings</span>
+                                <span>{{ __('app.profile_settings') }}</span>
                                 <i class="fas fa-user"></i>
+                            </a>
+                            <a href="{{ route('profile.orders.index') }}">
+                                <span>{{ __('app.orders') }}</span>
+                                <i class="fas fa-receipt"></i>
                             </a>
                                <form method="POST" action="{{ route('logout') }}" class="elx-nav__profile-form">
                                 @csrf
                                 <button type="submit" class="elx-nav__profile-logout">
-                                    <span>Logout</span>
+                                    <span>{{ __('app.logout') }}</span>
                                     <i class="fas fa-sign-out-alt"></i>
                                 </button>
                             </form>
                         </div>
                     </div>
                 @else
-                    <a href="{{ route('login') }}" class="elx-nav__btn elx-nav__btn--login">Join Us</a>
+                    <a href="{{ route('login') }}" class="elx-nav__btn elx-nav__btn--login">{{ __('app.join_us') }}</a>
                 @endauth
                 <button class="elx-nav__toggle" id="navToggle">
                     <span></span><span></span><span></span>
@@ -226,41 +406,35 @@
                                 alt="Elixira Logo" style="height: 35px;">
                         </a>
                         <p style="color: rgba(255,255,255,0.6); font-size: 0.95rem; line-height: 1.6;">
-                            Designed to support beauty, energy, and inner harmony through the ritual of superfoods and
-                            science.
+                            {{ __('home.footer_tagline') }}
                         </p>
                     </div>
 
                     <div class="elx-footer__nav-group">
                         <h4
                             style="color: #4ac8f6; font-size: 1rem; margin-bottom: 1.5rem; letter-spacing: 1px; text-transform: uppercase;">
-                            Shop</h4>
+                            {{ __('home.footer_shop') }}</h4>
                         <ul style="list-style: none; padding: 0;">
                             <li><a href="{{ route('menu.index') }}"
-                                    style="color: rgba(255,255,255,0.7); text-decoration: none; display: block; padding: 0.5rem 0;">Browse
-                                    Store</a></li>
+                                    style="color: rgba(255,255,255,0.7); text-decoration: none; display: block; padding: 0.5rem 0;">{{ __('home.footer_browse') }}</a></li>
                             <li><a href="{{ route('cart.index') }}"
-                                    style="color: rgba(255,255,255,0.7); text-decoration: none; display: block; padding: 0.5rem 0;">View
-                                    Cart</a></li>
+                                    style="color: rgba(255,255,255,0.7); text-decoration: none; display: block; padding: 0.5rem 0;">{{ __('home.footer_cart') }}</a></li>
                             <li><a href="{{ route('orders.track') }}"
-                                    style="color: rgba(255,255,255,0.7); text-decoration: none; display: block; padding: 0.5rem 0;">Track
-                                    Order</a></li>
+                                    style="color: rgba(255,255,255,0.7); text-decoration: none; display: block; padding: 0.5rem 0;">{{ __('home.footer_track') }}</a></li>
                         </ul>
                     </div>
 
                     <div class="elx-footer__nav-group">
                         <h4
                             style="color: #4ac8f6; font-size: 1rem; margin-bottom: 1.5rem; letter-spacing: 1px; text-transform: uppercase;">
-                            About</h4>
+                            {{ __('home.footer_about') }}</h4>
                         <ul style="list-style: none; padding: 0;">
                             <li><a href="{{ route('about') }}"
-                                    style="color: rgba(255,255,255,0.7); text-decoration: none; display: block; padding: 0.5rem 0;">The
-                                    Ritual</a></li>
+                                    style="color: rgba(255,255,255,0.7); text-decoration: none; display: block; padding: 0.5rem 0;">{{ __('home.footer_ritual') }}</a></li>
                             <li><a href="{{ route('contact') }}"
-                                    style="color: rgba(255,255,255,0.7); text-decoration: none; display: block; padding: 0.5rem 0;">Contact
-                                    Us</a></li>
+                                    style="color: rgba(255,255,255,0.7); text-decoration: none; display: block; padding: 0.5rem 0;">{{ __('home.footer_contact') }}</a></li>
                             <li><a href="#"
-                                    style="color: rgba(255,255,255,0.7); text-decoration: none; display: block; padding: 0.5rem 0;">Instagram</a>
+                                    style="color: rgba(255,255,255,0.7); text-decoration: none; display: block; padding: 0.5rem 0;">{{ __('home.footer_instagram') }}</a>
                             </li>
                         </ul>
                     </div>
@@ -269,10 +443,10 @@
                 {{-- Bottom info --}}
                 <div
                     style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 2rem; display: flex; justify-content: space-between; align-items: center; color: rgba(255,255,255,0.5); font-size: 0.85rem;">
-                    <span>Â© 2026 Elixira. All Rights Reserved.</span>
+                    <span>{{ __('home.footer_rights', ['year' => date('Y')]) }}</span>
                     <div style="display: flex; gap: 2rem;">
-                        <a href="#" style="color: inherit; text-decoration: none;">Privacy Policy</a>
-                        <a href="#" style="color: inherit; text-decoration: none;">Terms of Service</a>
+                        <a href="#" style="color: inherit; text-decoration: none;">{{ __('home.footer_privacy') }}</a>
+                        <a href="#" style="color: inherit; text-decoration: none;">{{ __('home.footer_terms') }}</a>
                     </div>
                 </div>
             </div>
@@ -604,6 +778,52 @@
                 }
             });
         }
+
+        // ─── Dark Mode Toggle ───
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const body = document.body;
+
+        function applyTheme(theme) {
+            if (theme === 'light') {
+                body.classList.add('light-mode');
+                if (themeIcon) { themeIcon.classList.remove('fa-moon'); themeIcon.classList.add('fa-sun'); }
+            } else {
+                body.classList.remove('light-mode');
+                if (themeIcon) { themeIcon.classList.remove('fa-sun'); themeIcon.classList.add('fa-moon'); }
+            }
+        }
+
+        const serverTheme = @json($userTheme ?? session('theme', 'dark'));
+        applyTheme(serverTheme || localStorage.getItem('elx-theme') || 'dark');
+
+        themeToggle?.addEventListener('click', () => {
+            const current = body.classList.contains('light-mode') ? 'light' : 'dark';
+            const next = current === 'dark' ? 'light' : 'dark';
+            const url = next === 'light' ? @json(route('theme.switch', 'light')) : @json(route('theme.switch', 'dark'));
+
+            fetch(url, {
+                method: 'GET',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                credentials: 'same-origin',
+            }).finally(() => {
+                localStorage.setItem('elx-theme', next);
+                localStorage.setItem('theme', next);
+                applyTheme(next);
+            });
+        });
+
+        // ─── RTL: flip dropdown position for Arabic ───
+        @if(app()->getLocale() === 'ar')
+        document.querySelectorAll('.elx-nav__dropdown-menu').forEach(menu => {
+            menu.style.left = 'auto';
+            menu.style.right = '50%';
+            menu.style.transform = 'translateX(50%)';
+        });
+        document.querySelectorAll('.elx-nav__dropdown:hover .elx-nav__dropdown-menu').forEach(menu => {
+            menu.style.transform = 'translateX(50%) translateY(0)';
+        });
+        @endif
     </script>
     @yield('scripts')
     <script>
@@ -613,6 +833,9 @@
             });
         }, 2500);
     </script>
+    
+    <!-- Language Selector Component -->
+    <x-language-selector />
 </body>
 
 </html>

@@ -16,6 +16,7 @@
     
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/theme.css') }}">
     
     <!-- Vite (for Breeze styles/scripts if needed later, but keeping visual style consistent with original) -->
     <!-- @vite(['resources/css/app.css', 'resources/js/app.js']) -->
@@ -23,6 +24,49 @@
     <style>
         /* Small overrides to make Bootstrap play nice with custom CSS if needed */
         a { text-decoration: none; }
+        
+        /* Apply theme on page load */
+        @if(auth()->check())
+            @if(auth()->user()->theme === 'light')
+                body {
+                    --theme-bg: #f8f9fa;
+                    --theme-bg-secondary: #ffffff;
+                    --theme-bg-tertiary: #f1f3f5;
+                    --theme-text: #212529;
+                    --theme-text-secondary: #495057;
+                    --theme-text-muted: #6c757d;
+                    --theme-border: #dee2e6;
+                    --theme-card-bg: #ffffff;
+                    --theme-input-bg: #ffffff;
+                    --theme-input-border: #ced4da;
+                    --theme-hover-bg: #f1f3f5;
+                    --theme-shadow: rgba(0, 0, 0, 0.1);
+                }
+                body.light-mode {
+                    --theme-bg: #f8f9fa;
+                }
+            @endif
+        @else
+            @if(session('theme') === 'light')
+                body {
+                    --theme-bg: #f8f9fa;
+                    --theme-bg-secondary: #ffffff;
+                    --theme-bg-tertiary: #f1f3f5;
+                    --theme-text: #212529;
+                    --theme-text-secondary: #495057;
+                    --theme-text-muted: #6c757d;
+                    --theme-border: #dee2e6;
+                    --theme-card-bg: #ffffff;
+                    --theme-input-bg: #ffffff;
+                    --theme-input-border: #ced4da;
+                    --theme-hover-bg: #f1f3f5;
+                    --theme-shadow: rgba(0, 0, 0, 0.1);
+                }
+                body.light-mode {
+                    --theme-bg: #f8f9fa;
+                }
+            @endif
+        @endif
     </style>
 </head>
 <body>
@@ -179,5 +223,8 @@
     </script>
     <script src="{{ asset('js/script.js') }}"></script>
     @stack('scripts')
+    
+    <!-- Theme Toggle Component -->
+    <x-theme-toggle />
 </body>
 </html>

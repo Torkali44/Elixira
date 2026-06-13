@@ -1,0 +1,25 @@
+<?php
+
+return [
+    'page_title' => 'My Account - Elixira',
+    'hero_title' => 'My Account',
+    'hero_subtitle' => 'Manage your details, keep your member code ready for checkout, and review every order from one place.',
+    'edit_details' => 'Edit Details',
+    'my_orders' => 'My Orders',
+    'shop_now' => 'Shop Now',
+    'saved_success' => 'Your account changes were saved successfully.',
+    'administrator' => 'Administrator',
+    'member' => 'Member',
+    'orders' => 'Orders',
+    'in_progress' => 'In Progress',
+    'delivered' => 'Delivered',
+    'spent' => 'Spent',
+    'manage_addresses' => 'Manage addresses',
+    'view_orders' => 'View previous orders',
+    'choose_avatar' => 'Choose avatar',
+    'track_by_phone' => 'Track by phone',
+    'become_vendor' => 'Become a Vendor',
+    'vendor_pending' => 'Vendor Request Pending',
+    'back_to_account' => 'Back To Account',
+    'start_shopping' => 'Start Shopping',
+];

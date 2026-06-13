@@ -201,6 +201,23 @@ test('vendor sees inactive brand message instead of 404', function () {
         ->assertNotFound();
 });
 
+test('admin translations page loads all sections', function () {
+    $admin = User::factory()->create(['role' => 'admin']);
+
+    foreach (['app', 'admin', 'vendor', 'about', 'contact', 'shop', 'profile_page', 'home', 'notifications', 'track', 'brands_page', 'testimonials_page', 'blogs_page'] as $section) {
+        $this->actingAs($admin)
+            ->get(route('admin.settings.translations', ['section' => $section]))
+            ->assertOk();
+    }
+});
+
+test('locale switch updates session for guest', function () {
+    $this->get(route('lang.switch', 'ar'))
+        ->assertRedirect();
+
+    expect(session('locale'))->toBe('ar');
+});
+
 test('vendor brand routes are registered and accessible', function () {
     $vendor = User::factory()->create(['role' => 'vendor']);
 

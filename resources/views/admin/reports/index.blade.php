@@ -2,6 +2,100 @@
 
 @section('content')
     <style>
+        /* Dark/Light mode support for cards */
+        .card {
+            background-color: var(--theme-card-bg) !important;
+            color: var(--theme-text);
+        }
+
+        h2, h3, h4, h5 {
+            color: var(--theme-text);
+        }
+
+        .text-muted {
+            color: var(--theme-text-muted) !important;
+        }
+
+        /* Report Cards Grid */
+        .reports-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .report-card {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 180px;
+            border-radius: 12px;
+            border: none;
+            text-decoration: none !important;
+            color: inherit !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            padding: 2rem 1rem;
+        }
+
+        .report-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        .report-card i {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .report-card .card-name {
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+
+        .report-card .card-description {
+            font-size: 0.85rem;
+            text-align: center;
+            opacity: 0.8;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .reports-grid {
+                grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .reports-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1rem;
+            }
+
+            .report-card {
+                min-height: 160px;
+                padding: 1.5rem 1rem;
+            }
+
+            .report-card i {
+                font-size: 2rem;
+                margin-bottom: 0.8rem;
+            }
+
+            .report-card .card-name {
+                font-size: 0.95rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .reports-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
         @media print {
             body.print-orders-only * {
                 visibility: hidden;
@@ -42,79 +136,58 @@
             }
         }
     </style>
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
         <div>
-            <h2 class="mb-1">Detailed Reports</h2>
-            <p class="text-muted">Overview of your store performance, inventory, and users.</p>
+            <h2 class="mb-1">{{ __('admin.reports.title') }}</h2>
+            <p class="text-muted">{{ __('admin.reports.subtitle') }}</p>
         </div>
         <div class="d-print-none">
-            <button type="button" onclick="printOrdersReport()" class="btn btn-primary"><i class="fas fa-print me-2"></i> Print Full
-                Report</button>
+            <button type="button" onclick="printOrdersReport()" class="btn btn-primary"><i class="fas fa-print me-2"></i> {{ __('admin.reports.print_button') }}</button>
         </div>
     </div>
 
     {{-- Printable Report Quick-Access Cards --}}
-    <div class="row g-3 mb-5 d-print-none">
-        <div class="col-12">
-            <h5 class="fw-bold text-muted text-uppercase mb-3" style="font-size: 0.8rem; letter-spacing: 1px;">
-                <i class="fas fa-file-pdf me-2 text-danger"></i> Print Individual Reports as PDF
-            </h5>
-        </div>
-        <div class="col-6 col-md-4 col-lg-2">
-            <a href="{{ route('admin.reports.orders') }}" target="_blank"
-                class="card border-0 shadow-sm h-100 text-decoration-none"
-                style="border-radius: 12px; border-left: 4px solid #007bff !important; transition: transform 0.2s;">
-                <div class="card-body text-center py-3">
-                    <i class="fas fa-shopping-bag mb-2" style="font-size: 1.8rem; color: #007bff;"></i>
-                    <div class="fw-bold small">Orders</div>
-                    <div class="text-muted" style="font-size: 0.7rem;">Printable PDF</div>
-                </div>
-            </a>
-        </div>
-        <div class="col-6 col-md-4 col-lg-2">
-            <a href="{{ route('admin.reports.products') }}" target="_blank"
-                class="card border-0 shadow-sm h-100 text-decoration-none"
-                style="border-radius: 12px; border-left: 4px solid #28a745 !important; transition: transform 0.2s;">
-                <div class="card-body text-center py-3">
-                    <i class="fas fa-boxes mb-2" style="font-size: 1.8rem; color: #28a745;"></i>
-                    <div class="fw-bold small">Products</div>
-                    <div class="text-muted" style="font-size: 0.7rem;">Printable PDF</div>
-                </div>
-            </a>
-        </div>
-        <div class="col-6 col-md-4 col-lg-2">
-            <a href="{{ route('admin.reports.vendors') }}" target="_blank"
-                class="card border-0 shadow-sm h-100 text-decoration-none"
-                style="border-radius: 12px; border-left: 4px solid #6f42c1 !important; transition: transform 0.2s;">
-                <div class="card-body text-center py-3">
-                    <i class="fas fa-store mb-2" style="font-size: 1.8rem; color: #6f42c1;"></i>
-                    <div class="fw-bold small">Vendors</div>
-                    <div class="text-muted" style="font-size: 0.7rem;">Printable PDF</div>
-                </div>
-            </a>
-        </div>
-        <div class="col-6 col-md-4 col-lg-2">
-            <a href="{{ route('admin.reports.brands') }}" target="_blank"
-                class="card border-0 shadow-sm h-100 text-decoration-none"
-                style="border-radius: 12px; border-left: 4px solid #fd7e14 !important; transition: transform 0.2s;">
-                <div class="card-body text-center py-3">
-                    <i class="fas fa-tags mb-2" style="font-size: 1.8rem; color: #fd7e14;"></i>
-                    <div class="fw-bold small">Brands</div>
-                    <div class="text-muted" style="font-size: 0.7rem;">Printable PDF</div>
-                </div>
-            </a>
-        </div>
-        <div class="col-6 col-md-4 col-lg-2">
-            <a href="{{ route('admin.reports.financials') }}" target="_blank"
-                class="card border-0 shadow-sm h-100 text-decoration-none"
-                style="border-radius: 12px; border-left: 4px solid #17a2b8 !important; transition: transform 0.2s;">
-                <div class="card-body text-center py-3">
-                    <i class="fas fa-coins mb-2" style="font-size: 1.8rem; color: #17a2b8;"></i>
-                    <div class="fw-bold small">Financials</div>
-                    <div class="text-muted" style="font-size: 0.7rem;">In / Out · PDF</div>
-                </div>
-            </a>
-        </div>
+    <div class="mb-3 d-print-none">
+        <h5 class="fw-bold text-muted text-uppercase mb-4" style="font-size: 0.8rem; letter-spacing: 1px;">
+            <i class="fas fa-file-pdf me-2 text-danger"></i> {{ __('admin.reports.pdf_section_title') }}
+        </h5>
+    </div>
+
+    <div class="reports-grid d-print-none">
+        <!-- Orders Card -->
+        <a href="{{ route('admin.reports.orders') }}" target="_blank" class="report-card" style="border-left: 5px solid #007bff;">
+            <i class="fas fa-shopping-bag" style="color: #007bff;"></i>
+            <div class="card-name">{{ __('admin.reports.orders.name') }}</div>
+            <div class="card-description">{{ __('admin.reports.orders.description') }}</div>
+        </a>
+
+        <!-- Products Card -->
+        <a href="{{ route('admin.reports.products') }}" target="_blank" class="report-card" style="border-left: 5px solid #28a745;">
+            <i class="fas fa-boxes" style="color: #28a745;"></i>
+            <div class="card-name">{{ __('admin.reports.products.name') }}</div>
+            <div class="card-description">{{ __('admin.reports.products.description') }}</div>
+        </a>
+
+        <!-- Vendors Card -->
+        <a href="{{ route('admin.reports.vendors') }}" target="_blank" class="report-card" style="border-left: 5px solid #6f42c1;">
+            <i class="fas fa-store" style="color: #6f42c1;"></i>
+            <div class="card-name">{{ __('admin.reports.vendors.name') }}</div>
+            <div class="card-description">{{ __('admin.reports.vendors.description') }}</div>
+        </a>
+
+        <!-- Brands Card -->
+        <a href="{{ route('admin.reports.brands') }}" target="_blank" class="report-card" style="border-left: 5px solid #fd7e14;">
+            <i class="fas fa-tags" style="color: #fd7e14;"></i>
+            <div class="card-name">{{ __('admin.reports.brands.name') }}</div>
+            <div class="card-description">{{ __('admin.reports.brands.description') }}</div>
+        </a>
+
+        <!-- Financials Card -->
+        <a href="{{ route('admin.reports.financials') }}" target="_blank" class="report-card" style="border-left: 5px solid #17a2b8;">
+            <i class="fas fa-coins" style="color: #17a2b8;"></i>
+            <div class="card-name">{{ __('admin.reports.financials.name') }}</div>
+            <div class="card-description">{{ __('admin.reports.financials.description') }}</div>
+        </a>
     </div>
 
 
@@ -123,9 +196,9 @@
         <div class="col-md-3">
             <div class="card border-0 shadow-sm h-100" style="border-left: 5px solid #28a745 !important;">
                 <div class="card-body">
-                    <small class="text-muted text-uppercase fw-bold">Total Revenue</small>
+                    <small class="text-muted text-uppercase fw-bold">{{ __('admin.reports.revenue.title') }}</small>
                     <h3 class="mt-2">﷼ {{ number_format($totalRevenue, 2) }}</h3>
-                    <p class="mb-0 text-success small"><i class="fas fa-wallet me-1"></i> Non-cancelled orders</p>
+                    <p class="mb-0 text-success small"><i class="fas fa-wallet me-1"></i> {{ __('admin.reports.revenue.description') }}</p>
                 </div>
             </div>
         </div>
@@ -133,9 +206,9 @@
         <div class="col-md-3">
             <div class="card border-0 shadow-sm h-100" style="border-left: 5px solid #007bff !important;">
                 <div class="card-body">
-                    <small class="text-muted text-uppercase fw-bold">Total Orders</small>
+                    <small class="text-muted text-uppercase fw-bold">{{ __('admin.reports.total_orders.title') }}</small>
                     <h3 class="mt-2">{{ $totalOrders }}</h3>
-                    <p class="mb-0 text-muted small"><i class="fas fa-shopping-bag me-1"></i> Lifetime orders</p>
+                    <p class="mb-0 text-muted small"><i class="fas fa-shopping-bag me-1"></i> {{ __('admin.reports.total_orders.description') }}</p>
                 </div>
             </div>
         </div>
@@ -143,9 +216,9 @@
         <div class="col-md-3">
             <div class="card border-0 shadow-sm h-100" style="border-left: 5px solid #ffc107 !important;">
                 <div class="card-body">
-                    <small class="text-muted text-uppercase fw-bold">Total Users</small>
+                    <small class="text-muted text-uppercase fw-bold">{{ __('admin.reports.total_users.title') }}</small>
                     <h3 class="mt-2">{{ $totalUsers }}</h3>
-                    <p class="mb-0 text-muted small"><i class="fas fa-users me-1"></i> Registered accounts</p>
+                    <p class="mb-0 text-muted small"><i class="fas fa-users me-1"></i> {{ __('admin.reports.total_users.description') }}</p>
                 </div>
             </div>
         </div>
@@ -153,9 +226,9 @@
         <div class="col-md-3">
             <div class="card border-0 shadow-sm h-100" style="border-left: 5px solid #dc3545 !important;">
                 <div class="card-body">
-                    <small class="text-muted text-uppercase fw-bold">Out of Stock</small>
+                    <small class="text-muted text-uppercase fw-bold">{{ __('admin.reports.out_of_stock.title') }}</small>
                     <h3 class="mt-2">{{ $outOfStock->count() }}</h3>
-                    <p class="mb-0 text-danger small"><i class="fas fa-exclamation-triangle me-1"></i> Needs restock</p>
+                    <p class="mb-0 text-danger small"><i class="fas fa-exclamation-triangle me-1"></i> {{ __('admin.reports.out_of_stock.description') }}</p>
                 </div>
             </div>
         </div>

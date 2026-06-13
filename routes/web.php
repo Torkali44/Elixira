@@ -1,19 +1,25 @@
 <?php
 
 use App\Http\Controllers\Admin\AvatarOptionController;
+use App\Http\Controllers\Admin\BlogController as AdminBlogController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\FaqController as AdminFaqController;
 use App\Http\Controllers\Admin\ItemController;
-use App\Http\Controllers\Admin\NewsletterController;
+use App\Http\Controllers\Admin\NewsletterController; // Breeze
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
-use App\Http\Controllers\Admin\ProductApprovalController; // Breeze
+use App\Http\Controllers\Admin\ProductApprovalController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\ReviewController;
+use App\Http\Controllers\Admin\TranslationController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\VendorRequestController;
+use App\Http\Controllers\BlogController;
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\FaqController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OrderController;
@@ -22,6 +28,7 @@ use App\Http\Controllers\RatingController;
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\SpecialRequestController;
 use App\Http\Controllers\TestimonialController;
+use App\Http\Controllers\ThemeController;
 use App\Http\Controllers\VendorProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -30,6 +37,11 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/about', [HomeController::class, 'about'])->name('about');
 Route::get('/contact', [HomeController::class, 'contact'])->name('contact');
 Route::get('/explore', [HomeController::class, 'explore'])->name('explore');
+Route::get('/lang/{locale}', [LocaleController::class, 'switch'])->name('lang.switch');
+Route::get('/theme/{theme}', [ThemeController::class, 'switch'])->name('theme.switch');
+Route::get('/faqs', [FaqController::class, 'index'])->name('faqs.index');
+Route::get('/blogs', [BlogController::class, 'index'])->name('blogs.index');
+Route::get('/blogs/{slug}', [BlogController::class, 'show'])->name('blogs.show');
 
 Route::get('/menu', [MenuController::class, 'index'])->name('menu.index');
 Route::get('/menu/{item}', [MenuController::class, 'show'])->name('menu.show');
@@ -143,6 +155,14 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::get('subscribers', [NewsletterController::class, 'index'])->name('subscribers.index');
     Route::delete('subscribers/{subscriber}', [NewsletterController::class, 'destroy'])->name('subscribers.destroy');
     Route::post('subscribers/send-mail', [NewsletterController::class, 'sendMail'])->name('subscribers.sendMail');
+
+    // FAQs & Blogs Management
+    Route::resource('faqs', AdminFaqController::class);
+    Route::resource('blogs', AdminBlogController::class);
+
+    // Translations Management
+    Route::get('settings/translations', [TranslationController::class, 'index'])->name('settings.translations');
+    Route::post('settings/translations', [TranslationController::class, 'update'])->name('settings.translations.update');
 });
 
 // Vendor Routes (Protected)

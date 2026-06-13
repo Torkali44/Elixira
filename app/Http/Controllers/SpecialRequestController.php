@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Notification;
 use App\Models\SpecialItemOffer;
 use App\Models\SpecialRequest;
 use App\Models\User;
+use App\Support\UserNotifier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -109,12 +109,10 @@ class SpecialRequestController extends Controller
 
         try {
             if ($resolvedUser) {
-                Notification::create([
-                    'user_id' => $resolvedUser->id,
-                    'title' => 'Special Request Offer Assigned',
-                    'message' => 'An offer of quantity '.$validated['quantity'].' has been assigned to your special request for "'.$specialRequest->item->name.'". You can now purchase it!',
-                    'url' => route('menu.show', $specialRequest->item_id),
-                ]);
+                UserNotifier::send($resolvedUser->id, 'special_request_offer', [
+                    'quantity' => (string) $validated['quantity'],
+                    'product' => $specialRequest->item->name,
+                ], route('menu.show', $specialRequest->item_id));
             }
         } catch (\Throwable $e) {
             \Log::error('Special request offer notification failed: '.$e->getMessage());

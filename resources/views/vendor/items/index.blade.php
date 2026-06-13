@@ -2,10 +2,10 @@
 
 @section('content')
 <div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h3 class="mb-0">All Products</h3>
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <h3 class="mb-0">{{ __('vendor.items.title') }}</h3>
         <a href="{{ route('vendor.items.create') }}" class="btn btn-primary">
-            <i class="fas fa-plus me-2"></i> Add Product
+            <i class="fas fa-plus me-2"></i> {{ __('vendor.items.add_product') }}
         </a>
     </div>
 
@@ -15,13 +15,13 @@
                 <table class="table table-hover align-middle">
                     <thead class="table-light">
                         <tr>
-                            <th>Image</th>
-                            <th>Name</th>
-                            <th>Category</th>
-                            <th>Price</th>
-                            <th>Stock</th>
-                            <th>Status</th>
-                            <th>Actions</th>
+                            <th>{{ __('vendor.items.col_image') }}</th>
+                            <th>{{ __('vendor.items.col_name') }}</th>
+                            <th>{{ __('vendor.items.col_category') }}</th>
+                            <th>{{ __('vendor.items.col_price') }}</th>
+                            <th>{{ __('vendor.items.col_stock') }}</th>
+                            <th>{{ __('vendor.items.col_status') }}</th>
+                            <th>{{ __('vendor.items.col_actions') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -42,19 +42,19 @@
                                 <td>{{ $item->stock }}</td>
                                 <td>
                                     @if($item->status === 'approved')
-                                        <span class="badge bg-success">Approved</span>
+                                        <span class="badge bg-success">{{ __('vendor.items.status_approved') }}</span>
                                     @elseif($item->status === 'rejected')
-                                        <span class="badge bg-danger" title="{{ $item->rejection_reason }}">Rejected</span>
+                                        <span class="badge bg-danger" title="{{ $item->rejection_reason }}">{{ __('vendor.items.status_rejected') }}</span>
                                         @if($item->rejection_reason)
                                             <small class="d-block text-danger mt-1">{{ $item->rejection_reason }}</small>
                                         @endif
                                     @elseif($item->status === 'rejected_with_notes')
-                                        <span class="badge bg-warning text-dark">Needs Revision</span>
+                                        <span class="badge bg-warning text-dark">{{ __('vendor.items.status_needs_revision') }}</span>
                                         @if($item->rejection_reason)
                                             <small class="d-block text-muted mt-1">{{ $item->rejection_reason }}</small>
                                         @endif
                                     @else
-                                        <span class="badge bg-info text-dark">Pending Approval</span>
+                                        <span class="badge bg-info text-dark">{{ __('vendor.items.status_pending') }}</span>
                                     @endif
                                 </td>
                                 <td>
@@ -62,7 +62,7 @@
                                         <a href="{{ route('vendor.items.edit', $item) }}" class="btn btn-outline-secondary">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        <form action="{{ route('vendor.items.destroy', $item) }}" method="POST" class="d-inline" data-confirm="Are you sure you want to delete this product?">
+                                        <form action="{{ route('vendor.items.destroy', $item) }}" method="POST" class="d-inline" data-confirm="{{ __('vendor.items.confirm_delete') }}">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="btn btn-outline-danger rounded-end">
@@ -74,10 +74,10 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="text-center py-4">
+                                <td colspan="7" class="text-center py-4">
                                     <div class="text-muted">
                                         <i class="fas fa-box-open fs-1 mb-3"></i>
-                                        <p class="mb-0">You haven't added any products yet.</p>
+                                        <p class="mb-0">{{ __('vendor.items.empty') }}</p>
                                     </div>
                                 </td>
                             </tr>

@@ -1,0 +1,25 @@
+<?php
+
+return [
+    'page_title' => 'حسابي - إيليكسيرا',
+    'hero_title' => 'حسابي',
+    'hero_subtitle' => 'أدر بياناتك، واحتفظ برمز العضوية جاهزاً عند الدفع، وراجع كل طلباتك من مكان واحد.',
+    'edit_details' => 'تعديل البيانات',
+    'my_orders' => 'طلباتي',
+    'shop_now' => 'تسوق الآن',
+    'saved_success' => 'تم حفظ تغييرات حسابك بنجاح.',
+    'administrator' => 'مدير',
+    'member' => 'عضو',
+    'orders' => 'الطلبات',
+    'in_progress' => 'قيد التنفيذ',
+    'delivered' => 'تم التسليم',
+    'spent' => 'المصروف',
+    'manage_addresses' => 'إدارة العناوين',
+    'view_orders' => 'عرض الطلبات السابقة',
+    'choose_avatar' => 'اختيار الصورة الرمزية',
+    'track_by_phone' => 'تتبع بالهاتف',
+    'become_vendor' => 'كن بائعاً',
+    'vendor_pending' => 'طلب البائع قيد المراجعة',
+    'back_to_account' => 'العودة للحساب',
+    'start_shopping' => 'ابدأ التسوق',
+];
