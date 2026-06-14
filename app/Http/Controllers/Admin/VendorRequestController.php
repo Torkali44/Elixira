@@ -74,9 +74,7 @@ class VendorRequestController extends Controller
                 $url = $request->status === 'approved' ? route('vendor.dashboard') : route('vendor.onboarding');
                 UserNotifier::send($user->id, 'vendor_request_updated', [
                     'status' => $request->status,
-                    'reason' => $vendorProfile->rejection_reason
-                        ? __('notifications.vendor_reason', ['reason' => $vendorProfile->rejection_reason])
-                        : '',
+                    'reason' => $vendorProfile->rejection_reason ?? '',
                 ], $url);
             }
         } catch (\Throwable $e) {
@@ -84,5 +82,26 @@ class VendorRequestController extends Controller
         }
 
         return redirect()->route('admin.vendors.requests.index')->with('success', 'Vendor request '.str_replace('_', ' ', $request->status).' successfully.');
+    }
+
+    public function confirmSubscription(VendorProfile $vendorProfile)
+    {
+        if ($vendorProfile->subscription_payment_status !== 'pending') {
+            return redirect()->back()->with('error', __('admin.vendor_requests.subscription_not_pending'));
+        }
+
+        $vendorProfile->update(['subscription_payment_status' => 'confirmed']);
+
+        try {
+            $user = $vendorProfile->user;
+            if ($user) {
+                UserNotifier::send($user->id, 'vendor_subscription_confirmed', [], route('vendor.onboarding'));
+            }
+        } catch (\Throwable $e) {
+            \Log::error('Vendor subscription notification failed: '.$e->getMessage());
+        }
+
+        return redirect()->route('admin.vendors.requests.show', $vendorProfile)
+            ->with('success', __('admin.vendor_requests.subscription_confirmed'));
     }
 }

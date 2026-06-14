@@ -57,7 +57,7 @@
                         <a href="{{ route('menu.index') }}?category={{ $category->id }}" class="elx-category-pill">
                             <div class="elx-category-pill__img">
                                 @if($category->image)
-                                    <img src="{{ asset('storage/' . $category->image) }}" alt="{{ $category->name }}">
+                                    <img src="{{ asset('storage/' . $category->image) }}" alt="{{ $category->local_name }}">
                                 @else
                                     <div class="elx-category-pill__placeholder">
                                         <i class="fas fa-leaf"></i>
@@ -65,7 +65,7 @@
                                 @endif
                             </div>
                             <div class="elx-category-pill__info">
-                                <h3>{{ $category->name }}</h3>
+                                <h3>{{ $category->local_name }}</h3>
                                 <span>{{ __('home.products_count', ['count' => $category->items_count]) }}</span>
                             </div>
                         </a>
@@ -77,46 +77,21 @@
     {{-- ═══════════════════════════════════════════════════════════ --}}
     {{-- LOGO TICKER (Scrolling Bar) --}}
     {{-- ═══════════════════════════════════════════════════════════ --}}
-    <section class="elx-ticker-section"
-        style="background: rgba(0,0,0,0.3); border-top: 1px solid rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.05);  overflow: hidden;">
-        <div class="elx-ticker" style="display: flex; overflow: hidden; user-select: none; gap: 4rem;">
-            <div class="elx-ticker__inner"
-                style="display: flex; flex-shrink: 0; align-items: center; gap: 6rem; animation: ticker-scroll 40s linear infinite;">
-                {{-- First Set --}}
-                <img src="https://framerusercontent.com/images/aXEmjQpai7hP0SiCn0wZkdKhSg.png" alt="Brand 1"
-                    style="height: 45px; opacity: 0.6; filter: grayscale(1) brightness(2);">
-                <img src="https://framerusercontent.com/images/nacEHk0iUMmtX9q6qNkhonBUxs.png" alt="Brand 2"
-                    style="height: 55px; opacity: 0.6; filter: grayscale(1) brightness(2);">
-                <img src="https://framerusercontent.com/images/iw3pKLbklnQKnFKBuZ2LK3w7E.png" alt="Brand 3"
-                    style="height: 35px; opacity: 0.6; filter: grayscale(1) brightness(2);">
-                <span
-                    style="font-family: var(--elx-font-alt); font-size: 1.5rem; font-weight: 700; color: rgba(255,255,255,0.2); letter-spacing: 0.2em;">ELIXIRA</span>
-                <img src="https://framerusercontent.com/images/aXEmjQpai7hP0SiCn0wZkdKhSg.png" alt="Brand 1"
-                    style="height: 45px; opacity: 0.6; filter: grayscale(1) brightness(2);">
-                <img src="https://framerusercontent.com/images/nacEHk0iUMmtX9q6qNkhonBUxs.png" alt="Brand 2"
-                    style="height: 55px; opacity: 0.6; filter: grayscale(1) brightness(2);">
-                <img src="https://framerusercontent.com/images/iw3pKLbklnQKnFKBuZ2LK3w7E.png" alt="Brand 3"
-                    style="height: 35px; opacity: 0.6; filter: grayscale(1) brightness(2);">
-                <span
-                    style="font-family: var(--elx-font-alt); font-size: 1.5rem; font-weight: 700; color: rgba(255,255,255,0.2); letter-spacing: 0.2em;">SUPERFOODS</span>
-
-                {{-- Duplicate Set for Seamless Loop --}}
-                <img src="https://framerusercontent.com/images/aXEmjQpai7hP0SiCn0wZkdKhSg.png" alt="Brand 1"
-                    style="height: 45px; opacity: 0.6; filter: grayscale(1) brightness(2);">
-                <img src="https://framerusercontent.com/images/nacEHk0iUMmtX9q6qNkhonBUxs.png" alt="Brand 2"
-                    style="height: 55px; opacity: 0.6; filter: grayscale(1) brightness(2);">
-                <img src="https://framerusercontent.com/images/iw3pKLbklnQKnFKBuZ2LK3w7E.png" alt="Brand 3"
-                    style="height: 35px; opacity: 0.6; filter: grayscale(1) brightness(2);">
-                <span
-                    style="font-family: var(--elx-font-alt); font-size: 1.5rem; font-weight: 700; color: rgba(255,255,255,0.2); letter-spacing: 0.2em;">ELIXIRA</span>
-                <img src="https://framerusercontent.com/images/aXEmjQpai7hP0SiCn0wZkdKhSg.png" alt="Brand 1"
-                    style="height: 45px; opacity: 0.6; filter: grayscale(1) brightness(2);">
-                <img src="https://framerusercontent.com/images/nacEHk0iUMmtX9q6qNkhonBUxs.png" alt="Brand 2"
-                    style="height: 55px; opacity: 0.6; filter: grayscale(1) brightness(2);">
-                <img src="https://framerusercontent.com/images/iw3pKLbklnQKnFKBuZ2LK3w7E.png" alt="Brand 3"
-                    style="height: 35px; opacity: 0.6; filter: grayscale(1) brightness(2);">
-                <span
-                    style="font-family: var(--elx-font-alt); font-size: 1.5rem; font-weight: 700; color: rgba(255,255,255,0.2); letter-spacing: 0.2em;">SUPERFOODS</span>
+    <section class="elx-ticker-section" style="background: rgba(0,0,0,0.3); border-top: 1px solid rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.05); overflow: hidden;">
+        <div class="elx-ticker" style="overflow: hidden;">
+            <div class="elx-ticker__track" style="display: flex; width: max-content; animation: ticker-scroll 35s linear infinite;">
+                @foreach([1, 2] as $set)
+                <div class="elx-ticker__group" style="display: flex; flex-shrink: 0; align-items: center; gap: 6rem; padding-right: 6rem;">
+                    <img src="https://framerusercontent.com/images/aXEmjQpai7hP0SiCn0wZkdKhSg.png" alt="Brand 1" style="height: 45px; opacity: 0.6; filter: grayscale(1) brightness(2);">
+                    <img src="https://framerusercontent.com/images/nacEHk0iUMmtX9q6qNkhonBUxs.png" alt="Brand 2" style="height: 55px; opacity: 0.6; filter: grayscale(1) brightness(2);">
+                    <img src="https://framerusercontent.com/images/iw3pKLbklnQKnFKBuZ2LK3w7E.png" alt="Brand 3" style="height: 35px; opacity: 0.6; filter: grayscale(1) brightness(2);">
+                    <span style="font-family: var(--elx-font-alt); font-size: 1.5rem; font-weight: 700; color: rgba(255,255,255,0.2); letter-spacing: 0.2em;">ELIXIRA</span>
+                    <img src="https://framerusercontent.com/images/aXEmjQpai7hP0SiCn0wZkdKhSg.png" alt="Brand 1" style="height: 45px; opacity: 0.6; filter: grayscale(1) brightness(2);">
+                    <img src="https://framerusercontent.com/images/nacEHk0iUMmtX9q6qNkhonBUxs.png" alt="Brand 2" style="height: 55px; opacity: 0.6; filter: grayscale(1) brightness(2);">
+                    <img src="https://framerusercontent.com/images/iw3pKLbklnQKnFKBuZ2LK3w7E.png" alt="Brand 3" style="height: 35px; opacity: 0.6; filter: grayscale(1) brightness(2);">
+                    <span style="font-family: var(--elx-font-alt); font-size: 1.5rem; font-weight: 700; color: rgba(255,255,255,0.2); letter-spacing: 0.2em;">SUPERFOODS</span>
+                </div>
+                @endforeach
             </div>
         </div>
     </section>
@@ -132,7 +107,7 @@
             }
         }
 
-        .elx-ticker-section:hover .elx-ticker__inner {
+        .elx-ticker-section:hover .elx-ticker__track {
             animation-play-state: paused;
         }
 

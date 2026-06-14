@@ -14,7 +14,7 @@ class HomeController extends Controller
     {
         $sections = HomePageSection::query()->active()->ordered()->get();
 
-        $featuredItems = Item::with('category')
+        $featuredItems = Item::with('category', 'countryPrices')
             ->where('status', 'approved')
             ->where('is_featured', true)
             ->latest()
@@ -22,7 +22,7 @@ class HomeController extends Controller
             ->get();
 
         if ($featuredItems->isEmpty()) {
-            $featuredItems = Item::with('category')
+            $featuredItems = Item::with('category', 'countryPrices')
                 ->where('status', 'approved')
                 ->latest()
                 ->take(8)
@@ -37,7 +37,7 @@ class HomeController extends Controller
     public function explore(): View
     {
         $categories = Category::withCount('items')->orderBy('name')->get();
-        $featuredItems = Item::with('category')
+        $featuredItems = Item::with('category', 'countryPrices')
             ->where('status', 'approved')
             ->where('is_featured', true)
             ->latest()
@@ -56,14 +56,16 @@ class HomeController extends Controller
 
     public function contact(): View
     {
-        return view('contact');
+        return view('contact', [
+            'locations' => config('locations.countries', []),
+        ]);
     }
 
     private function privateOfferQuantitiesForCurrentUser(): array
     {
         $user = auth()->user();
 
-        if (!$user) {
+        if (! $user) {
             return [];
         }
 

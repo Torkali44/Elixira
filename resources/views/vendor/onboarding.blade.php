@@ -1,6 +1,6 @@
 @extends('layouts.framer')
 
-@section('title', 'Become a Vendor - Elixira')
+@section('title', __('vendor.onboarding.page_title'))
 
 @section('head')
 <style>
@@ -206,9 +206,9 @@
         <div class="vendor-shell">
             <div style="text-align: center; margin-bottom: 2.5rem;" data-animate>
                 <h1 class="elx-hero__title">
-                    <span class="elx-hero__title-gradient">Become a Vendor</span>
+                    <span class="elx-hero__title-gradient">{{ __('vendor.onboarding.title') }}</span>
                 </h1>
-                <p style="color: var(--elx-light); max-width: 500px; margin: 0 auto;">Join Elixira as a partner and start selling your natural products, herbs, and perfumes directly to our customers.</p>
+                <p style="color: var(--elx-light); max-width: 500px; margin: 0 auto;">{{ __('vendor.onboarding.subtitle') }}</p>
             </div>
 
             @if(session('status'))
@@ -216,6 +216,15 @@
                     {{ session('status') }}
                 </div>
             @endif
+
+            <div class="vendor-success" data-animate style="margin-bottom: 1.5rem;">
+                <i class="fas fa-gift" style="margin-right: 0.5rem;"></i>
+                @if($subscription['requires_payment'])
+                    {{ __('vendor.onboarding.subscription_paid_notice', ['amount' => $subscription['amount'], 'currency' => $subscription['currency']]) }}
+                @else
+                    {{ __('vendor.onboarding.subscription_free_notice', ['remaining' => $subscription['remaining_free_slots'], 'total' => $subscription['free_slots']]) }}
+                @endif
+            </div>
 
             @if($errors->any())
                 <div class="vendor-error" style="margin-bottom: 1.5rem; padding: 1rem; border-radius: 16px; background: rgba(220, 53, 69, 0.1); border: 1px solid rgba(220, 53, 69, 0.2);">
@@ -252,7 +261,7 @@
 
                 <form action="{{ route('vendor.store') }}" method="POST" enctype="multipart/form-data" id="vendorForm">
                     @csrf
-                    
+                    <input type="hidden" name="onboarding_step" :value="step">
                     <!-- Step 1: Brand Info -->
                     <div class="vendor-form-section" :class="{ 'active': step === 1 }">
                         <div class="vendor-input-group">
@@ -373,8 +382,14 @@
                     <!-- Step 4: Verification & Submit -->
                     <div class="vendor-form-section" :class="{ 'active': step === 4 }">
                         <div class="vendor-input-group">
-                            <label class="vendor-label">Verification Document (Optional/Required based on your country)</label>
-                            <div style="color: var(--elx-light); font-size: 0.85rem; margin-bottom: 1rem;">Please upload your Commercial Register, Freelance Certificate, or personal ID to verify your identity.</div>
+                            <label class="vendor-label">{{ __('vendor.onboarding.commercial_registration') }} *</label>
+                            <input type="text" name="commercial_registration_number" class="vendor-input" value="{{ old('commercial_registration_number', $vendorProfile->commercial_registration_number) }}" placeholder="{{ __('vendor.onboarding.commercial_registration_placeholder') }}">
+                            @error('commercial_registration_number')<div class="vendor-error">{{ $message }}</div>@enderror
+                        </div>
+
+                        <div class="vendor-input-group">
+                            <label class="vendor-label">{{ __('vendor.onboarding.verification_document') }}</label>
+                            <div style="color: var(--elx-light); font-size: 0.85rem; margin-bottom: 1rem;">{{ __('vendor.onboarding.verification_document_hint') }}</div>
                             
                             <div class="vendor-file-upload" onclick="document.getElementById('verification_document').click()">
                                 <i class="fas fa-file-contract" style="font-size: 2rem; color: var(--elx-cyan); margin-bottom: 1rem;"></i>
@@ -390,6 +405,33 @@
                             </div>
                             @error('verification_document')<div class="vendor-error">{{ $message }}</div>@enderror
                         </div>
+
+                        @if($subscription['requires_payment'])
+                            <div class="vendor-input-group" style="margin-top: 2rem;">
+                                <label class="vendor-label">{{ __('vendor.onboarding.subscription_payment') }}</label>
+                                <div style="padding: 1rem 1.2rem; border-radius: 16px; background: rgba(255, 193, 7, 0.08); border: 1px solid rgba(255, 193, 7, 0.25); margin-bottom: 1rem; color: var(--elx-light); font-size: 0.9rem;">
+                                    {{ __('vendor.onboarding.subscription_bank_info', [
+                                        'amount' => $subscription['amount'],
+                                        'currency' => $subscription['currency'],
+                                        'bank' => $subscription['bank_name'],
+                                        'account' => $subscription['bank_account_number'],
+                                        'holder' => $subscription['bank_account_holder'],
+                                    ]) }}
+                                </div>
+                                <div class="vendor-file-upload" onclick="document.getElementById('subscription_payment_receipt').click()">
+                                    <i class="fas fa-receipt" style="font-size: 2rem; color: var(--elx-cyan); margin-bottom: 1rem;"></i>
+                                    <div style="color: var(--elx-white); font-weight: 500;">{{ __('vendor.onboarding.upload_receipt') }}</div>
+                                    <input type="file" id="subscription_payment_receipt" name="subscription_payment_receipt" style="display: none;" accept=".pdf,image/*" onchange="document.getElementById('receipt_name').textContent = this.files[0]?.name || ''">
+                                    <div id="receipt_name" style="margin-top: 1rem; color: var(--elx-cyan); font-size: 0.85rem;"></div>
+                                    @if($vendorProfile->subscription_payment_receipt)
+                                        <div style="margin-top: 0.5rem; color: var(--elx-light); font-size: 0.85rem;">
+                                            <i class="fas fa-check-circle text-success"></i> {{ __('vendor.onboarding.receipt_uploaded') }}
+                                        </div>
+                                    @endif
+                                </div>
+                                @error('subscription_payment_receipt')<div class="vendor-error">{{ $message }}</div>@enderror
+                            </div>
+                        @endif
 
                         <div class="vendor-input-group" style="margin-top: 2rem;">
                             <label class="vendor-checkbox">
@@ -425,11 +467,58 @@
 <script>
     function vendorStepper() {
         return {
-            step: {{ $errors->any() ? 1 : 1 }},
+            step: {{ (int) old('onboarding_step', request('step', $vendorProfile->onboarding_step ?? 1)) }},
             nextStep() {
                 this.step++;
             }
         }
     }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const form = document.getElementById('vendorForm');
+        const storageKey = 'elixira_vendor_onboarding_draft';
+        const saved = localStorage.getItem(storageKey);
+
+        if (saved && !@json($errors->any())) {
+            try {
+                const data = JSON.parse(saved);
+                Object.entries(data).forEach(([name, value]) => {
+                    const field = form.querySelector(`[name="${name}"]`);
+                    if (field && field.type !== 'file' && field.type !== 'checkbox') {
+                        field.value = value;
+                    }
+                    if (field && field.type === 'checkbox' && Array.isArray(value)) {
+                        form.querySelectorAll(`[name="${name}"]`).forEach((checkbox) => {
+                            checkbox.checked = value.includes(checkbox.value);
+                        });
+                    }
+                });
+            } catch (e) {}
+        }
+
+        form?.addEventListener('input', () => {
+            const payload = {};
+            Array.from(form.elements).forEach((element) => {
+                if (!element.name || element.type === 'file' || element.type === 'submit' || element.type === 'button') {
+                    return;
+                }
+                if (element.type === 'checkbox') {
+                    payload[element.name] = payload[element.name] || [];
+                    if (element.checked) {
+                        payload[element.name].push(element.value);
+                    }
+                    return;
+                }
+                payload[element.name] = element.value;
+            });
+            localStorage.setItem(storageKey, JSON.stringify(payload));
+        });
+
+        form?.addEventListener('submit', (event) => {
+            if (event.submitter?.value === 'submit') {
+                localStorage.removeItem(storageKey);
+            }
+        });
+    });
 </script>
 @endsection

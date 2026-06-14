@@ -8,7 +8,7 @@
     {{-- Top Div: Image container --}}
     <a href="{{ route('menu.show', $product->id) }}" class="elx-product-card__image-container" onclick="event.stopPropagation();">
         @if($product->image)
-            <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}" style="{{ $isOutOfStock ? 'filter: grayscale(0.8);' : '' }}">
+            <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->local_name }}" style="{{ $isOutOfStock ? 'filter: grayscale(0.8);' : '' }}">
         @else
             <div class="elx-product-card__no-img">
                 <i class="fas fa-seedling"></i>
@@ -17,15 +17,15 @@
         
         @if($isOutOfStock)
             <div class="elx-product-card__badge" style="position: absolute; top: 1rem; right: 1rem; background: #ff4d4d; padding: 0.3rem 0.8rem; border-radius: 100px; color: white; font-size: 0.7rem; font-weight: 700; z-index: 10;">
-                <span>Out of Stock</span>
+                <span>{{ __('shop.out_of_stock') }}</span>
             </div>
         @elseif($product->stock <= 0 && $hasPrivateAccess)
             <div class="elx-product-card__badge" style="position: absolute; top: 1rem; right: 1rem; background: rgba(74, 200, 246, 0.2); border: 1px solid rgba(74, 200, 246, 0.4); padding: 0.3rem 0.8rem; border-radius: 100px; color: #4ac8f6; font-size: 0.7rem; font-weight: 700; z-index: 10;">
-                <span>Private Access</span>
+                <span>{{ __('shop.private_access') }}</span>
             </div>
         @elseif($product->stock <= 5)
             <div class="elx-product-card__badge" style="position: absolute; top: 1rem; right: 1rem; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); padding: 0.3rem 0.8rem; border-radius: 100px; color: white; font-size: 0.7rem; font-weight: 700; z-index: 10;">
-                <span>Limited</span>
+                <span>{{ __('shop.limited') }}</span>
             </div>
         @endif
     </a>
@@ -34,16 +34,16 @@
     <div class="elx-product-card__info">
         <div class="elx-product-card__header" style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
             <a href="{{ route('menu.show', $product->id) }}" style="text-decoration: none; color: inherit; max-width: 65%; word-wrap: break-word;" onclick="event.stopPropagation();">
-                <h3 class="elx-product-card__name">{{ $product->name }}</h3>
+                <h3 class="elx-product-card__name">{{ $product->local_name }}</h3>
             </a>
-            <span class="elx-product-card__price" style="flex-shrink: 0; white-space: nowrap;">﷼ {{ number_format($product->price, 2) }}</span>
+            <span class="elx-product-card__price" style="flex-shrink: 0; white-space: nowrap;">﷼ {{ number_format($product->display_price, 2) }}</span>
         </div>
 
         {{-- Meta Info: Category, Brand, Points, Stock --}}
         <div class="elx-product-card__meta" style="display: flex; flex-wrap: wrap; gap: 0.35rem; margin-bottom: 0.5rem;">
             @if($product->category)
                 <span class="elx-product-card__tag" style="background: rgba(74, 200, 246, 0.1); color: #4ac8f6; padding: 0.15rem 0.55rem; border-radius: 50px; font-size: 0.7rem; font-weight: 600; border: 1px solid rgba(74, 200, 246, 0.2);">
-                    <i class="fas fa-layer-group" style="margin-right: 2px;"></i>{{ $product->category->name }}
+                    <i class="fas fa-layer-group" style="margin-right: 2px;"></i>{{ $product->category->local_name }}
                 </span>
             @endif
             @if($product->brandModel)
@@ -60,24 +60,24 @@
                     <i class="fas fa-tag" style="margin-right: 2px;"></i>{{ $product->brand }}
                 </span>
             @endif
-            @if($product->points > 0)
+            @if(($product->reward_points ?? 0) > 0)
                 <span class="elx-product-card__tag" style="background: rgba(0, 255, 136, 0.1); color: #00ff88; padding: 0.15rem 0.55rem; border-radius: 50px; font-size: 0.7rem; font-weight: 600; border: 1px solid rgba(0, 255, 136, 0.2);">
-                    <i class="fas fa-star" style="margin-right: 2px;"></i>{{ $product->points }} pts
+                    <i class="fas fa-star" style="margin-right: 2px;"></i>{{ __('home.reward_points', ['count' => $product->reward_points]) }}
                 </span>
             @endif
             <span class="elx-product-card__tag" style="background: {{ $isOutOfStock ? 'rgba(255,77,77,0.1)' : 'rgba(74,200,246,0.08)' }}; color: {{ $isOutOfStock ? '#ff4d4d' : 'rgba(255,255,255,0.5)' }}; padding: 0.15rem 0.55rem; border-radius: 50px; font-size: 0.7rem; font-weight: 600; border: 1px solid {{ $isOutOfStock ? 'rgba(255,77,77,0.2)' : 'rgba(255,255,255,0.1)' }};">
-                <i class="fas fa-box" style="margin-right: 2px;"></i>{{ $isOutOfStock ? 'Out of stock' : ($product->stock > 0 ? $product->stock . ' in stock' : 'Private access') }}
+                <i class="fas fa-box" style="margin-right: 2px;"></i>{{ $isOutOfStock ? __('shop.out_of_stock') : ($product->stock > 0 ? __('shop.in_stock', ['count' => $product->stock]) : __('shop.private_access_short')) }}
             </span>
         </div>
         
         <p class="elx-product-card__desc">
-            {{ $product->description }}
+            {{ $product->local_description }}
         </p>
 
         <div class="elx-product-card__cart-form" onclick="event.stopPropagation();" style="position: relative; z-index: 20;">
             @if($isOutOfStock)
                     <button type="button" class="elx-product-card__add-btn"
-                        onclick="event.stopPropagation(); showSpecialRequestModal({{ $product->id }}, '{{ addslashes($product->name) }}')" style="position: relative; z-index: 20; background: rgba(255, 77, 77, 0.1); color: #ff4d4d; border-color: rgba(255, 77, 77, 0.3);">
+                        onclick="event.stopPropagation(); showSpecialRequestModal({{ $product->id }}, '{{ addslashes($product->local_name) }}')" style="position: relative; z-index: 20; background: rgba(255, 77, 77, 0.1); color: #ff4d4d; border-color: rgba(255, 77, 77, 0.3);">
                     <i class="fas fa-hand-holding-heart"></i> {{ __('home.private_order') }}
                 </button>
             @else
@@ -85,7 +85,7 @@
                     @csrf
                     <input type="hidden" name="item_id" value="{{ $product->id }}">
                     <input type="hidden" name="quantity" value="1">
-                    <button type="button" class="elx-product-card__add-btn" onclick="addToCartAjax(this, event);" style="position: relative; z-index: 20;">
+                    <button type="button" class="elx-product-card__add-btn" onclick="addToCartAjax(this, event);" style="position: relative; z-index: 20; width: 100%;">
                         <i class="fas fa-cart-plus"></i> {{ $product->stock > 0 ? __('home.add_to_cart') : __('home.special_item') }}
                     </button>
                 </form>

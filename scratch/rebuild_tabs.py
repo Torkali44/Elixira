@@ -237,26 +237,26 @@ blade_content = f"""@extends('layouts.framer')
                         </div>
                         <div class="form-row">
                             <div class="form-group">
-                                <label class="form-label">Age Range</label>
+                                <label class="form-label">{{ __('testimonials_page.age_label') }}</label>
                                 <select name="age" class="form-input" required>
-                                    <option value="" disabled selected>Select...</option>
-                                    <option value="18-24">18 - 24 years</option>
-                                    <option value="25-34">25 - 34 years</option>
-                                    <option value="35-44">35 - 44 years</option>
-                                    <option value="45+">45+ years</option>
+                                    <option value="" disabled selected>{{ __('testimonials_page.select_age') }}</option>
+                                    <option value="18-24">{{ __('testimonials_page.age_18_24') }}</option>
+                                    <option value="25-34">{{ __('testimonials_page.age_25_34') }}</option>
+                                    <option value="35-44">{{ __('testimonials_page.age_35_44') }}</option>
+                                    <option value="45+">{{ __('testimonials_page.age_45_plus') }}</option>
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label class="form-label">Gender</label>
+                                <label class="form-label">{{ __('testimonials_page.gender') }}</label>
                                 <select name="gender" class="form-input" required>
-                                    <option value="" disabled selected>Select...</option>
-                                    <option value="Male">Male</option>
-                                    <option value="Female">Female</option>
-                                    <option value="Other">Other</option>
+                                    <option value="" disabled selected>{{ __('testimonials_page.select_gender') }}</option>
+                                    <option value="Male">{{ __('testimonials_page.gender_male') }}</option>
+                                    <option value="Female">{{ __('testimonials_page.gender_female') }}</option>
+                                    <option value="Other">{{ __('testimonials_page.gender_other') }}</option>
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label class="form-label">Rating</label>
+                                <label class="form-label">{{ __('testimonials_page.rating') }}</label>
                                 <select name="rating" class="form-input" required>
                                     <option value="" disabled selected>Select Stars...</option>
                                     <option value="5">5 Stars</option>

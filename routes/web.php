@@ -2,8 +2,9 @@
 
 use App\Http\Controllers\Admin\AvatarOptionController;
 use App\Http\Controllers\Admin\BlogController as AdminBlogController;
-use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\ContactMessageController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\DxnTeamRequestController as AdminDxnTeamRequestController;
 use App\Http\Controllers\Admin\FaqController as AdminFaqController;
 use App\Http\Controllers\Admin\ItemController;
 use App\Http\Controllers\Admin\NewsletterController; // Breeze
@@ -16,7 +17,8 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\VendorRequestController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\BrandController;
-use App\Http\Controllers\CartController;
+use App\Http\Controllers\ContactController;
+use App\Http\Controllers\DxnTeamRequestController;
 use App\Http\Controllers\FaqController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LocaleController;
@@ -36,6 +38,9 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/about', [HomeController::class, 'about'])->name('about');
 Route::get('/contact', [HomeController::class, 'contact'])->name('contact');
+Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');
+Route::get('/join-dxn', [DxnTeamRequestController::class, 'create'])->name('dxn-team.create');
+Route::post('/join-dxn', [DxnTeamRequestController::class, 'store'])->name('dxn-team.store');
 Route::get('/explore', [HomeController::class, 'explore'])->name('explore');
 Route::get('/lang/{locale}', [LocaleController::class, 'switch'])->name('lang.switch');
 Route::get('/theme/{theme}', [ThemeController::class, 'switch'])->name('theme.switch');
@@ -147,6 +152,16 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::get('vendors/requests', [VendorRequestController::class, 'index'])->name('vendors.requests.index');
     Route::get('vendors/requests/{vendorProfile}', [VendorRequestController::class, 'show'])->name('vendors.requests.show');
     Route::patch('vendors/requests/{vendorProfile}', [VendorRequestController::class, 'update'])->name('vendors.requests.update');
+    Route::patch('vendors/requests/{vendorProfile}/subscription', [VendorRequestController::class, 'confirmSubscription'])->name('vendors.requests.confirm-subscription');
+
+    Route::get('contact-messages', [ContactMessageController::class, 'index'])->name('contact-messages.index');
+    Route::get('contact-messages/{contactMessage}', [ContactMessageController::class, 'show'])->name('contact-messages.show');
+    Route::delete('contact-messages/{contactMessage}', [ContactMessageController::class, 'destroy'])->name('contact-messages.destroy');
+
+    Route::get('dxn-team-requests', [AdminDxnTeamRequestController::class, 'index'])->name('dxn-team-requests.index');
+    Route::get('dxn-team-requests/{dxnTeamRequest}', [AdminDxnTeamRequestController::class, 'show'])->name('dxn-team-requests.show');
+    Route::patch('dxn-team-requests/{dxnTeamRequest}', [AdminDxnTeamRequestController::class, 'update'])->name('dxn-team-requests.update');
+    Route::delete('dxn-team-requests/{dxnTeamRequest}', [AdminDxnTeamRequestController::class, 'destroy'])->name('dxn-team-requests.destroy');
 
     // Brands Management
     Route::resource('brands', App\Http\Controllers\Admin\BrandController::class)->only(['index', 'edit', 'update']);
@@ -159,6 +174,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     // FAQs & Blogs Management
     Route::resource('faqs', AdminFaqController::class);
     Route::resource('blogs', AdminBlogController::class);
+    Route::delete('blogs/gallery/{image}', [AdminBlogController::class, 'deleteGalleryImage'])->name('blogs.gallery.destroy');
 
     // Translations Management
     Route::get('settings/translations', [TranslationController::class, 'index'])->name('settings.translations');

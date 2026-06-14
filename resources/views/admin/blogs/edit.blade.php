@@ -60,6 +60,8 @@
             <div class="card border-0 shadow-sm" style="border-radius: 16px;">
                 <div class="card-body p-4">
                     <h5 class="fw-bold mb-4">{{ __('admin.blogs_page.settings') }}</h5>
+
+                    {{-- Cover Image --}}
                     <div class="mb-4">
                         <label class="form-label fw-semibold">{{ __('admin.blogs_page.cover_image') }}</label>
                         @if($blog->image)
@@ -71,6 +73,41 @@
                         @error('image') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         <div class="form-text">{{ __('admin.blogs_page.image_keep_hint') }}</div>
                     </div>
+
+                    {{-- Gallery Images --}}
+                    @if($blog->images->count() > 0)
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">{{ __('admin.blogs_page.current_gallery') }}</label>
+                        <div class="row g-2 mb-2">
+                            @foreach($blog->images as $img)
+                                <div class="col-auto position-relative">
+                                    <img src="{{ asset('storage/' . $img->image) }}" class="img-thumbnail" style="width: 80px; height: 80px; object-fit: cover;">
+                                    <button type="button" class="btn btn-danger btn-sm rounded-circle position-absolute top-0 end-0 p-1 px-2 m-1 js-delete-blog-img"
+                                            data-form-id="del-blog-img-{{ $img->id }}">
+                                        <i class="fas fa-times" style="font-size: 0.65rem;"></i>
+                                    </button>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                    @endif
+
+                    {{-- Add new gallery images --}}
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">{{ __('admin.blogs_page.gallery_images') }}</label>
+                        <input type="file" name="gallery[]" class="form-control @error('gallery.*') is-invalid @enderror" accept="image/*" multiple>
+                        <div class="form-text">{{ __('admin.blogs_page.gallery_hint') }}</div>
+                    </div>
+
+                    {{-- Video URL --}}
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">{{ __('admin.blogs_page.video_url') }}</label>
+                        <input type="url" name="video_url" class="form-control @error('video_url') is-invalid @enderror"
+                               value="{{ old('video_url', $blog->video_url) }}" placeholder="{{ __('admin.blogs_page.video_url_placeholder') }}">
+                        @error('video_url') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        <div class="form-text">{{ __('admin.blogs_page.video_url_hint') }}</div>
+                    </div>
+
                     <div class="form-check form-switch mb-4">
                         <input class="form-check-input" type="checkbox" id="is_published" name="is_published" value="1"
                                {{ old('is_published', $blog->is_published) ? 'checked' : '' }}>
@@ -82,4 +119,28 @@
         </div>
     </div>
 </form>
+
+{{-- Hidden delete forms for gallery images --}}
+@foreach($blog->images as $img)
+    <form id="del-blog-img-{{ $img->id }}" action="{{ route('admin.blogs.gallery.destroy', $img->id) }}" method="POST" style="display:none;">
+        @csrf
+        @method('DELETE')
+    </form>
+@endforeach
+
+<script>
+document.querySelectorAll('.js-delete-blog-img').forEach(btn => {
+    btn.addEventListener('click', function () {
+        const form = document.getElementById(btn.dataset.formId);
+        if (!form) return;
+        Swal.fire({
+            icon: 'warning',
+            title: 'Remove image?',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, remove',
+        }).then(r => { if (r.isConfirmed) form.submit(); });
+    });
+});
+</script>
 @endsection
+

@@ -58,4 +58,26 @@ class Blog extends Model
     {
         return $this->hasMany(BlogImage::class)->orderBy('sort_order');
     }
+
+    /**
+     * Get the embed video URL from standard youtube/vimeo link.
+     */
+    public function getEmbedVideoUrlAttribute(): ?string
+    {
+        if (! $this->video_url) {
+            return null;
+        }
+
+        // YouTube
+        if (preg_match('/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_\-]{11})/', $this->video_url, $m)) {
+            return 'https://www.youtube.com/embed/'.$m[1];
+        }
+
+        // Vimeo
+        if (preg_match('/(?:vimeo\.com\/|player\.vimeo\.com\/video\/)(\d+)/', $this->video_url, $m)) {
+            return 'https://player.vimeo.com/video/'.$m[1];
+        }
+
+        return null;
+    }
 }

@@ -1,4 +1,4 @@
-﻿@extends('layouts.framer')
+@extends('layouts.framer')
 
 @section('title', __('contact.page_title'))
 
@@ -95,6 +95,33 @@
                             <p style="color: var(--elx-gray); font-size: 0.9rem;">{{ __('contact.hours_value') }}</p>
                         </div>
                     </div>
+
+                    {{-- Social Links --}}
+                    <div class="info-item mt-4">
+                        <h5 style="color: var(--elx-white); margin-bottom: 0.8rem; text-align: center;">{{ __('contact.social_title') }}</h5>
+                        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; justify-content: center;">
+                                <a href="https://www.instagram.com/__elixira?igsh=bjl6d3FtMnk1a2V1"
+                                   target="_blank" rel="noopener"
+                                   style="display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: var(--elx-cyan); font-size: 1.1rem; transition: all 0.25s;" title="Instagram"
+                                   onmouseover="this.style.background='rgba(74,200,246,0.2)'; this.style.borderColor='var(--elx-cyan)';"
+                                   onmouseout="this.style.background='rgba(255,255,255,0.08)'; this.style.borderColor='rgba(255,255,255,0.15)';"
+                                ><i class="fab fa-instagram"></i></a>
+
+                                <a href="https://www.facebook.com/profile.php?id=61590957652478"
+                                   target="_blank" rel="noopener"
+                                   style="display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: var(--elx-cyan); font-size: 1.1rem; transition: all 0.25s;" title="Facebook"
+                                   onmouseover="this.style.background='rgba(74,200,246,0.2)'; this.style.borderColor='var(--elx-cyan)';"
+                                   onmouseout="this.style.background='rgba(255,255,255,0.08)'; this.style.borderColor='rgba(255,255,255,0.15)';"
+                                ><i class="fab fa-facebook-f"></i></a>
+
+                                <a href="https://wa.me/971545920050"
+                                   target="_blank" rel="noopener"
+                                   style="display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: var(--elx-cyan); font-size: 1.1rem; transition: all 0.25s;" title="WhatsApp"
+                                   onmouseover="this.style.background='rgba(74,200,246,0.2)'; this.style.borderColor='var(--elx-cyan)';"
+                                   onmouseout="this.style.background='rgba(255,255,255,0.08)'; this.style.borderColor='rgba(255,255,255,0.15)';"
+                                ><i class="fab fa-whatsapp"></i></a>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -108,12 +135,19 @@
                         </div>
                     @endif
 
-                    <form action="#" method="POST">
+                    <form action="{{ route('contact.store') }}" method="POST">
                         @csrf
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                             <input type="text" class="form-input" name="name" placeholder="{{ __('contact.form_name') }}" required>
                             <input type="email" class="form-input" name="email" placeholder="{{ __('contact.form_email') }}" required>
                         </div>
+                        <select class="form-input" name="reason" required style="appearance: auto;">
+                            <option value="">{{ __('contact.form_reason_placeholder') }}</option>
+                            <option value="inquiry">{{ __('contact.reason_inquiry') }}</option>
+                            <option value="complaint">{{ __('contact.reason_complaint') }}</option>
+                            <option value="technical">{{ __('contact.reason_technical') }}</option>
+                            <option value="other">{{ __('contact.reason_other') }}</option>
+                        </select>
                         <input type="text" class="form-input" name="subject" placeholder="{{ __('contact.form_subject') }}" required>
                         <textarea class="form-input form-textarea" name="message" rows="5" placeholder="{{ __('contact.form_message') }}" required></textarea>
 
@@ -127,9 +161,63 @@
     </div>
 </div>
 
-<section class="map-section" data-animate style="margin-top: 6rem; line-height: 0;">
-    <iframe
-        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d193595.15830869428!2d-74.119763973046!3d40.69766374874431!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c24fa5d33f083b%3A0xc80b8f06e177fe62!2sNew%20York%2C%20NY%2C%20USA!5e0!3m2!1sen!2s!4v1647856485648!5m2!1sen!2s"
+<section class="map-section" data-animate style="margin-top: 6rem;">
+    <div class="elx-container" style="margin-bottom: 1.5rem;">
+        <div style="display: flex; flex-wrap: wrap; gap: 1rem; justify-content: center;">
+            <select id="mapCountry" class="form-input" style="width: auto; min-width: 220px; margin-bottom: 0;">
+                @foreach($locations as $countryCode => $country)
+                    <option value="{{ $countryCode }}">{{ app()->getLocale() === 'ar' ? $country['label_ar'] : $country['label_en'] }}</option>
+                @endforeach
+            </select>
+            <select id="mapBranch" class="form-input" style="width: auto; min-width: 220px; margin-bottom: 0;"></select>
+        </div>
+    </div>
+    <iframe id="locationMap"
+        src=""
         width="100%" height="450" style="border:0; filter: invert(90%) hue-rotate(180deg) brightness(0.9);" allowfullscreen="" loading="lazy"></iframe>
 </section>
+@endsection
+
+@section('scripts')
+<script>
+    const locationData = @json($locations);
+    const locale = @json(app()->getLocale());
+    const countrySelect = document.getElementById('mapCountry');
+    const branchSelect = document.getElementById('mapBranch');
+    const mapFrame = document.getElementById('locationMap');
+
+    function branchLabel(branch) {
+        return locale === 'ar' ? branch.label_ar : branch.label_en;
+    }
+
+    function populateBranches(countryCode) {
+        branchSelect.innerHTML = '';
+        const branches = locationData[countryCode]?.branches || {};
+        Object.entries(branches).forEach(([key, branch]) => {
+            const option = document.createElement('option');
+            option.value = key;
+            option.textContent = branchLabel(branch);
+            branchSelect.appendChild(option);
+        });
+    }
+
+    function updateMap() {
+        const countryCode = countrySelect.value;
+        const branchKey = branchSelect.value;
+        const branch = locationData[countryCode]?.branches?.[branchKey];
+        if (branch?.embed_url) {
+            mapFrame.src = branch.embed_url;
+        }
+    }
+
+    countrySelect.addEventListener('change', () => {
+        populateBranches(countrySelect.value);
+        updateMap();
+    });
+
+    branchSelect.addEventListener('change', updateMap);
+
+    populateBranches(countrySelect.value);
+    updateMap();
+</script>
 @endsection

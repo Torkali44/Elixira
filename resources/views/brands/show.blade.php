@@ -329,7 +329,7 @@
                 $displayRating = $brand->average_rating ?: 0;
             @endphp
             <div class="brand-rating-centered">
-                <span class="brand-rating-label">Rating:</span>
+                <span class="brand-rating-label">{{ __('brands_page.rating_label') }}</span>
                 <div class="brand-rating__stars" style="margin-right: 0.5rem;">
                     @for($i = 1; $i <= 5; $i++)
                         @if($displayRating >= $i)
@@ -345,11 +345,11 @@
                 
                 @auth
                     <button type="button" class="glow-rate-btn" onclick="document.getElementById('rateBrandModal').classList.add('show')">
-                        <i class="fas fa-star me-1"></i> Rate
+                        <i class="fas fa-star me-1"></i> {{ __('brands_page.rate') }}
                     </button>
                 @else
                     <a href="{{ route('login') }}" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #ccc; padding: 0.3rem 1rem; border-radius: 50px; font-size: 0.85rem; text-decoration: none;">
-                        Login to rate
+                        {{ __('brands_page.login_to_rate') }}
                     </a>
                 @endauth
             </div>
@@ -376,7 +376,7 @@
                 <div class="brand-social-links">
                     @if($brand->store_link)
                         <a href="{{ $brand->store_link }}" target="_blank" class="brand-store-link">
-                            <i class="fas fa-link"></i> Visit my Shop
+                            <i class="fas fa-link"></i> {{ __('brands_page.visit_shop') }}
                         </a>
                     @endif
 
@@ -412,7 +412,7 @@
         </div>
 
         {{-- Products Section --}}
-        <h2 class="brand-section-title" data-animate>Our Products</h2>
+        <h2 class="brand-section-title" data-animate>{{ __('brands_page.our_products') }}</h2>
 
         @if($products->count() > 0)
             <div class="elx-products__grid menu-products-grid" data-animate>
@@ -429,14 +429,14 @@
         @else
             <div style="text-align: center; padding: 4rem 1rem; color: var(--elx-light);">
                 <i class="fas fa-box-open" style="font-size: 3rem; color: rgba(255,255,255,0.15); margin-bottom: 1rem; display: block;"></i>
-                <p>No products available from this brand yet.</p>
+                <p>{{ __('brands_page.no_products') }}</p>
             </div>
         @endif
 
         {{-- Similar Brands --}}
         @if($similarBrands->count() > 0)
         <div style="margin-top: 5rem;" data-animate>
-            <h2 class="brand-section-title">Similar Brands</h2>
+            <h2 class="brand-section-title">{{ __('brands_page.similar_brands') }}</h2>
             <div class="similar-brands-grid">
                 @foreach($similarBrands as $sBrand)
                     <a href="{{ route('brands.show', $sBrand->slug) }}" class="similar-brand-card">
@@ -448,7 +448,7 @@
                             </div>
                         @endif
                         <div class="similar-brand-name">{{ $sBrand->name }}</div>
-                        <div class="similar-brand-count">{{ $sBrand->items_count }} products</div>
+                        <div class="similar-brand-count">{{ __('brands_page.products_count', ['count' => $sBrand->items_count]) }}</div>
                     </a>
                 @endforeach
             </div>
@@ -457,7 +457,7 @@
         {{-- Reviews Section --}}
         <div class="mt-5 mb-5">
             <div class="reviews-header mb-4">
-                <h3 class="text-white" style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 2rem;">Brand Reviews</h3>
+                <h3 class="text-white" style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 2rem;">{{ __('brands_page.customer_reviews') }}</h3>
                 <div style="height: 3px; width: 60px; background: var(--elx-cyan); border-radius: 3px; margin-top: 10px;"></div>
             </div>
 
@@ -469,7 +469,7 @@
                         @endphp
                         <div class="review-card"
                             data-expandable="{{ $isReviewExpandable ? '1' : '0' }}"
-                            data-review-name="{{ $rating->user ? $rating->user->name : 'Guest' }}"
+                            data-review-name="{{ $rating->user ? $rating->user->name : __('brands_page.guest') }}"
                             data-review-rating="{{ $rating->rating }}"
                             data-review-content="{{ e($rating->comment) }}">
                             <div class="review-header">
@@ -485,7 +485,7 @@
                                     </div>
                                     <div class="review-meta">
                                         <h5 class="review-author">
-                                            {{ $rating->user ? $rating->user->name : 'Guest' }}
+                                            {{ $rating->user ? $rating->user->name : __('brands_page.guest') }}
                                             @if($rating->user && $rating->user->phone)
                                                 <span class="ms-1"><x-phone-flag :phone="$rating->user->phone" :show-phone="false" /></span>
                                             @else
@@ -505,7 +505,7 @@
                                 <div class="review-body">
                                     <p class="brand-review-message">{{ $rating->comment }}</p>
                                     @if($isReviewExpandable)
-                                        <div class="brand-review-read-more">Tap to read full review ...</div>
+                                        <div class="brand-review-read-more">{{ __('brands_page.tap_read_review') }}</div>
                                     @endif
                                 </div>
                             @endif
@@ -515,7 +515,7 @@
             @else
                 <div class="no-reviews-box">
                     <i class="fas fa-comment-slash" style="font-size: 3rem; color: rgba(255,255,255,0.1); margin-bottom: 1rem;"></i>
-                    <p style="color: #ccc; margin: 0;">No reviews yet. Be the first to rate this brand!</p>
+                    <p style="color: #ccc; margin: 0;">{{ __('brands_page.no_reviews') }}</p>
                 </div>
             @endif
         </div>
@@ -527,7 +527,7 @@
     <div class="custom-modal-dialog">
         <div class="custom-modal-content">
             <div class="custom-modal-header">
-                <h5 class="custom-modal-title">Rate {{ $brand->name }}</h5>
+                <h5 class="custom-modal-title">{{ __('brands_page.rate_brand', ['name' => $brand->name]) }}</h5>
                 <button type="button" class="custom-modal-close" onclick="document.getElementById('rateBrandModal').classList.remove('show')">&times;</button>
             </div>
             <form action="{{ route('ratings.store') }}" method="POST">
@@ -537,7 +537,7 @@
                     <input type="hidden" name="rateable_type" value="App\Models\Brand">
                     
                     <div class="rating-stars-container">
-                        <label class="rating-label">Your Rating</label>
+                        <label class="rating-label">{{ __('brands_page.your_rating') }}</label>
                         <div class="rating-stars-input">
                             <input type="radio" name="rating" id="star5" value="5" required>
                             <label for="star5" class="fas fa-star"></label>
@@ -557,13 +557,13 @@
                     </div>
                     
                     <div class="rating-comment-container">
-                        <label for="comment" class="rating-label">Comment (Optional)</label>
-                        <textarea class="rating-textarea" name="comment" id="comment" rows="3" placeholder="Tell us what you think..."></textarea>
+                        <label for="comment" class="rating-label">{{ __('brands_page.comment_optional') }}</label>
+                        <textarea class="rating-textarea" name="comment" id="comment" rows="3" placeholder="{{ __('brands_page.comment_placeholder') }}"></textarea>
                     </div>
                 </div>
                 <div class="custom-modal-footer">
-                    <button type="button" class="btn-cancel" onclick="document.getElementById('rateBrandModal').classList.remove('show')">Cancel</button>
-                    <button type="submit" class="btn-submit">Submit Rating</button>
+                    <button type="button" class="btn-cancel" onclick="document.getElementById('rateBrandModal').classList.remove('show')">{{ __('popups.cancel') }}</button>
+                    <button type="submit" class="btn-submit">{{ __('brands_page.submit_rating') }}</button>
                 </div>
             </form>
         </div>
@@ -901,7 +901,7 @@
 
         document.querySelectorAll('.review-card[data-expandable="1"]').forEach((card) => {
             card.addEventListener('click', () => {
-                const reviewerName = card.dataset.reviewName || 'Customer';
+                const reviewerName = card.dataset.reviewName || @json(__('popups.customer'));
                 const reviewContent = card.dataset.reviewContent || '';
                 const reviewRating = Number(card.dataset.reviewRating || 0);
                 const stars = '★'.repeat(reviewRating) + '☆'.repeat(Math.max(0, 5 - reviewRating));
@@ -917,7 +917,7 @@
                     background: '#0d1a20',
                     color: '#eaf4f8',
                     width: 640,
-                    confirmButtonText: 'Close',
+                    confirmButtonText: @json(__('brands_page.close')),
                     confirmButtonColor: '#4ac8f6',
                 });
             });

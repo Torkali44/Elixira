@@ -4,8 +4,8 @@
 <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h2 class="mb-1">My Orders</h2>
-            <p class="text-muted mb-0">Orders containing your products</p>
+            <h2 class="mb-1">{{ __('vendor.orders.title') }}</h2>
+            <p class="text-muted mb-0">{{ __('vendor.orders.subtitle') }}</p>
         </div>
     </div>
 
@@ -15,14 +15,14 @@
                 <table class="table table-hover align-middle mb-0">
                     <thead class="table-light">
                         <tr>
-                            <th class="ps-4">Order #</th>
-                            <th>Customer</th>
-                            <th>Phone</th>
-                            <th>Products Ordered</th>
-                            <th>Your Revenue</th>
-                            <th>Status</th>
-                            <th class="text-center">Date</th>
-                            <th class="text-end pe-4">Actions</th>
+                            <th class="ps-4">{{ __('vendor.orders.col_id') }}</th>
+                            <th>{{ __('vendor.orders.col_customer') }}</th>
+                            <th>{{ __('vendor.orders.col_phone') }}</th>
+                            <th>{{ __('vendor.orders.col_products') }}</th>
+                            <th>{{ __('vendor.orders.col_revenue') }}</th>
+                            <th>{{ __('vendor.orders.col_status') }}</th>
+                            <th class="text-center">{{ __('vendor.orders.col_date') }}</th>
+                            <th class="text-end pe-4">{{ __('vendor.orders.col_actions') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -39,12 +39,12 @@
                                     default => 'secondary',
                                 };
                                 $statusLabel = match($order->status) {
-                                    'pending' => 'Pending',
-                                    'confirmed' => 'Confirmed',
-                                    'preparing' => 'Preparing',
-                                    'ready' => 'Ready to Ship',
-                                    'delivered' => 'Delivered',
-                                    'cancelled' => 'Cancelled',
+                                    'pending' => __('vendor.orders.status_pending'),
+                                    'confirmed' => __('vendor.orders.status_confirmed'),
+                                    'preparing' => __('vendor.orders.status_preparing'),
+                                    'ready' => __('vendor.orders.status_ready'),
+                                    'delivered' => __('vendor.orders.status_delivered'),
+                                    'cancelled' => __('vendor.orders.status_cancelled'),
                                     default => ucfirst($order->status),
                                 };
                             @endphp
@@ -64,7 +64,7 @@
                                                 <img src="{{ asset('storage/' . $oi->item->image) }}" class="rounded" style="width: 28px; height: 28px; object-fit: cover;">
                                             @endif
                                             <div>
-                                                <small class="fw-bold">{{ $oi->item->name ?? 'Deleted' }}</small>
+                                                <small class="fw-bold">{{ $oi->item->name ?? __('vendor.orders.deleted') }}</small>
                                                 <small class="text-muted ms-1">× {{ $oi->quantity }} — ﷼{{ number_format($oi->price, 2) }}</small>
                                             </div>
                                         </div>
@@ -82,7 +82,7 @@
                                 </td>
                                 <td class="text-end pe-4">
                                     <a href="{{ route('vendor.orders.show', $order->id) }}" class="btn btn-sm btn-outline-primary" style="border-radius: 8px;">
-                                        <i class="fas fa-eye me-1"></i> Details
+                                        <i class="fas fa-eye me-1"></i> {{ __('vendor.orders.details') }}
                                     </a>
                                 </td>
                             </tr>
@@ -90,7 +90,7 @@
                             <tr>
                                 <td colspan="8" class="text-center py-5 text-muted">
                                     <i class="fas fa-inbox d-block mb-2" style="font-size: 2rem; opacity: 0.3;"></i>
-                                    <p class="mb-0">No orders yet.</p>
+                                    <p class="mb-0">{{ __('vendor.orders.empty') }}</p>
                                 </td>
                             </tr>
                         @endforelse

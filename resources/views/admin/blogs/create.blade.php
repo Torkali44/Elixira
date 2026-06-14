@@ -65,6 +65,21 @@
                         @error('image') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         <div class="form-text">{{ __('admin.blogs_page.image_hint') }}</div>
                     </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">{{ __('admin.blogs_page.gallery_images') }}</label>
+                        <input type="file" name="gallery[]" class="form-control @error('gallery.*') is-invalid @enderror" accept="image/*" multiple>
+                        <div class="form-text">{{ __('admin.blogs_page.gallery_hint') }}</div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">{{ __('admin.blogs_page.video_url') }}</label>
+                        <input type="url" name="video_url" class="form-control @error('video_url') is-invalid @enderror"
+                               value="{{ old('video_url') }}" placeholder="{{ __('admin.blogs_page.video_url_placeholder') }}">
+                        @error('video_url') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        <div class="form-text">{{ __('admin.blogs_page.video_url_hint') }}</div>
+                    </div>
+
                     <div class="form-check form-switch mb-4">
                         <input class="form-check-input" type="checkbox" id="is_published" name="is_published" value="1"
                                {{ old('is_published', 1) ? 'checked' : '' }}>
@@ -78,3 +93,4 @@
     </div>
 </form>
 @endsection
+

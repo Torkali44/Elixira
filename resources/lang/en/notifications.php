@@ -25,6 +25,18 @@ return [
         'title' => 'Vendor Request :status',
         'message' => 'Your vendor profile request status is now :status.:reason',
     ],
+    'vendor_subscription_confirmed' => [
+        'title' => 'Subscription Payment Confirmed',
+        'message' => 'Your vendor subscription payment has been confirmed by the admin.',
+    ],
+    'contact_message_received' => [
+        'title' => 'New Contact Message',
+        'message' => ':name sent a message: :subject',
+    ],
+    'dxn_team_request_received' => [
+        'title' => 'New DXN Team Request',
+        'message' => ':name submitted a DXN team building request.',
+    ],
     'special_request_offer' => [
         'title' => 'Special Request Offer Assigned',
         'message' => 'An offer of quantity :quantity has been assigned to your special request for ":product". You can now purchase it!',

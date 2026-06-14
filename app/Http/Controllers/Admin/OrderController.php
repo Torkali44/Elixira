@@ -81,6 +81,7 @@ class OrderController extends Controller
             'status' => 'required|in:pending,confirmed,preparing,ready,delivered,cancelled',
         ]);
 
+        $previousStatus = $order->status;
         $order->update(['status' => $request->status]);
 
         try {

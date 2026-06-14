@@ -1,6 +1,6 @@
 @extends('layouts.framer')
 
-@section('title', $item->name . ' - Elixira')
+@section('title', $item->local_name . ' - Elixira')
 
 @section('head')
 <style>
@@ -83,7 +83,7 @@
             <div class="product-gallery" data-animate>
                 <div class="main-img-container">
                     @if($item->image)
-                        <img src="{{ asset('storage/' . $item->image) }}" alt="{{ $item->name }}" id="mainProductImage">
+                        <img src="{{ asset('storage/' . $item->image) }}" alt="{{ $item->local_name }}" id="mainProductImage">
                     @else
                         <div style="aspect-ratio: 1/1; background: #1a2e38; display: flex; align-items: center; justify-content: center; color: var(--elx-cyan); font-size: 5rem;">
                             <i class="fas fa-seedling"></i>
@@ -114,14 +114,14 @@
             <div class="product-info" data-animate>
                 <div class="stock-badge {{ ($item->stock > 0 || $hasPrivateAccess) ? 'stock-in' : 'stock-out' }}">
                     <i class="fas {{ ($item->stock > 0 || $hasPrivateAccess) ? 'fa-check' : 'fa-times' }} me-1"></i>
-                    {{ $item->stock > 0 ? 'In Stock (' . $item->stock . ')' : ($hasPrivateAccess ? 'Private Access Available' : 'Out of Stock') }}
+                    {{ $item->stock > 0 ? __('shop.in_stock_label', ['count' => $item->stock]) : ($hasPrivateAccess ? __('shop.private_access_available') : __('shop.out_of_stock')) }}
                 </div>
 
                 {{-- Meta Tags: Category, Brand, Points --}}
                 <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.5rem;">
                     @if($item->category)
                         <span style="background: rgba(74, 200, 246, 0.1); color: #4ac8f6; padding: 0.35rem 1rem; border-radius: 50px; font-size: 0.8rem; font-weight: 600; border: 1px solid rgba(74, 200, 246, 0.2);">
-                            <i class="fas fa-layer-group" style="margin-right: 5px;"></i>{{ $item->category->name }}
+                            <i class="fas fa-layer-group" style="margin-right: 5px;"></i>{{ $item->category->local_name }}
                         </span>
                     @endif
                     @if($item->brandModel)
@@ -156,15 +156,15 @@
                         @endforeach
                     @endif
 
-                    @if($item->points > 0)
+                    @if(($item->reward_points ?? 0) > 0)
                         <span style="background: rgba(0, 255, 136, 0.1); color: #00ff88; padding: 0.35rem 1rem; border-radius: 50px; font-size: 0.8rem; font-weight: 600; border: 1px solid rgba(0, 255, 136, 0.2);">
-                            <i class="fas fa-star" style="margin-right: 5px;"></i>{{ $item->points }} Points
+                            <i class="fas fa-star" style="margin-right: 5px;"></i>{{ __('home.reward_points', ['count' => $item->reward_points]) }}
                         </span>
                     @endif
                 </div>
                 
                 <h1 class="elx-hero__title" style="font-size: 3.5rem; text-align: left; margin-bottom: 0.5rem;">
-                    <span class="elx-hero__title-gradient">{{ $item->name }}</span>
+                    <span class="elx-hero__title-gradient">{{ $item->local_name }}</span>
                 </h1>
 
                 @php
@@ -200,12 +200,12 @@
                 </div>
 
                 <p style="color: var(--elx-gray); font-size: 1.1rem; margin-bottom: 3rem; line-height: 1.6;">
-                    {{ $item->description }}
+                    {{ $item->local_description }}
                 </p>
 
                 @if($item->stock <= 0 && !$hasPrivateAccess)
-                    <button type="button" class="elx-btn" style="width: 100%; justify-content: center; padding: 1.2rem; font-size: 1.2rem; background: rgba(255, 77, 77, 0.1); color: #ff4d4d; border: 1px solid rgba(255, 77, 77, 0.3);" onclick="showSpecialRequestModal({{ $item->id }}, '{{ addslashes($item->name) }}')">
-                        <i class="fas fa-hand-holding-heart"></i> Private order
+                    <button type="button" class="elx-btn" style="width: 100%; justify-content: center; padding: 1.2rem; font-size: 1.2rem; background: rgba(255, 77, 77, 0.1); color: #ff4d4d; border: 1px solid rgba(255, 77, 77, 0.3);" onclick="showSpecialRequestModal({{ $item->id }}, '{{ addslashes($item->local_name) }}')">
+                        <i class="fas fa-hand-holding-heart"></i> {{ __('home.private_order') }}
                     </button>
                 @else
                     <form action="{{ route('cart.add') }}" method="POST">
@@ -218,12 +218,17 @@
                                 <input type="number" name="quantity" id="quantity" value="1" min="1" max="{{ $availableQty }}" style="width: 50px; text-align: center; background: none; border: none; color: white; font-weight: 700; outline: none;">
                                 <button type="button" onclick="const i = this.previousElementSibling; if(i.value < {{ $availableQty }}) i.value++;" style="background: none; border: none; color: white; cursor: pointer; padding: 0 0.5rem;">+</button>
                             </div>
-                            <span style="color: var(--elx-gray); font-size: 0.9rem;">Maximum {{ $availableQty }} units</span>
+                            <span style="color: var(--elx-gray); font-size: 0.9rem;">{{ __('shop.maximum_units', ['count' => $availableQty]) }}</span>
                         </div>
 
-                        <button type="submit" class="elx-btn elx-btn--primary" style="width: 100%; justify-content: center; padding: 1.2rem; font-size: 1.2rem;">
-                            <i class="fas fa-shopping-cart"></i> {{ __('home.add_to_cart') }}
-                        </button>
+                        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                            <button type="submit" class="elx-btn elx-btn--primary" style="flex: 1; min-width: 180px; justify-content: center; padding: 1.2rem; font-size: 1.1rem;">
+                                <i class="fas fa-shopping-cart"></i> {{ __('home.add_to_cart') }}
+                            </button>
+                            <button type="submit" name="buy_now" value="1" class="elx-btn elx-btn--glass" style="flex: 1; min-width: 180px; justify-content: center; padding: 1.2rem; font-size: 1.1rem; border-color: rgba(74, 200, 246, 0.4); color: #4ac8f6;">
+                                <i class="fas fa-bolt"></i> {{ __('home.buy_now') }}
+                            </button>
+                        </div>
                     </form>
                 @endif
 
@@ -349,7 +354,7 @@
         {{-- Reviews Section --}}
         <div class="mt-5 mb-5">
             <div class="reviews-header mb-4">
-                <h3 class="text-white" style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 2rem;">Customer Reviews</h3>
+                <h3 class="text-white" style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 2rem;">{{ __('shop.customer_reviews') }}</h3>
                 <div style="height: 3px; width: 60px; background: var(--elx-cyan); border-radius: 3px; margin-top: 10px;"></div>
             </div>
 

@@ -17,7 +17,7 @@
         <div class="menu-filter text-center mb-5" data-animate style="margin-bottom: 4rem;">
             <button class="filter-btn active" data-filter="all">{{ __('shop.filter_all') }}</button>
             @foreach($categories as $category)
-                <button class="filter-btn" data-filter=".cat-{{ $category->id }}">{{ $category->name }}</button>
+                <button class="filter-btn" data-filter=".cat-{{ $category->id }}">{{ $category->local_name }}</button>
             @endforeach
         </div>
 

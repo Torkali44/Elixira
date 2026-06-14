@@ -9,6 +9,7 @@ use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Item;
 use App\Models\ItemImage;
+use App\Support\ItemPricingService;
 use Illuminate\Support\Facades\Storage;
 
 class ItemController extends Controller
@@ -56,12 +57,14 @@ class ItemController extends Controller
     {
         $data = $request->validated();
         $data['is_featured'] = $request->has('is_featured');
+        $data = $this->normalizeBilingualFields($data);
 
         if ($request->hasFile('image')) {
             $data['image'] = $request->file('image')->store('items', 'public');
         }
 
         $item = Item::create($data);
+        app(ItemPricingService::class)->syncCountryPrices($item, $request->input('country_prices', []));
 
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $image) {
@@ -77,6 +80,7 @@ class ItemController extends Controller
     {
         $categories = Category::all();
         $brands = Brand::where('is_active', true)->orderBy('name')->get();
+        $item->load('countryPrices');
 
         return view('admin.items.edit', compact('item', 'categories', 'brands'));
     }
@@ -85,6 +89,7 @@ class ItemController extends Controller
     {
         $data = $request->validated();
         $data['is_featured'] = $request->has('is_featured');
+        $data = $this->normalizeBilingualFields($data);
 
         if ($request->hasFile('image')) {
             if ($item->image) {
@@ -97,6 +102,7 @@ class ItemController extends Controller
         }
 
         $item->update($data);
+        app(ItemPricingService::class)->syncCountryPrices($item, $request->input('country_prices', []));
 
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $image) {
@@ -124,5 +130,17 @@ class ItemController extends Controller
         $image->delete();
 
         return redirect()->back()->with('success', 'Image removed from gallery.');
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    private function normalizeBilingualFields(array $data): array
+    {
+        $data['name'] = $data['name_en'];
+        $data['description'] = $data['description_en'];
+
+        return $data;
     }
 }

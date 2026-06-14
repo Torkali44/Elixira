@@ -49,6 +49,7 @@ return [
     'notifications' => 'الإشعارات',
     'mark_all_read' => 'تعليم الكل كمقروء',
     'no_notifications' => 'لا توجد إشعارات بعد.',
+    'notifications_marked_read' => 'تم تعليم جميع الإشعارات كمقروءة.',
     'products' => 'المنتجات',
     'categories' => 'الفئات',
     'brands' => 'العلامات التجارية',

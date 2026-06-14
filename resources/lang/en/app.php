@@ -49,6 +49,7 @@ return [
     'notifications' => 'Notifications',
     'mark_all_read' => 'Mark all as read',
     'no_notifications' => 'No notifications yet.',
+    'notifications_marked_read' => 'All notifications marked as read.',
     'products' => 'Products',
     'categories' => 'Categories',
     'brands' => 'Brands',

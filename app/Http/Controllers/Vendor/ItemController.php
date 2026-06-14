@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Vendor;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Item;
+use App\Support\ItemPricingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -39,8 +40,10 @@ class ItemController extends Controller
     {
         $data = $request->validate([
             'category_id' => 'required|exists:categories,id',
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
+            'name_en' => 'required|string|max:255',
+            'name_ar' => 'nullable|string|max:255',
+            'description_en' => 'nullable|string',
+            'description_ar' => 'nullable|string',
             'long_description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
@@ -48,15 +51,20 @@ class ItemController extends Controller
             'images.*' => 'image|max:2048',
         ]);
 
+        // Map bilingual fields to legacy columns
+        $data['name'] = $data['name_en'];
+        $data['description'] = $data['description_en'] ?? null;
+
         $data['brand_id'] = $this->getBrandId();
         $data['status'] = 'pending';
-        $data['is_featured'] = false; // Vendors can't feature products
+        $data['is_featured'] = false;
 
         if ($request->hasFile('image')) {
             $data['image'] = $request->file('image')->store('items', 'public');
         }
 
         $item = Item::create($data);
+        app(ItemPricingService::class)->syncCountryPrices($item, $request->input('country_prices', []));
 
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $image) {
@@ -75,6 +83,7 @@ class ItemController extends Controller
         }
 
         $categories = Category::all();
+        $item->load('countryPrices');
 
         return view('vendor.items.edit', compact('item', 'categories'));
     }
@@ -87,14 +96,21 @@ class ItemController extends Controller
 
         $data = $request->validate([
             'category_id' => 'required|exists:categories,id',
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
+            'name_en' => 'required|string|max:255',
+            'name_ar' => 'nullable|string|max:255',
+            'description_en' => 'nullable|string',
+            'description_ar' => 'nullable|string',
             'long_description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
+            'country_prices' => 'nullable|array',
             'stock' => 'required|integer|min:0',
             'image' => 'nullable|image|max:2048',
             'images.*' => 'image|max:2048',
         ]);
+
+        // Map bilingual fields to legacy columns
+        $data['name'] = $data['name_en'];
+        $data['description'] = $data['description_en'] ?? null;
 
         if ($request->hasFile('image')) {
             if ($item->image) {
@@ -111,6 +127,7 @@ class ItemController extends Controller
         }
 
         $item->update($data);
+        app(ItemPricingService::class)->syncCountryPrices($item, $request->input('country_prices', []));
 
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $image) {

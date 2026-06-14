@@ -19,6 +19,7 @@
                         <th>{{ __('vendor.brands_page.col_countries') }}</th>
                         <th>{{ __('vendor.brands_page.col_products') }}</th>
                         <th>{{ __('vendor.brands_page.col_status') }}</th>
+                        <th>{{ __('admin.audit.last_modified') }}</th>
                         <th class="pe-4 text-end">{{ __('vendor.brands_page.col_action') }}</th>
                     </tr>
                 </thead>
@@ -68,6 +69,9 @@
                                 <span class="badge bg-danger">{{ __('vendor.brands_page.inactive') }}</span>
                             @endif
                         </td>
+                        <td>
+                            <small class="text-muted">{{ $brand->updated_at?->format('Y-m-d H:i') ?? __('admin.audit.never') }}</small>
+                        </td>
                         <td class="pe-4 text-end">
                             <div class="btn-group btn-group-sm">
                                 <a href="{{ route('admin.brands.edit', $brand->id) }}" class="btn btn-outline-primary" title="{{ __('vendor.brands_page.edit') }}">
@@ -81,7 +85,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" class="text-center py-4 text-muted">{{ __('vendor.brands_page.empty') }}</td>
+                        <td colspan="7" class="text-center py-4 text-muted">{{ __('vendor.brands_page.empty') }}</td>
                     </tr>
                     @endforelse
                 </tbody>

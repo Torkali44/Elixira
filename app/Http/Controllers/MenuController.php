@@ -5,16 +5,15 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\Item;
 use App\Models\SpecialItemOffer;
-use Illuminate\Http\Request;
 
 class MenuController extends Controller
 {
     public function index()
     {
-        $categories = Category::with(['items' => function($query) {
+        $categories = Category::with(['items' => function ($query) {
             $query->where('status', 'approved')->with('category', 'brandModel');
         }])->get();
-        $items = Item::with('category', 'brandModel')->where('status', 'approved')->get();
+        $items = Item::with('category', 'brandModel', 'countryPrices')->where('status', 'approved')->get();
         $privateOfferQuantities = $this->privateOfferQuantitiesForCurrentUser();
 
         return view('menu.index', compact('categories', 'items', 'privateOfferQuantities'));
@@ -22,8 +21,8 @@ class MenuController extends Controller
 
     public function show(Item $item)
     {
-        $item->load('category', 'images', 'brandModel', 'ratings.user');
-        
+        $item->load('category', 'images', 'brandModel', 'ratings.user', 'countryPrices');
+
         // Find other approved products with the same name sold by different brands
         $otherSellers = Item::with('brandModel')
             ->where('name', $item->name)
@@ -38,7 +37,7 @@ class MenuController extends Controller
             ->whereNotIn('id', $otherSellers->pluck('id'))
             ->take(4)
             ->get();
-            
+
         $privateOfferQuantities = $this->privateOfferQuantitiesForCurrentUser();
 
         return view('menu.show', compact('item', 'relatedItems', 'otherSellers', 'privateOfferQuantities'));
@@ -48,7 +47,7 @@ class MenuController extends Controller
     {
         $user = auth()->user();
 
-        if (!$user) {
+        if (! $user) {
             return [];
         }
 

@@ -16,8 +16,8 @@
                             </a>
                         </div>
                         <div class="card-content">
-                            <a href="{{ route('menu.show', $item) }}"><h3>{{ $item->name }}</h3></a>
-                            <p>{{ Str::limit($item->description, 90) }}</p>
+                            <a href="{{ route('menu.show', $item) }}"><h3>{{ $item->local_name }}</h3></a>
+                            <p>{{ Str::limit($item->local_description, 90) }}</p>
                             <span class="price">${{ number_format($item->price, 2) }}</span>
                             <form action="{{ route('cart.add') }}" method="POST" class="mt-3">
                                 @csrf

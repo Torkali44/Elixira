@@ -11,6 +11,7 @@ class VendorProfile extends Model
         'brand_name',
         'brand_logo',
         'brand_description',
+        'commercial_registration_number',
         'instagram_link',
         'tiktok_link',
         'snapchat_link',
@@ -21,6 +22,9 @@ class VendorProfile extends Model
         'product_types',
         'payment_method',
         'verification_document',
+        'subscription_payment_receipt',
+        'subscription_payment_status',
+        'onboarding_step',
         'status',
         'rejection_reason',
     ];

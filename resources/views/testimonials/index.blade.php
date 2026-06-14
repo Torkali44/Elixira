@@ -5,7 +5,7 @@
 @section('content')
     <style>
         .testimonials-page {
-            background-color: #0b161c;
+            background-color: var(--elx-darker);
             padding: 60px 20px;
             min-height: 100vh;
         }
@@ -416,22 +416,28 @@
             <h1 class="testimonials-title">{{ __('testimonials_page.hero_title') }}</h1>
             <ul class="testimonials-tabs">
                 <li><a href="{{ route('testimonials.index', ['tab' => 'direct']) }}"
-                        class="{{ $tab == 'direct' ? 'active' : '' }}">Direct</a></li>
+                        class="{{ $tab == 'direct' ? 'active' : '' }}">{{ __('testimonials_page.tab_direct') }}</a></li>
                 <li><a href="{{ route('testimonials.index', ['tab' => 'whatsapp']) }}"
-                        class="{{ $tab == 'whatsapp' ? 'active' : '' }}">WhatsApp</a></li>
+                        class="{{ $tab == 'whatsapp' ? 'active' : '' }}">{{ __('testimonials_page.tab_whatsapp') }}</a></li>
                 <li><a href="{{ route('testimonials.index', ['tab' => 'instagram']) }}"
-                        class="{{ $tab == 'instagram' ? 'active' : '' }}">Instagram</a></li>
+                        class="{{ $tab == 'instagram' ? 'active' : '' }}">{{ __('testimonials_page.tab_instagram') }}</a></li>
                 <li><a href="{{ route('testimonials.index', ['tab' => 'external']) }}"
-                        class="{{ $tab == 'external' ? 'active' : '' }}">External</a></li>
+                        class="{{ $tab == 'external' ? 'active' : '' }}">{{ __('testimonials_page.tab_external') }}</a></li>
                 <li><a href="{{ route('testimonials.index', ['tab' => 'video']) }}"
-                        class="{{ $tab == 'video' ? 'active' : '' }}">Videos</a></li>
+                        class="{{ $tab == 'video' ? 'active' : '' }}">{{ __('testimonials_page.tab_video') }}</a></li>
                 <li><a href="{{ route('testimonials.index', ['tab' => 'write']) }}"
-                        class="tab-write {{ $tab == 'write' ? 'active' : '' }}">Write Review</a></li>
+                        class="tab-write {{ $tab == 'write' ? 'active' : '' }}">{{ __('testimonials_page.tab_write') }}</a></li>
             </ul>
         </div>
 
         <div class="testimonials-content">
             @if($tab == 'direct')
+                @if($reviews->isEmpty())
+                    <div style="text-align: center; padding: 4rem 2rem; color: rgba(255,255,255,0.5); max-width: 600px; margin: 0 auto;">
+                        <i class="fas fa-comments" style="font-size: 3rem; margin-bottom: 1rem; color: #4ac8f6; opacity: 0.5;"></i>
+                        <p style="font-size: 1.1rem;">{{ __('testimonials_page.empty_tab') }}</p>
+                    </div>
+                @else
                 <div class="testimonials-grid"
                     style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 30px; max-width: 1200px; margin: 0 auto;">
                     @foreach($reviews as $rev)
@@ -470,7 +476,7 @@
                                 </p>
                             </div>
                             @if($isExpandable)
-                                <div class="testimonial-read-more">Tap to read full comment ...</div>
+                                <div class="testimonial-read-more">{{ __('testimonials_page.tap_read_more') }}</div>
                             @endif
 
                             <!-- <div class="testimonial-bottom-quotes" aria-hidden="true">
@@ -490,8 +496,8 @@
                                 <div style="display: flex; flex-direction: column;">
                                     <h4 style="margin: 0; color: #fff; font-size: 1rem; font-weight: 700;">{{ $rev->name }}</h4>
                                     <div style="display: flex; gap: 15px; font-size: 0.85rem; color: #8fa8b3; margin-top: 3px;">
-                                        <span>Gen.: <strong style="color: #d0dee5;">{{ $rev->skin_type  ?? 'N/A' }}</strong></span>
-                                        <span>Age: <strong style="color: #d0dee5;">{{ $rev->age ?? 'N/A' }}</strong></span>
+                                        <span>{{ __('testimonials_page.gen') }} <strong style="color: #d0dee5;">{{ $rev->skin_type  ?? 'N/A' }}</strong></span>
+                                        <span>{{ __('testimonials_page.age') }} <strong style="color: #d0dee5;">{{ $rev->age ?? 'N/A' }}</strong></span>
                                     </div>
                                 </div>
                             </div>
@@ -504,10 +510,11 @@
                 </div>
 
                 <div style="text-align: center; margin-top: 60px;">
-                    <p style="color: #888; margin-bottom: 20px;">Have a story to share?</p>
+                    <p style="color: #888; margin-bottom: 20px;">{{ __('testimonials_page.have_story') }}</p>
                     <a href="{{ route('testimonials.index', ['tab' => 'write']) }}" class="submit-btn"
-                        style="text-decoration: none; display: inline-block;">Write Your Review</a>
+                        style="text-decoration: none; display: inline-block;">{{ __('testimonials_page.write_your_review') }}</a>
                 </div>
+                @endif
 
             @elseif($tab == 'write')
                 <div class="elx-container" style="margin-top: 0; margin-bottom: 1.5rem;">
@@ -549,7 +556,7 @@
                         @csrf
                         <input type="hidden" name="type" value="direct">
 
-                        <div class="review-section-title">Select Your Avatar</div>
+                        <div class="review-section-title">{{ __('testimonials_page.select_avatar') }}</div>
                         <div class="avatars-wrapper">
                             @php $defaultAvatarUrl = $avatarOptions->first()->image_url ?? ''; @endphp
                             @forelse($avatarOptions as $index => $avatar)
@@ -562,7 +569,7 @@
                                 </label>
                             @empty
                                 <p style="grid-column: 1 / -1; color: #ff8a8a;">
-                                    No avatar options are active now. Please contact support.
+                                    {{ __('testimonials_page.no_avatars') }}
                                 </p>
                             @endforelse
                         </div>
@@ -570,61 +577,67 @@
                         <div class="form-wrapper">
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label class="form-label">Full Name</label>
-                                    <input type="text" name="name" class="form-input" placeholder="e.g. Ryo Hazoki"
+                                    <label class="form-label">{{ __('testimonials_page.full_name') }}</label>
+                                    <input type="text" name="name" class="form-input" placeholder="{{ __('testimonials_page.full_name_placeholder') }}"
                                         value="{{ old('name') }}" required>
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label">Email Address</label>
-                                    <input type="email" name="email" class="form-input" placeholder="e.g. duke@elixira.com (optional)"
+                                    <label class="form-label">{{ __('testimonials_page.email') }}</label>
+                                    <input type="email" name="email" class="form-input" placeholder="{{ __('testimonials_page.email_placeholder') }}"
                                         value="{{ old('email') }}">
                                 </div>
                             </div>
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label class="form-label">Age Range</label>
+                                    <label class="form-label">{{ __('testimonials_page.age_label') }}</label>
                                     <select name="age" class="form-input" required>
-                                        <option value="" disabled @selected(old('age') === null || old('age') === '')>Select...</option>
-                                        <option value="18-24" @selected(old('age') === '18-24')>18 - 24 years</option>
-                                        <option value="25-34" @selected(old('age') === '25-34')>25 - 34 years</option>
-                                        <option value="35-44" @selected(old('age') === '35-44')>35 - 44 years</option>
-                                        <option value="45+" @selected(old('age') === '45+')>45+ years</option>
+                                        <option value="" disabled @selected(old('age') === null || old('age') === '')>{{ __('testimonials_page.select_age') }}</option>
+                                        <option value="18-24" @selected(old('age') === '18-24')>{{ __('testimonials_page.age_18_24') }}</option>
+                                        <option value="25-34" @selected(old('age') === '25-34')>{{ __('testimonials_page.age_25_34') }}</option>
+                                        <option value="35-44" @selected(old('age') === '35-44')>{{ __('testimonials_page.age_35_44') }}</option>
+                                        <option value="45+" @selected(old('age') === '45+')>{{ __('testimonials_page.age_45_plus') }}</option>
                                     </select>
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label">Gender</label>
+                                    <label class="form-label">{{ __('testimonials_page.gender') }}</label>
                                     <select name="gender" class="form-input" required>
-                                        <option value="" disabled @selected(old('gender') === null || old('gender') === '')>Select...</option>
-                                        <option value="Male" @selected(old('gender') === 'Male')>Male</option>
-                                        <option value="Female" @selected(old('gender') === 'Female')>Female</option>
-                                        <option value="Other" @selected(old('gender') === 'Other')>Other</option>
+                                        <option value="" disabled @selected(old('gender') === null || old('gender') === '')>{{ __('testimonials_page.select_gender') }}</option>
+                                        <option value="Male" @selected(old('gender') === 'Male')>{{ __('testimonials_page.gender_male') }}</option>
+                                        <option value="Female" @selected(old('gender') === 'Female')>{{ __('testimonials_page.gender_female') }}</option>
+                                        <option value="Other" @selected(old('gender') === 'Other')>{{ __('testimonials_page.gender_other') }}</option>
                                     </select>
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label">Rating</label>
+                                    <label class="form-label">{{ __('testimonials_page.rating') }}</label>
                                     <select name="rating" class="form-input" required>
-                                        <option value="" disabled @selected(old('rating') === null || old('rating') === '')>Select Stars...</option>
-                                        <option value="5" @selected(old('rating') == '5')>5 Stars</option>
-                                        <option value="4" @selected(old('rating') == '4')>4 Stars</option>
-                                        <option value="3" @selected(old('rating') == '3')>3 Stars</option>
-                                        <option value="2" @selected(old('rating') == '2')>2 Stars</option>
-                                        <option value="1" @selected(old('rating') == '1')>1 Star</option>
+                                        <option value="" disabled @selected(old('rating') === null || old('rating') === '')>{{ __('testimonials_page.select_rating') }}</option>
+                                        <option value="5" @selected(old('rating') == '5')>{{ __('testimonials_page.5_stars') }}</option>
+                                        <option value="4" @selected(old('rating') == '4')>{{ __('testimonials_page.4_stars') }}</option>
+                                        <option value="3" @selected(old('rating') == '3')>{{ __('testimonials_page.3_stars') }}</option>
+                                        <option value="2" @selected(old('rating') == '2')>{{ __('testimonials_page.2_stars') }}</option>
+                                        <option value="1" @selected(old('rating') == '1')>{{ __('testimonials_page.1_star') }}</option>
                                     </select>
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label class="form-label">How would you describe your experience with us?</label>
-                                <textarea name="content" class="form-input" placeholder="Share your thoughts..."
+                                <label class="form-label">{{ __('testimonials_page.review') }}</label>
+                                <textarea name="content" class="form-input" placeholder="{{ __('testimonials_page.review_placeholder') }}"
                                     required>{{ old('content') }}</textarea>
                             </div>
                             
                             <div class="submit-btn-wrapper">
-                                <button type="submit" class="submit-btn">Send Review</button>
+                                <button type="submit" class="submit-btn">{{ __('testimonials_page.submit_review') }}</button>
                             </div>
                         </div>
                     </form>
                 </div>
             @elseif($tab == 'video')
+                @if($reviews->isEmpty())
+                    <div style="text-align: center; padding: 4rem 2rem; color: rgba(255,255,255,0.5); max-width: 600px; margin: 0 auto;">
+                        <i class="fas fa-video" style="font-size: 3rem; margin-bottom: 1rem; color: #4ac8f6; opacity: 0.5;"></i>
+                        <p style="font-size: 1.1rem;">{{ __('testimonials_page.empty_tab') }}</p>
+                    </div>
+                @else
                 <div class="testimonials-grid">
                     @foreach($reviews as $rev)
                         @php
@@ -647,7 +660,14 @@
                         </div>
                     @endforeach
                 </div>
+                @endif
             @else
+                @if($reviews->isEmpty())
+                    <div style="text-align: center; padding: 4rem 2rem; color: rgba(255,255,255,0.5); max-width: 600px; margin: 0 auto;">
+                        <i class="fas fa-images" style="font-size: 3rem; margin-bottom: 1rem; color: #4ac8f6; opacity: 0.5;"></i>
+                        <p style="font-size: 1.1rem;">{{ __('testimonials_page.empty_tab') }}</p>
+                    </div>
+                @else
                 <div class="testimonials-grid">
                     @foreach($reviews as $rev)
                         <div class="screenshot-card">
@@ -666,6 +686,7 @@
                         </div>
                     @endforeach
                 </div>
+                @endif
             @endif
         </div>
     </div>

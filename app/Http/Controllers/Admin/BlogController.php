@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Blog;
+use App\Models\BlogImage;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -43,6 +44,8 @@ class BlogController extends Controller
             'summary_en' => 'nullable|string',
             'summary_ar' => 'nullable|string',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'gallery.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:4096',
+            'video_url' => 'nullable|url|max:500',
         ]);
 
         $data['is_published'] = $request->has('is_published');
@@ -62,7 +65,15 @@ class BlogController extends Controller
         }
         $data['slug'] = $slug;
 
-        Blog::create($data);
+        $blog = Blog::create($data);
+
+        // Store gallery images
+        if ($request->hasFile('gallery')) {
+            foreach ($request->file('gallery') as $idx => $file) {
+                $path = $file->store('blogs/gallery', 'public');
+                $blog->images()->create(['image' => $path, 'sort_order' => $idx]);
+            }
+        }
 
         return redirect()->route('admin.blogs.index')->with('success', 'Blog post created successfully.');
     }
@@ -72,6 +83,8 @@ class BlogController extends Controller
      */
     public function edit(Blog $blog): View
     {
+        $blog->load('images');
+
         return view('admin.blogs.edit', compact('blog'));
     }
 
@@ -88,6 +101,8 @@ class BlogController extends Controller
             'summary_en' => 'nullable|string',
             'summary_ar' => 'nullable|string',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'gallery.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:4096',
+            'video_url' => 'nullable|url|max:500',
         ]);
 
         $data['is_published'] = $request->has('is_published');
@@ -118,6 +133,15 @@ class BlogController extends Controller
 
         $blog->update($data);
 
+        // Store new gallery images
+        if ($request->hasFile('gallery')) {
+            $nextOrder = $blog->images()->max('sort_order') + 1;
+            foreach ($request->file('gallery') as $idx => $file) {
+                $path = $file->store('blogs/gallery', 'public');
+                $blog->images()->create(['image' => $path, 'sort_order' => $nextOrder + $idx]);
+            }
+        }
+
         return redirect()->route('admin.blogs.index')->with('success', 'Blog post updated successfully.');
     }
 
@@ -129,8 +153,24 @@ class BlogController extends Controller
         if ($blog->image) {
             Storage::disk('public')->delete($blog->image);
         }
+        // Delete gallery images too
+        foreach ($blog->images as $img) {
+            Storage::disk('public')->delete($img->image);
+        }
         $blog->delete();
 
         return redirect()->route('admin.blogs.index')->with('success', 'Blog post deleted successfully.');
+    }
+
+    /**
+     * Delete a single blog gallery image.
+     */
+    public function deleteGalleryImage(BlogImage $image): RedirectResponse
+    {
+        Storage::disk('public')->delete($image->image);
+        $blogId = $image->blog_id;
+        $image->delete();
+
+        return redirect()->route('admin.blogs.edit', $blogId)->with('success', 'Gallery image removed.');
     }
 }

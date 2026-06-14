@@ -51,6 +51,14 @@
         <span class="badge bg-danger rounded-pill">{{ $newVendorsCount }}</span>
     @endif
 </a>
+<a href="{{ route('admin.contact-messages.index') }}" class="dashboard-nav-link {{ request()->routeIs('admin.contact-messages.*') ? 'active' : '' }}">
+    <i class="fas fa-envelope"></i>
+    <span>{{ __('admin.nav.contact_messages') }}</span>
+</a>
+<a href="{{ route('admin.dxn-team-requests.index') }}" class="dashboard-nav-link {{ request()->routeIs('admin.dxn-team-requests.*') ? 'active' : '' }}">
+    <i class="fas fa-users"></i>
+    <span>{{ __('admin.nav.dxn_team_requests') }}</span>
+</a>
 <a href="{{ route('admin.brands.index') }}" class="dashboard-nav-link {{ request()->routeIs('admin.brands.*') ? 'active' : '' }}">
     <i class="fas fa-tags"></i>
     <span>{{ __('admin.nav.brands') }}</span>

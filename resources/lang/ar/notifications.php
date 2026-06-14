@@ -25,6 +25,18 @@ return [
         'title' => 'طلب البائع :status',
         'message' => 'حالة طلب ملف البائع الخاص بك أصبحت :status.:reason',
     ],
+    'vendor_subscription_confirmed' => [
+        'title' => 'تم تأكيد دفع الاشتراك',
+        'message' => 'تم تأكيد دفع اشتراك البائع من قبل الإدارة.',
+    ],
+    'contact_message_received' => [
+        'title' => 'رسالة تواصل جديدة',
+        'message' => 'أرسل :name رسالة: :subject',
+    ],
+    'dxn_team_request_received' => [
+        'title' => 'طلب فريق DXN جديد',
+        'message' => 'قدّم :name طلب بناء فريق DXN.',
+    ],
     'special_request_offer' => [
         'title' => 'تم تعيين عرض للطلب الخاص',
         'message' => 'تم تعيين عرض بكمية :quantity لطلبك الخاص على ":product". يمكنك الشراء الآن!',

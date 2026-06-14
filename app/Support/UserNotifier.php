@@ -11,10 +11,15 @@ class UserNotifier
      */
     public static function send(int $userId, string $key, array $data = [], ?string $url = null): void
     {
+        $titleKey = "notifications.{$key}.title";
+        $messageKey = "notifications.{$key}.message";
+
         Notification::create([
             'user_id' => $userId,
-            'title_key' => "notifications.{$key}.title",
-            'message_key' => "notifications.{$key}.message",
+            'title' => __($titleKey, $data),
+            'message' => __($messageKey, $data),
+            'title_key' => $titleKey,
+            'message_key' => $messageKey,
             'data' => $data,
             'url' => $url,
             'is_read' => false,

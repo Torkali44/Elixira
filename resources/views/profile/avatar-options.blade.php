@@ -1,6 +1,6 @@
 @extends('layouts.framer')
 
-@section('title', 'Choose Avatar - Elixira')
+@section('title', __('profile_page.avatar_page_title'))
 
 @section('head')
 <style>
@@ -23,13 +23,13 @@
 <div class="page-content">
     <div class="elx-container">
         <div class="elx-section__header" data-animate>
-            <h1 class="elx-hero__title"><span class="elx-hero__title-gradient">Choose Your Avatar</span></h1>
-            <p class="elx-hero__subtitle">Pick any avatar enabled by admin and save it to your account.</p>
+            <h1 class="elx-hero__title"><span class="elx-hero__title-gradient">{{ __('profile_page.avatar_hero_title') }}</span></h1>
+            <p class="elx-hero__subtitle">{{ __('profile_page.avatar_hero_subtitle') }}</p>
         </div>
 
         @if(session('status') === 'avatar-updated')
             <div style="padding:1rem; border-radius:14px; margin-bottom:1rem; border:1px solid rgba(74,200,246,.25); background:rgba(74,200,246,.12); color:var(--elx-cyan);">
-                Avatar updated successfully.
+                {{ __('profile_page.avatar_updated') }}
             </div>
         @endif
 
@@ -46,11 +46,11 @@
                                 <span>{{ $option->name }}</span>
                                 <span style="font-size: 0.75rem; color: rgba(255, 255, 255, 0.5); font-weight: normal;">
                                     @if($option->gender === 'male')
-                                        (m)
+                                        {{ __('profile_page.gender_male_short') }}
                                     @elseif($option->gender === 'female')
-                                        (f)
+                                        {{ __('profile_page.gender_female_short') }}
                                     @else
-                                        (m/f)
+                                        {{ __('profile_page.gender_both_short') }}
                                     @endif
                                 </span>
                             </div>
@@ -62,8 +62,8 @@
                 <div style="color:#ff9b9b; margin-top:.8rem;">{{ $message }}</div>
             @enderror
             <div style="margin-top:1.3rem; display:flex; gap:.8rem;">
-                <button type="submit" class="elx-btn elx-btn--primary">Save Avatar</button>
-                <a href="{{ route('profile.edit') }}" class="elx-btn elx-btn--glass">Back To Account</a>
+                <button type="submit" class="elx-btn elx-btn--primary">{{ __('profile_page.save_avatar') }}</button>
+                <a href="{{ route('profile.edit') }}" class="elx-btn elx-btn--glass">{{ __('profile_page.back_to_account') }}</a>
             </div>
         </form>
     </div>

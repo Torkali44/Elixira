@@ -44,6 +44,32 @@
                     {!! nl2br($blog->content) !!}
                 </div>
 
+                {{-- Embedded Video --}}
+                @if($blog->embed_video_url)
+                    <div style="margin-top: 3rem;">
+                        <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 16px; border: 1px solid rgba(255,255,255,0.08);">
+                            <iframe src="{{ $blog->embed_video_url }}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;" frameborder="0" allowfullscreen loading="lazy"></iframe>
+                        </div>
+                    </div>
+                @endif
+
+                {{-- Image Gallery --}}
+                @if($blog->images->count() > 0)
+                    <div style="margin-top: 3rem;">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem;">
+                            @foreach($blog->images as $img)
+                                <a href="{{ asset('storage/' . $img->image) }}" target="_blank" style="display: block; border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.08); aspect-ratio: 4/3;">
+                                    <img src="{{ asset('storage/' . $img->image) }}"
+                                         alt="{{ $blog->title }}"
+                                         style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.35s ease;"
+                                         onmouseover="this.style.transform='scale(1.05)'"
+                                         onmouseout="this.style.transform='scale(1)'">
+                                </a>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+
                 <div style="margin-top: 5rem; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 2.5rem; display: flex; justify-content: {{ app()->getLocale() === 'ar' ? 'flex-end' : 'flex-start' }};">
                     <a href="{{ route('blogs.index') }}" class="elx-btn elx-btn--glass" style="gap: 0.5rem; display: inline-flex; align-items: center;">
                         <i class="fas fa-arrow-{{ app()->getLocale() === 'ar' ? 'right' : 'left' }}"></i> {{ __('blogs_page.back') }}
@@ -54,3 +80,4 @@
     </section>
 </div>
 @endsection
+

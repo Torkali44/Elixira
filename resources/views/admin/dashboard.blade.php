@@ -16,7 +16,7 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="card-title mb-0 opacity-75 text-uppercase" style="font-size: 0.75rem; letter-spacing: 1px;">Categories</h6>
+                            <h6 class="card-title mb-0 opacity-75 text-uppercase" style="font-size: 0.75rem; letter-spacing: 1px;">{{ __('admin.dashboard.categories') }}</h6>
                             <h2 class="mt-2 mb-0 fw-bold">{{ $categoriesCount }}</h2>
                         </div>
                         <div class="p-3 rounded-circle" style="background: rgba(255,255,255,0.1);">
@@ -25,7 +25,7 @@
                     </div>
                 </div>
                 <div class="card-footer bg-transparent border-0 pb-3">
-                    <a href="{{ route('admin.categories.index') }}" class="text-white text-decoration-none small">Manage <i
+                    <a href="{{ route('admin.categories.index') }}" class="text-white text-decoration-none small">{{ __('admin.common.manage') }} <i
                             class="fas fa-chevron-right ms-1" style="font-size: 0.7rem;"></i></a>
                 </div>
             </div>
@@ -37,9 +37,9 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="card-title mb-0 opacity-75 text-uppercase" style="font-size: 0.75rem; letter-spacing: 1px;">Total Products</h6>
+                            <h6 class="card-title mb-0 opacity-75 text-uppercase" style="font-size: 0.75rem; letter-spacing: 1px;">{{ __('admin.dashboard.total_products') }}</h6>
                             <h2 class="mt-2 mb-0 fw-bold">{{ $itemsCount }}</h2>
-                            <small class="opacity-75" style="font-size: 0.7rem;">{{ $itemsBreakdown['approved'] }} active</small>
+                            <small class="opacity-75" style="font-size: 0.7rem;">{{ __('admin.dashboard.active_products', ['count' => $itemsBreakdown['approved']]) }}</small>
                         </div>
                         <div class="p-3 rounded-circle" style="background: rgba(255,255,255,0.1);">
                             <i class="fas fa-box-open fa-lg"></i>
@@ -47,7 +47,7 @@
                     </div>
                 </div>
                 <div class="card-footer bg-transparent border-0 pb-3">
-                    <a href="{{ route('admin.items.index') }}" class="text-white text-decoration-none small">Inventory <i
+                    <a href="{{ route('admin.items.index') }}" class="text-white text-decoration-none small">{{ __('admin.dashboard.inventory') }} <i
                             class="fas fa-chevron-right ms-1" style="font-size: 0.7rem;"></i></a>
                 </div>
             </div>
@@ -59,9 +59,9 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="card-title mb-0 opacity-75 text-uppercase" style="font-size: 0.75rem; letter-spacing: 1px;">Pending Orders</h6>
+                            <h6 class="card-title mb-0 opacity-75 text-uppercase" style="font-size: 0.75rem; letter-spacing: 1px;">{{ __('admin.dashboard.pending_orders') }}</h6>
                             <h2 class="mt-2 mb-0 fw-bold">{{ $pendingOrdersCount }}</h2>
-                            <small class="opacity-75" style="font-size: 0.7rem;">Out of {{ $ordersCount }} orders</small>
+                            <small class="opacity-75" style="font-size: 0.7rem;">{{ __('admin.dashboard.out_of_orders', ['count' => $ordersCount]) }}</small>
                         </div>
                         <div class="p-3 rounded-circle" style="background: rgba(255,255,255,0.1);">
                             <i class="fas fa-clock fa-lg"></i>
@@ -69,7 +69,7 @@
                     </div>
                 </div>
                 <div class="card-footer bg-transparent border-0 pb-3">
-                    <a href="{{ route('admin.orders.index') }}" class="text-white text-decoration-none small">Process <i
+                    <a href="{{ route('admin.orders.index') }}" class="text-white text-decoration-none small">{{ __('admin.dashboard.process') }} <i
                             class="fas fa-chevron-right ms-1" style="font-size: 0.7rem;"></i></a>
                 </div>
             </div>
@@ -81,9 +81,9 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="card-title mb-0 opacity-75 text-uppercase" style="font-size: 0.75rem; letter-spacing: 1px;">Total Users</h6>
+                            <h6 class="card-title mb-0 opacity-75 text-uppercase" style="font-size: 0.75rem; letter-spacing: 1px;">{{ __('admin.dashboard.total_users') }}</h6>
                             <h2 class="mt-2 mb-0 fw-bold">{{ $usersCount }}</h2>
-                            <small class="opacity-75" style="font-size: 0.7rem;">{{ $vendorsCount }} active sellers</small>
+                            <small class="opacity-75" style="font-size: 0.7rem;">{{ __('admin.dashboard.active_sellers', ['count' => $vendorsCount]) }}</small>
                         </div>
                         <div class="p-3 rounded-circle" style="background: rgba(255,255,255,0.1);">
                             <i class="fas fa-user-circle fa-lg"></i>
@@ -91,7 +91,7 @@
                     </div>
                 </div>
                 <div class="card-footer bg-transparent border-0 pb-3">
-                    <a href="{{ route('admin.users.index') }}" class="text-white text-decoration-none small">Manage Users <i
+                    <a href="{{ route('admin.users.index') }}" class="text-white text-decoration-none small">{{ __('admin.dashboard.manage_users') }} <i
                             class="fas fa-chevron-right ms-1" style="font-size: 0.7rem;"></i></a>
                 </div>
             </div>
@@ -103,7 +103,7 @@
         <div class="col-md-12">
             <div class="card border-0 shadow-sm" style="border-radius: 16px;">
                 <div class="card-body">
-                    <h6 class="fw-bold mb-3"><i class="fas fa-chart-pie text-primary me-2"></i> Product Approval & Status Breakdown</h6>
+                    <h6 class="fw-bold mb-3"><i class="fas fa-chart-pie text-primary me-2"></i> {{ __('admin.dashboard.product_status') }}</h6>
                     <div class="progress" style="height: 24px; border-radius: 12px; overflow: hidden;">
                         @php
                             $totalItems = max($itemsCount, 1);
@@ -112,22 +112,22 @@
                             $rejectedPercent = round(($itemsBreakdown['rejected'] / $totalItems) * 100);
                         @endphp
                         <div class="progress-bar bg-success" role="progressbar" style="width: {{ $approvedPercent }}%" 
-                            title="Approved Products ({{ $itemsBreakdown['approved'] }})">
-                            {{ $approvedPercent }}% Approved
+                            title="{{ __('admin.dashboard.approved') }} ({{ $itemsBreakdown['approved'] }})">
+                            {{ __('admin.dashboard.percent_approved', ['percent' => $approvedPercent]) }}
                         </div>
                         <div class="progress-bar bg-warning text-dark" role="progressbar" style="width: {{ $pendingPercent }}%" 
-                            title="Pending Products ({{ $itemsBreakdown['pending'] }})">
-                            {{ $pendingPercent }}% Pending
+                            title="{{ __('admin.dashboard.pending') }} ({{ $itemsBreakdown['pending'] }})">
+                            {{ __('admin.dashboard.percent_pending', ['percent' => $pendingPercent]) }}
                         </div>
                         <div class="progress-bar bg-danger" role="progressbar" style="width: {{ $rejectedPercent }}%" 
-                            title="Rejected Products ({{ $itemsBreakdown['rejected'] }})">
-                            {{ $rejectedPercent }}% Rejected
+                            title="{{ __('admin.dashboard.rejected') }} ({{ $itemsBreakdown['rejected'] }})">
+                            {{ __('admin.dashboard.percent_rejected', ['percent' => $rejectedPercent]) }}
                         </div>
                     </div>
                     <div class="d-flex justify-content-center gap-4 mt-3 flex-wrap">
-                        <span class="small text-muted"><i class="fas fa-circle text-success me-1"></i> Approved: <strong>{{ $itemsBreakdown['approved'] }}</strong></span>
-                        <span class="small text-muted"><i class="fas fa-circle text-warning me-1"></i> Pending: <strong>{{ $itemsBreakdown['pending'] }}</strong></span>
-                        <span class="small text-muted"><i class="fas fa-circle text-danger me-1"></i> Rejected: <strong>{{ $itemsBreakdown['rejected'] }}</strong></span>
+                        <span class="small text-muted"><i class="fas fa-circle text-success me-1"></i> {{ __('admin.dashboard.approved') }}: <strong>{{ $itemsBreakdown['approved'] }}</strong></span>
+                        <span class="small text-muted"><i class="fas fa-circle text-warning me-1"></i> {{ __('admin.dashboard.pending') }}: <strong>{{ $itemsBreakdown['pending'] }}</strong></span>
+                        <span class="small text-muted"><i class="fas fa-circle text-danger me-1"></i> {{ __('admin.dashboard.rejected') }}: <strong>{{ $itemsBreakdown['rejected'] }}</strong></span>
                     </div>
                 </div>
             </div>
@@ -161,9 +161,9 @@
                                 @forelse($topVendors as $index => $vendor)
                                     @php
                                         $rankColors = [
-                                            0 => ['#ffd700', 'Gold Rank (Top Seller)'],
-                                            1 => ['#c0c0c0', 'Silver Rank'],
-                                            2 => ['#cd7f32', 'Bronze Rank']
+                                            0 => ['#ffd700', __('admin.dashboard.rank_gold')],
+                                            1 => ['#c0c0c0', __('admin.dashboard.rank_silver')],
+                                            2 => ['#cd7f32', __('admin.dashboard.rank_bronze')]
                                         ];
                                         $rankColor = $rankColors[$index] ?? null;
                                     @endphp
@@ -189,7 +189,7 @@
                                                 @endif
                                                 <div>
                                                     <div class="fw-bold">{{ $vendor->brand_name }}</div>
-                                                    <a href="{{ route('brands.show', \App\Models\Brand::find($vendor->brand_id)?->slug ?? '') }}" target="_blank" class="small text-decoration-none text-cyan">View storefront <i class="fas fa-external-link-alt" style="font-size:0.65rem;"></i></a>
+                                                    <a href="{{ route('brands.show', \App\Models\Brand::find($vendor->brand_id)?->slug ?? '') }}" target="_blank" class="small text-decoration-none text-cyan">{{ __('admin.dashboard.view_storefront') }} <i class="fas fa-external-link-alt" style="font-size:0.65rem;"></i></a>
                                                 </div>
                                             </div>
                                         </td>
@@ -199,7 +199,7 @@
                                         </td>
                                         <td>
                                             <span class="badge bg-secondary rounded-pill px-2 py-1">
-                                                {{ \App\Models\Brand::find($vendor->brand_id)?->items()->count() ?? 0 }} products
+                                                {{ __('admin.dashboard.products_badge', ['count' => \App\Models\Brand::find($vendor->brand_id)?->items()->count() ?? 0]) }}
                                             </span>
                                         </td>
                                         <td>
@@ -236,14 +236,14 @@
                                             @endif
                                         </td>
                                         <td class="pe-4 text-muted small" style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                                            {{ \App\Models\Brand::find($vendor->brand_id)?->description ?? 'No description provided.' }}
+                                            {{ \App\Models\Brand::find($vendor->brand_id)?->description ?? __('admin.dashboard.no_description') }}
                                         </td>
                                     </tr>
                                 @empty
                                     <tr>
                                         <td colspan="8" class="text-center py-5 text-muted">
                                             <i class="fas fa-store-slash d-block mb-3" style="font-size: 2.5rem; opacity: 0.3;"></i>
-                                            No sales recorded for any vendor brand yet.
+                                            {{ __('admin.dashboard.no_vendor_sales') }}
                                         </td>
                                     </tr>
                                 @endforelse
@@ -318,7 +318,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="5" class="text-center py-5 text-muted">No orders found.</td>
+                                        <td colspan="5" class="text-center py-5 text-muted">{{ __('admin.dashboard.no_orders') }}</td>
                                     </tr>
                                 @endforelse
                             </tbody>
@@ -338,15 +338,15 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <div>
-                            <small class="text-muted d-block">All Users</small>
+                            <small class="text-muted d-block">{{ __('admin.dashboard.all_users') }}</small>
                             <strong>{{ $usersCount }}</strong>
                         </div>
                         <div>
-                            <small class="text-muted d-block">Suspended users</small>
+                            <small class="text-muted d-block">{{ __('admin.dashboard.suspended_users') }}</small>
                             <strong>{{ $suspendedUsersCount }}</strong>
                         </div>
                         <div>
-                            <small class="text-muted d-block">Admins</small>
+                            <small class="text-muted d-block">{{ __('admin.dashboard.admins_label') }}</small>
                             <strong>{{ $adminsCount }}</strong>
                         </div>
                     </div>
@@ -384,10 +384,10 @@
                                     </div>
                                 </div>
                                 <a href="{{ route('admin.users.edit', $user) }}"
-                                    class="btn btn-sm btn-outline-secondary">Edit</a>
+                                    class="btn btn-sm btn-outline-secondary">{{ __('admin.dashboard.edit') }}</a>
                             </div>
                         @empty
-                            <div class="text-center py-4 text-muted">No users found.</div>
+                            <div class="text-center py-4 text-muted">{{ __('admin.dashboard.no_users') }}</div>
                         @endforelse
                     </div>
                 </div>
@@ -407,17 +407,17 @@
                                 <div class="d-flex align-items-center">
                                     <i class="fas fa-exclamation-triangle text-warning me-3"></i>
                                     <div>
-                                        <h6 class="mb-0 fw-bold">{{ $lowStockItem->name }}</h6>
-                                        <small class="text-muted">Currently {{ $lowStockItem->stock }} in stock — Sold by <strong>{{ $lowStockItem->brandModel->name ?? $lowStockItem->brand ?? 'Elixira Store' }}</strong></small>
+                                        <h6 class="mb-0 fw-bold">{{ $lowStockItem->local_name }}</h6>
+                                        <small class="text-muted">{{ __('admin.dashboard.low_stock_desc', ['count' => $lowStockItem->stock, 'brand' => $lowStockItem->brandModel->name ?? $lowStockItem->brand ?? 'Elixira Store']) }}</small>
                                     </div>
                                 </div>
                                 <a href="{{ route('admin.items.edit', $lowStockItem->id) }}"
-                                    class="btn btn-sm btn-outline-secondary rounded-pill">Update</a>
+                                    class="btn btn-sm btn-outline-secondary rounded-pill">{{ __('admin.dashboard.update') }}</a>
                             </div>
                         @empty
                             <div class="text-center py-5 text-muted">
                                 <i class="fas fa-check-circle text-success d-block mb-3" style="font-size: 2rem;"></i>
-                                <p class="mb-0">All items are sufficiently stocked.</p>
+                                <p class="mb-0">{{ __('admin.dashboard.all_stocked') }}</p>
                             </div>
                         @endforelse
                     </div>

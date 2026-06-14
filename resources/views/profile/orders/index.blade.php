@@ -1,6 +1,6 @@
 @extends('layouts.framer')
 
-@section('title', 'My Orders - Elixira')
+@section('title', __('orders_page.page_title'))
 
 @section('head')
 <style>
@@ -38,13 +38,13 @@
 <div class="page-content">
     <div class="elx-container">
         <div class="elx-section__header" data-animate>
-            <h1 class="elx-hero__title"><span class="elx-hero__title-gradient">My Orders</span></h1>
-            <p class="elx-hero__subtitle">All your linked orders are in one place.</p>
+            <h1 class="elx-hero__title"><span class="elx-hero__title-gradient">{{ __('orders_page.my_orders_title') }}</span></h1>
+            <p class="elx-hero__subtitle">{{ __('orders_page.my_orders_subtitle') }}</p>
         </div>
 
         <div style="display:flex; gap:.75rem; margin-bottom:1.2rem;">
             <a href="{{ route('profile.edit') }}" class="elx-btn elx-btn--glass">{{ __('profile_page.back_to_account') }}</a>
-            <a href="{{ route('orders.track') }}" class="elx-btn elx-btn--glass">Track By Phone</a>
+            <a href="{{ route('orders.track') }}" class="elx-btn elx-btn--glass">{{ __('orders_page.track_by_phone') }}</a>
         </div>
 
         @if($orders->count())
@@ -52,30 +52,31 @@
                 @foreach($orders as $order)
                     @php
                         $statusClass = $statusClasses[$order->status] ?? 'orders-status--pending';
-                        $itemsPreview = $order->orderItems->map(fn ($orderItem) => $orderItem->item?->name)->filter()->implode(' • ');
+                        $itemsPreview = $order->orderItems->map(fn ($orderItem) => $orderItem->item?->local_name)->filter()->implode(' • ');
+                        $statusLabel = __('notifications.status.' . $order->status);
                     @endphp
                     <article class="orders-card" data-animate>
                         <div class="orders-row">
                             <div>
-                                <div class="orders-meta">Order #{{ $order->id }} • {{ $order->created_at->format('M j, Y') }}</div>
+                                <div class="orders-meta">{{ __('orders_page.order_title', ['id' => $order->id]) }} • {{ $order->created_at->format('M j, Y') }}</div>
                                 <h3 style="margin:.4rem 0 0;">{{ $order->customer_name }}</h3>
                             </div>
                             <div style="text-align:right;">
-                                <span class="orders-status {{ $statusClass }}">{{ ucfirst($order->status) }}</span>
+                                <span class="orders-status {{ $statusClass }}">{{ $statusLabel }}</span>
                                 <div style="margin-top:.6rem; color:var(--elx-cyan); font-size:1.2rem; font-weight:700;">﷼ {{ number_format($order->total_amount, 2) }}</div>
                             </div>
                         </div>
                         <div style="margin-top:.8rem; color:rgba(255,255,255,.78);">
-                            {{ $order->order_items_count }} item{{ $order->order_items_count === 1 ? '' : 's' }} •
-                            {{ $itemsPreview ?: 'Items available in order details' }}
+                            {{ __('orders_page.items_count', ['count' => $order->order_items_count]) }} •
+                            {{ $itemsPreview ?: __('orders_page.items_preview_fallback') }}
                         </div>
                         <div class="orders-row" style="margin-top:1rem;">
                             <span style="color:var(--elx-gray); display:inline-flex; align-items:center; gap:.35rem;">
                                 <x-phone-flag :phone="$order->customer_phone" />
                             </span>
                             <div style="display:flex; gap:.5rem;">
-                                <a href="{{ route('profile.orders.invoice', $order) }}" class="elx-btn elx-btn--glass">Invoice</a>
-                                <a href="{{ route('profile.orders.show', $order) }}" class="elx-btn elx-btn--glass">View Details</a>
+                                <a href="{{ route('profile.orders.invoice', $order) }}" class="elx-btn elx-btn--glass">{{ __('orders_page.invoice') }}</a>
+                                <a href="{{ route('profile.orders.show', $order) }}" class="elx-btn elx-btn--glass">{{ __('orders_page.view_details') }}</a>
                             </div>
                         </div>
                     </article>
@@ -86,9 +87,8 @@
             </div>
         @else
             <div class="orders-card">
-                <h3>No orders linked to this account yet.</h3>
-                <p style="color:var(--elx-gray);">Once you place an order while signed in, it will appear here automatically.</p>
-                <a href="{{ route('menu.index') }}" class="elx-btn elx-btn--primary">{{ __('profile_page.start_shopping') }}</a>
+                <h3>{{ __('orders_page.no_orders_linked') }}</h3>
+                <p style="color:var(--elx-gray);">{{ __('orders_page.no_orders_hint') }}</p>
             </div>
         @endif
     </div>

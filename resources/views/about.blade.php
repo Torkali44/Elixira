@@ -24,7 +24,10 @@
                         <h2 style="font-size: 3rem; margin: 1.5rem 0; color: white;">{{ __('about.story_title') }}</h2>
                         <p style="opacity: 0.8; line-height: 1.8; font-size: 1.1rem; margin-bottom: 1.5rem;">{{ __('about.story_p1') }}</p>
                         <p style="opacity: 0.75; line-height: 1.8; font-size: 1.1rem; margin-bottom: 2.5rem;">{{ __('about.story_p2') }}</p>
-                        <a href="{{ route('menu.index') }}" class="elx-btn elx-btn--primary">{{ __('about.shop_collection') }}</a>
+                        <div style="display: flex; flex-wrap: wrap; gap: 1rem;">
+                            <a href="{{ route('menu.index') }}" class="elx-btn elx-btn--primary">{{ __('about.shop_collection') }}</a>
+                            <a href="{{ route('dxn-team.create') }}" class="elx-btn elx-btn--glass">{{ __('about.join_dxn') }}</a>
+                        </div>
                     </div>
                     <div style="flex: 1; min-width: 320px; border-radius: 40px; overflow: hidden; height: 500px; box-shadow: 0 30px 60px rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.05);">
                         <img src="https://images.unsplash.com/photo-1556228578-0d85b1a4d571?auto=format&fit=crop&w=1000&q=80"

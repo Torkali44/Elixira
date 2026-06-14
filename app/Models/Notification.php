@@ -59,6 +59,14 @@ class Notification extends Model
             }
         }
 
+        if (isset($data['reason']) && is_string($data['reason']) && trim($data['reason']) !== '') {
+            if ($this->message_key === 'notifications.vendor_request_updated.message') {
+                $data['reason'] = __('notifications.vendor_reason', ['reason' => $data['reason']]);
+            } else {
+                $data['reason'] = __('notifications.rejection_reason', ['reason' => $data['reason']]);
+            }
+        }
+
         return $data;
     }
 

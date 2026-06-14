@@ -27,6 +27,7 @@ class BlogController extends Controller
     {
         $blog = Blog::where('slug', $slug)
             ->where('is_published', true)
+            ->with('images')
             ->firstOrFail();
 
         return view('blogs.show', compact('blog'));

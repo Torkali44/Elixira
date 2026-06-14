@@ -122,4 +122,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Notification::class)->where('is_read', false)->latest();
     }
+
+    public function pointsTransactions()
+    {
+        return $this->hasMany(UserPointsTransaction::class)->latest();
+    }
 }

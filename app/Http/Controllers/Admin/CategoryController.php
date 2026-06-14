@@ -13,6 +13,7 @@ class CategoryController extends Controller
     public function index()
     {
         $categories = Category::latest()->get();
+
         return view('admin.categories.index', compact('categories'));
     }
 
@@ -23,10 +24,11 @@ class CategoryController extends Controller
 
     public function store(StoreCategoryRequest $request)
     {
+        $data = $request->validated();
+        $data['name'] = $data['name_en'];
+        $data['description'] = $data['description_en'];
 
-        $data = $request->all();
-
-       if ($request->hasFile('image')) {
+        if ($request->hasFile('image')) {
             $data['image'] = $request->file('image')->store('categories', 'public');
         }
 
@@ -43,6 +45,8 @@ class CategoryController extends Controller
     public function update(UpdateCategoryRequest $request, Category $category)
     {
         $data = $request->validated();
+        $data['name'] = $data['name_en'];
+        $data['description'] = $data['description_en'];
 
         if ($request->hasFile('image')) {
             if ($category->image) {

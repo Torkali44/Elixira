@@ -56,9 +56,7 @@ class ProductApprovalController extends Controller
             if ($vendor) {
                 UserNotifier::send($vendor->id, 'product_rejected', [
                     'product' => $item->name,
-                    'reason' => $request->rejection_reason
-                        ? __('notifications.rejection_reason', ['reason' => $request->rejection_reason])
-                        : '',
+                    'reason' => $request->rejection_reason ?? '',
                 ], route('vendor.items.edit', $item->id));
             }
         } catch (\Throwable $e) {

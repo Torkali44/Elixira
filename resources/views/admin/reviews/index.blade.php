@@ -1,5 +1,16 @@
 @extends('layouts.admin')
 
+@section('head')
+<style>
+    .admin-reviews-table th { background: #13252d !important; color: #b7d7d0 !important; border-color: rgba(255,255,255,0.08) !important; }
+    .admin-reviews-table td { background: rgba(19, 37, 45, 0.95) !important; color: #e8f4f8 !important; border-color: rgba(255,255,255,0.08) !important; }
+    .admin-reviews-table .text-dark, .admin-reviews-table .text-muted { color: #aab8bf !important; }
+    .admin-reviews-table .bg-light { background: rgba(255,255,255,0.06) !important; color: #e8f4f8 !important; border-color: rgba(255,255,255,0.1) !important; }
+    .admin-reviews-card { background: #13252d; border: 1px solid rgba(255,255,255,0.08); }
+    .admin-reviews-card .card-header { background: rgba(0,0,0,0.2); border-bottom: 1px solid rgba(255,255,255,0.08); color: #b7d7d0; }
+</style>
+@endsection
+
 @section('content')
 <div class="container-fluid">
     <div class="row">
@@ -11,14 +22,14 @@
             </div>
 
             <!-- List of Reviews -->
-            <div class="card shadow mb-4">
+            <div class="card shadow mb-4 admin-reviews-card">
                 <div class="card-header py-3">
                     <h6 class="m-0 font-weight-bold text-primary">{{ __('vendor.reviews_page.all_reviews') }}</h6>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table table-bordered table-hover align-middle" style="color: #333;">
-                            <thead class="bg-primary text-white">
+                        <table class="table table-bordered table-hover align-middle admin-reviews-table">
+                            <thead>
                                 <tr>
                                     <th style="width: 60px;">{{ __('vendor.reviews_page.col_id') }}</th>
                                     <th style="width: 100px;">{{ __('vendor.reviews_page.col_source') }}</th>
@@ -31,7 +42,7 @@
                             </thead>
                             <tbody>
                                 @foreach($reviews as $review)
-                                <tr style="background-color: #fff;">
+                                <tr>
                                     <td class="font-weight-bold">#{{ $review->id }}</td>
                                     <td>
                                         <span class="badge badge-secondary px-2 py-1" style="font-size: 0.8rem; background-color: #6c757d; color: #fff;">

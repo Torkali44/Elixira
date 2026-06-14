@@ -1,6 +1,6 @@
 @extends('layouts.framer')
 
-@section('title', 'Order #' . $order->id . ' - My Account')
+@section('title', __('orders_page.order_title', ['id' => $order->id]))
 
 @section('head')
 <style>
@@ -235,7 +235,7 @@
         <div class="account-order-page">
             <div class="elx-section__header" data-animate>
                 <h1 class="elx-hero__title">
-                    <span class="elx-hero__title-gradient">Order #{{ $order->id }}</span>
+                    <span class="elx-hero__title-gradient">{{ __('orders_page.order_title', ['id' => $order->id]) }}</span>
                 </h1>
                 <p class="elx-hero__subtitle">{{ $order->created_at->format('F j, Y \\a\\t g:i A') }}</p>
             </div>
@@ -243,41 +243,47 @@
             <div class="account-order-card" data-animate>
                 <div class="account-order-header">
                     <div>
-                        <span class="account-status {{ $statusClasses[$order->status] ?? 'account-status--pending' }}">{{ ucfirst($order->status) }}</span>
+                        <span class="account-status {{ $statusClasses[$order->status] ?? 'account-status--pending' }}">{{ __('notifications.status.' . $order->status) }}</span>
                         <h2 style="margin-top: 0.9rem; font-size: 1.8rem;">{{ $order->customer_name }}</h2>
-                        <p style="color: rgba(255, 255, 255, 0.72); display: flex; align-items: center; flex-wrap: wrap; gap: 0.4rem;">Placed with
+                        <p style="color: rgba(255, 255, 255, 0.72); display: flex; align-items: center; flex-wrap: wrap; gap: 0.4rem;">{{ __('orders_page.placed_with') }}
                             <x-phone-flag :phone="$order->customer_phone" />
                         </p>
                     </div>
 
                     <div class="account-hero__actions">
-                        <a href="{{ route('profile.orders.index') }}" class="elx-btn elx-btn--glass">Back To Orders</a>
-                        <a href="{{ route('profile.orders.invoice', $order) }}" class="elx-btn elx-btn--glass">Invoice</a>
-                        <a href="{{ route('menu.index') }}" class="elx-btn elx-btn--primary">Shop Again</a>
+                        <a href="{{ route('profile.orders.index') }}" class="elx-btn elx-btn--glass">{{ __('orders_page.back_to_orders') }}</a>
+                        <a href="{{ route('profile.orders.invoice', $order) }}" class="elx-btn elx-btn--glass">{{ __('orders_page.invoice') }}</a>
+                        <a href="{{ route('menu.index') }}" class="elx-btn elx-btn--primary">{{ __('orders_page.shop_again') }}</a>
                     </div>
                 </div>
 
                 <div class="account-order-kpis">
                     <div class="account-order-kpi">
-                        <span class="account-order-kpi__label">Order Total</span>
+                        <span class="account-order-kpi__label">{{ __('orders_page.order_total') }}</span>
                         <span class="account-order-kpi__value">﷼ {{ number_format($order->total_amount, 2) }}</span>
                     </div>
                     <div class="account-order-kpi">
-                        <span class="account-order-kpi__label">Items</span>
+                        <span class="account-order-kpi__label">{{ __('orders_page.items') }}</span>
                         <span class="account-order-kpi__value">{{ $order->orderItems->sum('quantity') }}</span>
                     </div>
                     <div class="account-order-kpi">
-                        <span class="account-order-kpi__label">Member Code</span>
-                        <span class="account-order-kpi__value">{{ $order->user_code ?: 'Not used' }}</span>
+                        <span class="account-order-kpi__label">{{ __('orders_page.member_code') }}</span>
+                        <span class="account-order-kpi__value">{{ $order->user_code ?: __('orders_page.not_used') }}</span>
                     </div>
+                    @if(($pointsEarned ?? 0) > 0)
+                    <div class="account-order-kpi">
+                        <span class="account-order-kpi__label">{{ __('orders_page.points_earned') }}</span>
+                        <span class="account-order-kpi__value" style="color: #00ff88;">+{{ $pointsEarned }}</span>
+                    </div>
+                    @endif
                 </div>
             </div>
 
             <div class="account-order-grid">
                 <div class="account-order-card" data-animate>
                     <div style="display: flex; justify-content: space-between; gap: 1rem; align-items: center; margin-bottom: 1.2rem;">
-                        <h3 style="font-size: 1.3rem; color: var(--elx-accent); margin: 0;">Ordered Items</h3>
-                        <span style="color: var(--elx-light);">{{ $order->orderItems->count() }} line items</span>
+                        <h3 style="font-size: 1.3rem; color: var(--elx-accent); margin: 0;">{{ __('orders_page.ordered_items') }}</h3>
+                        <span style="color: var(--elx-light);">{{ __('orders_page.line_items', ['count' => $order->orderItems->count()]) }}</span>
                     </div>
 
                     <div class="account-order-items">
@@ -294,8 +300,8 @@
                                 </div>
 
                                 <div>
-                                    <h4 style="margin-bottom: 0.35rem;">{{ $orderItem->item?->name ?: 'Product removed' }}</h4>
-                                    <div style="color: var(--elx-gray);">Qty {{ $orderItem->quantity }} • ﷼ {{ number_format($orderItem->price, 2) }} each</div>
+                                    <h4 style="margin-bottom: 0.35rem;">{{ $orderItem->item?->local_name ?: __('orders_page.product_removed') }}</h4>
+                                    <div style="color: var(--elx-gray);">{{ __('orders_page.qty_each', ['qty' => $orderItem->quantity, 'price' => number_format($orderItem->price, 2)]) }}</div>
                                 </div>
 
                                 <div style="text-align: right; font-size: 1.1rem; font-weight: 700; color: var(--elx-cyan);">
@@ -308,17 +314,17 @@
 
                 <div class="account-order-summary">
                     <div class="account-order-card" data-animate>
-                        <h3 style="font-size: 1.2rem; color: var(--elx-accent); margin-bottom: 1rem;">Delivery Summary</h3>
+                        <h3 style="font-size: 1.2rem; color: var(--elx-accent); margin-bottom: 1rem;">{{ __('orders_page.delivery_summary') }}</h3>
 
                         <div class="account-order-block">
                             <div style="display: grid; gap: 0.95rem;">
                                 <div>
-                                    <div style="color: var(--elx-light); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em;">Shipping Address</div>
+                                    <div style="color: var(--elx-light); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em;">{{ __('orders_page.shipping_address') }}</div>
                                     <div style="margin-top: 0.35rem;">{{ $order->address }}</div>
                                 </div>
                                 <div>
-                                    <div style="color: var(--elx-light); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em;">Notes</div>
-                                    <div style="margin-top: 0.35rem; color: rgba(255, 255, 255, 0.78);">{{ $order->notes ?: 'No extra notes added.' }}</div>
+                                    <div style="color: var(--elx-light); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em;">{{ __('orders_page.notes') }}</div>
+                                    <div style="margin-top: 0.35rem; color: rgba(255, 255, 255, 0.78);">{{ $order->notes ?: __('orders_page.no_notes') }}</div>
                                 </div>
                             </div>
                         </div>
@@ -340,8 +346,8 @@
                     </div>
 
                     <div class="account-order-card" data-animate>
-                        <h3 style="font-size: 1.2rem; color: var(--elx-accent); margin-bottom: 0.4rem;">Status Progress</h3>
-                        <p style="color: rgba(255, 255, 255, 0.68);">A quick view of where the order currently stands.</p>
+                        <h3 style="font-size: 1.2rem; color: var(--elx-accent); margin-bottom: 0.4rem;">{{ __('orders_page.status_progress') }}</h3>
+                        <p style="color: rgba(255, 255, 255, 0.68);">{{ __('orders_page.status_progress_hint') }}</p>
 
                         <div class="account-timeline">
                             @foreach($timeline as $step)

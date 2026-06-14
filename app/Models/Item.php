@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\ItemPricingService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
@@ -62,9 +63,19 @@ class Item extends Model
         return $this->brandModel?->vendorProfile?->user;
     }
 
+    public function countryPrices()
+    {
+        return $this->hasMany(ItemCountryPrice::class);
+    }
+
     public function images()
     {
         return $this->hasMany(ItemImage::class);
+    }
+
+    public function getDisplayPriceAttribute(): float
+    {
+        return app(ItemPricingService::class)->resolvePrice($this, auth()->user());
     }
 
     public function specialRequests()
@@ -97,6 +108,7 @@ class Item extends Model
         if (app()->getLocale() === 'ar') {
             return $this->name_ar ?: $this->name;
         }
+
         return $this->name_en ?: $this->name;
     }
 
@@ -108,6 +120,7 @@ class Item extends Model
         if (app()->getLocale() === 'ar') {
             return $this->description_ar ?: $this->description;
         }
+
         return $this->description_en ?: $this->description;
     }
 }

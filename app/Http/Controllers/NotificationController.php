@@ -30,6 +30,6 @@ class NotificationController extends Controller
             return response()->json(['success' => true]);
         }
 
-        return redirect()->back()->with('success', 'All notifications marked as read.');
+        return redirect()->back()->with('success', __('app.notifications_marked_read'));
     }
 }

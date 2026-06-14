@@ -1,6 +1,6 @@
 @extends('layouts.framer')
 
-@section('title', 'Your cart - Elixira')
+@section('title', __('cart_page.page_title'))
 
 @section('head')
 <style>
@@ -93,7 +93,7 @@
         {{-- Section Header --}}
         <div class="elx-section__header" data-animate>
             <h1 class="elx-hero__title">
-                <span class="elx-hero__title-gradient">Shopping Bag</span>
+                <span class="elx-hero__title-gradient">{{ __('cart_page.hero_title') }}</span>
             </h1>
         </div>
 
@@ -105,21 +105,22 @@
                         <table class="cart-table">
                             <thead>
                                 <tr>
-                                    <th>Product</th>
-                                    <th>Price</th>
-                                    <th>Points</th>
-                                    <th>Quantity</th>
-                                    <th>Subtotal</th>
+                                    <th>{{ __('cart_page.product') }}</th>
+                                    <th>{{ __('cart_page.price') }}</th>
+                                    <th>{{ __('cart_page.points') }}</th>
+                                    <th>{{ __('cart_page.quantity') }}</th>
+                                    <th>{{ __('cart_page.subtotal') }}</th>
                                     <th></th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @php $total = 0; $totalPoints = 0; @endphp
+                                @php $total = 0; $totalPoints = 0; $cartItems = \App\Models\Item::whereIn('id', array_keys(session('cart')))->get()->keyBy('id'); @endphp
                                 @foreach(session('cart') as $id => $details)
                                     @php 
                                         $total += $details['price'] * $details['quantity'];
                                         $points = isset($details['points']) ? $details['points'] : 0;
                                         $totalPoints += $points * $details['quantity'];
+                                        $displayName = $cartItems->get($id)?->local_name ?? $details['name'];
                                     @endphp
                                     <tr class="cart-row" data-id="{{ $id }}">
                                         <td>
@@ -133,7 +134,7 @@
                                                         </div>
                                                     @endif
                                                 </div>
-                                                <span style="font-weight: 600;">{{ $details['name'] }}</span>
+                                                <span style="font-weight: 600;">{{ $displayName }}</span>
                                             </div>
                                         </td>
                                         <td>﷼ {{ number_format($details['price'], 2) }}</td>
@@ -157,14 +158,14 @@
                 {{-- Order Summary & Checkout --}}
                 <div data-animate>
                     <div class="cart-card">
-                        <h3 class="elx-product-card__name" style="font-size: 1.5rem; margin-bottom: 2rem; color: var(--elx-accent);">Order Summary</h3>
+                        <h3 class="elx-product-card__name" style="font-size: 1.5rem; margin-bottom: 2rem; color: var(--elx-accent);">{{ __('cart_page.order_summary') }}</h3>
                         
                         <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; color: var(--elx-gray);">
-                            <span>Total Amount</span>
+                            <span>{{ __('cart_page.total_amount') }}</span>
                             <span style="color: var(--elx-white); font-weight: 700; font-size: 1.2rem;">﷼ {{ number_format($total, 2) }}</span>
                         </div>
                         <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; color: var(--elx-gray);">
-                            <span>Total Points</span>
+                            <span>{{ __('cart_page.total_points') }}</span>
                             <span style="color: var(--elx-cyan); font-weight: 700; font-size: 1.2rem;">{{ $totalPoints }}</span>
                         </div>
                         
@@ -172,7 +173,7 @@
 
                         <form action="{{ route('checkout') }}" method="POST">
                             @csrf
-                            <input type="text" name="customer_name" class="form-input" placeholder="Full Name *" value="{{ auth()->check() ? auth()->user()->name : old('customer_name') }}" required>
+                            <input type="text" name="customer_name" class="form-input" placeholder="{{ __('cart_page.full_name') }}" value="{{ auth()->check() ? auth()->user()->name : old('customer_name') }}" required>
                             @error('customer_name')<div style="color: #ff8a8a; font-size: 0.8rem; margin-top: -0.5rem; margin-bottom: 1rem;">{{ $message }}</div>@enderror
                             
                             @php
@@ -191,12 +192,12 @@
                                 <div style="flex: 0 0 auto; min-width: 8.75rem; max-width: 11rem;">
                                     <x-country-code-picker name="country_code" :value="$cCode" variant="cart" />
                                 </div>
-                                <input type="tel" name="phone_number" class="form-input" placeholder="Phone Number *" value="{{ $pNum }}" style="flex: 1; margin-bottom: 0;" required>
+                                <input type="tel" name="phone_number" class="form-input" placeholder="{{ __('cart_page.phone') }}" value="{{ $pNum }}" style="flex: 1; margin-bottom: 0;" required>
                             </div>
                             @error('phone_number')<div style="color: #ff8a8a; font-size: 0.8rem; margin-top: -0.5rem; margin-bottom: 1rem;">{{ $message }}</div>@enderror
                             @error('country_code')<div style="color: #ff8a8a; font-size: 0.8rem; margin-top: -0.5rem; margin-bottom: 1rem;">{{ $message }}</div>@enderror
 
-                            <input type="text" name="user_code" class="form-input" placeholder="User Code (optional)" value="{{ old('user_code', auth()->user()?->user_code ?? '') }}">
+                            <input type="text" name="user_code" class="form-input" placeholder="{{ __('cart_page.user_code') }}" value="{{ old('user_code', auth()->user()?->user_code ?? '') }}">
                             @error('user_code')<div style="color: #ff8a8a; font-size: 0.8rem; margin-top: -0.5rem; margin-bottom: 1rem;">{{ $message }}</div>@enderror
                             
                             @auth
@@ -221,32 +222,32 @@
                                             newAddrControls.style.display = 'none';
                                         }
                                     ">
-                                        <option value="" disabled {{ !$mainAddress ? 'selected' : '' }}>Select previous address</option>
+                                        <option value="" disabled {{ !$mainAddress ? 'selected' : '' }}>{{ __('cart_page.select_address') }}</option>
                                         @foreach($userAddresses as $addr)
                                             <option value="{{ $addr->address }}" {{ $addr->is_main ? 'selected' : '' }}>
-                                                {{ \Illuminate\Support\Str::limit($addr->address, 50) }} {{ $addr->is_main ? '(Main)' : '' }}
+                                                {{ \Illuminate\Support\Str::limit($addr->address, 50) }} {{ $addr->is_main ? __('cart_page.main_address') : '' }}
                                             </option>
                                         @endforeach
                                         <!-- <option value="new">Add new address</option> -->
                                     </select>
                                 @endif
                                 
-                                <input type="text" id="address" name="address" class="form-input" placeholder="Shipping Address *" value="{{ $defaultAddress }}" {{ $userAddresses->count() > 0 && $mainAddress ? 'readonly' : '' }} required>
+                                <input type="text" id="address" name="address" class="form-input" placeholder="{{ __('cart_page.shipping_address') }}" value="{{ $defaultAddress }}" {{ $userAddresses->count() > 0 && $mainAddress ? 'readonly' : '' }} required>
                                 
                                 <div id="new_address_controls" style="margin-bottom: 1rem; color: var(--elx-light); font-size: 0.9rem; {{ $userAddresses->count() > 0 && $mainAddress ? 'display: none;' : '' }}">
-                                    <label><input type="checkbox" name="save_address" value="1" checked> Save this address</label>
+                                    <label><input type="checkbox" name="save_address" value="1" checked> {{ __('cart_page.save_address') }}</label>
                                     &nbsp;&nbsp;
-                                    <label><input type="checkbox" name="is_main_address" value="1" checked> Set as main</label>
+                                    <label><input type="checkbox" name="is_main_address" value="1" checked> {{ __('cart_page.set_main') }}</label>
                                 </div>
                             @else
-                                <input type="text" name="address" class="form-input" placeholder="Shipping Address *" value="{{ old('address') }}" required>
+                                <input type="text" name="address" class="form-input" placeholder="{{ __('cart_page.shipping_address') }}" value="{{ old('address') }}" required>
                             @endauth
                             
-                            <textarea name="notes" class="form-input" style="border-radius: 15px;" placeholder="Notes (optional)" rows="2">{{ old('notes') }}</textarea>
+                            <textarea name="notes" class="form-input" style="border-radius: 15px;" placeholder="{{ __('cart_page.notes') }}" rows="2">{{ old('notes') }}</textarea>
                             @error('notes')<div style="color: #ff8a8a; font-size: 0.8rem; margin-top: -0.5rem; margin-bottom: 1rem;">{{ $message }}</div>@enderror
                             
                             <button type="submit" class="elx-btn elx-btn--primary" style="width: 100%; justify-content: center; padding: 1rem; margin-top: 1rem;">
-                                Place Order
+                                {{ __('cart_page.place_order') }}
                             </button>
                         </form>
                     </div>
@@ -257,9 +258,9 @@
                 <div style="font-size: 4rem; color: rgba(74, 200, 246, 0.2); margin-bottom: 2rem;">
                     <i class="fas fa-shopping-bag"></i>
                 </div>
-                <h3 style="font-size: 2rem; margin-bottom: 1rem;">Your bag is empty</h3>
-                <p style="color: var(--elx-gray); margin-bottom: 2rem;">Browse the shop and add products you love.</p>
-                <a href="{{ route('menu.index') }}" class="elx-btn elx-btn--primary">Shop Collections</a>
+                <h3 style="font-size: 2rem; margin-bottom: 1rem;">{{ __('cart_page.empty_title') }}</h3>
+                <p style="color: var(--elx-gray); margin-bottom: 2rem;">{{ __('cart_page.empty_desc') }}</p>
+                <a href="{{ route('menu.index') }}" class="elx-btn elx-btn--primary">{{ __('cart_page.shop_collections') }}</a>
             </div>
         @endif
     </div>
@@ -279,7 +280,7 @@ $(function () {
             data: { _token: '{{ csrf_token() }}', id: id, quantity: quantity },
             success: function () { window.location.reload(); },
             error: function(xhr) {
-                let msg = 'Something went wrong';
+                let msg = @json(__('cart_page.error_title'));
                 try {
                     let err = JSON.parse(xhr.responseText);
                     if (err.errors) {
@@ -288,7 +289,7 @@ $(function () {
                         msg = err.message;
                     }
                 } catch(e) {}
-                Swal.fire({icon: 'error', title: 'Oops...', html: msg});
+                Swal.fire({icon: 'error', title: @json(__('popups.error_title')), html: msg});
                 
                 // Reset the input value to previous (or just reload to sync)
                 setTimeout(() => window.location.reload(), 2000);
@@ -299,11 +300,11 @@ $(function () {
     $('.remove-from-cart').on('click', function (e) {
         Swal.fire({
             icon: 'warning',
-            title: 'Please confirm',
-            text: 'Remove this item from your bag?',
+            title: @json(__('popups.confirm_title')),
+            text: @json(__('cart_page.remove_confirm')),
             showCancelButton: true,
-            confirmButtonText: 'Yes',
-            cancelButtonText: 'Cancel',
+            confirmButtonText: @json(__('popups.yes')),
+            cancelButtonText: @json(__('popups.cancel')),
         }).then((result) => {
             if (result.isConfirmed) {
                 var id = $(this).attr('data-id');

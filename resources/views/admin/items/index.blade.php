@@ -60,6 +60,7 @@
                         <th>{{ __('admin.items.col_price') }}</th>
                         <th>{{ __('admin.items.col_stock') }}</th>
                         <th>{{ __('admin.items.col_status') }}</th>
+                        <th>{{ __('admin.audit.last_modified') }}</th>
                         <th>{{ __('admin.items.col_actions') }}</th>
                     </tr>
                 </thead>
@@ -134,6 +135,9 @@
                             @else
                                 <span class="badge bg-danger rounded-pill px-3 py-2"><i class="fas fa-times-circle me-1"></i> {{ __('admin.items.status_rejected') }}</span>
                             @endif
+                        </td>
+                        <td>
+                            <small class="text-muted">{{ $item->updated_at?->format('Y-m-d H:i') ?? __('admin.audit.never') }}</small>
                         </td>
                         <td>
                             <div class="btn-group">

@@ -12,6 +12,8 @@ use App\Models\OrderItem;
 use App\Models\SpecialItemOffer;
 use App\Models\User;
 use App\Models\UserAddress;
+use App\Support\ItemPricingService;
+use App\Support\RewardPointsService;
 use App\Support\UserNotifier;
 use Illuminate\Support\Facades\DB;
 
@@ -26,7 +28,23 @@ class CartController extends Controller
 
     public function add(AddToCartRequest $request)
     {
-        $item = Item::findOrFail($request->item_id);
+        $item = Item::with('countryPrices')->findOrFail($request->item_id);
+        $pricing = app(ItemPricingService::class);
+        $countryCode = $pricing->resolveCountryCode($request->input('country_code'));
+
+        if (! $pricing->isAvailableInCountry($item, $countryCode)) {
+            $message = __('shop.not_available_in_country');
+
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => $message]);
+            }
+
+            return redirect()->back()->with('error', $message);
+        }
+
+        $resolvedPrice = $pricing->resolvePrice($item, $request->user(), $countryCode);
+        session(['shopping_country' => $countryCode]);
+
         $cart = session()->get('cart', []);
         $quantity = $request->quantity ?? 1;
         $privateAllowance = $this->availablePrivateQuantity($request->user(), $item->id);
@@ -65,15 +83,29 @@ class CartController extends Controller
             $cart[$item->id]['quantity'] += $quantity;
         } else {
             $cart[$item->id] = [
-                'name' => $item->name,
+                'name' => $item->local_name,
                 'quantity' => $quantity,
-                'price' => $item->price,
+                'price' => $resolvedPrice,
+                'country_code' => $countryCode,
                 'points' => $item->points ?? 0,
                 'image' => $item->image,
             ];
         }
 
         session()->put('cart', $cart);
+
+        if ($request->boolean('buy_now')) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Added to your cart.',
+                    'cartCount' => count($cart),
+                    'redirect' => route('cart.index'),
+                ]);
+            }
+
+            return redirect()->route('cart.index')->with('success', 'Added to your cart.');
+        }
 
         if ($request->ajax() || $request->wantsJson()) {
             return response()->json(['success' => true, 'message' => 'Added to your cart.', 'cartCount' => count($cart)]);
@@ -153,6 +185,7 @@ class CartController extends Controller
         $total = collect($cart)->sum(fn (array $details) => $details['price'] * $details['quantity']);
 
         $fullPhone = $request->country_code.ltrim($request->phone_number, '0');
+        session(['shopping_country' => app(ItemPricingService::class)->mapPhoneCountryCode($request->country_code)]);
         $authenticatedUser = $request->user();
         $resolvedUserCode = $request->filled('user_code')
             ? $request->user_code
@@ -219,8 +252,6 @@ class CartController extends Controller
                 'notes' => $request->notes,
             ]);
 
-            $totalRewardPoints = 0;
-
             foreach ($cart as $id => $details) {
                 OrderItem::create([
                     'order_id' => $order->id,
@@ -245,16 +276,10 @@ class CartController extends Controller
 
                     // Increment item popularity counter (old "points" field)
                     $item->increment('points', 1);
-
-                    // Accumulate reward points for the user
-                    $totalRewardPoints += ($item->reward_points ?? 0) * (int) $details['quantity'];
                 }
             }
 
-            // Award accumulated reward points to the authenticated user
-            if ($authenticatedUser && $totalRewardPoints > 0) {
-                $authenticatedUser->increment('total_points', $totalRewardPoints);
-            }
+            RewardPointsService::awardForOrder($order);
 
             // Create notifications for customer and vendors
             try {
@@ -288,7 +313,7 @@ class CartController extends Controller
             return redirect()->route('orders.track', [
                 'order_id' => $order->id,
                 'phone' => $order->customer_phone,
-            ])->with('success', 'Thank you! Your order #'.$order->id.' has been placed.');
+            ])->with('success', __('orders_page.checkout_success', ['order' => $order->id]));
         } catch (\Throwable $exception) {
             DB::rollBack();
             \Log::error('Checkout Error: '.$exception->getMessage(), [

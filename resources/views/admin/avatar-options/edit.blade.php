@@ -2,8 +2,8 @@
 
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="mb-0">Edit Avatar</h2>
-    <a href="{{ route('admin.avatar-options.index') }}" class="btn btn-secondary">Back</a>
+    <h2 class="mb-0">{{ __('admin.avatar_options_admin.edit_avatar') }}</h2>
+    <a href="{{ route('admin.avatar-options.index') }}" class="btn btn-secondary">{{ __('admin.avatar_options_admin.back') }}</a>
 </div>
 
 <div class="card border-0 shadow-sm">
@@ -12,7 +12,7 @@
             @csrf
             @method('PUT')
             @include('admin.avatar-options.partials.form', ['avatarOption' => $avatarOption])
-            <button class="btn btn-primary">Update Avatar</button>
+            <button class="btn btn-primary">{{ __('admin.avatar_options_admin.update') }}</button>
         </form>
     </div>
 </div>

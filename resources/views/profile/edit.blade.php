@@ -1,6 +1,6 @@
 @extends('layouts.framer')
 
-@section('title', 'My Account - Elixira')
+@section('title', __('profile_page.page_title'))
 
 @section('head')
 <style>
@@ -509,10 +509,34 @@
                             <span class="account-stat__label">{{ __('profile_page.delivered') }}</span>
                         </div>
                         <div class="account-stat">
-                            <span class="account-stat__value">﷼ {{ number_format((float) $accountStats['total_spent'], 2) }}</span>
-                            <span class="account-stat__label">{{ __('profile_page.spent') }}</span>
+                            <span class="account-stat__value">{{ number_format($user->total_points ?? 0) }}</span>
+                            <span class="account-stat__label">{{ __('profile_page.points_total') }}</span>
                         </div>
                     </div>
+
+                    @if($user->pointsTransactions->isNotEmpty())
+                        <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.08);">
+                            <h3 style="font-size: 1rem; margin-bottom: 1rem; color: var(--elx-accent);">
+                                <i class="fas fa-star me-1"></i> {{ __('profile_page.points_history') }}
+                            </h3>
+                            <div style="display: flex; flex-direction: column; gap: 0.75rem; max-height: 280px; overflow-y: auto;">
+                                @foreach($user->pointsTransactions as $transaction)
+                                    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; padding: 0.75rem 1rem; background: rgba(255,255,255,0.03); border-radius: 12px; border: 1px solid rgba(255,255,255,0.06);">
+                                        <div>
+                                            <div style="font-weight: 600; font-size: 0.9rem;">+{{ $transaction->points }} {{ __('profile_page.reward_points') }}</div>
+                                            <div class="account-muted" style="font-size: 0.8rem; margin-top: 0.25rem;">{{ $transaction->local_description }}</div>
+                                            @if($transaction->order_id)
+                                                <a href="{{ route('profile.orders.show', $transaction->order_id) }}" style="font-size: 0.75rem; color: var(--elx-cyan);">{{ __('profile_page.points_order', ['id' => $transaction->order_id]) }}</a>
+                                            @endif
+                                        </div>
+                                        <span class="account-muted" style="font-size: 0.75rem; white-space: nowrap;">{{ $transaction->created_at->format('M d, Y') }}</span>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @else
+                        <p class="account-muted" style="margin-top: 1.25rem; font-size: 0.85rem;">{{ __('profile_page.no_points_yet') }}</p>
+                    @endif
 
                     <div class="account-links">
                         <!-- <a href="#security" class="account-link">
@@ -536,6 +560,7 @@
                             <span>{{ __('profile_page.track_by_phone') }}</span>
                         </a>
                         
+                        @if(auth()->user()->role !== 'admin')
                         @if(!auth()->user()->vendorProfile || auth()->user()->vendorProfile->status === 'draft')
                         <a href="{{ route('vendor.onboarding') }}" class="account-link" style="border-color: rgba(74, 200, 246, 0.3); background: rgba(74, 200, 246, 0.05);">
                             <i class="fas fa-store"></i>
@@ -549,38 +574,39 @@
                         @elseif(auth()->user()->vendorProfile->status === 'rejected_with_notes')
                         <a href="{{ route('vendor.rejected') }}" class="account-link" style="border-color: rgba(255, 107, 107, 0.3); background: rgba(255, 107, 107, 0.05);">
                             <i class="fas fa-exclamation-triangle"></i>
-                            <span style="color: #ff6b6b;">Action Required: Resubmit</span>
+                            <span style="color: #ff6b6b;">{{ __('profile_page.vendor_resubmit') }}</span>
                         </a>
                         @elseif(auth()->user()->vendorProfile->status === 'approved')
                         <a href="{{ route('vendor.dashboard') }}" class="account-link">
                             <i class="fas fa-store"></i>
-                            <span style="color: #7ef0bf;">Vendor Dashboard</span>
+                            <span style="color: #7ef0bf;">{{ __('profile_page.vendor_dashboard') }}</span>
                         </a>
+                        @endif
                         @endif
                     </div>
                 </div>
 
                 <div class="account-card">
                     <div class="account-section__header" style="margin-bottom: 1rem;">
-                        <h3 class="account-section__title">Account Snapshot</h3>
+                        <h3 class="account-section__title">{{ __('profile_page.account_snapshot') }}</h3>
                     </div>
 
                     <div style="display: grid; gap: 0.85rem;">
                         <div>
-                            <span class="account-label">Member Since</span>
-                            <div>{{ $user->created_at?->format('F Y') ?? 'Recently joined' }}</div>
+                            <span class="account-label">{{ __('profile_page.member_since') }}</span>
+                            <div>{{ $user->created_at?->format('F Y') ?? __('profile_page.recently_joined') }}</div>
                         </div>
                         <div>
-                            <span class="account-label">Phone</span>
-                            <div>{{ $user->phone ?: 'Add your number for faster checkout' }}</div>
+                            <span class="account-label">{{ __('profile_page.phone') }}</span>
+                            <div>{{ $user->phone ?: __('profile_page.phone_missing') }}</div>
                         </div>
                         <div>
-                            <span class="account-label">Member Code</span>
-                            <div>{{ $user->user_code ?: 'Not added yet' }}</div>
+                            <span class="account-label">{{ __('profile_page.member_code') }}</span>
+                            <div>{{ $user->user_code ?: __('profile_page.member_code_missing') }}</div>
                         </div>
                         <div>
-                            <span class="account-label">Last Delivery Address</span>
-                            <div class="account-muted">{{ $latestOrder?->address ?: 'No saved delivery orders yet.' }}</div>
+                            <span class="account-label">{{ __('profile_page.last_delivery_address') }}</span>
+                            <div class="account-muted">{{ $latestOrder?->address ?: __('profile_page.no_delivery_orders') }}</div>
                         </div>
                     </div>
                 </div>
@@ -588,7 +614,7 @@
                 @if($featuredItems->isNotEmpty())
                     <div class="account-card">
                         <div class="account-section__header" style="margin-bottom: 1rem;">
-                            <h3 class="account-section__title">Suggested For You</h3>
+                            <h3 class="account-section__title">{{ __('profile_page.suggested_for_you') }}</h3>
                         </div>
 
                         <div class="account-featured">
@@ -605,8 +631,8 @@
                                     </div>
 
                                     <div>
-                                        <div style="font-weight: 700;">{{ $item->name }}</div>
-                                        <div class="account-muted">{{ $item->category?->name ?: 'Featured ritual' }}</div>
+                                        <div style="font-weight: 700;">{{ $item->local_name }}</div>
+                                        <div class="account-muted">{{ $item->category?->local_name ?: __('profile_page.featured_ritual') }}</div>
                                         <div style="margin-top: 0.35rem; color: var(--elx-cyan); font-weight: 700;">﷼ {{ number_format($item->price, 2) }}</div>
                                     </div>
                                 </a>
@@ -620,8 +646,8 @@
                 <div class="account-card" id="details">
                     <div class="account-section__header">
                         <div>
-                            <h2 class="account-section__title">Profile Details</h2>
-                            <p class="account-muted">Keep your contact information ready for checkout and support.</p>
+                            <h2 class="account-section__title">{{ __('profile_page.profile_details') }}</h2>
+                            <p class="account-muted">{{ __('profile_page.profile_details_hint') }}</p>
                         </div>
                     </div>
 
@@ -633,7 +659,7 @@
 
 
                             <div>
-                                <label for="name" class="account-label">Full Name</label>
+                                <label for="name" class="account-label">{{ __('profile_page.full_name') }}</label>
                                 <input id="name" name="name" type="text" class="account-input" value="{{ old('name', $user->name) }}" required>
                                 @error('name')
                                     <div class="account-error">{{ $message }}</div>
@@ -641,7 +667,7 @@
                             </div>
 
                             <div>
-                                <label for="email" class="account-label">Email Address</label>
+                                <label for="email" class="account-label">{{ __('profile_page.email_address') }}</label>
                                 <input id="email" name="email" type="email" class="account-input" value="{{ old('email', $user->email) }}" required>
                                 @error('email')
                                     <div class="account-error">{{ $message }}</div>
@@ -649,11 +675,11 @@
                             </div>
 
                             <div>
-                                <label for="gender" class="account-label">Gender</label>
+                                <label for="gender" class="account-label">{{ __('profile_page.gender') }}</label>
                                 <select id="gender" name="gender" class="account-select" required>
-                                    <option value="" disabled @selected(is_null(old('gender', $user->gender)))>Select...</option>
-                                    <option value="male" @selected(old('gender', $user->gender) === 'male')>Male</option>
-                                    <option value="female" @selected(old('gender', $user->gender) === 'female')>Female</option>
+                                    <option value="" disabled @selected(is_null(old('gender', $user->gender)))>{{ __('profile_page.select') }}</option>
+                                    <option value="male" @selected(old('gender', $user->gender) === 'male')>{{ __('profile_page.gender_male') }}</option>
+                                    <option value="female" @selected(old('gender', $user->gender) === 'female')>{{ __('profile_page.gender_female') }}</option>
                                 </select>
                                 @error('gender')
                                     <div class="account-error">{{ $message }}</div>
@@ -661,17 +687,17 @@
                             </div>
 
                             <div class="account-field--full">
-                                <label for="user_code" class="account-label">Member Code</label>
-                                <input id="user_code" name="user_code" type="text" class="account-input" value="{{ old('user_code', $user->user_code) }}" placeholder="Optional code used to match older orders">
+                                <label for="user_code" class="account-label">{{ __('profile_page.member_code') }}</label>
+                                <input id="user_code" name="user_code" type="text" class="account-input" value="{{ old('user_code', $user->user_code) }}" placeholder="{{ __('profile_page.member_code_placeholder') }}">
                                 @error('user_code')
                                     <div class="account-error">{{ $message }}</div>
                                 @enderror
                             </div>
                             <div class="account-field--full">
-                                <label class="account-label">Phone Number</label>
+                                <label class="account-label">{{ __('profile_page.phone_number') }}</label>
                                 <div class="account-inline">
                                     <x-country-code-picker name="country_code" :value="$countryCode" variant="account" />
-                                    <input name="phone_number" type="tel" class="account-input" value="{{ $phoneNumber }}" placeholder="Phone number">
+                                    <input name="phone_number" type="tel" class="account-input" value="{{ $phoneNumber }}" placeholder="{{ __('profile_page.phone_placeholder') }}">
                                 </div>
                                 @error('phone_number')
                                     <div class="account-error">{{ $message }}</div>
@@ -683,8 +709,8 @@
                         </div>
 
                         <div style="margin-top: 1.5rem; display: flex; gap: 0.75rem; flex-wrap: wrap;">
-                            <button type="submit" class="elx-btn elx-btn--primary">Save Changes</button>
-                            <a href="{{ route('cart.index') }}" class="elx-btn elx-btn--glass">Go To Checkout</a>
+                            <button type="submit" class="elx-btn elx-btn--primary">{{ __('profile_page.save_changes') }}</button>
+                            <a href="{{ route('cart.index') }}" class="elx-btn elx-btn--glass">{{ __('profile_page.go_to_checkout') }}</a>
                         </div>
                     </form>
                 </div>
@@ -692,8 +718,8 @@
                 <div class="account-card" id="addresses">
                     <div class="account-section__header">
                         <div>
-                            <h2 class="account-section__title">Saved Addresses</h2>
-                            <p class="account-muted">Manage your delivery locations for faster checkout.</p>
+                            <h2 class="account-section__title">{{ __('profile_page.saved_addresses') }}</h2>
+                            <p class="account-muted">{{ __('profile_page.saved_addresses_hint') }}</p>
                         </div>
                     </div>
 
@@ -707,7 +733,7 @@
                                         <div style="display: flex; align-items: center; gap: 0.5rem;">
                                             <span style="color: var(--elx-white); font-weight: 500;">{{ $address->address }}</span>
                                             @if($address->is_main)
-                                                <span style="font-size: 0.7rem; background: rgba(74, 200, 246, 0.2); color: var(--elx-cyan); padding: 0.2rem 0.6rem; border-radius: 10px;">MAIN</span>
+                                                <span style="font-size: 0.7rem; background: rgba(74, 200, 246, 0.2); color: var(--elx-cyan); padding: 0.2rem 0.6rem; border-radius: 10px;">{{ __('profile_page.main_badge') }}</span>
                                             @endif
                                         </div>
                                     </div>
@@ -716,29 +742,29 @@
                                             <form method="POST" action="{{ route('profile.addresses.main', $address) }}">
                                                 @csrf
                                                 @method('PATCH')
-                                                <button type="submit" class="elx-btn" style="padding: 0.4rem 0.8rem; font-size: 0.75rem; background: rgba(74, 200, 246, 0.1); border-color: rgba(74, 200, 246, 0.3); color: var(--elx-cyan);">Set Main</button>
+                                                <button type="submit" class="elx-btn" style="padding: 0.4rem 0.8rem; font-size: 0.75rem; background: rgba(74, 200, 246, 0.1); border-color: rgba(74, 200, 246, 0.3); color: var(--elx-cyan);">{{ __('profile_page.set_main') }}</button>
                                             </form>
                                         @endif
-                                        <form method="POST" action="{{ route('profile.addresses.destroy', $address) }}" onsubmit="return confirm('Are you sure you want to delete this address?')">
+                                        <form method="POST" action="{{ route('profile.addresses.destroy', $address) }}" onsubmit="return confirm(@json(__('profile_page.delete_address_confirm')))">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="elx-btn" style="padding: 0.4rem 0.8rem; font-size: 0.75rem; background: rgba(255, 77, 77, 0.1); border-color: rgba(255, 77, 77, 0.3); color: #ff4d4d;">Delete</button>
+                                            <button type="submit" class="elx-btn" style="padding: 0.4rem 0.8rem; font-size: 0.75rem; background: rgba(255, 77, 77, 0.1); border-color: rgba(255, 77, 77, 0.3); color: #ff4d4d;">{{ __('profile_page.delete') }}</button>
                                         </form>
                                     </div>
                                 </div>
                             @endforeach
                         </div>
                     @else
-                        <p class="account-muted" style="margin-bottom: 2rem;">No saved addresses yet.</p>
+                        <p class="account-muted" style="margin-bottom: 2rem;">{{ __('profile_page.no_addresses') }}</p>
                     @endif
 
                     <form method="POST" action="{{ route('profile.addresses.store') }}">
                         @csrf
                         <div class="account-field--full">
-                            <label for="address_input" class="account-label">Add New Address</label>
+                            <label for="address_input" class="account-label">{{ __('profile_page.add_new_address') }}</label>
                             <div style="display: flex; gap: 0.75rem;">
-                                <input id="address_input" name="address" type="text" class="account-input" placeholder="Enter full delivery address" required minlength="10">
-                                <button type="submit" class="elx-btn elx-btn--primary" style="white-space: nowrap;">Add Address</button>
+                                <input id="address_input" name="address" type="text" class="account-input" placeholder="{{ __('profile_page.address_placeholder') }}" required minlength="10">
+                                <button type="submit" class="elx-btn elx-btn--primary" style="white-space: nowrap;">{{ __('profile_page.add_address') }}</button>
                             </div>
                             @error('address')
                                 <div class="account-error">{{ $message }}</div>
@@ -750,8 +776,8 @@
                 <div class="account-card" id="security">
                     <div class="account-section__header">
                         <div>
-                            <h2 class="account-section__title">Update password</h2>
-                            <p class="account-muted">Change your password whenever you want to keep the account protected.</p>
+                            <h2 class="account-section__title">{{ __('profile_page.update_password') }}</h2>
+                            <p class="account-muted">{{ __('profile_page.update_password_hint') }}</p>
                         </div>
                     </div>
 
@@ -761,7 +787,7 @@
 
                         <div class="account-form-grid">
                             <div class="account-field--full">
-                                <label for="current_password" class="account-label">Current Password</label>
+                                <label for="current_password" class="account-label">{{ __('profile_page.current_password') }}</label>
                                 <input id="current_password" name="current_password" type="password" class="account-input" autocomplete="current-password">
                                 @error('current_password', 'updatePassword')
                                     <div class="account-error">{{ $message }}</div>
@@ -769,7 +795,7 @@
                             </div>
 
                             <div>
-                                <label for="password" class="account-label">New Password</label>
+                                <label for="password" class="account-label">{{ __('profile_page.new_password') }}</label>
                                 <input id="password" name="password" type="password" class="account-input" autocomplete="new-password">
                                 @error('password', 'updatePassword')
                                     <div class="account-error">{{ $message }}</div>
@@ -777,34 +803,24 @@
                             </div>
 
                             <div>
-                                <label for="password_confirmation" class="account-label">Confirm Password</label>
+                                <label for="password_confirmation" class="account-label">{{ __('profile_page.confirm_password') }}</label>
                                 <input id="password_confirmation" name="password_confirmation" type="password" class="account-input" autocomplete="new-password">
                             </div>
                         </div>
 
-                        <button type="submit" class="elx-btn elx-btn--glass" style="margin-top: 1.5rem;"> Save </button>
+                        <button type="submit" class="elx-btn elx-btn--glass" style="margin-top: 1.5rem;">{{ __('profile_page.save') }}</button>
                     </form>
                 </div>
 
-                @if($user->role === 'admin')
-                    <div class="account-card account-danger">
-                        <div class="account-section__header" style="margin-bottom: 0;">
-                            <div>
-                                <h2 class="account-section__title" style="color: #ffb1b1;">Danger Zone</h2>
-                                <p class="account-muted">Administrator accounts are protected and cannot delete themselves from the system.</p>
-                            </div>
-                            <span class="elx-btn" style="background: rgba(255, 193, 7, 0.12); border-color: rgba(255, 193, 7, 0.24); color: #ffd36a;">Protected</span>
-                        </div>
-                    </div>
-                @else
+                @if($user->role !== 'admin')
                     <details class="account-card account-danger" @if($errors->userDeletion->isNotEmpty()) open @endif>
                         <summary>
                             <div class="account-section__header" style="margin-bottom: 0;">
                                 <div>
-                                    <h2 class="account-section__title" style="color: #ffb1b1;">Danger Zone</h2>
-                                    <p class="account-muted">Delete the account permanently only if you are completely sure.</p>
+                                    <h2 class="account-section__title" style="color: #ffb1b1;">{{ __('profile_page.danger_zone') }}</h2>
+                                    <p class="account-muted">{{ __('profile_page.danger_zone_hint') }}</p>
                                 </div>
-                                <span class="elx-btn" style="background: rgba(220, 53, 69, 0.12); border-color: rgba(220, 53, 69, 0.24); color: #ff9b9b;">Delete Account</span>
+                                <span class="elx-btn" style="background: rgba(220, 53, 69, 0.12); border-color: rgba(220, 53, 69, 0.24); color: #ff9b9b;">{{ __('profile_page.delete_account') }}</span>
                             </div>
                         </summary>
 
@@ -813,13 +829,13 @@
                                 @csrf
                                 @method('DELETE')
 
-                                <label for="delete_password" class="account-label">Confirm With Password</label>
-                                <input id="delete_password" name="password" type="password" class="account-input" placeholder="Enter your password to continue" required>
+                                <label for="delete_password" class="account-label">{{ __('profile_page.confirm_with_password') }}</label>
+                                <input id="delete_password" name="password" type="password" class="account-input" placeholder="{{ __('profile_page.delete_password_placeholder') }}" required>
                                 @error('password', 'userDeletion')
                                     <div class="account-error">{{ $message }}</div>
                                 @enderror
 
-                                <button type="submit" class="elx-btn" style="margin-top: 1rem; background: rgba(220, 53, 69, 0.16); border-color: rgba(220, 53, 69, 0.28); color: #ff9b9b;">Permanently Delete Account</button>
+                                <button type="submit" class="elx-btn" style="margin-top: 1rem; background: rgba(220, 53, 69, 0.16); border-color: rgba(220, 53, 69, 0.28); color: #ff9b9b;">{{ __('profile_page.permanently_delete') }}</button>
                             </form>
                         </div>
                     </details>

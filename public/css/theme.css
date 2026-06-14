@@ -4,17 +4,17 @@
 
 :root {
     /* Dark Mode Colors (Default) */
-    --theme-bg: #1a1a1a;
-    --theme-bg-secondary: #2d2d2d;
-    --theme-bg-tertiary: #3a3a3a;
+    --theme-bg: #060f14;
+    --theme-bg-secondary: #13252d;
+    --theme-bg-tertiary: #1a2e38;
     --theme-text: #ffffff;
     --theme-text-secondary: #e0e0e0;
     --theme-text-muted: #b0b0b0;
     --theme-border: #404040;
-    --theme-card-bg: #252525;
-    --theme-input-bg: #1f1f1f;
-    --theme-input-border: #3a3a3a;
-    --theme-hover-bg: #353535;
+    --theme-card-bg: #13252d;
+    --theme-input-bg: #0a1a22;
+    --theme-input-border: rgba(30, 103, 130, 0.3);
+    --theme-hover-bg: #1a2e38;
     --theme-shadow: rgba(0, 0, 0, 0.5);
     
     /* Brand Colors - Stay consistent */

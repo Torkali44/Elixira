@@ -4,11 +4,11 @@
 <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h2 class="mb-1 fw-bold text-dark">My Brand</h2>
-            <p class="text-muted mb-0">Manage your public brand identity, logo, social links and storefront presentation</p>
+            <h2 class="mb-1 fw-bold text-dark">{{ __('vendor.brand.title') }}</h2>
+            <p class="text-muted mb-0">{{ __('vendor.brand.subtitle') }}</p>
         </div>
         <a href="{{ route('brands.show', $brand->slug) }}" target="_blank" class="btn btn-outline-primary btn-sm px-3 py-2" style="border-radius: 8px;">
-            <i class="fas fa-external-link-alt me-2"></i> {{ $brand->is_active ? 'View store page' : 'Preview inactive store' }}
+            <i class="fas fa-external-link-alt me-2"></i> {{ $brand->is_active ? __('vendor.brand.view_store') : __('vendor.brand.preview_inactive') }}
         </a>
     </div>
 
@@ -16,8 +16,8 @@
         <div class="alert alert-danger border-0 shadow-sm d-flex align-items-start gap-3 mb-4" style="border-radius: 12px;">
             <i class="fas fa-store-slash mt-1"></i>
             <div>
-                <strong>Your brand is inactive.</strong>
-                <div class="small mt-1">Customers cannot see your storefront or products. Contact the admin to reactivate your brand, or use the preview link above to see what you will see when visiting your store URL.</div>
+                <strong>{{ __('vendor.brand.inactive_title') }}</strong>
+                <div class="small mt-1">{{ __('vendor.brand.inactive_hint') }}</div>
             </div>
         </div>
     @endunless
@@ -26,7 +26,7 @@
         <div class="col-lg-8">
             <div class="card border-0 shadow-sm mb-4" style="border-radius: 16px;">
                 <div class="card-header bg-white border-0 py-3 ps-4">
-                    <h5 class="card-title fw-bold m-0 text-dark">Brand Profile Settings</h5>
+                    <h5 class="card-title fw-bold m-0 text-dark">{{ __('vendor.brand.profile_settings') }}</h5>
                 </div>
                 <div class="card-body px-4 pb-4">
                     <form action="{{ route('vendor.brand.update') }}" method="POST" enctype="multipart/form-data">
@@ -35,7 +35,7 @@
 
                         <!-- Brand Logo Section -->
                         <div class="mb-4">
-                            <label class="form-label fw-bold text-muted small text-uppercase">Brand Logo</label>
+                            <label class="form-label fw-bold text-muted small text-uppercase">{{ __('vendor.brand.logo') }}</label>
                             <div class="d-flex align-items-center gap-4 p-3 bg-light" style="border-radius: 12px; border: 1px dashed rgba(0,0,0,0.1);">
                                 <div class="logo-preview-wrapper" style="position: relative;">
                                     @if($brand->logo)
@@ -48,14 +48,17 @@
                                 </div>
                                 <div class="flex-grow-1">
                                     <input type="file" name="logo" id="logoInput" class="form-control form-control-sm mb-2" accept="image/*">
-                                    <small class="text-muted d-block">Recommended: Square format (1:1), PNG/JPG/SVG, max 2MB.</small>
+                                    <small class="text-muted d-block">{{ __('vendor.brand.logo_hint') }}</small>
+                                    @if($brand->logo)
+                                        <small class="text-muted d-block mt-1">{{ __('vendor.brand.keep_logo_hint') }}</small>
+                                    @endif
                                 </div>
                             </div>
                         </div>
 
                         <!-- Brand Name & Description -->
                         <div class="mb-4">
-                            <label for="name" class="form-label fw-bold text-muted small text-uppercase">Brand Name</label>
+                            <label for="name" class="form-label fw-bold text-muted small text-uppercase">{{ __('vendor.brand.name') }}</label>
                             <input type="text" name="name" id="name" class="form-control @error('name') is-invalid @enderror" value="{{ old('name', $brand->name) }}" required style="border-radius: 8px;">
                             @error('name')
                                 <div class="invalid-feedback">{{ $message }}</div>
@@ -63,8 +66,8 @@
                         </div>
 
                         <div class="mb-4">
-                            <label for="description" class="form-label fw-bold text-muted small text-uppercase">Description</label>
-                            <textarea name="description" id="description" rows="5" class="form-control @error('description') is-invalid @enderror" placeholder="Describe your brand and products to your customers..." style="border-radius: 8px;">{{ old('description', $brand->description) }}</textarea>
+                            <label for="description" class="form-label fw-bold text-muted small text-uppercase">{{ __('vendor.brand.description') }}</label>
+                            <textarea name="description" id="description" rows="5" class="form-control @error('description') is-invalid @enderror" placeholder="{{ __('vendor.brand.desc_placeholder') }}" style="border-radius: 8px;">{{ old('description', $brand->description) }}</textarea>
                             @error('description')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -72,7 +75,7 @@
 
                         <!-- Service Countries -->
                         <div class="mb-4">
-                            <label class="form-label fw-bold text-muted small text-uppercase d-block">Service Countries</label>
+                            <label class="form-label fw-bold text-muted small text-uppercase d-block">{{ __('vendor.brand.service_countries') }}</label>
                             <div class="d-flex gap-4 mt-2">
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" name="service_countries[]" value="Saudi Arabia" id="countryKsa" 
@@ -97,7 +100,7 @@
                         <hr class="my-4" style="opacity: 0.1;">
 
                         <!-- Social Links -->
-                        <h6 class="fw-bold mb-3 text-dark">Social Media Links</h6>
+                        <h6 class="fw-bold mb-3 text-dark">{{ __('vendor.brand.social_links') }}</h6>
                         <div class="row g-3 mb-4">
                             <div class="col-md-6">
                                 <label for="instagram_link" class="form-label text-muted small"><i class="fab fa-instagram me-1 text-danger"></i> Instagram</label>
@@ -120,19 +123,19 @@
                         <hr class="my-4" style="opacity: 0.1;">
 
                         <!-- External Store Integration -->
-                        <h6 class="fw-bold mb-3 text-dark">External Store Integration</h6>
+                        <h6 class="fw-bold mb-3 text-dark">{{ __('vendor.brand.ext_store') }}</h6>
                         <div class="mb-3">
-                            <label for="store_link" class="form-label text-muted small"><i class="fas fa-link me-1 text-success"></i> External Store URL</label>
+                            <label for="store_link" class="form-label text-muted small"><i class="fas fa-link me-1 text-success"></i> {{ __('vendor.brand.ext_store_url') }}</label>
                             <input type="url" name="store_link" id="store_link" class="form-control" placeholder="https://myexternalstore.com" value="{{ old('store_link', $brand->store_link) }}" style="border-radius: 8px;">
                         </div>
                         <div class="mb-4">
-                            <label for="store_link_description" class="form-label text-muted small">External Store Button Description</label>
-                            <textarea name="store_link_description" id="store_link_description" rows="2" class="form-control" placeholder="Quick instructions or a CTA for the external store link..." style="border-radius: 8px;">{{ old('store_link_description', $brand->store_link_description) }}</textarea>
+                            <label for="store_link_description" class="form-label text-muted small">{{ __('vendor.brand.ext_store_desc') }}</label>
+                            <textarea name="store_link_description" id="store_link_description" rows="2" class="form-control" placeholder="{{ __('vendor.brand.ext_store_placeholder') }}" style="border-radius: 8px;">{{ old('store_link_description', $brand->store_link_description) }}</textarea>
                         </div>
 
                         <div class="d-grid mt-4">
                             <button type="submit" class="btn btn-primary py-2 fw-bold" style="border-radius: 8px; background-color: #2D1325; border-color: #2D1325;">
-                                <i class="fas fa-save me-2"></i> Save and Update Brand
+                                <i class="fas fa-save me-2"></i> {{ __('vendor.brand.save_btn') }}
                             </button>
                         </div>
                     </form>
@@ -144,7 +147,7 @@
             <!-- Brand Info Card Mockup -->
             <div class="card border-0 shadow-sm mb-4 text-center p-4" style="border-radius: 16px;">
                 <div class="card-body">
-                    <h6 class="text-muted text-uppercase small fw-bold mb-3">Storefront Card Preview</h6>
+                    <h6 class="text-muted text-uppercase small fw-bold mb-3">{{ __('vendor.brand.preview_title') }}</h6>
                     <div class="d-flex flex-column align-items-center mb-3">
                         <div class="mb-3">
                             @if($brand->logo)
@@ -156,11 +159,11 @@
                             @endif
                         </div>
                         <h4 class="fw-bold m-0 text-dark">{{ $brand->name }}</h4>
-                        <span class="badge bg-success rounded-pill mt-2 py-1 px-3" style="font-size: 0.75rem;">Approved Vendor</span>
+                        <span class="badge bg-success rounded-pill mt-2 py-1 px-3" style="font-size: 0.75rem;">{{ __('vendor.brand.approved_vendor') }}</span>
                     </div>
 
                     <p class="text-muted small px-2" style="max-height: 80px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;">
-                        {{ $brand->description ?? 'No brand description provided yet.' }}
+                        {{ $brand->description ?? __('vendor.brand.no_description') }}
                     </p>
 
                     <div class="d-flex justify-content-center gap-3 my-3">
@@ -180,18 +183,18 @@
 
                     <div class="border-top pt-3 mt-3 text-start small">
                         <div class="d-flex justify-content-between mb-2">
-                            <span class="text-muted">Service Regions:</span>
+                            <span class="text-muted">{{ __('vendor.brand.service_regions') }}</span>
                             <span class="fw-bold">
                                 @if(empty($brand->service_countries))
-                                    None
+                                    {{ __('vendor.brand.none') }}
                                 @else
                                     {{ implode(', ', $brand->service_countries) }}
                                 @endif
                             </span>
                         </div>
                         <div class="d-flex justify-content-between">
-                            <span class="text-muted">Total Products:</span>
-                            <span class="fw-bold text-primary">{{ $brand->items()->count() }} Products</span>
+                            <span class="text-muted">{{ __('vendor.brand.total_products') }}</span>
+                            <span class="fw-bold text-primary">{{ __('vendor.brand.products_count', ['count' => $brand->items()->count()]) }}</span>
                         </div>
                     </div>
                 </div>

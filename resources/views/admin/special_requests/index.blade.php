@@ -4,8 +4,8 @@
 
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
     <div>
-        <h2 class="mb-1">Special Requests</h2>
-        <p class="text-muted mb-0">Overview of special requests for out-of-stock items.</p>
+        <h2 class="mb-1">{{ __('admin.special_requests_admin.title') }}</h2>
+        <p class="text-muted mb-0">{{ __('admin.special_requests_admin.subtitle') }}</p>
     </div>
 </div>
 
@@ -14,25 +14,25 @@
     <div class="col-6 col-md-3">
         <div class="card border-0 shadow-sm text-center p-3" style="border-radius: 12px;">
             <div class="fw-bold fs-4 text-primary">{{ $totalRequests }}</div>
-            <div class="text-muted small">Total Requests</div>
+            <div class="text-muted small">{{ __('admin.special_requests_admin.total_requests') }}</div>
         </div>
     </div>
     <div class="col-6 col-md-3">
         <div class="card border-0 shadow-sm text-center p-3" style="border-radius: 12px;">
             <div class="fw-bold fs-4 text-warning">{{ $pendingRequestsCount }}</div>
-            <div class="text-muted small">Pending</div>
+            <div class="text-muted small">{{ __('admin.special_requests_admin.pending') }}</div>
         </div>
     </div>
     <div class="col-6 col-md-3">
         <div class="card border-0 shadow-sm text-center p-3" style="border-radius: 12px;">
             <div class="fw-bold fs-4 text-success">{{ $notifiedRequestsCount }}</div>
-            <div class="text-muted small">Notified / Completed</div>
+            <div class="text-muted small">{{ __('admin.special_requests_admin.notified_completed') }}</div>
         </div>
     </div>
     <div class="col-6 col-md-3">
         <div class="card border-0 shadow-sm text-center p-3" style="border-radius: 12px; height: 100%; display: flex; flex-direction: column; justify-content: center;">
             <div class="fw-bold text-truncate text-dark" style="font-size: 1.05rem;" title="{{ $topProductName }}">{{ $topProductName }}</div>
-            <div class="text-muted small">Top Requested ({{ $topProductCount }} qty)</div>
+            <div class="text-muted small">{{ __('admin.special_requests_admin.top_requested', ['qty' => $topProductCount]) }}</div>
         </div>
     </div>
 </div>
@@ -43,14 +43,14 @@
             <table class="table align-middle">
                 <thead>
                     <tr>
-                        <th>Product</th>
-                        <th>User</th>
-                        <th>Country</th>
-                        <th>Phone</th>
-                        <th>Email</th>
-                        <th>Date</th>
-                        <th>Status</th>
-                        <th>Private Offers</th>
+                        <th>{{ __('admin.special_requests_admin.product') }}</th>
+                        <th>{{ __('admin.special_requests_admin.user') }}</th>
+                        <th>{{ __('admin.special_requests_admin.country') }}</th>
+                        <th>{{ __('admin.special_requests_admin.phone') }}</th>
+                        <th>{{ __('admin.special_requests_admin.email') }}</th>
+                        <th>{{ __('admin.special_requests_admin.date') }}</th>
+                        <th>{{ __('admin.special_requests_admin.status') }}</th>
+                        <th>{{ __('admin.special_requests_admin.private_offers') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -71,14 +71,14 @@
                                         </div>
                                     </div>
                                 @else
-                                    <span class="text-muted">Deleted Product</span>
+                                    <span class="text-muted">{{ __('admin.special_requests_admin.deleted_product') }}</span>
                                 @endif
                             </td>
                             <td>
                                 @if($request->user)
                                     <div class="fw-bold">{{ $request->user->name }}</div>
                                 @else
-                                    <div class="fw-bold">{{ $request->name ?? 'Guest' }}</div>
+                                    <div class="fw-bold">{{ $request->name ?? __('admin.special_requests_admin.guest') }}</div>
                                 @endif
                             </td>
                             <td>
@@ -95,7 +95,7 @@
                                 @if($country)
                                     <img src="{{ asset($country) }}" alt="Country" width="22" height="16" style="flex-shrink: 0; object-fit: cover; border-radius: 2px; box-shadow: 0 0 0 1px rgba(0,0,0,.08);">
                                 @else
-                                    <span class="text-muted small">N/A</span>
+                                    <span class="text-muted small">{{ __('admin.special_requests_admin.na') }}</span>
                                 @endif
                             </td>
                             
@@ -107,9 +107,9 @@
                             <td>{{ $request->created_at->format('M d, Y h:i A') }}</td>
                             <td>
                                 @if($request->status === 'pending')
-                                    <span class="badge bg-warning text-dark">Pending</span>
+                                    <span class="badge bg-warning text-dark">{{ __('admin.special_requests_admin.status_pending') }}</span>
                                 @else
-                                    <span class="badge bg-success">Notified</span>
+                                    <span class="badge bg-success">{{ __('admin.special_requests_admin.status_notified') }}</span>
                                 @endif
                             </td>
                             <td>
@@ -117,25 +117,25 @@
                                     @foreach($request->offers as $offer)
                                         <div class="small mb-1">
                                             <span class="badge bg-info text-dark">
-                                                {{ max(0, $offer->quantity - $offer->used_quantity) }} / {{ $offer->quantity }} left
+                                                {{ max(0, $offer->quantity - $offer->used_quantity) }} / {{ $offer->quantity }} {{ __('admin.special_requests_admin.left') }}
                                             </span>
                                             @if($offer->user)
-                                                <span class="text-muted">for {{ $offer->user->name }}</span>
+                                                <span class="text-muted">{{ __('admin.special_requests_admin.for') }} {{ $offer->user->name }}</span>
                                             @elseif($offer->target_email)
-                                                <span class="text-muted">for {{ $offer->target_email }}</span>
+                                                <span class="text-muted">{{ __('admin.special_requests_admin.for') }} {{ $offer->target_email }}</span>
                                             @elseif($offer->target_phone)
-                                                <span class="text-muted">for {{ $offer->target_phone }}</span>
+                                                <span class="text-muted">{{ __('admin.special_requests_admin.for') }} {{ $offer->target_phone }}</span>
                                             @endif
                                         </div>
                                     @endforeach
                                 @else
-                                    <span class="text-muted small">No offer yet</span>
+                                    <span class="text-muted small">{{ __('admin.special_requests_admin.no_offer') }}</span>
                                 @endif
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="text-center py-4 text-muted">No special requests found.</td>
+                            <td colspan="8" class="text-center py-4 text-muted">{{ __('admin.special_requests_admin.empty') }}</td>
                         </tr>
                     @endforelse
                 </tbody>

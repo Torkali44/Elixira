@@ -23,7 +23,7 @@
                 <a href="{{ route('menu.index') }}?category={{ $category->id }}" class="elx-category-pill" style="padding: 1rem 2rem 1rem 1rem;">
                     <div class="elx-category-pill__img" style="width: 80px; height: 80px;">
                         @if($category->image)
-                            <img src="{{ asset('storage/' . $category->image) }}" alt="{{ $category->name }}">
+                            <img src="{{ asset('storage/' . $category->image) }}" alt="{{ $category->local_name }}">
                         @else
                             <div class="elx-category-pill__placeholder">
                                 <i class="fas fa-leaf"></i>
@@ -31,8 +31,8 @@
                         @endif
                     </div>
                     <div class="elx-category-pill__info">
-                        <h3 style="font-size: 1.2rem;">{{ $category->name }}</h3>
-                        <span>{{ $category->items_count }} products</span>
+                        <h3 style="font-size: 1.2rem;">{{ $category->local_name }}</h3>
+                        <span>{{ __('home.products_count', ['count' => $category->items_count]) }}</span>
                     </div>
                 </a>
                 @endforeach
@@ -51,7 +51,7 @@
                     <div class="elx-product-card__glow"></div>
                     <div class="elx-product-card__image">
                         @if($item->image)
-                            <img src="{{ asset('storage/' . $item->image) }}" alt="{{ $item->name }}" loading="lazy">
+                            <img src="{{ asset('storage/' . $item->image) }}" alt="{{ $item->local_name }}" loading="lazy">
                         @else
                             <div class="elx-product-card__no-img">
                                 <i class="fas fa-seedling"></i>
@@ -59,21 +59,26 @@
                         @endif
                     </div>
                     <div class="elx-product-card__badge">
-                        <span>{{ $item->category->name }}</span>
+                        <span>{{ $item->category->local_name }}</span>
                     </div>
                     <div class="elx-product-card__info">
-                        <h3 class="elx-product-card__name">{{ $item->name }}</h3>
+                        <h3 class="elx-product-card__name">{{ $item->local_name }}</h3>
                         <div class="elx-product-card__price-row">
                             <span class="elx-product-card__currency">﷼</span>
                             <span class="elx-product-card__price">{{ number_format($item->price, 2) }}</span>
                         </div>
-                        <p class="elx-product-card__desc">{{ Str::limit($item->description, 80) }}</p>
+                        <p class="elx-product-card__desc">{{ Str::limit($item->local_description, 80) }}</p>
+                        @if(($item->reward_points ?? 0) > 0)
+                            <p class="elx-product-card__desc" style="color: #00ff88; margin-top: 0.5rem;">
+                                <i class="fas fa-star"></i> {{ __('home.reward_points', ['count' => $item->reward_points]) }}
+                            </p>
+                        @endif
                     </div>
                     <form action="{{ route('cart.add') }}" method="POST" class="elx-product-card__cart-form" onclick="event.stopPropagation();">
                         @csrf
                         <input type="hidden" name="item_id" value="{{ $item->id }}">
                         <button type="submit" class="elx-product-card__add-btn" onclick="event.preventDefault(); this.closest('form').submit();">
-                            <i class="fas fa-plus"></i> Add to Cart
+                            <i class="fas fa-plus"></i> {{ __('home.add_to_cart') }}
                         </button>
                     </form>
                 </a>

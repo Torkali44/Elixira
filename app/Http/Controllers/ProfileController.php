@@ -8,6 +8,8 @@ use App\Models\AvatarOption;
 use App\Models\Item;
 use App\Models\Order;
 use App\Models\User;
+use App\Models\UserAddress;
+use App\Models\UserPointsTransaction;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -32,7 +34,7 @@ class ProfileController extends Controller
             ->get();
 
         return view('profile.edit', [
-            'user' => $user,
+            'user' => $user->load(['pointsTransactions.item', 'pointsTransactions.order']),
             'accountStats' => [
                 'total_orders' => (clone $ordersQuery)->count(),
                 'active_orders' => (clone $ordersQuery)
@@ -97,8 +99,14 @@ class ProfileController extends Controller
 
         $order->load(['orderItems.item']);
 
+        $pointsEarned = UserPointsTransaction::query()
+            ->where('order_id', $order->id)
+            ->where('user_id', $request->user()->id)
+            ->sum('points');
+
         return view('profile.orders.show', [
             'order' => $order,
+            'pointsEarned' => (int) $pointsEarned,
         ]);
     }
 
@@ -122,8 +130,8 @@ class ProfileController extends Controller
         $data = $request->validated();
         $removeAvatar = (bool) ($data['remove_avatar'] ?? false);
 
-        if (!empty($data['phone_number'])) {
-            $data['phone'] = ($data['country_code'] ?? '+966') . ltrim($data['phone_number'], '0');
+        if (! empty($data['phone_number'])) {
+            $data['phone'] = ($data['country_code'] ?? '+966').ltrim($data['phone_number'], '0');
         } else {
             $data['phone'] = null;
         }
@@ -221,7 +229,7 @@ class ProfileController extends Controller
         ]);
 
         $user = $request->user();
-        
+
         $address = $user->addresses()->create([
             'address' => $request->address,
             'is_main' => $user->addresses()->count() === 0,
@@ -230,10 +238,10 @@ class ProfileController extends Controller
         return back()->with('status', 'address-added');
     }
 
-    public function deleteAddress(Request $request, \App\Models\UserAddress $address): RedirectResponse
+    public function deleteAddress(Request $request, UserAddress $address): RedirectResponse
     {
         abort_unless($address->user_id === $request->user()->id, 403);
-        
+
         $isMain = $address->is_main;
         $address->delete();
 
@@ -247,7 +255,7 @@ class ProfileController extends Controller
         return back()->with('status', 'address-deleted');
     }
 
-    public function setMainAddress(Request $request, \App\Models\UserAddress $address): RedirectResponse
+    public function setMainAddress(Request $request, UserAddress $address): RedirectResponse
     {
         abort_unless($address->user_id === $request->user()->id, 403);
 

@@ -68,13 +68,20 @@
         .elx-nav__dropdown {
             position: relative;
         }
+        .elx-nav__dropdown > a {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            white-space: nowrap;
+        }
         .elx-nav__dropdown-menu {
             position: absolute;
-            top: calc(100% + 0.6rem);
-            left: 50%;
+            top: 100%;
+            inset-inline-start: 50%;
             transform: translateX(-50%);
             min-width: 180px;
             padding: 0.5rem;
+            padding-top: 0.85rem;
             border-radius: 16px;
             background: rgba(6, 15, 20, 0.97);
             border: 1px solid rgba(255, 255, 255, 0.08);
@@ -82,9 +89,17 @@
             backdrop-filter: blur(20px);
             opacity: 0;
             pointer-events: none;
-            transform: translateX(-50%) translateY(-8px);
+            transform: translateX(-50%) translateY(-4px);
             transition: opacity 0.2s ease, transform 0.2s ease;
             z-index: 1050;
+        }
+        .elx-nav__dropdown-menu::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 0.85rem;
         }
         .elx-nav__dropdown:hover .elx-nav__dropdown-menu,
         .elx-nav__dropdown.open .elx-nav__dropdown-menu {
@@ -108,7 +123,8 @@
         }
         .elx-nav__dropdown > a .fa-chevron-down {
             font-size: 0.6rem;
-            margin-left: 4px;
+            margin: 0;
+            flex-shrink: 0;
             transition: transform 0.2s ease;
         }
         .elx-nav__dropdown:hover > a .fa-chevron-down {
@@ -117,8 +133,8 @@
 
         /* ─── Theme & Lang Toggle Buttons ─── */
         .elx-nav__icon-btn {
-            width: 38px;
-            height: 38px;
+            width: 40px;
+            height: 40px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -144,7 +160,7 @@
             font-weight: 600;
             letter-spacing: 0.04em;
             border-radius: 100px;
-            height: 38px;
+            height: 40px;
         }
 
         /* ─── Light Theme Override ─── */
@@ -250,17 +266,18 @@
                         class="{{ request()->routeIs('orders.*') ? 'active' : '' }}">{{ __('app.track_order') }}</a></li>
             </ul>
 
-            <div class="elx-nav__actions" style="gap: 0.6rem;">
+            <div class="elx-nav__actions">
+                <div class="elx-nav__actions-cluster">
                 @auth
-                    <div class="elx-nav__notifications-wrapper" id="notificationsMenu" style="position: relative; margin-right: 0.5rem;">
-                        <button type="button" class="elx-nav__notifications-trigger" id="notificationsTrigger" aria-expanded="false" aria-controls="notificationsDropdown" style="background: none; border: none; color: #fff; font-size: 1.35rem; cursor: pointer; position: relative; padding: 5px; display: flex; align-items: center; justify-content: center; height: 42px; width: 42px; border-radius: 50%; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.1); transition: var(--elx-transition);">
+                    <div class="elx-nav__notifications-wrapper" id="notificationsMenu">
+                        <button type="button" class="elx-nav__notifications-trigger" id="notificationsTrigger" aria-expanded="false" aria-controls="notificationsDropdown">
                             <i class="fas fa-bell"></i>
                             @php $unreadCount = auth()->user()->unreadNotifications()->count(); @endphp
                             @if($unreadCount > 0)
-                                <span class="elx-nav__notifications-badge" style="position: absolute; top: -4px; right: -4px; background-color: #dc3545; color: white; font-size: 0.65rem; font-weight: bold; border-radius: 50%; padding: 2px 5px; min-width: 17px; text-align: center; line-height: 1;">{{ $unreadCount }}</span>
+                                <span class="elx-nav__notifications-badge">{{ $unreadCount }}</span>
                             @endif
                         </button>
-                        <div class="elx-nav__notifications-dropdown" id="notificationsDropdown" style="position: absolute; right: 0; top: calc(100% + 0.8rem); width: 320px; background: #13252d; border: 1px solid rgba(20, 204, 255, 0.15); border-radius: 24px; box-shadow: 0 24px 80px rgba(0,0,0,0.5); display: none; z-index: 1100; overflow: hidden; font-family: var(--elx-font);">
+                        <div class="elx-nav__notifications-dropdown" id="notificationsDropdown" style="position: absolute; inset-inline-end: 0; top: calc(100% + 0.8rem); width: 320px; background: #13252d; border: 1px solid rgba(20, 204, 255, 0.15); border-radius: 24px; box-shadow: 0 24px 80px rgba(0,0,0,0.5); display: none; z-index: 1100; overflow: hidden; font-family: var(--elx-font);">
                             <div class="elx-nav__notifications-head" style="display: flex; justify-content: space-between; align-items: center; padding: 16px; border-bottom: 1px solid rgba(255,255,255,0.08); background: rgba(0,0,0,0.15);">
                                 <strong style="color: #fff; font-size: 0.95rem;">{{ __('app.notifications') }}</strong>
                                 @if($unreadCount > 0)
@@ -313,8 +330,9 @@
                         <span class="elx-nav__cart-badge">{{ $cartCount }}</span>
                     @endif
                 </a>
-                <!-- ======================================================= -->
-                <!-- قبل -->
+                </div>
+
+                <div class="elx-nav__actions-user">
                @auth
                     @if(auth()->user()->role === 'admin')
                         <a href="{{ route('admin.dashboard') }}" class="elx-nav__btn elx-nav__btn--admin">
@@ -366,6 +384,7 @@
                 @else
                     <a href="{{ route('login') }}" class="elx-nav__btn elx-nav__btn--login">{{ __('app.join_us') }}</a>
                 @endauth
+                </div>
                 <button class="elx-nav__toggle" id="navToggle">
                     <span></span><span></span><span></span>
                 </button>
@@ -433,10 +452,40 @@
                                     style="color: rgba(255,255,255,0.7); text-decoration: none; display: block; padding: 0.5rem 0;">{{ __('home.footer_ritual') }}</a></li>
                             <li><a href="{{ route('contact') }}"
                                     style="color: rgba(255,255,255,0.7); text-decoration: none; display: block; padding: 0.5rem 0;">{{ __('home.footer_contact') }}</a></li>
-                            <li><a href="#"
-                                    style="color: rgba(255,255,255,0.7); text-decoration: none; display: block; padding: 0.5rem 0;">{{ __('home.footer_instagram') }}</a>
+                            <li><a href="{{ route('blogs.index') }}"
+                                    style="color: rgba(255,255,255,0.7); text-decoration: none; display: block; padding: 0.5rem 0;">{{ __('home.footer_blog') }}</a>
+                            </li>
+                            <li><a href="{{ route('dxn-team.create') }}"
+                                    style="color: rgba(255,255,255,0.7); text-decoration: none; display: block; padding: 0.5rem 0;">{{ __('home.footer_join_dxn') }}</a>
                             </li>
                         </ul>
+                    </div>
+
+                    {{-- Social Links Column --}}
+                    <div class="elx-footer__nav-group">
+                        <h4 style="color: #4ac8f6; font-size: 1rem; margin-bottom: 1.5rem; letter-spacing: 1px; text-transform: uppercase;">
+                            {{ __('home.footer_follow') }}
+                        </h4>
+                        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                            <a href="https://www.instagram.com/__elixira?igsh=bjl6d3FtMnk1a2V1"
+                               target="_blank" rel="noopener"
+                               style="display: inline-flex; align-items: center; gap: 0.6rem; color: rgba(255,255,255,0.7); text-decoration: none; font-size: 0.95rem; transition: color 0.2s;"
+                               onmouseover="this.style.color='#4ac8f6'" onmouseout="this.style.color='rgba(255,255,255,0.7)'">
+                                <i class="fab fa-instagram" style="width:18px;"></i> Instagram
+                            </a>
+                            <a href="https://www.facebook.com/profile.php?id=61590957652478"
+                               target="_blank" rel="noopener"
+                               style="display: inline-flex; align-items: center; gap: 0.6rem; color: rgba(255,255,255,0.7); text-decoration: none; font-size: 0.95rem; transition: color 0.2s;"
+                               onmouseover="this.style.color='#4ac8f6'" onmouseout="this.style.color='rgba(255,255,255,0.7)'">
+                                <i class="fab fa-facebook-f" style="width:18px;"></i> Facebook
+                            </a>
+                            <a href="https://wa.me/971545920050"
+                               target="_blank" rel="noopener"
+                               style="display: inline-flex; align-items: center; gap: 0.6rem; color: rgba(255,255,255,0.7); text-decoration: none; font-size: 0.95rem; transition: color 0.2s;"
+                               onmouseover="this.style.color='#4ac8f6'" onmouseout="this.style.color='rgba(255,255,255,0.7)'">
+                                <i class="fab fa-whatsapp" style="width:18px;"></i> WhatsApp
+                            </a>
+                        </div>
                     </div>
                 </div>
 
@@ -460,7 +509,7 @@
             Swal.fire({
                 icon,
                 text: message,
-                confirmButtonText: 'OK',
+                confirmButtonText: @json(__('popups.ok')),
                 confirmButtonColor: '#1f8db5',
             });
         };
@@ -474,7 +523,7 @@
             @unless($testimonialsWriteInlineAlerts)
                 Swal.fire({
                     icon: 'success',
-                    title: 'Success!',
+                    title: @json(__('popups.success_title')),
                     text: "{!! addslashes(session('success')) !!}",
                     toast: true,
                     position: 'top-end',
@@ -489,7 +538,7 @@
             @unless($testimonialsWriteInlineAlerts)
                 Swal.fire({
                     icon: 'error',
-                    title: 'Oops...',
+                    title: @json(__('popups.error_title')),
                     text: "{!! addslashes(session('error')) !!}",
                     toast: true,
                     position: 'top-end',
@@ -505,11 +554,11 @@
                 event.preventDefault();
                 Swal.fire({
                     icon: 'warning',
-                    title: 'Please confirm',
+                    title: @json(__('popups.confirm_title')),
                     text: form.dataset.confirm,
                     showCancelButton: true,
-                    confirmButtonText: 'Yes',
-                    cancelButtonText: 'Cancel',
+                    confirmButtonText: @json(__('popups.yes')),
+                    cancelButtonText: @json(__('popups.cancel')),
                 }).then((result) => {
                     if (result.isConfirmed) {
                         form.submit();
@@ -523,6 +572,31 @@
         navToggle?.addEventListener('click', () => {
             navLinks.classList.toggle('open');
             navToggle.classList.toggle('active');
+        });
+
+        document.querySelectorAll('.elx-nav__dropdown').forEach((dropdown) => {
+            let closeTimer = null;
+
+            const openMenu = () => {
+                if (closeTimer) {
+                    clearTimeout(closeTimer);
+                    closeTimer = null;
+                }
+                dropdown.classList.add('open');
+            };
+
+            const scheduleClose = () => {
+                closeTimer = setTimeout(() => dropdown.classList.remove('open'), 350);
+            };
+
+            dropdown.addEventListener('mouseenter', openMenu);
+            dropdown.addEventListener('mouseleave', scheduleClose);
+            dropdown.addEventListener('focusin', openMenu);
+            dropdown.addEventListener('focusout', (event) => {
+                if (!dropdown.contains(event.relatedTarget)) {
+                    scheduleClose();
+                }
+            });
         });
 
         const profileMenu = document.getElementById('profileMenu');
@@ -836,6 +910,35 @@
     
     <!-- Language Selector Component -->
     <x-language-selector />
+
+    <a href="https://wa.me/971545920050" target="_blank" rel="noopener noreferrer" class="whatsapp-btn" aria-label="WhatsApp">
+        <i class="fab fa-whatsapp"></i>
+    </a>
+    <style>
+        .whatsapp-btn {
+            position: fixed;
+            bottom: 30px;
+            {{ app()->getLocale() === 'ar' ? 'left' : 'right' }}: 30px;
+            background-color: #25D366;
+            color: white;
+            width: 65px;
+            height: 65px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 35px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            z-index: 2000;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+        .whatsapp-btn:hover {
+            transform: scale(1.1);
+            color: white;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+        }
+    </style>
 </body>
 
 </html>
