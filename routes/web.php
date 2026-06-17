@@ -2,8 +2,10 @@
 
 use App\Http\Controllers\Admin\AvatarOptionController;
 use App\Http\Controllers\Admin\BlogController as AdminBlogController;
+use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ContactMessageController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\DxnSponsorCodeController;
 use App\Http\Controllers\Admin\DxnTeamRequestController as AdminDxnTeamRequestController;
 use App\Http\Controllers\Admin\FaqController as AdminFaqController;
 use App\Http\Controllers\Admin\ItemController;
@@ -39,7 +41,11 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/about', [HomeController::class, 'about'])->name('about');
 Route::get('/contact', [HomeController::class, 'contact'])->name('contact');
 Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');
-Route::get('/join-dxn', [DxnTeamRequestController::class, 'create'])->name('dxn-team.create');
+Route::redirect('/join-dxn', '/become-dxn-distributor');
+Route::get('/become-dxn-distributor', [DxnTeamRequestController::class, 'create'])->name('dxn-distributor.create');
+Route::post('/become-dxn-distributor', [DxnTeamRequestController::class, 'store'])->name('dxn-distributor.store');
+Route::post('/become-dxn-distributor/existing-member', [DxnTeamRequestController::class, 'storeExistingMember'])->name('dxn-distributor.existing-member');
+Route::get('/join-dxn', fn () => redirect()->route('dxn-distributor.create'))->name('dxn-team.create');
 Route::post('/join-dxn', [DxnTeamRequestController::class, 'store'])->name('dxn-team.store');
 Route::get('/explore', [HomeController::class, 'explore'])->name('explore');
 Route::get('/lang/{locale}', [LocaleController::class, 'switch'])->name('lang.switch');
@@ -106,6 +112,8 @@ Route::middleware('auth')->group(function () {
     // Notifications
     Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
     Route::post('/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
+
+    Route::get('/my-dxn-application/{application}', [DxnTeamRequestController::class, 'status'])->name('dxn-distributor.status');
 });
 
 Route::post('/ratings', [RatingController::class, 'store'])->name('ratings.store');
@@ -162,6 +170,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::get('dxn-team-requests/{dxnTeamRequest}', [AdminDxnTeamRequestController::class, 'show'])->name('dxn-team-requests.show');
     Route::patch('dxn-team-requests/{dxnTeamRequest}', [AdminDxnTeamRequestController::class, 'update'])->name('dxn-team-requests.update');
     Route::delete('dxn-team-requests/{dxnTeamRequest}', [AdminDxnTeamRequestController::class, 'destroy'])->name('dxn-team-requests.destroy');
+
+    Route::get('dxn-sponsor-codes', [DxnSponsorCodeController::class, 'index'])->name('dxn-sponsor-codes.index');
+    Route::post('dxn-sponsor-codes', [DxnSponsorCodeController::class, 'store'])->name('dxn-sponsor-codes.store');
+    Route::patch('dxn-sponsor-codes/{dxnSponsorCode}', [DxnSponsorCodeController::class, 'update'])->name('dxn-sponsor-codes.update');
+    Route::delete('dxn-sponsor-codes/{dxnSponsorCode}', [DxnSponsorCodeController::class, 'destroy'])->name('dxn-sponsor-codes.destroy');
 
     // Brands Management
     Route::resource('brands', App\Http\Controllers\Admin\BrandController::class)->only(['index', 'edit', 'update']);

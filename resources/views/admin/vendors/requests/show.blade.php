@@ -26,11 +26,11 @@
                 <input type="hidden" name="status" id="hidden_reject_status">
                 <input type="hidden" name="rejection_reason" id="hidden_reject_reason">
             </form>
-            <form action="{{ route('admin.vendors.requests.update', $vendorProfile) }}" method="POST" class="d-inline ms-2">
+            <form action="{{ route('admin.vendors.requests.update', $vendorProfile) }}" method="POST" class="d-inline ms-2" data-confirm="{{ __('admin.vendor_requests.confirm_approve') }}">
                 @csrf
                 @method('PATCH')
                 <input type="hidden" name="status" value="approved">
-                <button type="submit" class="btn btn-success" onclick="return confirm('{{ __('admin.vendor_requests.confirm_approve') }}')">
+                <button type="submit" class="btn btn-success">
                     <i class="fas fa-check"></i> {{ __('admin.vendor_requests.approve_app') }}
                 </button>
             </form>
@@ -205,10 +205,10 @@
                 @endif
 
                 @if($vendorProfile->subscription_payment_status === 'pending')
-                    <form action="{{ route('admin.vendors.requests.confirm-subscription', $vendorProfile) }}" method="POST">
+                    <form action="{{ route('admin.vendors.requests.confirm-subscription', $vendorProfile) }}" method="POST" data-confirm="{{ __('admin.vendor_requests.confirm_subscription') }}">
                         @csrf
                         @method('PATCH')
-                        <button type="submit" class="btn btn-success w-100" onclick="return confirm('{{ __('admin.vendor_requests.confirm_subscription') }}')">
+                        <button type="submit" class="btn btn-success w-100">
                             {{ __('admin.vendor_requests.confirm_subscription_btn') }}
                         </button>
                     </form>

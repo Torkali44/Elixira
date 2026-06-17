@@ -26,7 +26,7 @@
                         <p style="opacity: 0.75; line-height: 1.8; font-size: 1.1rem; margin-bottom: 2.5rem;">{{ __('about.story_p2') }}</p>
                         <div style="display: flex; flex-wrap: wrap; gap: 1rem;">
                             <a href="{{ route('menu.index') }}" class="elx-btn elx-btn--primary">{{ __('about.shop_collection') }}</a>
-                            <a href="{{ route('dxn-team.create') }}" class="elx-btn elx-btn--glass">{{ __('about.join_dxn') }}</a>
+                            <a href="{{ route('dxn-distributor.create') }}" class="elx-btn elx-btn--glass">{{ __('about.join_dxn') }}</a>
                         </div>
                     </div>
                     <div style="flex: 1; min-width: 320px; border-radius: 40px; overflow: hidden; height: 500px; box-shadow: 0 30px 60px rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.05);">

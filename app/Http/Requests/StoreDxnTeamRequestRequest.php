@@ -18,7 +18,12 @@ class StoreDxnTeamRequestRequest extends FormRequest
             'email' => ['required', 'email', 'max:255'],
             'phone' => ['required', 'string', 'max:30'],
             'member_code' => ['nullable', 'string', 'max:100'],
+            'team_name' => ['required', 'string', 'max:255'],
+            'team_size' => ['required', 'integer', 'min:1', 'max:500'],
             'country' => ['required', 'in:KSA,UAE'],
+            'team_members' => ['nullable', 'array'],
+            'team_members.*.name' => ['nullable', 'string', 'max:255'],
+            'team_members.*.contact' => ['nullable', 'string', 'max:255'],
             'team_goal' => ['nullable', 'string', 'max:1000'],
             'message' => ['nullable', 'string', 'max:5000'],
         ];

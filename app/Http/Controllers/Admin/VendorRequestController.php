@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Brand;
 use App\Models\VendorProfile;
 use App\Support\UserNotifier;
+use App\Support\VendorSubscriptionService;
 use Illuminate\Http\Request;
 
 class VendorRequestController extends Controller
@@ -20,8 +21,10 @@ class VendorRequestController extends Controller
     public function show(VendorProfile $vendorProfile)
     {
         $vendorProfile->load('user');
+        $subscriptionStatus = app(VendorSubscriptionService::class)->statusForVendor($vendorProfile);
+        $plans = app(VendorSubscriptionService::class)->plansWithLabels();
 
-        return view('admin.vendors.requests.show', compact('vendorProfile'));
+        return view('admin.vendors.requests.show', compact('vendorProfile', 'subscriptionStatus', 'plans'));
     }
 
     public function update(Request $request, VendorProfile $vendorProfile)
@@ -60,6 +63,9 @@ class VendorRequestController extends Controller
                     'is_active' => true,
                 ]);
             }
+
+            $vendorProfile->refresh();
+            app(VendorSubscriptionService::class)->activateSubscription($vendorProfile);
         } elseif (in_array($request->status, ['rejected', 'rejected_with_notes'])) {
             $user = $vendorProfile->user;
             if ($user->role === 'vendor') {
@@ -90,12 +96,12 @@ class VendorRequestController extends Controller
             return redirect()->back()->with('error', __('admin.vendor_requests.subscription_not_pending'));
         }
 
-        $vendorProfile->update(['subscription_payment_status' => 'confirmed']);
+        app(VendorSubscriptionService::class)->confirmPayment($vendorProfile);
 
         try {
             $user = $vendorProfile->user;
             if ($user) {
-                UserNotifier::send($user->id, 'vendor_subscription_confirmed', [], route('vendor.onboarding'));
+                UserNotifier::send($user->id, 'vendor_subscription_confirmed', [], route('vendor.dashboard'));
             }
         } catch (\Throwable $e) {
             \Log::error('Vendor subscription notification failed: '.$e->getMessage());

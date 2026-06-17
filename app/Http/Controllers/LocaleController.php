@@ -14,12 +14,25 @@ class LocaleController extends Controller
         if (in_array($locale, ['en', 'ar'])) {
             session()->put('locale', $locale);
 
-            // Also save to user preferences if authenticated
             if (auth()->check()) {
                 auth()->user()->update(['locale' => $locale]);
             }
         }
 
-        return redirect()->back();
+        $backUrl = url()->previous();
+        $parsed = parse_url($backUrl);
+        $query = [];
+        if (! empty($parsed['query'])) {
+            parse_str($parsed['query'], $query);
+        }
+
+        if (request()->has('step')) {
+            $query['step'] = request('step');
+        }
+
+        $path = ($parsed['path'] ?? '/');
+        $redirectTo = $path.(empty($query) ? '' : '?'.http_build_query($query));
+
+        return redirect($redirectTo);
     }
 }

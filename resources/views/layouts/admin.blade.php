@@ -40,15 +40,36 @@
         if (request()->routeIs('admin.brands.*')) {
             session(['brands_last_viewed_at' => now()]);
         }
+        if (request()->routeIs('admin.contact-messages.*')) {
+            session(['contact_messages_last_viewed_at' => now()]);
+        }
+        if (request()->routeIs('admin.dxn-team-requests.*')) {
+            session(['dxn_team_requests_last_viewed_at' => now()]);
+        }
+        if (request()->routeIs('admin.items.*')) {
+            session(['items_last_viewed_at' => now()]);
+        }
 
         $ordersLastViewed = session('orders_last_viewed_at');
         $newOrdersCount = $ordersLastViewed ? \App\Models\Order::where('created_at', '>', $ordersLastViewed)->count() : \App\Models\Order::where('status', 'pending')->count();
         $specialRequestsLastViewed = session('special_requests_last_viewed_at');
         $newSpecialRequestsCount = $specialRequestsLastViewed ? \App\Models\SpecialRequest::where('created_at', '>', $specialRequestsLastViewed)->count() : \App\Models\SpecialRequest::where('status', 'pending')->count();
         $vendorsLastViewed = session('vendors_last_viewed_at');
-        $newVendorsCount = $vendorsLastViewed ? \App\Models\VendorProfile::where('created_at', '>', $vendorsLastViewed)->count() : \App\Models\VendorProfile::where('status', 'pending')->count();
+        $newVendorsCount = $vendorsLastViewed ? \App\Models\VendorProfile::where('status', 'pending')->where('updated_at', '>', $vendorsLastViewed)->count() : \App\Models\VendorProfile::where('status', 'pending')->count();
         $brandsLastViewed = session('brands_last_viewed_at');
         $newBrandsCount = $brandsLastViewed ? \App\Models\Brand::where('created_at', '>', $brandsLastViewed)->count() : \App\Models\Brand::where('is_active', false)->count();
+        $contactMessagesLastViewed = session('contact_messages_last_viewed_at');
+        $newContactMessagesCount = $contactMessagesLastViewed
+            ? \App\Models\ContactMessage::where('created_at', '>', $contactMessagesLastViewed)->count()
+            : \App\Models\ContactMessage::whereNull('read_at')->count();
+        $dxnTeamLastViewed = session('dxn_team_requests_last_viewed_at');
+        $newDxnTeamRequestsCount = $dxnTeamLastViewed
+            ? \App\Models\DxnTeamRequest::where('created_at', '>', $dxnTeamLastViewed)->count()
+            : \App\Models\DxnTeamRequest::where('status', 'pending')->whereNull('read_at')->count();
+        $itemsLastViewed = session('items_last_viewed_at');
+        $newPendingItemsCount = $itemsLastViewed
+            ? \App\Models\Item::where('status', 'pending')->where('created_at', '>', $itemsLastViewed)->count()
+            : \App\Models\Item::where('status', 'pending')->count();
     @endphp
 
     <div class="row g-0">
@@ -133,6 +154,20 @@
                     confirmButtonText: @json(__('admin.common.yes')),
                     cancelButtonText: @json(__('admin.common.cancel')),
                 }).then((result) => { if (result.isConfirmed) form.submit(); });
+            });
+        });
+        document.querySelectorAll('button[data-swal-confirm]').forEach((button) => {
+            button.addEventListener('click', function (event) {
+                event.preventDefault();
+                const form = button.closest('form');
+                Swal.fire({
+                    icon: 'warning',
+                    title: @json(__('admin.common.please_confirm')),
+                    text: button.dataset.swalConfirm,
+                    showCancelButton: true,
+                    confirmButtonText: @json(__('admin.common.yes')),
+                    cancelButtonText: @json(__('admin.common.cancel')),
+                }).then((result) => { if (result.isConfirmed && form) form.submit(); });
             });
         });
         document.querySelectorAll('#adminSidebar a').forEach((link) => {

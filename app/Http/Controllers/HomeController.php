@@ -15,7 +15,7 @@ class HomeController extends Controller
         $sections = HomePageSection::query()->active()->ordered()->get();
 
         $featuredItems = Item::with('category', 'countryPrices')
-            ->where('status', 'approved')
+            ->publiclyVisible()
             ->where('is_featured', true)
             ->latest()
             ->take(8)
@@ -23,7 +23,7 @@ class HomeController extends Controller
 
         if ($featuredItems->isEmpty()) {
             $featuredItems = Item::with('category', 'countryPrices')
-                ->where('status', 'approved')
+                ->publiclyVisible()
                 ->latest()
                 ->take(8)
                 ->get();
@@ -38,7 +38,7 @@ class HomeController extends Controller
     {
         $categories = Category::withCount('items')->orderBy('name')->get();
         $featuredItems = Item::with('category', 'countryPrices')
-            ->where('status', 'approved')
+            ->publiclyVisible()
             ->where('is_featured', true)
             ->latest()
             ->take(8)

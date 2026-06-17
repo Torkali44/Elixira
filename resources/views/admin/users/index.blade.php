@@ -46,7 +46,7 @@
 <div class="card border-0 shadow-sm mb-4">
     <div class="card-body">
         <form action="{{ route('admin.users.index') }}" method="GET" class="row g-3 align-items-end">
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <label for="search" class="form-label">{{ __('admin.users_page.search') }}</label>
                 <input type="text" id="search" name="search" class="form-control" placeholder="{{ __('admin.users_page.search_placeholder') }}" value="{{ request('search') }}">
             </div>
@@ -57,6 +57,25 @@
                     <option value="admin" @selected(request('role') === 'admin')>{{ __('admin.users_page.admins') }}</option>
                     <option value="vendor" @selected(request('role') === 'vendor')>{{ __('admin.users_page.vendors') }}</option>
                     <option value="user" @selected(request('role') === 'user')>{{ __('admin.users_page.user') }}</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="dxn_verified" class="form-label">{{ __('admin.users_page.dxn_verified') }}</label>
+                <select id="dxn_verified" name="dxn_verified" class="form-select">
+                    <option value="">{{ __('admin.users_page.all_dxn') }}</option>
+                    <option value="yes" @selected(request('dxn_verified') === 'yes')>{{ __('admin.users_page.dxn_verified_yes') }}</option>
+                    <option value="no" @selected(request('dxn_verified') === 'no')>{{ __('admin.users_page.dxn_verified_no') }}</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="dxn_tag_color" class="form-label">{{ __('admin.users_page.dxn_tag_color') }}</label>
+                <select id="dxn_tag_color" name="dxn_tag_color" class="form-select">
+                    <option value="">{{ __('admin.users_page.all_colors') }}</option>
+                    @foreach($dxnTagColors as $colorKey => $colorHex)
+                        <option value="{{ $colorHex }}" @selected(request('dxn_tag_color') === $colorHex)>
+                            {{ __('admin.users_page.dxn_color_'.$colorKey) }} ({{ $colorHex }})
+                        </option>
+                    @endforeach
                 </select>
             </div>
             
@@ -77,6 +96,7 @@
                         <th>{{ __('admin.users_page.user') }}</th>
                         <th>{{ __('admin.users_page.country') }}</th>
                         <th>{{ __('admin.users_page.role') }}</th>
+                        <th>{{ __('admin.users_page.dxn_tag') }}</th>
                         <th>{{ __('admin.users_page.phone') }}</th>
                         <th>{{ __('admin.users_page.email') }}</th>
                         <th>{{ __('admin.users_page.code') }}</th>
@@ -131,6 +151,20 @@
                                     <span class="badge bg-info">{{ __('admin.users_page.vendors') }}</span>
                                 @else
                                     <span class="badge bg-secondary">{{ __('admin.users_page.user') }}</span>
+                                @endif
+                            </td>
+                            <td>
+                                @if($user->is_dxn_verified && $user->dxn_member_code)
+                                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                                        @if($user->dxn_badge_image)
+                                            <img src="{{ asset('storage/'.$user->dxn_badge_image) }}" alt="DXN" width="28" height="28" style="border-radius: 6px; object-fit: cover;">
+                                        @endif
+                                        <span class="badge rounded-pill px-3 py-2" style="background: {{ $user->dxn_tag_color ?: '#00ff88' }}; color: #0b1a22; font-weight: 700; box-shadow: 0 0 12px {{ $user->dxn_tag_color ?: '#00ff88' }}55;">
+                                            DXN.Mem: {{ $user->dxn_member_code }}
+                                        </span>
+                                    </div>
+                                @else
+                                    <span class="text-muted">—</span>
                                 @endif
                             </td>
                             <td>{{ $user->phone ?? '-' }}</td>

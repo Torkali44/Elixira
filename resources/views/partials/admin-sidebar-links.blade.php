@@ -9,6 +9,9 @@
 <a href="{{ route('admin.items.index') }}" class="dashboard-nav-link {{ request()->routeIs('admin.items.index') || request()->routeIs('admin.items.edit') || request()->routeIs('admin.items.create') ? 'active' : '' }}">
     <i class="fas fa-boxes"></i>
     <span>{{ __('admin.nav.products') }}</span>
+    @if($newPendingItemsCount > 0)
+        <span class="badge bg-danger rounded-pill">{{ $newPendingItemsCount }}</span>
+    @endif
 </a>
 <a href="{{ route('admin.users.index') }}" class="dashboard-nav-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
     <i class="fas fa-users"></i>
@@ -54,10 +57,20 @@
 <a href="{{ route('admin.contact-messages.index') }}" class="dashboard-nav-link {{ request()->routeIs('admin.contact-messages.*') ? 'active' : '' }}">
     <i class="fas fa-envelope"></i>
     <span>{{ __('admin.nav.contact_messages') }}</span>
+    @if($newContactMessagesCount > 0)
+        <span class="badge bg-danger rounded-pill">{{ $newContactMessagesCount }}</span>
+    @endif
 </a>
 <a href="{{ route('admin.dxn-team-requests.index') }}" class="dashboard-nav-link {{ request()->routeIs('admin.dxn-team-requests.*') ? 'active' : '' }}">
     <i class="fas fa-users"></i>
     <span>{{ __('admin.nav.dxn_team_requests') }}</span>
+    @if($newDxnTeamRequestsCount > 0)
+        <span class="badge bg-danger rounded-pill">{{ $newDxnTeamRequestsCount }}</span>
+    @endif
+</a>
+<a href="{{ route('admin.dxn-sponsor-codes.index') }}" class="dashboard-nav-link {{ request()->routeIs('admin.dxn-sponsor-codes.*') ? 'active' : '' }}">
+    <i class="fas fa-id-badge"></i>
+    <span>{{ __('admin.nav.dxn_sponsor_codes') }}</span>
 </a>
 <a href="{{ route('admin.brands.index') }}" class="dashboard-nav-link {{ request()->routeIs('admin.brands.*') ? 'active' : '' }}">
     <i class="fas fa-tags"></i>

@@ -33,6 +33,7 @@ class UpdateUserRequest extends FormRequest
             'email' => $email,
             'user_code' => $userCode,
             'remove_avatar' => $this->boolean('remove_avatar'),
+            'is_dxn_verified' => $this->boolean('is_dxn_verified'),
         ]);
     }
 
@@ -55,6 +56,10 @@ class UpdateUserRequest extends FormRequest
                 'regex:/^[A-Z0-9_-]+$/',
                 Rule::unique(User::class)->ignore($this->route('user')?->id),
             ],
+            'is_dxn_verified' => ['nullable', 'boolean'],
+            'dxn_member_code' => ['nullable', 'string', 'max:100'],
+            'dxn_tag_color' => ['nullable', 'string', 'max:20'],
+            'dxn_badge_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'avatar' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'remove_avatar' => ['nullable', 'boolean'],
             'role' => ['required', 'string', Rule::in(['user', 'admin', 'vendor'])],

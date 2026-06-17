@@ -11,9 +11,9 @@ class MenuController extends Controller
     public function index()
     {
         $categories = Category::with(['items' => function ($query) {
-            $query->where('status', 'approved')->with('category', 'brandModel');
+            $query->publiclyVisible()->with('category', 'brandModel');
         }])->get();
-        $items = Item::with('category', 'brandModel', 'countryPrices')->where('status', 'approved')->get();
+        $items = Item::with('category', 'brandModel', 'countryPrices')->publiclyVisible()->get();
         $privateOfferQuantities = $this->privateOfferQuantitiesForCurrentUser();
 
         return view('menu.index', compact('categories', 'items', 'privateOfferQuantities'));
@@ -21,19 +21,23 @@ class MenuController extends Controller
 
     public function show(Item $item)
     {
+        if (! $item->isPubliclyVisible()) {
+            abort(404);
+        }
+
         $item->load('category', 'images', 'brandModel', 'ratings.user', 'countryPrices');
 
         // Find other approved products with the same name sold by different brands
         $otherSellers = Item::with('brandModel')
             ->where('name', $item->name)
             ->where('id', '!=', $item->id)
-            ->where('status', 'approved')
+            ->publiclyVisible()
             ->get();
 
         $relatedItems = Item::with('category', 'brandModel')
             ->where('category_id', $item->category_id)
-            ->where('status', 'approved')
             ->where('id', '!=', $item->id)
+            ->publiclyVisible()
             ->whereNotIn('id', $otherSellers->pluck('id'))
             ->take(4)
             ->get();

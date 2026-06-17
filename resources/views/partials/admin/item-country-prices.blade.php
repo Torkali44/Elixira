@@ -18,7 +18,14 @@
                     <div class="form-check mb-3">
                         <input class="form-check-input" type="checkbox" name="country_prices[{{ $code }}][enabled]" value="1" id="country_{{ $code }}"
                             @checked(old("country_prices.{$code}.enabled", $row !== null))>
-                        <label class="form-check-label fw-semibold" for="country_{{ $code }}">{{ $label }}</label>
+                        <label class="form-check-label fw-semibold" for="country_{{ $code }}">
+                            @if($code === 'KSA')
+                                🇸🇦
+                            @else
+                                🇦🇪
+                            @endif
+                            {{ $label }}
+                        </label>
                     </div>
                     <div class="mb-2">
                         <label class="form-label small">{{ __('admin.items_page.member_price') }}</label>

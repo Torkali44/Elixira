@@ -21,7 +21,7 @@ return [
     'login_to_rate' => 'سجّل الدخول للتقييم',
     'country_ksa' => 'المملكة العربية السعودية',
     'country_uae' => 'الإمارات العربية المتحدة',
-    'member_price' => 'سعر العضو',
-    'guest_price' => 'سعر غير العضو',
+    'member_price_label' => 'عضو',
+    'guest_price_label' => 'عادي',
     'not_available_in_country' => 'هذا المنتج غير متوفر في الدولة المختارة.',
 ];

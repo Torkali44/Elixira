@@ -65,7 +65,7 @@
                         <h3 class="elx-product-card__name">{{ $item->local_name }}</h3>
                         <div class="elx-product-card__price-row">
                             <span class="elx-product-card__currency">﷼</span>
-                            <span class="elx-product-card__price">{{ number_format($item->price, 2) }}</span>
+                            <span class="elx-product-card__price"><x-product-pricing :item="$item" align="flex-end" /></span>
                         </div>
                         <p class="elx-product-card__desc">{{ Str::limit($item->local_description, 80) }}</p>
                         @if(($item->reward_points ?? 0) > 0)

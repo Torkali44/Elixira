@@ -479,6 +479,17 @@
             </div>
         @endif
 
+        @if(session('success'))
+            <div class="account-success" data-animate>
+                {{ session('success') }}
+            </div>
+        @endif
+        @if(session('error'))
+            <div style="margin-bottom: 1.5rem; padding: 1rem 1.2rem; border-radius: 18px; border: 1px solid rgba(220, 53, 69, 0.35); background: rgba(220, 53, 69, 0.1); color: #ff8a8a;" data-animate>
+                {{ session('error') }}
+            </div>
+        @endif
+
         <div class="account-shell">
             <aside class="account-sidebar" data-animate>
                 <div class="account-card">
@@ -488,8 +499,20 @@
                         <div>
                             <div class="account-pill">
                                 <i class="fas fa-user-circle"></i>
-                                <span>{{ $user->role === 'admin' ? __('profile_page.administrator') : __('profile_page.member') }}</span>
+                                <span>{{ $user->role === 'admin' ? __('profile_page.administrator') : ($user->role === 'vendor' ? __('profile_page.vendor') : __('profile_page.member')) }}</span>
                             </div>
+                            @if($user->is_dxn_verified && $user->dxn_member_code)
+                                <div style="display: inline-flex; align-items: center; gap: 0.5rem; margin-top: 0.65rem; padding: 0.35rem 0.75rem; border-radius: 999px; border: 1px solid {{ $user->resolvedDxnTagColor() }}; box-shadow: 0 0 12px {{ $user->resolvedDxnTagColor() }}55; background: {{ $user->resolvedDxnTagColor() }}15;">
+                                    @if($user->dxn_badge_image)
+                                        <img src="{{ $user->dxn_badge_url }}" alt="" style="width: 22px; height: 22px; object-fit: contain; border-radius: 4px;">
+                                    @else
+                                        <span style="width: 22px; height: 22px; display: inline-block; border: 1px dashed {{ $user->resolvedDxnTagColor() }}55; border-radius: 4px;"></span>
+                                    @endif
+                                    <span style="font-size: 0.78rem; font-weight: 700; color: {{ $user->resolvedDxnTagColor() }}; letter-spacing: 0.03em;">
+                                        DXN.Mem: {{ $user->dxn_member_code }}
+                                    </span>
+                                </div>
+                            @endif
                             <h2 style="margin: 0.9rem 0 0.25rem; font-size: 1.5rem;">{{ $user->name }}</h2>
                             <p class="account-muted">{{ $user->email }}</p>
                         </div>
@@ -562,9 +585,9 @@
                         
                         @if(auth()->user()->role !== 'admin')
                         @if(!auth()->user()->vendorProfile || auth()->user()->vendorProfile->status === 'draft')
-                        <a href="{{ route('vendor.onboarding') }}" class="account-link" style="border-color: rgba(74, 200, 246, 0.3); background: rgba(74, 200, 246, 0.05);">
+                        <a href="{{ route('vendor.onboarding', ['step' => auth()->user()->vendorProfile?->onboarding_step ?? 1]) }}" class="account-link" style="border-color: rgba(74, 200, 246, 0.3); background: rgba(74, 200, 246, 0.05);">
                             <i class="fas fa-store"></i>
-                            <span style="color: var(--elx-cyan);">{{ __('profile_page.become_vendor') }}</span>
+                            <span style="color: var(--elx-cyan);">{{ auth()->user()->vendorProfile?->status === 'draft' ? __('profile_page.resume_vendor_draft') : __('profile_page.become_vendor') }}</span>
                         </a>
                         @elseif(auth()->user()->vendorProfile->status === 'pending')
                         <a href="{{ route('vendor.pending') }}" class="account-link">

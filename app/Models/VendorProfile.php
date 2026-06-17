@@ -24,6 +24,9 @@ class VendorProfile extends Model
         'verification_document',
         'subscription_payment_receipt',
         'subscription_payment_status',
+        'subscription_plan',
+        'subscription_starts_at',
+        'subscription_ends_at',
         'onboarding_step',
         'status',
         'rejection_reason',
@@ -33,6 +36,8 @@ class VendorProfile extends Model
         'other_links' => 'array',
         'service_countries' => 'array',
         'product_types' => 'array',
+        'subscription_starts_at' => 'datetime',
+        'subscription_ends_at' => 'datetime',
     ];
 
     public function user()

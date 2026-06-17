@@ -166,7 +166,10 @@
             const content = document.getElementById('content').value.trim();
 
             if (!subject || !content) {
-                alert('{{ __('admin.subscribers_page.fill_fields_alert') }}');
+                Swal.fire({
+                    icon: 'warning',
+                    text: @json(__('admin.subscribers_page.fill_fields_alert')),
+                });
                 return;
             }
 

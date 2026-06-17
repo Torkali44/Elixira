@@ -29,6 +29,18 @@ return [
         'title' => 'تم تأكيد دفع الاشتراك',
         'message' => 'تم تأكيد دفع اشتراك البائع من قبل الإدارة.',
     ],
+    'vendor_subscription_expiring' => [
+        'title' => 'اشتراكك على وشك الانتهاء',
+        'message' => 'اشتراكك كبائع ينتهي خلال :days يوم/أيام. سارع بالتجديد لضمان عدم إخفاء منتجاتك من المتجر.',
+    ],
+    'vendor_subscription_grace' => [
+        'title' => 'فترة سماح الاشتراك',
+        'message' => 'انتهى اشتراكك كبائع. لديك :days يوم/أيام للتجديد قبل إخفاء منتجاتك من المتجر.',
+    ],
+    'vendor_subscription_expired' => [
+        'title' => 'انتهى الاشتراك',
+        'message' => 'انتهى اشتراكك بالكامل. جدّد الاشتراك لاستعادة ظهور منتجاتك في المتجر.',
+    ],
     'contact_message_received' => [
         'title' => 'رسالة تواصل جديدة',
         'message' => 'أرسل :name رسالة: :subject',
@@ -36,6 +48,10 @@ return [
     'dxn_team_request_received' => [
         'title' => 'طلب فريق DXN جديد',
         'message' => 'قدّم :name طلب بناء فريق DXN.',
+    ],
+    'dxn_team_request_updated' => [
+        'title' => 'طلب DXN :status',
+        'message' => 'تم تحديث طلب DXN الخاص بـ ":team_name" إلى: :status.',
     ],
     'special_request_offer' => [
         'title' => 'تم تعيين عرض للطلب الخاص',

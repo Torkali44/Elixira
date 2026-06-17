@@ -185,7 +185,7 @@
                                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('admin.common.cancel') }}</button>
                                                 <div>
                                                     <button type="submit" name="reject_type" value="notes" class="btn btn-warning text-dark me-2">{{ __('admin.items.reject_with_notes') }}</button>
-                                                    <button type="submit" name="reject_type" value="final" class="btn btn-danger" onclick="return confirm('{{ __('admin.items.confirm_final_reject') }}');">{{ __('admin.items.final_reject') }}</button>
+                                                    <button type="button" class="btn btn-danger" data-swal-confirm="{{ __('admin.items.confirm_final_reject') }}" data-final-reject="{{ $item->id }}">{{ __('admin.items.final_reject') }}</button>
                                                 </div>
                                             </div>
                                         </form>
@@ -212,3 +212,32 @@
     {{ $items->links() }}
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    document.querySelectorAll('[data-final-reject]').forEach((button) => {
+        button.addEventListener('click', () => {
+            const form = button.closest('form');
+            Swal.fire({
+                icon: 'warning',
+                title: @json(__('admin.common.please_confirm')),
+                text: button.dataset.swalConfirm,
+                showCancelButton: true,
+                confirmButtonText: @json(__('admin.common.yes')),
+                cancelButtonText: @json(__('admin.common.cancel')),
+            }).then((result) => {
+                if (!result.isConfirmed || !form) return;
+                let input = form.querySelector('input[name="reject_type"]');
+                if (!input) {
+                    input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'reject_type';
+                    form.appendChild(input);
+                }
+                input.value = 'final';
+                form.submit();
+            });
+        });
+    });
+</script>
+@endpush

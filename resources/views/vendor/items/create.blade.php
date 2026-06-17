@@ -55,6 +55,11 @@
                                 <label class="form-label">{{ __('vendor.items_page.stock') }} <span class="text-danger">*</span></label>
                                 <input type="number" name="stock" class="form-control" value="{{ old('stock', 0) }}" required>
                             </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">{{ __('admin.items_page.reward_points') }}</label>
+                                <input type="number" min="0" name="reward_points" class="form-control" value="{{ old('reward_points', 0) }}">
+                                <small class="text-muted">{{ __('admin.items_page.reward_points_hint') }}</small>
+                            </div>
                         </div>
 
                         @include('partials.admin.item-country-prices', ['item' => null])

@@ -10,8 +10,10 @@ return [
     'saved_success' => 'تم حفظ تغييرات حسابك بنجاح.',
     'administrator' => 'مدير',
     'member' => 'عضو',
+    'vendor' => 'بائع',
     'orders' => 'الطلبات',
     'in_progress' => 'قيد التنفيذ',
+
     'delivered' => 'تم التسليم',
     'spent' => 'المصروف',
     'manage_addresses' => 'إدارة العناوين',
@@ -19,6 +21,7 @@ return [
     'choose_avatar' => 'اختيار الصورة الرمزية',
     'track_by_phone' => 'تتبع بالهاتف',
     'become_vendor' => 'كن بائعاً',
+    'resume_vendor_draft' => 'متابعة طلب البائع',
     'vendor_pending' => 'طلب البائع قيد المراجعة',
     'vendor_resubmit' => 'إجراء مطلوب: إعادة الإرسال',
     'vendor_dashboard' => 'لوحة البائع',

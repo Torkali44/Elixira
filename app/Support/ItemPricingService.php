@@ -20,19 +20,50 @@ class ItemPricingService
         ];
     }
 
+    /**
+     * @return array<string, string>
+     */
+    public function countryFlags(): array
+    {
+        return [
+            'KSA' => asset('images/sa.png'),
+            'UAE' => asset('images/AE.png'),
+        ];
+    }
+
+    public function countryFlag(string $countryCode): ?string
+    {
+        return $this->countryFlags()[$countryCode] ?? null;
+    }
+
+    public function detectUserCountry(?User $user = null): string
+    {
+        $sessionCountry = session('shopping_country');
+        if (is_string($sessionCountry) && in_array($sessionCountry, ['KSA', 'UAE'], true)) {
+            return $sessionCountry;
+        }
+
+        $user ??= auth()->user();
+        if ($user && filled($user->phone)) {
+            $phone = (string) $user->phone;
+            if (str_contains($phone, '+971') || str_starts_with(ltrim($phone, '+'), '971')) {
+                return 'UAE';
+            }
+            if (str_contains($phone, '+966') || str_starts_with(ltrim($phone, '+'), '966') || str_starts_with(ltrim($phone, '0'), '05')) {
+                return 'KSA';
+            }
+        }
+
+        return self::DEFAULT_COUNTRY;
+    }
+
     public function resolveCountryCode(?string $countryCode = null): string
     {
         if ($countryCode && in_array($countryCode, ['KSA', 'UAE'], true)) {
             return $countryCode;
         }
 
-        $sessionCountry = session('shopping_country');
-
-        if (is_string($sessionCountry) && in_array($sessionCountry, ['KSA', 'UAE'], true)) {
-            return $sessionCountry;
-        }
-
-        return self::DEFAULT_COUNTRY;
+        return $this->detectUserCountry();
     }
 
     public function mapPhoneCountryCode(?string $phoneCountryCode): string
@@ -49,7 +80,16 @@ class ItemPricingService
         return $user !== null && filled($user->user_code);
     }
 
-    public function resolvePrice(Item $item, ?User $user = null, ?string $countryCode = null): float
+    /**
+     * @return array{
+     *     country_code: string,
+     *     member_price: float,
+     *     guest_price: float,
+     *     active_price: float,
+     *     has_country_pricing: bool
+     * }
+     */
+    public function getPriceBreakdown(Item $item, ?User $user = null, ?string $countryCode = null): array
     {
         $countryCode = $this->resolveCountryCode($countryCode);
         $countryPrice = $item->relationLoaded('countryPrices')
@@ -57,10 +97,32 @@ class ItemPricingService
             : $item->countryPrices()->where('country_code', $countryCode)->first();
 
         if ($countryPrice) {
-            return (float) ($this->isMember($user) ? $countryPrice->member_price : $countryPrice->guest_price);
+            $memberPrice = (float) $countryPrice->member_price;
+            $guestPrice = (float) $countryPrice->guest_price;
+
+            return [
+                'country_code' => $countryCode,
+                'member_price' => $memberPrice,
+                'guest_price' => $guestPrice,
+                'active_price' => $this->isMember($user) ? $memberPrice : $guestPrice,
+                'has_country_pricing' => true,
+            ];
         }
 
-        return (float) $item->price;
+        $fallback = (float) $item->price;
+
+        return [
+            'country_code' => $countryCode,
+            'member_price' => $fallback,
+            'guest_price' => $fallback,
+            'active_price' => $fallback,
+            'has_country_pricing' => false,
+        ];
+    }
+
+    public function resolvePrice(Item $item, ?User $user = null, ?string $countryCode = null): float
+    {
+        return $this->getPriceBreakdown($item, $user, $countryCode)['active_price'];
     }
 
     public function isAvailableInCountry(Item $item, ?string $countryCode = null): bool

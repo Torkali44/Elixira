@@ -195,8 +195,8 @@
                     @endauth
                 </div>
                 
-                <div style="font-size: 2rem; font-weight: 700; color: var(--elx-white); margin-bottom: 2rem;">
-                    ﷼ {{ number_format($item->price, 2) }}
+                <div style="margin-bottom: 2rem;">
+                    <x-product-pricing :item="$item" align="flex-start" size="2rem" smallSize="1rem" />
                 </div>
 
                 <p style="color: var(--elx-gray); font-size: 1.1rem; margin-bottom: 3rem; line-height: 1.6;">

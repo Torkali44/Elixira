@@ -6,6 +6,7 @@ use App\Models\VendorProfile;
 use App\Support\VendorSubscriptionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
 
 class VendorProfileController extends Controller
 {
@@ -29,6 +30,8 @@ class VendorProfileController extends Controller
         return view('vendor.onboarding', [
             'vendorProfile' => $user->vendorProfile ?? new VendorProfile,
             'subscription' => $subscription,
+            'initialStep' => (int) request('step', $user->vendorProfile?->onboarding_step ?? 1),
+            'hasReceipt' => filled($user->vendorProfile?->subscription_payment_receipt),
         ]);
     }
 
@@ -42,6 +45,8 @@ class VendorProfileController extends Controller
             'brand_logo' => 'nullable|image|max:2048',
             'brand_description' => $isDraft ? 'nullable|string|max:1000' : 'required|string|max:1000',
             'commercial_registration_number' => $isDraft ? 'nullable|string|max:100' : 'required|string|max:100',
+            'phone_country_code' => $isDraft ? 'nullable|in:+966,+971' : 'required|in:+966,+971',
+            'phone' => $isDraft ? 'nullable|string|max:20' : 'required|string|max:20',
             'instagram_link' => 'nullable|url|max:255',
             'tiktok_link' => 'nullable|url|max:255',
             'snapchat_link' => 'nullable|url|max:255',
@@ -51,6 +56,7 @@ class VendorProfileController extends Controller
             'product_types' => $isDraft ? 'nullable|array' : 'required|array',
             'verification_document' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:4096',
             'subscription_payment_receipt' => ($isDraft || ! $requiresPayment) ? 'nullable|file|mimes:pdf,jpg,jpeg,png|max:4096' : 'required|file|mimes:pdf,jpg,jpeg,png|max:4096',
+            'subscription_plan' => $requiresPayment && ! $isDraft ? 'required|in:monthly,semi_annual,yearly' : 'nullable|in:monthly,semi_annual,yearly',
             'onboarding_step' => 'nullable|integer|min:1|max:4',
             'action' => 'required|in:draft,submit',
         ];
@@ -67,20 +73,20 @@ class VendorProfileController extends Controller
             return redirect()->route('vendor.pending')->with('error', __('vendor.already_submitted'));
         }
 
-        $profile = $user->vendorProfile ?? new VendorProfile;
+        $profile = VendorProfile::query()->firstOrNew(['user_id' => $user->id]);
+        $currentStep = (int) ($request->onboarding_step ?: 1);
+
+        if (! $isDraft && $requiresPayment && ! $request->hasFile('subscription_payment_receipt') && blank($profile->subscription_payment_receipt)) {
+            throw ValidationException::withMessages([
+                'subscription_payment_receipt' => __('vendor.onboarding.receipt_required'),
+            ]);
+        }
+
         $profile->user_id = $user->id;
-        $profile->brand_name = $request->brand_name;
-        $profile->brand_description = $request->brand_description;
-        $profile->commercial_registration_number = $request->commercial_registration_number;
-        $profile->instagram_link = $request->instagram_link;
-        $profile->tiktok_link = $request->tiktok_link;
-        $profile->snapchat_link = $request->snapchat_link;
-        $profile->store_link = $request->store_link;
-        $profile->store_link_description = $request->store_link_description;
-        $profile->service_countries = $request->service_countries;
-        $profile->product_types = $request->product_types;
         $profile->payment_method = 'cash_on_delivery';
-        $profile->onboarding_step = (int) ($request->onboarding_step ?: 1);
+        $profile->onboarding_step = $currentStep;
+
+        $this->applyStepFields($profile, $request, $isDraft, $currentStep);
 
         if ($request->hasFile('brand_logo')) {
             if ($profile->brand_logo) {
@@ -102,10 +108,16 @@ class VendorProfileController extends Controller
             }
             $profile->subscription_payment_receipt = $request->file('subscription_payment_receipt')->store('vendor_subscription_receipts', 'public');
             $profile->subscription_payment_status = 'pending';
+            $profile->subscription_plan = $request->subscription_plan ?: $profile->subscription_plan;
         } elseif ($requiresPayment && $profile->subscription_payment_status === 'not_required') {
             $profile->subscription_payment_status = 'pending';
+            if ($request->filled('subscription_plan')) {
+                $profile->subscription_plan = $request->subscription_plan;
+            }
         } elseif (! $requiresPayment) {
             $profile->subscription_payment_status = 'not_required';
+        } elseif ($request->filled('subscription_plan')) {
+            $profile->subscription_plan = $request->subscription_plan;
         }
 
         if ($request->action === 'submit') {
@@ -116,13 +128,58 @@ class VendorProfileController extends Controller
 
         $profile->save();
 
+        if ((! $isDraft || $currentStep === 1) && $request->filled('phone')) {
+            $fullPhone = ($request->phone_country_code ?? '+966').ltrim((string) $request->phone, '0');
+            $user->phone = $fullPhone;
+            $user->save();
+        }
+
         if ($profile->status === 'pending') {
-            return redirect()->route('vendor.pending')->with('status', __('vendor.submitted_success'));
+            return redirect()->route('vendor.pending')->with('success', __('vendor.submitted_success'));
         }
 
         return redirect()
-            ->route('vendor.onboarding', ['step' => $profile->onboarding_step])
-            ->with('status', __('vendor.draft_saved'));
+            ->route('profile.edit')
+            ->with('success', __('vendor.draft_saved'));
+    }
+
+    private function applyStepFields(VendorProfile $profile, Request $request, bool $isDraft, int $currentStep): void
+    {
+        if ($this->shouldApplyStepFields($isDraft, $currentStep, 1)) {
+            $profile->brand_name = $request->input('brand_name');
+            $profile->brand_description = $request->input('brand_description');
+
+            if ($request->has('service_countries') || ! $isDraft) {
+                $profile->service_countries = $request->input('service_countries', []);
+            }
+        }
+
+        if ($this->shouldApplyStepFields($isDraft, $currentStep, 2)) {
+            $profile->instagram_link = $request->input('instagram_link');
+            $profile->tiktok_link = $request->input('tiktok_link');
+            $profile->snapchat_link = $request->input('snapchat_link');
+            $profile->store_link = $request->input('store_link');
+            $profile->store_link_description = $request->input('store_link_description');
+        }
+
+        if ($this->shouldApplyStepFields($isDraft, $currentStep, 3)) {
+            if ($request->has('product_types') || ! $isDraft) {
+                $profile->product_types = $request->input('product_types', []);
+            }
+        }
+
+        if ($this->shouldApplyStepFields($isDraft, $currentStep, 4)) {
+            $profile->commercial_registration_number = $request->input('commercial_registration_number');
+        }
+    }
+
+    private function shouldApplyStepFields(bool $isDraft, int $currentStep, int $fieldStep): bool
+    {
+        if (! $isDraft) {
+            return true;
+        }
+
+        return $currentStep === $fieldStep;
     }
 
     public function pending()

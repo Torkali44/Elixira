@@ -41,5 +41,6 @@ class DatabaseSeeder extends Seeder
         $this->call(AvatarOptionSeeder::class);
         $this->call(HomePageSectionSeeder::class);
         $this->call(FaqSeeder::class);
+        $this->call(DxnSponsorCodeSeeder::class);
     }
 }

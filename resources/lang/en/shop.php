@@ -21,7 +21,7 @@ return [
     'login_to_rate' => 'Login to rate',
     'country_ksa' => 'Saudi Arabia',
     'country_uae' => 'United Arab Emirates',
-    'member_price' => 'Member Price',
-    'guest_price' => 'Guest Price',
+    'member_price_label' => 'Member',
+    'guest_price_label' => 'Regular',
     'not_available_in_country' => 'This product is not available in the selected country.',
 ];

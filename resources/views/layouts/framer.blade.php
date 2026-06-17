@@ -7,12 +7,9 @@
         document.documentElement.classList.add('elx-animate-scroll');
         // Immediately apply saved theme to prevent FOUC
         (function() {
-            var theme = @json($userTheme ?? session('theme', 'dark'));
-            if (theme === 'light') {
-                document.body.classList.add('light-mode');
-            }
-            localStorage.setItem('elx-theme', theme);
-            localStorage.setItem('theme', theme);
+            document.body.classList.remove('light-mode');
+            localStorage.setItem('elx-theme', 'dark');
+            localStorage.setItem('theme', 'dark');
         })();
     </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -54,6 +51,56 @@
         .elx-footer a:hover {
             color: #4ac8f6 !important;
             transform: translateX(5px);
+        }
+        .elx-footer button:hover {
+            color: #4ac8f6 !important;
+        }
+        .elx-legal-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 3000;
+            background: rgba(0, 0, 0, 0.75);
+            padding: 1rem;
+            align-items: center;
+            justify-content: center;
+        }
+        .elx-legal-modal__dialog {
+            background: #13252d;
+            border: 1px solid rgba(74, 200, 246, 0.25);
+            border-radius: 20px;
+            max-width: 760px;
+            width: 100%;
+            max-height: 90vh;
+            overflow: auto;
+            padding: 1rem 1.25rem 1.35rem;
+        }
+        .elx-legal-modal__head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 0.75rem;
+        }
+        .elx-legal-modal__head h3 {
+            margin: 0;
+            color: #fff;
+            font-size: 1.05rem;
+        }
+        .elx-legal-modal__close {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 1.5rem;
+            cursor: pointer;
+            line-height: 1;
+        }
+        .elx-legal-modal__body p {
+            color: rgba(255, 255, 255, 0.78);
+            line-height: 1.7;
+            margin: 0 0 0.85rem;
+        }
+        .elx-legal-modal__body p:last-child {
+            margin-bottom: 0;
         }
 
         /* Notifications Dropdown Toggle */
@@ -286,8 +333,10 @@
                             </div>
                             <div class="elx-nav__notifications-list" style="max-height: 350px; overflow-y: auto;">
                                 @forelse(auth()->user()->notifications()->take(10)->get() as $notif)
-                                    <div class="elx-nav__notifications-item {{ $notif->is_read ? '' : 'unread' }}" 
-                                         onclick="handleNotificationClick(event, '{{ route('notifications.read', $notif->id) }}', '{{ $notif->url ?? '#' }}')"
+                                    <div class="elx-nav__notifications-item {{ $notif->is_read ? '' : 'unread' }}"
+                                         data-read-url="{{ route('notifications.read', $notif->id) }}"
+                                         data-redirect-url="{{ $notif->url ?: route('home') }}"
+                                         onclick="handleNotificationClick(event, this)"
                                          style="padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.08); cursor: pointer; transition: background 0.25s; background: {{ $notif->is_read ? 'rgba(0, 0, 0, 0.2)' : 'rgba(74, 200, 246, 0.12)' }}; text-align: left;">
                                         <div style="display: flex; align-items: start; gap: 8px;">
                                             @if(!$notif->is_read)
@@ -311,16 +360,12 @@
                     </div>
                 @endauth
 
-                {{-- Dark Mode Toggle --}}
-                <button type="button" class="elx-nav__icon-btn" id="themeToggle" title="Toggle theme">
-                    <i class="fas fa-moon" id="themeIcon"></i>
-                </button>
-
                 {{-- Language Toggle --}}
+                @php $langQuery = request()->getQueryString(); @endphp
                 @if(app()->getLocale() === 'ar')
-                    <a href="{{ route('lang.switch', 'en') }}" class="elx-nav__icon-btn elx-nav__lang-btn" title="Switch to English">EN</a>
+                    <a href="{{ route('lang.switch', 'en') }}{{ $langQuery ? '?'.$langQuery : '' }}" class="elx-nav__icon-btn elx-nav__lang-btn" title="Switch to English" onclick="return preserveVendorOnboardingStep(this, event)">EN</a>
                 @else
-                    <a href="{{ route('lang.switch', 'ar') }}" class="elx-nav__icon-btn elx-nav__lang-btn" title="التبديل إلى العربية">ع</a>
+                    <a href="{{ route('lang.switch', 'ar') }}{{ $langQuery ? '?'.$langQuery : '' }}" class="elx-nav__icon-btn elx-nav__lang-btn" title="التبديل إلى العربية" onclick="return preserveVendorOnboardingStep(this, event)">ع</a>
                 @endif
 
                 <a href="{{ route('cart.index') }}" class="elx-nav__cart" title="Cart">
@@ -455,7 +500,7 @@
                             <li><a href="{{ route('blogs.index') }}"
                                     style="color: rgba(255,255,255,0.7); text-decoration: none; display: block; padding: 0.5rem 0;">{{ __('home.footer_blog') }}</a>
                             </li>
-                            <li><a href="{{ route('dxn-team.create') }}"
+                            <li><a href="{{ route('dxn-distributor.create') }}"
                                     style="color: rgba(255,255,255,0.7); text-decoration: none; display: block; padding: 0.5rem 0;">{{ __('home.footer_join_dxn') }}</a>
                             </li>
                         </ul>
@@ -491,19 +536,127 @@
 
                 {{-- Bottom info --}}
                 <div
-                    style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 2rem; display: flex; justify-content: space-between; align-items: center; color: rgba(255,255,255,0.5); font-size: 0.85rem;">
-                    <span>{{ __('home.footer_rights', ['year' => date('Y')]) }}</span>
+                    style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 2rem; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem; color: rgba(255,255,255,0.5); font-size: 0.85rem;">
+                    <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem;">
+                        <span>{{ __('home.footer_rights', ['year' => date('Y')]) }}</span>
+                        <span style="opacity: 0.45;">|</span>
+                        <button type="button" id="openCrCertificateModal"
+                                style="background: none; border: none; padding: 0; color: #4ac8f6; cursor: pointer; font-size: inherit; text-decoration: underline;">
+                            {{ __('home.footer_cr_label') }}: {{ config('company.commercial_registration_number') }}
+                        </button>
+                    </div>
                     <div style="display: flex; gap: 2rem;">
-                        <a href="#" style="color: inherit; text-decoration: none;">{{ __('home.footer_privacy') }}</a>
-                        <a href="#" style="color: inherit; text-decoration: none;">{{ __('home.footer_terms') }}</a>
+                        <button type="button" id="openPrivacyModal"
+                                style="background: none; border: none; padding: 0; color: inherit; cursor: pointer; font-size: inherit; text-decoration: none;">
+                            {{ __('home.footer_privacy') }}
+                        </button>
+                        <button type="button" id="openTermsModal"
+                                style="background: none; border: none; padding: 0; color: inherit; cursor: pointer; font-size: inherit; text-decoration: none;">
+                            {{ __('home.footer_terms') }}
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
     </footer>
 
+    <div id="crCertificateModal" style="display:none; position:fixed; inset:0; z-index:3000; background:rgba(0,0,0,0.75); padding:1rem; align-items:center; justify-content:center;">
+        <div style="background:#13252d; border:1px solid rgba(74,200,246,0.25); border-radius:20px; max-width:900px; width:100%; max-height:90vh; overflow:auto; padding:1rem 1rem 1.25rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:1rem; margin-bottom:0.75rem;">
+                <h3 style="margin:0; color:#fff; font-size:1.05rem;">{{ __('home.footer_cr_modal_title') }}</h3>
+                <button type="button" id="closeCrCertificateModal" style="background:none; border:none; color:#fff; font-size:1.5rem; cursor:pointer; line-height:1;">&times;</button>
+            </div>
+            <img src="{{ asset(config('company.commercial_registration_image')) }}"
+                 alt="{{ __('home.footer_cr_modal_title') }}"
+                 style="width:100%; height:auto; border-radius:12px; display:block;">
+        </div>
+    </div>
+
+    <div id="privacyModal" class="elx-legal-modal" style="display:none;">
+        <div class="elx-legal-modal__dialog">
+            <div class="elx-legal-modal__head">
+                <h3>{{ __('home.footer_privacy_modal_title') }}</h3>
+                <button type="button" class="elx-legal-modal__close" data-close-modal="privacyModal">&times;</button>
+            </div>
+            <div class="elx-legal-modal__body">
+                @foreach(__('home.privacy_policy_clauses') as $clause)
+                    <p>{{ $clause }}</p>
+                @endforeach
+            </div>
+        </div>
+    </div>
+
+    <div id="termsModal" class="elx-legal-modal" style="display:none;">
+        <div class="elx-legal-modal__dialog">
+            <div class="elx-legal-modal__head">
+                <h3>{{ __('home.footer_terms_modal_title') }}</h3>
+                <button type="button" class="elx-legal-modal__close" data-close-modal="termsModal">&times;</button>
+            </div>
+            <div class="elx-legal-modal__body">
+                @foreach(__('home.terms_of_service_clauses') as $clause)
+                    <p>{{ $clause }}</p>
+                @endforeach
+            </div>
+        </div>
+    </div>
+
     {{-- Scripts --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        (function () {
+            const crModal = document.getElementById('crCertificateModal');
+            const openCr = document.getElementById('openCrCertificateModal');
+            const closeCr = document.getElementById('closeCrCertificateModal');
+
+            if (openCr && crModal) {
+                openCr.addEventListener('click', () => {
+                    crModal.style.display = 'flex';
+                });
+            }
+
+            if (closeCr && crModal) {
+                closeCr.addEventListener('click', () => {
+                    crModal.style.display = 'none';
+                });
+            }
+
+            if (crModal) {
+                crModal.addEventListener('click', (event) => {
+                    if (event.target === crModal) {
+                        crModal.style.display = 'none';
+                    }
+                });
+            }
+
+            const bindLegalModal = (openId, modalId) => {
+                const openBtn = document.getElementById(openId);
+                const modal = document.getElementById(modalId);
+
+                if (!openBtn || !modal) {
+                    return;
+                }
+
+                openBtn.addEventListener('click', () => {
+                    modal.style.display = 'flex';
+                });
+
+                modal.querySelectorAll('[data-close-modal]').forEach((button) => {
+                    button.addEventListener('click', () => {
+                        modal.style.display = 'none';
+                    });
+                });
+
+                modal.addEventListener('click', (event) => {
+                    if (event.target === modal) {
+                        modal.style.display = 'none';
+                    }
+                });
+            };
+
+            bindLegalModal('openPrivacyModal', 'privacyModal');
+            bindLegalModal('openTermsModal', 'termsModal');
+        })();
+    </script>
     <script>
         const showInfoPopup = (message, icon = 'info') => {
             Swal.fire({
@@ -664,18 +817,26 @@
             });
         }
 
-        function handleNotificationClick(event, readUrl, redirectUrl) {
+        function handleNotificationClick(event, element) {
             event.preventDefault();
             event.stopPropagation();
-            
+
+            const readUrl = element.dataset.readUrl;
+            const redirectUrl = element.dataset.redirectUrl;
+
             fetch(readUrl, {
                 method: 'POST',
                 headers: {
                     'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    'Accept': 'application/json'
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
                 }
             }).finally(() => {
-                window.location.href = redirectUrl;
+                if (redirectUrl) {
+                    window.location.href = redirectUrl;
+                } else {
+                    window.location.reload();
+                }
             });
         }
 
@@ -853,39 +1014,20 @@
             });
         }
 
-        // ─── Dark Mode Toggle ───
-        const themeToggle = document.getElementById('themeToggle');
-        const themeIcon = document.getElementById('themeIcon');
-        const body = document.body;
-
-        function applyTheme(theme) {
-            if (theme === 'light') {
-                body.classList.add('light-mode');
-                if (themeIcon) { themeIcon.classList.remove('fa-moon'); themeIcon.classList.add('fa-sun'); }
-            } else {
-                body.classList.remove('light-mode');
-                if (themeIcon) { themeIcon.classList.remove('fa-sun'); themeIcon.classList.add('fa-moon'); }
+        // ─── Preserve vendor onboarding step when switching language ───
+        function preserveVendorOnboardingStep(link, event) {
+            if (!window.location.pathname.includes('/vendor/onboarding')) {
+                return true;
             }
+
+            event.preventDefault();
+            const step = localStorage.getItem('vendor_onboarding_step') || new URLSearchParams(window.location.search).get('step') || '1';
+            const url = new URL(link.href, window.location.origin);
+            url.searchParams.set('step', step);
+            window.location.href = url.toString();
+
+            return false;
         }
-
-        const serverTheme = @json($userTheme ?? session('theme', 'dark'));
-        applyTheme(serverTheme || localStorage.getItem('elx-theme') || 'dark');
-
-        themeToggle?.addEventListener('click', () => {
-            const current = body.classList.contains('light-mode') ? 'light' : 'dark';
-            const next = current === 'dark' ? 'light' : 'dark';
-            const url = next === 'light' ? @json(route('theme.switch', 'light')) : @json(route('theme.switch', 'dark'));
-
-            fetch(url, {
-                method: 'GET',
-                headers: { 'X-Requested-With': 'XMLHttpRequest' },
-                credentials: 'same-origin',
-            }).finally(() => {
-                localStorage.setItem('elx-theme', next);
-                localStorage.setItem('theme', next);
-                applyTheme(next);
-            });
-        });
 
         // ─── RTL: flip dropdown position for Arabic ───
         @if(app()->getLocale() === 'ar')

@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Support\ItemPricingService;
+use App\Support\VendorSubscriptionService;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
@@ -122,5 +124,47 @@ class Item extends Model
         }
 
         return $this->description_en ?: $this->description;
+    }
+
+    public function scopePubliclyVisible(Builder $query): Builder
+    {
+        $graceDays = (int) config('vendor.grace_period_days', 7);
+        $graceCutoff = now()->subDays($graceDays);
+
+        return $query->where('status', 'approved')
+            ->where(function (Builder $q) use ($graceCutoff) {
+                $q->whereNull('brand_id')
+                    ->orWhereHas('brandModel', function (Builder $brandQuery) use ($graceCutoff) {
+                        $brandQuery->where('is_active', true)
+                            ->whereHas('vendorProfile', function (Builder $vpQuery) use ($graceCutoff) {
+                                $vpQuery->where('status', 'approved')
+                                    ->where(function (Builder $subQuery) use ($graceCutoff) {
+                                        $subQuery->where('subscription_payment_status', 'not_required')
+                                            ->orWhere(function (Builder $paidQuery) use ($graceCutoff) {
+                                                $paidQuery->where('subscription_payment_status', 'confirmed')
+                                                    ->where(function (Builder $dateQuery) use ($graceCutoff) {
+                                                        $dateQuery->whereNull('subscription_ends_at')
+                                                            ->orWhere('subscription_ends_at', '>', $graceCutoff);
+                                                    });
+                                            });
+                                    });
+                            });
+                    });
+            });
+    }
+
+    public function isPubliclyVisible(): bool
+    {
+        if ($this->status !== 'approved') {
+            return false;
+        }
+
+        if ($this->brand_id === null) {
+            return true;
+        }
+
+        $profile = $this->brandModel?->vendorProfile;
+
+        return app(VendorSubscriptionService::class)->productsPubliclyVisible($profile);
     }
 }

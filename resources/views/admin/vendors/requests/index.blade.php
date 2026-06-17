@@ -9,12 +9,6 @@
         </div>
     </div>
 
-    @if(session('success'))
-        <div class="alert alert-success">
-            {{ session('success') }}
-        </div>
-    @endif
-
     <div class="card border-0 shadow-sm">
         <div class="card-body">
             <div class="table-responsive">

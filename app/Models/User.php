@@ -27,6 +27,10 @@ class User extends Authenticatable
         'gender',
         'phone',
         'user_code',
+        'is_dxn_verified',
+        'dxn_member_code',
+        'dxn_tag_color',
+        'dxn_badge_image',
         'total_points',
         'avatar',
         'avatar_option_id',
@@ -56,6 +60,8 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'is_suspended' => 'boolean',
+            'is_dxn_verified' => 'boolean',
+            'dxn_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
     }
@@ -126,5 +132,15 @@ class User extends Authenticatable
     public function pointsTransactions()
     {
         return $this->hasMany(UserPointsTransaction::class)->latest();
+    }
+
+    public function getDxnBadgeUrlAttribute(): ?string
+    {
+        return $this->dxn_badge_image ? asset('storage/'.$this->dxn_badge_image) : null;
+    }
+
+    public function resolvedDxnTagColor(): string
+    {
+        return $this->attributes['dxn_tag_color'] ?? (string) config('dxn.default_tag_colors.primary', '#00ff88');
     }
 }

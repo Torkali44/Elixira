@@ -36,7 +36,9 @@
             <a href="{{ route('menu.show', $product->id) }}" style="text-decoration: none; color: inherit; max-width: 65%; word-wrap: break-word;" onclick="event.stopPropagation();">
                 <h3 class="elx-product-card__name">{{ $product->local_name }}</h3>
             </a>
-            <span class="elx-product-card__price" style="flex-shrink: 0; white-space: nowrap;">﷼ {{ number_format($product->display_price, 2) }}</span>
+            <span class="elx-product-card__price" style="flex-shrink: 0; white-space: nowrap;">
+                <x-product-pricing :item="$product" align="flex-end" />
+            </span>
         </div>
 
         {{-- Meta Info: Category, Brand, Points, Stock --}}

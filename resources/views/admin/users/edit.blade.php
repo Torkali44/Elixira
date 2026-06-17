@@ -70,6 +70,29 @@
                             @enderror
                         </div>
 
+                        <div class="col-12"><hr><h6 class="mb-3">{{ __('admin.users_page.dxn_section') }}</h6></div>
+                        <div class="col-md-4">
+                            <div class="form-check mt-2">
+                                <input class="form-check-input" type="checkbox" name="is_dxn_verified" value="1" id="is_dxn_verified" @checked(old('is_dxn_verified', $user->is_dxn_verified))>
+                                <label class="form-check-label" for="is_dxn_verified">{{ __('admin.users_page.dxn_verified') }}</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="dxn_member_code" class="form-label">{{ __('admin.users_page.dxn_member_code') }}</label>
+                            <input type="text" id="dxn_member_code" name="dxn_member_code" class="form-control" value="{{ old('dxn_member_code', $user->dxn_member_code) }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="dxn_tag_color" class="form-label">{{ __('admin.users_page.dxn_tag_color') }}</label>
+                            <input type="color" id="dxn_tag_color" name="dxn_tag_color" class="form-control form-control-color" value="{{ old('dxn_tag_color', $user->dxn_tag_color ?: '#00ff88') }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="dxn_badge_image" class="form-label">{{ __('admin.users_page.dxn_badge') }}</label>
+                            <input type="file" id="dxn_badge_image" name="dxn_badge_image" class="form-control" accept="image/*">
+                            @if($user->dxn_badge_image)
+                                <img src="{{ $user->dxn_badge_url }}" alt="" class="mt-2" style="width:40px;height:40px;object-fit:contain;">
+                            @endif
+                        </div>
+
                         <div class="col-md-6">
                             <label for="role" class="form-label">{{ __('admin.users_page.user_role') }}</label>
                             <select id="role" name="role" class="form-select @error('role') is-invalid @enderror" required>

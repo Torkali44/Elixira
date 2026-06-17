@@ -20,10 +20,11 @@ class UserController extends Controller
 
             $query->where(function ($builder) use ($search) {
                 $builder
-                    ->where('name', 'like', '%' . $search . '%')
-                    ->orWhere('email', 'like', '%' . $search . '%')
-                    ->orWhere('phone', 'like', '%' . $search . '%')
-                    ->orWhere('user_code', 'like', '%' . $search . '%');
+                    ->where('name', 'like', '%'.$search.'%')
+                    ->orWhere('email', 'like', '%'.$search.'%')
+                    ->orWhere('phone', 'like', '%'.$search.'%')
+                    ->orWhere('user_code', 'like', '%'.$search.'%')
+                    ->orWhere('dxn_member_code', 'like', '%'.$search.'%');
             });
         }
 
@@ -31,18 +32,32 @@ class UserController extends Controller
             $query->where('role', $request->role);
         }
 
-        
+        if ($request->filled('dxn_verified')) {
+            if ($request->dxn_verified === 'yes') {
+                $query->where('is_dxn_verified', true);
+            } elseif ($request->dxn_verified === 'no') {
+                $query->where(function ($builder) {
+                    $builder->where('is_dxn_verified', false)->orWhereNull('is_dxn_verified');
+                });
+            }
+        }
+
+        if ($request->filled('dxn_tag_color')) {
+            $query->where('dxn_tag_color', $request->dxn_tag_color);
+        }
 
         $users = $query->paginate(15)->appends($request->query());
 
         return view('admin.users.index', [
             'users' => $users,
+            'dxnTagColors' => config('dxn.default_tag_colors', []),
             'stats' => [
                 'total' => User::count(),
                 'admins' => User::where('role', 'admin')->count(),
                 'vendors' => User::where('role', 'vendor')->count(),
                 'with_avatars' => User::whereNotNull('avatar')->count(),
                 'suspended' => User::where('is_suspended', true)->count(),
+                'dxn_verified' => User::where('is_dxn_verified', true)->count(),
             ],
         ]);
     }
@@ -57,10 +72,17 @@ class UserController extends Controller
         $data = $request->validated();
         $removeAvatar = (bool) ($data['remove_avatar'] ?? false);
 
-        unset($data['avatar'], $data['remove_avatar']);
+        unset($data['avatar'], $data['remove_avatar'], $data['dxn_badge_image']);
 
         $data['phone'] = $data['phone'] ?? null;
         $data['user_code'] = $data['user_code'] ?? null;
+
+        if (! empty($data['is_dxn_verified']) && filled($data['dxn_member_code'] ?? null)) {
+            $data['dxn_verified_at'] = $user->dxn_verified_at ?? now();
+            $data['user_code'] = $data['dxn_member_code'];
+        } elseif (empty($data['is_dxn_verified'])) {
+            $data['dxn_verified_at'] = null;
+        }
 
         $user->fill($data);
 
@@ -73,6 +95,13 @@ class UserController extends Controller
         } elseif ($removeAvatar && $user->avatar) {
             Storage::disk('public')->delete($user->avatar);
             $user->avatar = null;
+        }
+
+        if ($request->hasFile('dxn_badge_image')) {
+            if ($user->dxn_badge_image) {
+                Storage::disk('public')->delete($user->dxn_badge_image);
+            }
+            $user->dxn_badge_image = $request->file('dxn_badge_image')->store('dxn_badges', 'public');
         }
 
         if ($user->isDirty('email')) {
@@ -94,7 +123,7 @@ class UserController extends Controller
             return redirect()->back()->with('error', 'Admin accounts cannot be suspended.');
         }
 
-        $user->is_suspended = !$user->is_suspended;
+        $user->is_suspended = ! $user->is_suspended;
         $user->save();
 
         $status = $user->is_suspended ? 'suspended' : 'activated';
