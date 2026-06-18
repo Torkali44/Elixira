@@ -36,6 +36,8 @@
                             <small class="text-muted" id="contentHelp">For screenshots, this is an optional description. For videos, this must be the YouTube link.</small>
                         </div>
 
+                        @include('admin.partials.tags-input', ['selectedTags' => '', 'tagSuggestions' => $tagSuggestions ?? []])
+
                         <button type="submit" class="btn btn-primary">Save Testimonial</button>
                         <a href="{{ route('admin.reviews.index') }}" class="btn btn-secondary">Cancel</a>
                     </form>

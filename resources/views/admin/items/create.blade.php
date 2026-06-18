@@ -121,6 +121,8 @@
                 <label class="form-check-label" for="is_featured">{{ __('admin.items_page.featured') }}</label>
             </div>
 
+            @include('admin.partials.tags-input', ['selectedTags' => $selectedTags ?? '', 'tagSuggestions' => $tagSuggestions ?? []])
+
             <button type="submit" class="btn btn-primary px-4">{{ __('admin.items_page.save_product') }}</button>
         </form>
     </div>

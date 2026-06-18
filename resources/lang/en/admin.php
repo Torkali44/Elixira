@@ -5,6 +5,8 @@ return [
         'dashboard' => 'Dashboard',
         'categories' => 'Categories',
         'products' => 'All Products',
+        'packages' => 'Packages',
+        'home_sections' => 'Homepage Sections',
         'users' => 'Users Management',
         'orders' => 'Orders',
         'reports' => 'Reports (Detailed)',
@@ -592,6 +594,11 @@ return [
         'active_users' => 'Active for users',
         'save' => 'Save Avatar',
         'update' => 'Update Avatar',
+    ],
+    'tags' => [
+        'label' => 'Tags',
+        'placeholder' => 'e.g. wellness, honey, spirulina',
+        'hint' => 'Separate tags with commas. Use the same tags on products, blogs, and brands to connect related content.',
     ],
     'validation' => [
         'name_en_required' => 'English name is required.',

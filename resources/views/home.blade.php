@@ -8,15 +8,35 @@
 
    
     {{-- HERO SECTION --}}
-   
+    @php
+        $heroSection = ($sections ?? collect())->firstWhere('slug', 'hero');
+        $heroExtras = [];
+        if ($heroSection?->body) {
+            try {
+                $heroExtras = json_decode($heroSection->body, true, 512, JSON_THROW_ON_ERROR) ?: [];
+            } catch (\JsonException) {
+                $heroExtras = [];
+            }
+        }
+        $heroBg = $heroSection?->image
+            ? asset('storage/' . $heroSection->image)
+            : 'https://framerusercontent.com/images/8dBa4covRirMxiSicaHoAjMUTLw.jpeg?width=4000&height=1715';
+        $heroTitle = $heroSection?->title ?: __('home.hero_title');
+        $heroSubtitle = $heroSection?->subtitle ?: __('home.hero_subtitle');
+        $primaryLabel = $heroSection?->button_label ?: __('home.enter_store');
+        $primaryUrl = $heroSection?->button_url ? (\Illuminate\Support\Str::startsWith($heroSection->button_url, ['http://', 'https://']) ? $heroSection->button_url : url($heroSection->button_url)) : route('menu.index');
+        $secondaryLabel = $heroExtras['secondary_button_label'] ?? __('home.go_cart');
+        $secondaryUrl = isset($heroExtras['secondary_button_url'])
+            ? (\Illuminate\Support\Str::startsWith($heroExtras['secondary_button_url'], ['http://', 'https://']) ? $heroExtras['secondary_button_url'] : url($heroExtras['secondary_button_url']))
+            : route('cart.index');
+    @endphp
+    @if(! $heroSection || $heroSection->is_active)
     <section class="elx-hero" id="hero"
         style="position: relative; overflow: hidden; height: 100vh; display: flex; align-items: center; justify-content: center;">
-        {{-- Main Background Image --}}
         <div class="elx-hero__bg"
-            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -2; background-image: url('https://framerusercontent.com/images/8dBa4covRirMxiSicaHoAjMUTLw.jpeg?width=4000&height=1715'); background-size: cover; background-position: center;">
+            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -2; background-image: url('{{ $heroBg }}'); background-size: cover; background-position: center;">
         </div>
 
-        {{-- Vivid Overlays --}}
         <div class="elx-hero__overlay-vivid"
             style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: linear-gradient(180deg, rgba(19, 37, 45, 0.4) 0%, rgba(19, 37, 45, 0.9) 100%);">
         </div>
@@ -30,18 +50,19 @@
         <div class="elx-hero__content" data-animate style="text-align: center; max-width: 900px; padding: 2rem;">
             <h1 class="elx-hero__title">
                 <span class="elx-hero__title-gradient"
-                    style="background-image: linear-gradient(0deg, #4ac8f6 0%, #ffddbd 100%); -webkit-background-clip: text; color: transparent;">{{ __('home.hero_title') }}</span>
+                    style="background-image: linear-gradient(0deg, #4ac8f6 0%, #ffddbd 100%); -webkit-background-clip: text; color: transparent;">{{ $heroTitle }}</span>
             </h1>
             <p class="elx-hero__subtitle"
                 style="color: rgba(255,255,255,0.76); font-size: 1.25rem; line-height: 1.6; margin: 1.5rem 0 2rem;">
-                {{ __('home.hero_subtitle') }}
+                {{ $heroSubtitle }}
             </p>
-            <div class="elx-hero__actions" style="display: flex; gap: 1rem; justify-content: center;">
-                <a href="{{ route('menu.index') }}" class="elx-btn elx-btn--primary">{{ __('home.enter_store') }}</a>
-                <a href="{{ route('cart.index') }}" class="elx-btn elx-btn--glass">{{ __('home.go_cart') }}</a>
+            <div class="elx-hero__actions" style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                <a href="{{ $primaryUrl }}" class="elx-btn elx-btn--primary">{{ $primaryLabel }}</a>
+                <a href="{{ $secondaryUrl }}" class="elx-btn elx-btn--glass">{{ $secondaryLabel }}</a>
             </div>
         </div>
     </section>
+    @endif
 
  
     {{-- CATEGORIES SECTION --}}

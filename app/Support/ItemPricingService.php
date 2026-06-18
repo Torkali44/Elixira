@@ -137,6 +137,18 @@ class ItemPricingService
     }
 
     /**
+     * @return list<string>
+     */
+    public function availableCountryCodes(Item $item): array
+    {
+        if (! $item->relationLoaded('countryPrices')) {
+            $item->load('countryPrices');
+        }
+
+        return $item->countryPrices->pluck('country_code')->all();
+    }
+
+    /**
      * @param  array<string, array{member_price: mixed, guest_price: mixed}>  $countryPrices
      */
     public function syncCountryPrices(Item $item, array $countryPrices): void

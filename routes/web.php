@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DxnSponsorCodeController;
 use App\Http\Controllers\Admin\DxnTeamRequestController as AdminDxnTeamRequestController;
 use App\Http\Controllers\Admin\FaqController as AdminFaqController;
+use App\Http\Controllers\Admin\HomeSectionController;
 use App\Http\Controllers\Admin\ItemController;
 use App\Http\Controllers\Admin\NewsletterController; // Breeze
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
@@ -19,6 +20,7 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\VendorRequestController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\BrandController;
+use App\Http\Controllers\CartController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\DxnTeamRequestController;
 use App\Http\Controllers\FaqController;
@@ -27,9 +29,11 @@ use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\PackageController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RatingController;
-use App\Http\Controllers\ReservationController;
+use App\Http\Controllers\SearchController;
+use App\Http\Controllers\ShoppingCountryController;
 use App\Http\Controllers\SpecialRequestController;
 use App\Http\Controllers\TestimonialController;
 use App\Http\Controllers\ThemeController;
@@ -56,6 +60,10 @@ Route::get('/blogs/{slug}', [BlogController::class, 'show'])->name('blogs.show')
 
 Route::get('/menu', [MenuController::class, 'index'])->name('menu.index');
 Route::get('/menu/{item}', [MenuController::class, 'show'])->name('menu.show');
+Route::get('/packages', [PackageController::class, 'index'])->name('packages.index');
+Route::get('/packages/{package}', [PackageController::class, 'show'])->name('packages.show');
+Route::get('/search', [SearchController::class, 'index'])->name('search.index');
+Route::post('/shopping-country', [ShoppingCountryController::class, 'update'])->name('shopping-country.update');
 
 Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
 Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
@@ -134,6 +142,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
 
     Route::resource('items', ItemController::class);
     Route::delete('items/images/{image}', [ItemController::class, 'deleteImage'])->name('items.delete-image');
+    Route::resource('packages', App\Http\Controllers\Admin\PackageController::class);
+    Route::get('home-sections', [HomeSectionController::class, 'index'])->name('home-sections.index');
+    Route::get('home-sections/{home_section}/edit', [HomeSectionController::class, 'edit'])->name('home-sections.edit');
+    Route::put('home-sections/{home_section}', [HomeSectionController::class, 'update'])->name('home-sections.update');
     Route::resource('users', UserController::class)->only(['index', 'edit', 'update', 'destroy']);
     Route::patch('users/{user}/suspend', [UserController::class, 'suspend'])->name('users.suspend');
 

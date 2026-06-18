@@ -173,6 +173,51 @@
         accent-color: var(--elx-cyan);
     }
 
+    .vendor-phone-row {
+        display: flex;
+        gap: 0.75rem;
+        align-items: stretch;
+    }
+
+    .vendor-phone-codes {
+        display: flex;
+        gap: 0.5rem;
+        flex-shrink: 0;
+    }
+
+    .vendor-phone-code {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.85rem 0.9rem;
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.09);
+        background: rgba(255, 255, 255, 0.04);
+        color: var(--elx-white);
+        cursor: pointer;
+        transition: var(--elx-transition);
+        min-width: 108px;
+        justify-content: center;
+    }
+
+    .vendor-phone-code input {
+        display: none;
+    }
+
+    .vendor-phone-code.active,
+    .vendor-phone-code:has(input:checked) {
+        border-color: var(--elx-cyan);
+        background: rgba(74, 200, 246, 0.12);
+        box-shadow: 0 0 0 2px rgba(74, 200, 246, 0.12);
+    }
+
+    .vendor-phone-code img {
+        width: 22px;
+        height: 15px;
+        border-radius: 2px;
+        object-fit: cover;
+    }
+
     .vendor-actions {
         display: flex;
         justify-content: space-between;
@@ -321,12 +366,20 @@
                         @endphp
                         <div class="vendor-input-group">
                             <label class="vendor-label">{{ __('vendor.onboarding.phone') }} *</label>
-                            <div style="display: flex; gap: 0.75rem; align-items: stretch;">
-                                <select name="phone_country_code" class="vendor-select" style="width: 140px;">
-                                    <option value="+966" @selected($phoneCountry === '+966')>  +966 </option>
-                                    <option value="+971" @selected($phoneCountry === '+971')> <x-country-flag country="UAE" :size="22" :show-label="false" /> +971 </option>
-                                </select>
-                                <input type="text" name="phone" class="vendor-input" value="{{ $phoneNumber }}" placeholder="{{ __('vendor.onboarding.phone_placeholder') }}">
+                            <div class="vendor-phone-row">
+                                <div class="vendor-phone-codes">
+                                    <label class="vendor-phone-code {{ $phoneCountry === '+966' ? 'active' : '' }}">
+                                        <input type="radio" name="phone_country_code" value="+966" @checked($phoneCountry === '+966')>
+                                        @if($ksaFlag)<img src="{{ $ksaFlag }}" alt="KSA">@endif
+                                        <span>+966</span>
+                                    </label>
+                                    <label class="vendor-phone-code {{ $phoneCountry === '+971' ? 'active' : '' }}">
+                                        <input type="radio" name="phone_country_code" value="+971" @checked($phoneCountry === '+971')>
+                                        @if($uaeFlag)<img src="{{ $uaeFlag }}" alt="UAE">@endif
+                                        <span>+971</span>
+                                    </label>
+                                </div>
+                                <input type="text" name="phone" class="vendor-input" value="{{ $phoneNumber }}" placeholder="{{ __('vendor.onboarding.phone_placeholder') }}" style="flex: 1;">
                             </div>
                             @error('phone')<div class="vendor-error">{{ $message }}</div>@enderror
                             @error('phone_country_code')<div class="vendor-error">{{ $message }}</div>@enderror
@@ -616,6 +669,13 @@
                 }
                 localStorage.removeItem('vendor_onboarding_step');
             }
+        });
+    });
+
+    document.querySelectorAll('.vendor-phone-code input').forEach((input) => {
+        input.addEventListener('change', () => {
+            document.querySelectorAll('.vendor-phone-code').forEach((label) => label.classList.remove('active'));
+            input.closest('.vendor-phone-code')?.classList.add('active');
         });
     });
 </script>

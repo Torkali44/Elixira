@@ -61,6 +61,22 @@ return [
         'title' => 'تعليق/مراجعة جديدة',
         'message' => 'تم إرسال مراجعة جديدة من :name وهي في انتظار الموافقة.',
     ],
+    'new_product' => [
+        'title' => 'منتج جديد',
+        'message' => 'اكتشف منتجنا الجديد: :product',
+    ],
+    'brand_new_product' => [
+        'title' => ':brand أضاف منتجاً جديداً',
+        'message' => 'أضاف :brand منتج :product إلى المتجر.',
+    ],
+    'new_package' => [
+        'title' => 'باكيدج جديد',
+        'message' => 'اكتشف باكيدجنا الجديد: :package',
+    ],
+    'missed_packages' => [
+        'title' => 'باكيدجات قد تكون فاتتك',
+        'message' => 'بعض الباكيدجات المميزة بانتظارك — اضغط للاطلاع.',
+    ],
     'rejection_reason' => ' السبب: :reason',
     'vendor_reason' => ' السبب: :reason',
     'status' => [

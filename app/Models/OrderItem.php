@@ -10,8 +10,10 @@ class OrderItem extends Model
     protected $fillable = [
         'order_id',
         'item_id',
+        'package_id',
+        'product_name',
         'quantity',
-        'price'
+        'price',
     ];
 
     protected $casts = [

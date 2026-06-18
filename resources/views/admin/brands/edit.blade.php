@@ -127,6 +127,8 @@
                         </div>
 
                         <div class="d-grid mt-4">
+                            @include('admin.partials.tags-input', ['selectedTags' => $selectedTags ?? '', 'tagSuggestions' => $tagSuggestions ?? []])
+
                             <button type="submit" class="btn btn-primary py-2 fw-bold" style="border-radius: 8px;">
                                 <i class="fas fa-save me-2"></i> {{ __('admin.brands_edit.update_btn') }}
                             </button>

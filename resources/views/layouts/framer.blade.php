@@ -293,6 +293,8 @@
                 <li><a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'active' : '' }}">{{ __('app.home') }}</a></li>
                 <li><a href="{{ route('menu.index') }}"
                         class="{{ request()->routeIs('menu.*') ? 'active' : '' }}">{{ __('app.shop') }}</a></li>
+                <li><a href="{{ route('packages.index') }}"
+                        class="{{ request()->routeIs('packages.*') ? 'active' : '' }}">{{ __('shop.packages_title') }}</a></li>
                 <li class="elx-nav__dropdown">
                     <a href="{{ route('about') }}" class="{{ request()->routeIs('about') || request()->routeIs('brands.*') || request()->routeIs('faqs.*') ? 'active' : '' }}">{{ __('app.about') }} <i class="fas fa-chevron-down"></i></a>
                     <div class="elx-nav__dropdown-menu">
@@ -314,6 +316,10 @@
             </ul>
 
             <div class="elx-nav__actions">
+                <form action="{{ route('search.index') }}" method="GET" class="d-none d-lg-flex" style="margin-inline-end: 0.5rem;">
+                    <input type="search" name="q" value="{{ request('q') }}" placeholder="{{ __('shop.search_placeholder') }}"
+                        style="width: 180px; padding: 0.45rem 0.9rem; border-radius: 999px; border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.05); color: #fff; font-size: 0.85rem;">
+                </form>
                 <div class="elx-nav__actions-cluster">
                 @auth
                     <div class="elx-nav__notifications-wrapper" id="notificationsMenu">

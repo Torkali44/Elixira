@@ -10,7 +10,7 @@ return [
     'phone_title' => 'WhatsApp',
     'phone_value' => '+971 54 592 0050',
     'email_title' => 'Email Address',
-    'email_value' => 'info@elixira.com',
+    'email_value' => 'eshraqa.melody00@gmail.com',
     'hours_title' => 'Business Hours',
     'hours_value' => 'All Days: 9:00 AM – 9:00 PM',
     'social_title' => 'Follow Us',

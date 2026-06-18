@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Blog;
 use App\Models\BlogImage;
+use App\Models\Tag;
+use App\Support\TagService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -28,7 +30,7 @@ class BlogController extends Controller
      */
     public function create(): View
     {
-        return view('admin.blogs.create');
+        return view('admin.blogs.create', $this->tagFormData());
     }
 
     /**
@@ -46,6 +48,7 @@ class BlogController extends Controller
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'gallery.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:4096',
             'video_url' => 'nullable|url|max:500',
+            'tags' => 'nullable|string|max:1000',
         ]);
 
         $data['is_published'] = $request->has('is_published');
@@ -66,6 +69,7 @@ class BlogController extends Controller
         $data['slug'] = $slug;
 
         $blog = Blog::create($data);
+        app(TagService::class)->syncFromInput($blog, $request->input('tags'));
 
         // Store gallery images
         if ($request->hasFile('gallery')) {
@@ -83,9 +87,9 @@ class BlogController extends Controller
      */
     public function edit(Blog $blog): View
     {
-        $blog->load('images');
+        $blog->load('images', 'tags');
 
-        return view('admin.blogs.edit', compact('blog'));
+        return view('admin.blogs.edit', compact('blog') + $this->tagFormData($blog));
     }
 
     /**
@@ -103,6 +107,7 @@ class BlogController extends Controller
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'gallery.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:4096',
             'video_url' => 'nullable|url|max:500',
+            'tags' => 'nullable|string|max:1000',
         ]);
 
         $data['is_published'] = $request->has('is_published');
@@ -132,6 +137,7 @@ class BlogController extends Controller
         }
 
         $blog->update($data);
+        app(TagService::class)->syncFromInput($blog, $request->input('tags'));
 
         // Store new gallery images
         if ($request->hasFile('gallery')) {
@@ -172,5 +178,16 @@ class BlogController extends Controller
         $image->delete();
 
         return redirect()->route('admin.blogs.edit', $blogId)->with('success', 'Gallery image removed.');
+    }
+
+    /**
+     * @return array{selectedTags: string, tagSuggestions: list<string>}
+     */
+    private function tagFormData(?Blog $blog = null): array
+    {
+        return [
+            'selectedTags' => $blog?->tagNames() ?? '',
+            'tagSuggestions' => Tag::query()->orderBy('name')->pluck('name')->all(),
+        ];
     }
 }

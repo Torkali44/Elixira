@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasTags;
 use App\Support\ItemPricingService;
 use App\Support\VendorSubscriptionService;
 use Illuminate\Database\Eloquent\Builder;
@@ -11,6 +12,8 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Item extends Model
 {
+    use HasTags;
+
     protected $fillable = [
         'category_id',
         'brand_id',

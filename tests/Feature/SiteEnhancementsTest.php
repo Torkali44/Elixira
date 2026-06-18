@@ -1,14 +1,20 @@
 <?php
 
+use App\Models\Blog;
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\ContactMessage;
 use App\Models\DxnSponsorCode;
 use App\Models\DxnTeamRequest;
+use App\Models\Faq;
+use App\Models\HomePageSection;
 use App\Models\Item;
+use App\Models\Review;
 use App\Models\User;
 use App\Models\VendorProfile;
 use App\Support\ItemPricingService;
+use App\Support\SiteBroadcastService;
+use App\Support\TagService;
 use App\Support\UserNotifier;
 
 test('contact form stores a message for admin review', function () {
@@ -309,4 +315,138 @@ test('vendor subscription expiring soon command sends renewal warning', function
 
     expect($notification)->not->toBeNull()
         ->and($notification->message_key)->toBe('notifications.vendor_subscription_expiring.message');
+});
+
+test('cart page loads without controller resolution error', function () {
+    $this->get(route('cart.index'))->assertSuccessful();
+});
+
+test('global search finds products blogs and faqs', function () {
+    $category = Category::query()->create(['name' => 'Hair', 'name_en' => 'Hair', 'name_ar' => 'شعر']);
+    Item::query()->create([
+        'category_id' => $category->id,
+        'name' => 'Hair Cream',
+        'name_en' => 'Hair Cream',
+        'name_ar' => 'كريم شعر',
+        'description' => 'desc',
+        'price' => 50,
+        'stock' => 3,
+        'status' => 'approved',
+    ]);
+
+    Blog::query()->create([
+        'title_en' => 'Hair Care Tips',
+        'title_ar' => 'نصائح للعناية بالشعر',
+        'slug' => 'hair-care-tips',
+        'summary_en' => 'About hair cream',
+        'summary_ar' => 'عن كريم الشعر',
+        'content_en' => 'Full article about hair cream',
+        'content_ar' => 'مقال كامل',
+        'is_published' => true,
+        'published_at' => now(),
+    ]);
+
+    Faq::query()->create([
+        'question_en' => 'What is hair cream?',
+        'question_ar' => 'ما هو كريم الشعر؟',
+        'answer_en' => 'A nourishing cream for hair.',
+        'answer_ar' => 'كريم مغذي للشعر.',
+        'is_published' => true,
+        'sort_order' => 1,
+    ]);
+
+    $response = $this->get(route('search.index', ['q' => 'hair cream']));
+
+    $response->assertSuccessful()
+        ->assertSee('Hair Cream')
+        ->assertSee('Hair Care Tips')
+        ->assertSee('What is hair cream?');
+});
+
+test('admin can manage homepage hero section', function () {
+    $admin = User::factory()->create(['role' => 'admin']);
+
+    HomePageSection::query()->updateOrCreate(
+        ['slug' => 'hero'],
+        [
+            'admin_label' => 'Hero',
+            'template' => 'hero',
+            'title' => 'Seasonal Hero',
+            'subtitle' => 'Limited offer',
+            'body' => json_encode(['secondary_button_label' => 'Cart', 'secondary_button_url' => '/cart']),
+            'button_label' => 'Shop',
+            'button_url' => '/menu',
+            'sort_order' => 10,
+            'is_active' => true,
+        ]
+    );
+
+    $this->actingAs($admin)
+        ->get(route('admin.home-sections.index'))
+        ->assertSuccessful();
+
+    $this->get(route('home'))
+        ->assertSuccessful()
+        ->assertSee('Seasonal Hero')
+        ->assertSee('Limited offer');
+});
+
+test('product page shows country-specific pricing selector', function () {
+    $category = Category::query()->create(['name' => 'Cat', 'name_en' => 'Cat', 'name_ar' => 'قسم']);
+    $item = Item::query()->create([
+        'category_id' => $category->id,
+        'name' => 'Dual Country Item',
+        'name_en' => 'Dual Country Item',
+        'name_ar' => 'منتج',
+        'description' => 'desc',
+        'price' => 100,
+        'stock' => 5,
+        'status' => 'approved',
+    ]);
+    $item->countryPrices()->create(['country_code' => 'KSA', 'member_price' => 80, 'guest_price' => 100]);
+    $item->countryPrices()->create(['country_code' => 'UAE', 'member_price' => 90, 'guest_price' => 110]);
+
+    $this->get(route('menu.show', ['item' => $item, 'country' => 'UAE']))
+        ->assertSuccessful()
+        ->assertSee(__('shop.country_uae'));
+});
+
+test('related testimonials appear on product page by shared tags', function () {
+    $category = Category::query()->create(['name' => 'Cat', 'name_en' => 'Cat', 'name_ar' => 'قسم']);
+    $item = Item::query()->create([
+        'category_id' => $category->id,
+        'name' => 'Tagged Product',
+        'name_en' => 'Tagged Product',
+        'name_ar' => 'منتج',
+        'description' => 'desc',
+        'price' => 50,
+        'stock' => 3,
+        'status' => 'approved',
+    ]);
+
+    app(TagService::class)->syncFromInput($item, 'hair, glow');
+
+    $review = Review::query()->create([
+        'type' => 'whatsapp',
+        'avatar' => 'reviews/sample.jpg',
+        'content' => 'Amazing hair results',
+        'status' => 'approved',
+    ]);
+    app(TagService::class)->syncFromInput($review, 'hair');
+
+    $this->get(route('menu.show', $item))
+        ->assertSuccessful()
+        ->assertSee(__('shop.related_testimonials'))
+        ->assertSee('Amazing hair results');
+});
+
+test('site broadcast notifications respect daily cap', function () {
+    $user = User::factory()->create(['role' => 'user']);
+    $service = app(SiteBroadcastService::class);
+
+    $service->broadcastIfAllowed('new_product', ['product' => 'One']);
+    $service->broadcastIfAllowed('new_product', ['product' => 'Two']);
+    $service->broadcastIfAllowed('new_product', ['product' => 'Three']);
+
+    expect($user->fresh()->notifications()->count())->toBe(2);
 });

@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Brand;
+use App\Models\Tag;
+use App\Support\TagService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -22,7 +24,9 @@ class BrandController extends Controller
 
     public function edit(Brand $brand)
     {
-        return view('admin.brands.edit', compact('brand'));
+        $brand->load('tags');
+
+        return view('admin.brands.edit', compact('brand') + $this->tagFormData($brand));
     }
 
     public function update(Request $request, Brand $brand)
@@ -39,6 +43,7 @@ class BrandController extends Controller
             'store_link_description' => 'nullable|string|max:500',
             'service_countries' => 'required|array|min:1',
             'service_countries.*' => 'string|in:Saudi Arabia,UAE',
+            'tags' => 'nullable|string|max:1000',
         ]);
 
         $logoPath = $brand->logo;
@@ -74,6 +79,8 @@ class BrandController extends Controller
             'is_active' => $request->has('is_active'),
         ]);
 
+        app(TagService::class)->syncFromInput($brand, $request->input('tags'));
+
         // Sync with VendorProfile
         $vendorProfile = $brand->vendorProfile;
         if ($vendorProfile) {
@@ -91,5 +98,16 @@ class BrandController extends Controller
         }
 
         return redirect()->route('admin.brands.index')->with('success', 'Brand and vendor profile updated successfully.');
+    }
+
+    /**
+     * @return array{selectedTags: string, tagSuggestions: list<string>}
+     */
+    private function tagFormData(Brand $brand): array
+    {
+        return [
+            'selectedTags' => $brand->tagNames(),
+            'tagSuggestions' => Tag::query()->orderBy('name')->pluck('name')->all(),
+        ];
     }
 }

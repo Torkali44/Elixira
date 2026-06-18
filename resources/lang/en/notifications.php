@@ -61,6 +61,22 @@ return [
         'title' => 'New Review/Comment',
         'message' => 'A new review has been submitted by :name and is pending approval.',
     ],
+    'new_product' => [
+        'title' => 'New Product Added',
+        'message' => 'Check out our new product: :product',
+    ],
+    'brand_new_product' => [
+        'title' => ':brand launched something new',
+        'message' => ':brand just added :product to the shop.',
+    ],
+    'new_package' => [
+        'title' => 'New Package Available',
+        'message' => 'Discover our new package: :package',
+    ],
+    'missed_packages' => [
+        'title' => 'Packages you might have missed',
+        'message' => 'Some curated packages are waiting for you — tap to explore.',
+    ],
     'rejection_reason' => ' Reason: :reason',
     'vendor_reason' => ' Reason: :reason',
     'status' => [

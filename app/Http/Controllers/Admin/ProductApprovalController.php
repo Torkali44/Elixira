@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Item;
+use App\Support\SiteBroadcastService;
 use App\Support\UserNotifier;
 use Illuminate\Http\Request;
 
@@ -29,6 +30,21 @@ class ProductApprovalController extends Controller
                 UserNotifier::send($vendor->id, 'product_approved', [
                     'product' => $item->name,
                 ], route('vendor.items.index'));
+            }
+
+            $brandName = $item->brandModel?->name;
+            if ($brandName) {
+                app(SiteBroadcastService::class)->broadcastIfAllowed(
+                    'brand_new_product',
+                    ['brand' => $brandName, 'product' => $item->local_name],
+                    route('menu.show', $item)
+                );
+            } else {
+                app(SiteBroadcastService::class)->broadcastIfAllowed(
+                    'new_product',
+                    ['product' => $item->local_name],
+                    route('menu.show', $item)
+                );
             }
         } catch (\Throwable $e) {
             \Log::error('Product approval notification failed: '.$e->getMessage());

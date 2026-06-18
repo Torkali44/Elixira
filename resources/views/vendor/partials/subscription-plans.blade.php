@@ -167,7 +167,62 @@
         display: grid;
         gap: 0.35rem;
     }
-    .vendor-receipt-required::after { content: ' *'; color: #ff9b9b; }
+    .vendor-receipt-panel {
+        margin-top: 1.25rem;
+        padding: 1.15rem 1.2rem 1.25rem;
+        border-radius: 18px;
+        background: linear-gradient(145deg, #fff4df 0%, #ffe7b8 100%);
+        border: 1px solid rgba(180, 110, 20, 0.22);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
+    }
+
+    .vendor-receipt-panel .vendor-label {
+        color: #7a4d00;
+        font-weight: 700;
+    }
+
+    .vendor-receipt-upload {
+        border: 2px dashed rgba(180, 110, 20, 0.45);
+        border-radius: 16px;
+        padding: 1.75rem 1.25rem;
+        text-align: center;
+        cursor: pointer;
+        transition: 0.2s ease;
+        background: rgba(255, 255, 255, 0.72);
+    }
+
+    .vendor-receipt-upload:hover {
+        border-color: #b45309;
+        background: #fff;
+        box-shadow: 0 8px 24px rgba(180, 110, 20, 0.12);
+    }
+
+    .vendor-receipt-upload__title {
+        color: #7a4d00;
+        font-weight: 700;
+    }
+
+    .vendor-receipt-upload__hint {
+        color: #9a6b1f;
+        font-size: 0.8rem;
+        margin-top: 0.5rem;
+    }
+
+    .vendor-receipt-upload__name {
+        margin-top: 1rem;
+        color: #b45309;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .vendor-receipt-upload__done {
+        margin-top: 0.5rem;
+        color: #15803d;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .vendor-receipt-required::after { content: ' *'; color: #dc2626; }
     @media (max-width: 900px) {
         .vendor-plans { grid-template-columns: 1fr; }
     }
@@ -230,20 +285,22 @@
         </ul>
     </div>
 
-    <label class="vendor-label vendor-receipt-required">{{ __('vendor.onboarding.upload_receipt') }}</label>
-    <div class="vendor-file-upload" id="receiptUploadBox" onclick="document.getElementById('subscription_payment_receipt').click()">
-        <i class="fas fa-receipt" style="font-size: 2rem; color: var(--elx-cyan); margin-bottom: 1rem;"></i>
-        <div style="color: var(--elx-white); font-weight: 500;">{{ __('vendor.onboarding.upload_receipt') }}</div>
-        <div style="color: var(--elx-light); font-size: 0.8rem; margin-top: 0.5rem;">PDF, PNG, JPG</div>
-        <input type="file" id="subscription_payment_receipt" name="subscription_payment_receipt" style="display: none;" accept=".pdf,image/*" onchange="document.getElementById('receipt_name').textContent = this.files[0]?.name || ''">
-        <div id="receipt_name" style="margin-top: 1rem; color: var(--elx-cyan); font-size: 0.85rem;"></div>
-        @if($vendorProfile->subscription_payment_receipt ?? ($hasReceipt ?? false))
-            <div style="margin-top: 0.5rem; color: #7ef0bf; font-size: 0.85rem;">
-                <i class="fas fa-check-circle"></i> {{ __('vendor.onboarding.receipt_uploaded') }}
-            </div>
-        @endif
+    <div class="vendor-receipt-panel">
+        <label class="vendor-label vendor-receipt-required">{{ __('vendor.onboarding.upload_receipt') }}</label>
+        <div class="vendor-receipt-upload" id="receiptUploadBox" onclick="document.getElementById('subscription_payment_receipt').click()">
+            <i class="fas fa-receipt" style="font-size: 2rem; color: #b45309; margin-bottom: 1rem;"></i>
+            <div class="vendor-receipt-upload__title">{{ __('vendor.onboarding.upload_receipt') }}</div>
+            <div class="vendor-receipt-upload__hint">PDF, PNG, JPG</div>
+            <input type="file" id="subscription_payment_receipt" name="subscription_payment_receipt" style="display: none;" accept=".pdf,image/*" onchange="document.getElementById('receipt_name').textContent = this.files[0]?.name || ''">
+            <div id="receipt_name" class="vendor-receipt-upload__name"></div>
+            @if($vendorProfile->subscription_payment_receipt ?? ($hasReceipt ?? false))
+                <div class="vendor-receipt-upload__done">
+                    <i class="fas fa-check-circle"></i> {{ __('vendor.onboarding.receipt_uploaded') }}
+                </div>
+            @endif
+        </div>
+        @error('subscription_payment_receipt')<div class="vendor-error">{{ $message }}</div>@enderror
     </div>
-    @error('subscription_payment_receipt')<div class="vendor-error">{{ $message }}</div>@enderror
 </div>
 
 <script>

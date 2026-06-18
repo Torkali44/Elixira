@@ -13,6 +13,14 @@
         <span class="badge bg-danger rounded-pill">{{ $newPendingItemsCount }}</span>
     @endif
 </a>
+<a href="{{ route('admin.packages.index') }}" class="dashboard-nav-link {{ request()->routeIs('admin.packages.*') ? 'active' : '' }}">
+    <i class="fas fa-box-open"></i>
+    <span>{{ __('admin.nav.packages') }}</span>
+</a>
+<a href="{{ route('admin.home-sections.index') }}" class="dashboard-nav-link {{ request()->routeIs('admin.home-sections.*') ? 'active' : '' }}">
+    <i class="fas fa-home"></i>
+    <span>{{ __('admin.nav.home_sections') }}</span>
+</a>
 <a href="{{ route('admin.users.index') }}" class="dashboard-nav-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
     <i class="fas fa-users"></i>
     <span>{{ __('admin.nav.users') }}</span>

@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\Item;
 use App\Models\SpecialItemOffer;
+use App\Support\ItemPricingService;
+use App\Support\TagService;
 
 class MenuController extends Controller
 {
@@ -25,7 +27,10 @@ class MenuController extends Controller
             abort(404);
         }
 
-        $item->load('category', 'images', 'brandModel', 'ratings.user', 'countryPrices');
+        $item->load('category', 'images', 'brandModel', 'ratings.user', 'countryPrices', 'tags');
+
+        $pricingService = app(ItemPricingService::class);
+        $selectedCountry = $pricingService->resolveCountryCode(request('country'));
 
         // Find other approved products with the same name sold by different brands
         $otherSellers = Item::with('brandModel')
@@ -34,17 +39,22 @@ class MenuController extends Controller
             ->publiclyVisible()
             ->get();
 
-        $relatedItems = Item::with('category', 'brandModel')
-            ->where('category_id', $item->category_id)
-            ->where('id', '!=', $item->id)
-            ->publiclyVisible()
-            ->whereNotIn('id', $otherSellers->pluck('id'))
-            ->take(4)
-            ->get();
+        $tagService = app(TagService::class);
+        $relatedItems = $tagService->relatedItems($item, 4);
+        $relatedBlogs = $tagService->relatedBlogsForItem($item, 4);
+        $relatedReviews = $tagService->relatedReviewsForItem($item, 6);
 
         $privateOfferQuantities = $this->privateOfferQuantitiesForCurrentUser();
 
-        return view('menu.show', compact('item', 'relatedItems', 'otherSellers', 'privateOfferQuantities'));
+        return view('menu.show', compact(
+            'item',
+            'relatedItems',
+            'relatedBlogs',
+            'relatedReviews',
+            'otherSellers',
+            'privateOfferQuantities',
+            'selectedCountry'
+        ));
     }
 
     private function privateOfferQuantitiesForCurrentUser(): array

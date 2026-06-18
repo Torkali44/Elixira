@@ -39,7 +39,8 @@
             <div class="mb-3">
                 <label class="form-label">Body</label>
                 <textarea name="body" class="form-control font-monospace small" rows="8" maxlength="20000">{{ old('body', $section->body) }}</textarea>
-                <small class="text-muted">For template <strong>icon_cards</strong>, use JSON array: <code>[{"icon":"fa-leaf","title":"...","text":"..."},...]</code></small>
+                <small class="text-muted">For template <strong>icon_cards</strong>, use JSON array: <code>[{"icon":"fa-leaf","title":"...","text":"..."},...]</code><br>
+                For template <strong>hero</strong>, optional second button JSON: <code>{"secondary_button_label":"Go Cart","secondary_button_url":"/cart"}</code></small>
             </div>
 
             <div class="row">

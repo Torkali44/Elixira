@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasTags;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
 class Blog extends Model
 {
+    use HasTags;
+
     protected $fillable = [
         'title_en',
         'title_ar',

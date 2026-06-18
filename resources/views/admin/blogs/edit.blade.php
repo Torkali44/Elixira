@@ -113,6 +113,9 @@
                                {{ old('is_published', $blog->is_published) ? 'checked' : '' }}>
                         <label class="form-check-label fw-semibold" for="is_published">{{ __('admin.blogs_page.status_published') }}</label>
                     </div>
+
+                    @include('admin.partials.tags-input', ['selectedTags' => $selectedTags ?? '', 'tagSuggestions' => $tagSuggestions ?? []])
+
                     <button type="submit" class="btn btn-primary w-100"><i class="fas fa-save me-2"></i> {{ __('admin.blogs_page.update_btn') }}</button>
                 </div>
             </div>

@@ -86,6 +86,9 @@
                         <label class="form-check-label fw-semibold" for="is_published">{{ __('admin.blogs_page.publish_immediately') }}</label>
                         <div class="form-text">{{ __('admin.blogs_page.publish_hint') }}</div>
                     </div>
+
+                    @include('admin.partials.tags-input', ['selectedTags' => $selectedTags ?? '', 'tagSuggestions' => $tagSuggestions ?? []])
+
                     <button type="submit" class="btn btn-primary w-100"><i class="fas fa-paper-plane me-2"></i> {{ __('admin.blogs_page.publish_btn') }}</button>
                 </div>
             </div>

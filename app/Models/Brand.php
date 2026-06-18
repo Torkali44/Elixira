@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasTags;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Support\Str;
 
 class Brand extends Model
 {
+    use HasTags;
+
     protected $fillable = [
         'vendor_profile_id',
         'slug',
@@ -37,7 +40,7 @@ class Brand extends Model
                 $original = $brand->slug;
                 $count = 1;
                 while (static::where('slug', $brand->slug)->exists()) {
-                    $brand->slug = $original . '-' . $count++;
+                    $brand->slug = $original.'-'.$count++;
                 }
             }
         });
@@ -67,7 +70,7 @@ class Brand extends Model
 
     public function getLogoUrlAttribute(): ?string
     {
-        return $this->logo ? asset('storage/' . $this->logo) : null;
+        return $this->logo ? asset('storage/'.$this->logo) : null;
     }
 
     public function ratings(): MorphMany
@@ -81,14 +84,15 @@ class Brand extends Model
         $itemRatings = Rating::where('rateable_type', Item::class)
             ->whereIn('rateable_id', $this->items()->pluck('id'))
             ->pluck('rating');
-            
+
         $allRatings = $brandRatings->concat($itemRatings);
-        
+
         if ($allRatings->isEmpty()) {
             return 0;
         }
-        
+
         $avg = $allRatings->average();
+
         return round($avg * 2) / 2;
     }
 

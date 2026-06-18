@@ -10,7 +10,7 @@ return [
     'phone_title' => 'واتساب',
     'phone_value' => '+971 54 592 0050',
     'email_title' => 'البريد الإلكتروني',
-    'email_value' => 'info@elixira.com',
+    'email_value' => 'eshraqa.melody00@gmail.com',
     'hours_title' => 'ساعات العمل',
     'hours_value' => 'جميع الأيام: 9:00 ص – 9:00 م',
     'social_title' => 'تابعنا',

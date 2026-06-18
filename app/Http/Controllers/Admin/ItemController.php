@@ -9,7 +9,9 @@ use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Item;
 use App\Models\ItemImage;
+use App\Models\Tag;
 use App\Support\ItemPricingService;
+use App\Support\TagService;
 use Illuminate\Support\Facades\Storage;
 
 class ItemController extends Controller
@@ -50,7 +52,7 @@ class ItemController extends Controller
         $categories = Category::all();
         $brands = Brand::where('is_active', true)->orderBy('name')->get();
 
-        return view('admin.items.create', compact('categories', 'brands'));
+        return view('admin.items.create', compact('categories', 'brands') + $this->tagFormData());
     }
 
     public function store(StoreItemRequest $request)
@@ -65,6 +67,7 @@ class ItemController extends Controller
 
         $item = Item::create($data);
         app(ItemPricingService::class)->syncCountryPrices($item, $request->input('country_prices', []));
+        app(TagService::class)->syncFromInput($item, $request->input('tags'));
 
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $image) {
@@ -80,9 +83,9 @@ class ItemController extends Controller
     {
         $categories = Category::all();
         $brands = Brand::where('is_active', true)->orderBy('name')->get();
-        $item->load('countryPrices');
+        $item->load('countryPrices', 'tags');
 
-        return view('admin.items.edit', compact('item', 'categories', 'brands'));
+        return view('admin.items.edit', compact('item', 'categories', 'brands') + $this->tagFormData($item));
     }
 
     public function update(UpdateItemRequest $request, Item $item)
@@ -103,6 +106,7 @@ class ItemController extends Controller
 
         $item->update($data);
         app(ItemPricingService::class)->syncCountryPrices($item, $request->input('country_prices', []));
+        app(TagService::class)->syncFromInput($item, $request->input('tags'));
 
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $image) {
@@ -142,5 +146,16 @@ class ItemController extends Controller
         $data['description'] = $data['description_en'];
 
         return $data;
+    }
+
+    /**
+     * @return array{selectedTags: string, tagSuggestions: list<string>}
+     */
+    private function tagFormData(?Item $item = null): array
+    {
+        return [
+            'selectedTags' => $item?->tagNames() ?? '',
+            'tagSuggestions' => Tag::query()->orderBy('name')->pluck('name')->all(),
+        ];
     }
 }

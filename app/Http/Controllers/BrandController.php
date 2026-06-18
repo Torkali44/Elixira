@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Brand;
 use App\Models\SpecialItemOffer;
-use Illuminate\Http\Request;
+use App\Support\TagService;
 
 class BrandController extends Controller
 {
@@ -44,12 +44,8 @@ class BrandController extends Controller
 
         $privateOfferQuantities = $this->privateOfferQuantitiesForCurrentUser();
 
-        // Similar brands (same service countries, exclude current)
-        $similarBrands = Brand::where('is_active', true)
-            ->where('id', '!=', $brand->id)
-            ->withCount('items')
-            ->take(4)
-            ->get();
+        // Similar brands by shared tags
+        $similarBrands = app(TagService::class)->relatedBrands($brand, 4);
 
         return view('brands.show', compact('brand', 'products', 'similarBrands', 'privateOfferQuantities'));
     }

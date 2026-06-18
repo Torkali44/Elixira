@@ -37,6 +37,7 @@ class StoreItemRequest extends FormRequest
             'images.*' => 'image|max:10240',
             'is_featured' => 'boolean',
             'long_description' => 'nullable|string',
+            'tags' => 'nullable|string|max:1000',
         ];
     }
 
