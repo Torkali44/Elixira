@@ -137,6 +137,7 @@ class Item extends Model
         $graceCutoff = now()->subDays($graceDays);
 
         return $query->where('status', 'approved')
+            ->whereHas('countryPrices')
             ->where(function (Builder $q) use ($graceCutoff) {
                 $q->whereNull('brand_id')
                     ->orWhereHas('brandModel', function (Builder $brandQuery) use ($graceCutoff) {
@@ -161,6 +162,10 @@ class Item extends Model
     public function isPubliclyVisible(): bool
     {
         if ($this->status !== 'approved') {
+            return false;
+        }
+
+        if ($this->countryPrices()->doesntExist()) {
             return false;
         }
 

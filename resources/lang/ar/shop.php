@@ -27,6 +27,8 @@ return [
     'member_price_label' => 'عضو',
     'guest_price_label' => 'عادي',
     'not_available_in_country' => 'هذا المنتج غير متوفر في الدولة المختارة.',
+    'product_missing_country_pricing' => 'هذا المنتج غير مكتمل الإعداد للبيع. اختر منتجاً آخر.',
+    'package_missing_country_pricing' => 'هذا الباكيدج غير مكتمل الإعداد للبيع. اختر باكيدجاً آخر.',
     'available_in' => 'متوفر في',
     'related_testimonials' => 'تعليقات وفيديوهات ذات صلة',
     'view_all_testimonials' => 'عرض كل التعليقات',

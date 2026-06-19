@@ -607,6 +607,9 @@ return [
         'name_ar_required' => 'Arabic name is required.',
         'description_en_required' => 'English description is required.',
         'description_ar_required' => 'Arabic description is required.',
+        'country_price_required' => 'Enable at least one country (KSA or UAE) and set a member price.',
+        'member_price_required' => 'Member price is required for :country when the country is enabled.',
+        'stock_required' => 'Stock quantity is required.',
     ],
     'audit' => [
         'last_modified' => 'Last Modified',

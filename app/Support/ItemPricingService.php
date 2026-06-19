@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Models\Item;
+use App\Models\Package;
 use App\Models\User;
 
 class ItemPricingService
@@ -87,7 +88,7 @@ class ItemPricingService
      *     guest_price: float,
      *     active_price: float,
      *     has_country_pricing: bool,
-     *     discount_percent?: int
+     *     has_higher_guest_price?: bool
      * }
      */
     public function getPriceBreakdown(Item $item, ?User $user = null, ?string $countryCode = null): array
@@ -122,35 +123,46 @@ class ItemPricingService
             ];
         }
 
-        return $this->applyDiscount($item, $breakdown, $user);
-    }
-
-    /**
-     * @param  array<string, mixed>  $breakdown
-     * @return array<string, mixed>
-     */
-    private function applyDiscount(Item $item, array $breakdown, ?User $user): array
-    {
-        $discountPercent = (int) ($item->discount_percent ?? 0);
-
-        if ($discountPercent <= 0 || $discountPercent > 100) {
-            return $breakdown;
-        }
-
-        $factor = 1 - ($discountPercent / 100);
-        $breakdown['original_member_price'] = $breakdown['member_price'];
-        $breakdown['original_guest_price'] = $breakdown['guest_price'];
-        $breakdown['member_price'] = round((float) $breakdown['member_price'] * $factor, 2);
-        $breakdown['guest_price'] = round((float) $breakdown['guest_price'] * $factor, 2);
-        $breakdown['active_price'] = $this->isMember($user) ? $breakdown['member_price'] : $breakdown['guest_price'];
-        $breakdown['discount_percent'] = $discountPercent;
-
         return $breakdown;
     }
 
     public function resolvePrice(Item $item, ?User $user = null, ?string $countryCode = null): float
     {
         return $this->getPriceBreakdown($item, $user, $countryCode)['active_price'];
+    }
+
+    public function resolveCountryCodeForItem(Item $item, ?string $countryCode = null): ?string
+    {
+        $available = $this->availableCountryCodes($item);
+
+        if ($available === []) {
+            return null;
+        }
+
+        $countryCode = $this->resolveCountryCode($countryCode);
+
+        if (in_array($countryCode, $available, true)) {
+            return $countryCode;
+        }
+
+        return $available[0];
+    }
+
+    public function resolveCountryCodeForPackage(Package $package, ?string $countryCode = null): ?string
+    {
+        $available = app(PackagePricingService::class)->availableCountryCodes($package);
+
+        if ($available === []) {
+            return null;
+        }
+
+        $countryCode = $this->resolveCountryCode($countryCode);
+
+        if (in_array($countryCode, $available, true)) {
+            return $countryCode;
+        }
+
+        return $available[0];
     }
 
     public function isAvailableInCountry(Item $item, ?string $countryCode = null): bool

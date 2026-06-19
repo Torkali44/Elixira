@@ -5,7 +5,9 @@
 @endphp
 
 <div class="mb-4">
-    <label class="form-label fw-semibold">{{ __('admin.items_page.country_pricing') }}</label>
+    <label class="form-label fw-semibold">{{ __('admin.items_page.country_pricing') }} <span class="text-danger">*</span></label>
+    <p class="text-muted small">{{ __('admin.items_page.country_pricing_hint') }}</p>
+    @error('country_prices')<div class="text-danger small mb-2">{{ $message }}</div>@enderror
     <div class="row g-3">
         @foreach(['KSA' => __('shop.country_ksa'), 'UAE' => __('shop.country_uae')] as $code => $label)
             @php $row = $code === 'KSA' ? $ksa : $uae; @endphp
@@ -18,7 +20,8 @@
                     </div>
                     <div class="mb-2">
                         <label class="form-label small">{{ __('admin.items_page.member_price') }}</label>
-                        <input type="number" step="0.01" min="0" class="form-control" name="country_prices[{{ $code }}][member_price]" value="{{ old("country_prices.{$code}.member_price", $row?->member_price) }}">
+                        <input type="number" step="0.01" min="0" class="form-control @error("country_prices.{$code}.member_price") is-invalid @enderror" name="country_prices[{{ $code }}][member_price]" value="{{ old("country_prices.{$code}.member_price", $row?->member_price) }}">
+                        @error("country_prices.{$code}.member_price")<div class="text-danger small mt-1">{{ $message }}</div>@enderror
                     </div>
                     <div>
                         <label class="form-label small">{{ __('admin.items_page.guest_price') }}</label>

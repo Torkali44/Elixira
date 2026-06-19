@@ -114,6 +114,7 @@
             </nav>
 
             <div class="main-content">
+                @include('partials.dashboard-validation-support')
                 @yield('content')
             </div>
         </div>
@@ -147,6 +148,42 @@
                 title: @json(__('admin.common.validation_error')),
                 html: `{!! collect($errors->all())->map(fn ($error) => '<div style="margin:.25rem 0;">• '.e($error).'</div>')->implode('') !!}`,
                 confirmButtonText: @json(__('app.confirm'))
+            });
+
+            document.addEventListener('DOMContentLoaded', () => {
+                const fieldTabMap = {
+                    name_ar: '#name-ar-tab',
+                    description_ar: '#desc-ar-tab',
+                    name_en: '#name-en-tab',
+                    description_en: '#desc-en-tab',
+                };
+
+                for (const [field, tabSelector] of Object.entries(fieldTabMap)) {
+                    const input = document.querySelector(`[name="${field}"]`);
+                    if (!input || !input.classList.contains('is-invalid')) {
+                        continue;
+                    }
+
+                    const tabTrigger = document.querySelector(`[data-bs-toggle="tab"][href="${tabSelector}"], [data-bs-toggle="tab"][data-bs-target="${tabSelector}"]`);
+                    if (tabTrigger) {
+                        bootstrap.Tab.getOrCreateInstance(tabTrigger).show();
+                    }
+
+                    input.focus();
+                    break;
+                }
+
+                document.querySelectorAll('.nav-tabs .nav-link').forEach((link) => {
+                    const target = link.getAttribute('href') || link.getAttribute('data-bs-target');
+                    if (!target) {
+                        return;
+                    }
+
+                    const pane = document.querySelector(target);
+                    if (pane && pane.querySelector('.is-invalid')) {
+                        link.classList.add('text-danger', 'fw-bold');
+                    }
+                });
             });
         @endif
         function markAllVendorNotificationsAsRead(event) {

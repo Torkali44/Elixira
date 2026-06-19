@@ -2,13 +2,22 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Http\Requests\Concerns\ValidatesCountryPrices;
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateItemRequest extends FormRequest
 {
+    use ValidatesCountryPrices;
+
     public function authorize(): bool
     {
         return true;
+    }
+
+    public function withValidator(Validator $validator): void
+    {
+        $this->validateCountryPrices($validator);
     }
 
     public function rules(): array
@@ -21,8 +30,6 @@ class UpdateItemRequest extends FormRequest
             'brand' => 'nullable|string|max:255',
             'description_en' => 'required|string',
             'description_ar' => 'required|string',
-            'price' => 'required|numeric|min:0',
-            'discount_percent' => 'nullable|integer|min:0|max:100',
             'country_prices' => 'nullable|array',
             'country_prices.KSA' => 'nullable|array',
             'country_prices.KSA.member_price' => 'nullable|numeric|min:0',
@@ -51,9 +58,7 @@ class UpdateItemRequest extends FormRequest
             'name_ar.required' => __('admin.validation.name_ar_required'),
             'description_en.required' => __('admin.validation.description_en_required'),
             'description_ar.required' => __('admin.validation.description_ar_required'),
-            'price.required' => 'Price is required.',
-            'price.numeric' => 'Price must be a number.',
-            'price.min' => 'Price cannot be negative.',
+            'stock.required' => __('admin.validation.stock_required'),
             'image.image' => 'The file must be an image.',
             'image.max' => 'Image size must be 10MB or less.',
         ];

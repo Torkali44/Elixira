@@ -947,6 +947,34 @@
             });
         }
 
+        function selectProductCardCountry(btn) {
+            const productId = btn.dataset.productId;
+            const country = btn.dataset.country;
+            const input = document.getElementById(`product-country-${productId}`);
+            if (input) {
+                input.value = country;
+            }
+            document.querySelectorAll(`.product-card-country-btn[data-product-id="${productId}"]`).forEach((el) => {
+                const active = el.dataset.country === country;
+                el.style.borderColor = active ? 'rgba(74,200,246,0.8)' : 'rgba(255,255,255,0.15)';
+                el.style.background = active ? 'rgba(74,200,246,0.15)' : 'rgba(255,255,255,0.04)';
+            });
+        }
+
+        function selectPackageCardCountry(btn) {
+            const packageId = btn.dataset.packageId;
+            const country = btn.dataset.country;
+            const input = document.getElementById(`package-country-${packageId}`);
+            if (input) {
+                input.value = country;
+            }
+            document.querySelectorAll(`.package-card-country-btn[data-package-id="${packageId}"]`).forEach((el) => {
+                const active = el.dataset.country === country;
+                el.style.borderColor = active ? 'rgba(74,200,246,0.8)' : 'rgba(255,255,255,0.15)';
+                el.style.background = active ? 'rgba(74,200,246,0.15)' : 'rgba(255,255,255,0.04)';
+            });
+        }
+
         function showSpecialRequestModal(itemId, itemName) {
             Swal.fire({
                 title: `Special Order - ${itemName}`,

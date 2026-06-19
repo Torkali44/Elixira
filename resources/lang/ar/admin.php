@@ -606,6 +606,9 @@ return [
         'name_ar_required' => 'الاسم العربي مطلوب.',
         'description_en_required' => 'الوصف الإنجليزي مطلوب.',
         'description_ar_required' => 'الوصف العربي مطلوب.',
+        'country_price_required' => 'فعّل دولة واحدة على الأقل (السعودية أو الإمارات) وأدخل سعر العضو.',
+        'member_price_required' => 'سعر العضو مطلوب لـ :country عند تفعيل الدولة.',
+        'stock_required' => 'كمية المخزون مطلوبة.',
     ],
     'audit' => [
         'last_modified' => 'آخر تعديل',

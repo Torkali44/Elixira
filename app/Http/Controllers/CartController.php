@@ -13,6 +13,7 @@ use App\Models\Package;
 use App\Models\SpecialItemOffer;
 use App\Models\User;
 use App\Models\UserAddress;
+use App\Support\CartService;
 use App\Support\ItemPricingService;
 use App\Support\PackagePricingService;
 use App\Support\RewardPointsService;
@@ -22,9 +23,11 @@ use Illuminate\Support\Facades\DB;
 
 class CartController extends Controller
 {
+    public function __construct(private CartService $cartService) {}
+
     public function index()
     {
-        $cart = session()->get('cart', []);
+        $cart = $this->cartService->get();
 
         return view('cart.index', compact('cart'));
     }
@@ -33,10 +36,10 @@ class CartController extends Controller
     {
         $item = Item::with('countryPrices')->findOrFail($request->item_id);
         $pricing = app(ItemPricingService::class);
-        $countryCode = $pricing->resolveCountryCode($request->input('country_code'));
+        $countryCode = $pricing->resolveCountryCodeForItem($item, $request->input('country_code'));
 
-        if (! $pricing->isAvailableInCountry($item, $countryCode)) {
-            $message = __('shop.not_available_in_country');
+        if ($countryCode === null) {
+            $message = __('shop.product_missing_country_pricing');
 
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json(['success' => false, 'message' => $message]);
@@ -48,7 +51,7 @@ class CartController extends Controller
         $resolvedPrice = $pricing->resolvePrice($item, $request->user(), $countryCode);
         session(['shopping_country' => $countryCode]);
 
-        $cart = session()->get('cart', []);
+        $cart = $this->cartService->get();
         $quantity = $request->quantity ?? 1;
         $privateAllowance = $this->availablePrivateQuantity($request->user(), $item->id);
         $maxAllowed = $item->stock + $privateAllowance;
@@ -86,16 +89,17 @@ class CartController extends Controller
             $cart[$item->id]['quantity'] += $quantity;
         } else {
             $cart[$item->id] = [
+                'type' => 'item',
                 'name' => $item->local_name,
                 'quantity' => $quantity,
                 'price' => $resolvedPrice,
                 'country_code' => $countryCode,
-                'points' => $item->points ?? 0,
+                'points' => $item->reward_points ?? 0,
                 'image' => $item->image,
             ];
         }
 
-        session()->put('cart', $cart);
+        $this->cartService->put($cart);
 
         if ($request->boolean('buy_now')) {
             if ($request->ajax() || $request->wantsJson()) {
@@ -127,11 +131,17 @@ class CartController extends Controller
 
         $package = Package::with('countryPrices')->where('is_active', true)->findOrFail($request->package_id);
         $pricing = app(PackagePricingService::class);
-        $countryCode = app(ItemPricingService::class)->resolveCountryCode($request->input('country_code'));
+        $itemPricing = app(ItemPricingService::class);
+        $countryCode = $itemPricing->resolveCountryCodeForPackage($package, $request->input('country_code'));
+
+        if ($countryCode === null) {
+            return redirect()->back()->with('error', __('shop.package_missing_country_pricing'));
+        }
+
         $resolvedPrice = $pricing->resolvePrice($package, $request->user(), $countryCode);
         session(['shopping_country' => $countryCode]);
 
-        $cart = session()->get('cart', []);
+        $cart = $this->cartService->get();
         $cartKey = 'p_'.$package->id;
         $quantity = (int) ($request->quantity ?? 1);
         $maxAllowed = max(0, (int) $package->stock);
@@ -162,7 +172,7 @@ class CartController extends Controller
             ];
         }
 
-        session()->put('cart', $cart);
+        $this->cartService->put($cart);
 
         if ($request->boolean('buy_now')) {
             return redirect()->route('cart.index')->with('success', __('cart_page.added'));
@@ -173,7 +183,7 @@ class CartController extends Controller
 
     public function update(UpdateCartRequest $request)
     {
-        $cart = session()->get('cart', []);
+        $cart = $this->cartService->get();
 
         if (! isset($cart[$request->id])) {
             return response()->json(['success' => false, 'message' => 'Item not found in cart.'], 404);
@@ -197,7 +207,7 @@ class CartController extends Controller
         }
 
         $cart[$request->id]['quantity'] = $request->quantity;
-        session()->put('cart', $cart);
+        $this->cartService->put($cart);
 
         return response()->json(['success' => true]);
     }
@@ -205,7 +215,7 @@ class CartController extends Controller
     public function remove(RemoveFromCartRequest $request)
     {
         $id = $request->id;
-        $cart = session()->get('cart', []);
+        $cart = $this->cartService->get();
 
         if (! isset($cart[$id])) {
             if ($request->ajax() || $request->wantsJson()) {
@@ -216,7 +226,7 @@ class CartController extends Controller
         }
 
         unset($cart[$id]);
-        session()->put('cart', $cart);
+        $this->cartService->put($cart);
 
         if ($request->ajax() || $request->wantsJson()) {
             return response()->json(['success' => true]);
@@ -227,7 +237,7 @@ class CartController extends Controller
 
     public function checkout(CheckoutRequest $request)
     {
-        $cart = session()->get('cart', []);
+        $cart = $this->cartService->get();
 
         if (empty($cart)) {
             return redirect()->back()->with('error', 'Your cart is empty.');
@@ -406,7 +416,7 @@ class CartController extends Controller
             }
 
             DB::commit();
-            session()->forget('cart');
+            $this->cartService->forget();
 
             return redirect()->route('orders.track', [
                 'order_id' => $order->id,

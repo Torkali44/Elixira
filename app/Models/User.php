@@ -38,6 +38,7 @@ class User extends Authenticatable
         'role',
         'theme',
         'locale',
+        'cart_data',
     ];
 
     /**
@@ -63,6 +64,7 @@ class User extends Authenticatable
             'is_dxn_verified' => 'boolean',
             'dxn_verified_at' => 'datetime',
             'password' => 'hashed',
+            'cart_data' => 'array',
         ];
     }
 

@@ -9,6 +9,7 @@ use App\Models\DxnTeamRequest;
 use App\Models\Faq;
 use App\Models\HomePageSection;
 use App\Models\Item;
+use App\Models\Order;
 use App\Models\Package;
 use App\Models\Review;
 use App\Models\User;
@@ -214,9 +215,12 @@ test('authenticated user can checkout package cart entries keyed as p_id', funct
         'reward_points' => 10,
         'is_active' => true,
     ]);
+    $package->countryPrices()->create(['country_code' => 'KSA', 'member_price' => 100, 'guest_price' => 120]);
 
     session()->put('cart', [
         'p_'.$package->id => [
+            'type' => 'package',
+            'package_id' => $package->id,
             'name' => $package->local_name,
             'quantity' => 1,
             'price' => 120,
@@ -234,6 +238,59 @@ test('authenticated user can checkout package cart entries keyed as p_id', funct
 
     expect($package->fresh()->stock)->toBe(4)
         ->and($user->fresh()->total_points)->toBe(10);
+});
+
+test('authenticated user cart persists in user profile data', function () {
+    $user = User::factory()->create();
+    $category = Category::query()->create(['name' => 'Cat', 'name_en' => 'Cat', 'name_ar' => 'قسم']);
+    $item = Item::query()->create([
+        'category_id' => $category->id,
+        'name' => 'Persist Item',
+        'name_en' => 'Persist Item',
+        'name_ar' => 'منتج',
+        'description' => 'desc',
+        'price' => 50,
+        'stock' => 5,
+        'status' => 'approved',
+    ]);
+    $item->countryPrices()->create(['country_code' => 'KSA', 'member_price' => 40, 'guest_price' => 50]);
+
+    $this->actingAs($user)->post(route('cart.add'), [
+        'item_id' => $item->id,
+        'quantity' => 1,
+        'country_code' => 'KSA',
+    ])->assertRedirect();
+
+    expect($user->fresh()->cart_data)->toHaveKey((string) $item->id);
+
+    session()->flush();
+
+    $this->actingAs($user)->get(route('cart.index'))
+        ->assertSuccessful()
+        ->assertSee('Persist Item');
+});
+
+test('admin item store returns validation errors when arabic description is missing', function () {
+    $admin = User::factory()->create(['role' => 'admin']);
+    $category = Category::query()->create(['name' => 'Cat', 'name_en' => 'Cat', 'name_ar' => 'قسم']);
+
+    $this->actingAs($admin)->post(route('admin.items.store'), [
+        'category_id' => $category->id,
+        'name_en' => 'Test Product',
+        'name_ar' => 'منتج تجريبي',
+        'description_en' => 'English description',
+        'description_ar' => '',
+        'stock' => 5,
+        'country_prices' => [
+            'KSA' => [
+                'enabled' => '1',
+                'member_price' => 50,
+                'guest_price' => 60,
+            ],
+        ],
+    ])
+        ->assertSessionHasErrors(['description_ar'])
+        ->assertRedirect();
 });
 
 test('monthly reward points reset command clears user totals', function () {
@@ -528,7 +585,7 @@ test('site broadcast notifications respect daily cap', function () {
     expect($user->fresh()->notifications()->count())->toBe(2);
 });
 
-test('product page shows discount badge when admin sets discount percent', function () {
+test('guest price is shown exactly as entered even when legacy discount percent exists', function () {
     $category = Category::query()->create(['name' => 'Cat', 'name_en' => 'Cat', 'name_ar' => 'قسم']);
     $item = Item::query()->create([
         'category_id' => $category->id,
@@ -541,10 +598,13 @@ test('product page shows discount badge when admin sets discount percent', funct
         'status' => 'approved',
         'discount_percent' => 20,
     ]);
+    $item->countryPrices()->create(['country_code' => 'KSA', 'member_price' => 80, 'guest_price' => 100]);
 
-    $this->get(route('menu.show', $item))
-        ->assertSuccessful()
-        ->assertSee('-20%', false);
+    $pricing = app(ItemPricingService::class)->getPriceBreakdown($item, null, 'KSA');
+
+    expect($pricing['guest_price'])->toBe(100.0)
+        ->and($pricing['member_price'])->toBe(80.0)
+        ->and($pricing['active_price'])->toBe(100.0);
 });
 
 test('package can be added to cart from storefront', function () {
@@ -580,6 +640,7 @@ test('package page shows related content by shared tags', function () {
         'stock' => 5,
         'is_active' => true,
     ]);
+    $package->countryPrices()->create(['country_code' => 'KSA', 'member_price' => 90, 'guest_price' => 100]);
     app(TagService::class)->syncFromInput($package, 'glow, skin');
 
     $related = Package::query()->create([
@@ -591,6 +652,7 @@ test('package page shows related content by shared tags', function () {
         'stock' => 3,
         'is_active' => true,
     ]);
+    $related->countryPrices()->create(['country_code' => 'KSA', 'member_price' => 70, 'guest_price' => 80]);
     app(TagService::class)->syncFromInput($related, 'glow');
 
     $blog = Blog::query()->create([
@@ -622,4 +684,36 @@ test('package page shows related content by shared tags', function () {
         ->assertSee('Amazing glow results')
         ->assertSee(__('shop.related_packages'))
         ->assertSee('Glow Duo');
+});
+
+test('track order detail page renders package line items without errors', function () {
+    $package = Package::query()->create([
+        'name' => 'Invoice Package',
+        'name_en' => 'Invoice Package',
+        'name_ar' => 'باكيدج',
+        'description' => 'desc',
+        'price' => 120,
+        'stock' => 2,
+        'is_active' => true,
+    ]);
+
+    $order = Order::query()->create([
+        'customer_name' => 'Buyer',
+        'customer_phone' => '+966501234567',
+        'address' => 'Riyadh',
+        'total_amount' => 120,
+        'status' => 'pending',
+    ]);
+
+    $order->orderItems()->create([
+        'package_id' => $package->id,
+        'product_name' => 'Invoice Package',
+        'quantity' => 1,
+        'price' => 120,
+    ]);
+
+    $this->get(route('orders.track', ['order_id' => $order->id, 'phone' => $order->customer_phone]))
+        ->assertSuccessful()
+        ->assertSee('Invoice Package')
+        ->assertSee(__('track.print_invoice'));
 });

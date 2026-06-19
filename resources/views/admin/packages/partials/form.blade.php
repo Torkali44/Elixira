@@ -5,43 +5,46 @@
 <div class="row">
     <div class="col-md-6 mb-3">
         <label class="form-label">{{ __('admin.packages_page.name_en') }} *</label>
-        <input type="text" name="name_en" class="form-control" value="{{ old('name_en', $package?->name_en) }}" required>
+        <input type="text" name="name_en" class="form-control @error('name_en') is-invalid @enderror" value="{{ old('name_en', $package?->name_en) }}">
+        @error('name_en')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
     </div>
     <div class="col-md-6 mb-3">
         <label class="form-label">{{ __('admin.packages_page.name_ar') }} *</label>
-        <input type="text" name="name_ar" class="form-control" value="{{ old('name_ar', $package?->name_ar) }}" dir="rtl" required>
+        <input type="text" name="name_ar" class="form-control @error('name_ar') is-invalid @enderror" value="{{ old('name_ar', $package?->name_ar) }}" dir="rtl">
+        @error('name_ar')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
     </div>
 </div>
 
 <div class="mb-3">
     <label class="form-label">{{ __('admin.packages_page.description_en') }} *</label>
-    <textarea name="description_en" class="form-control" rows="2" required>{{ old('description_en', $package?->description_en) }}</textarea>
+    <textarea name="description_en" class="form-control @error('description_en') is-invalid @enderror" rows="2">{{ old('description_en', $package?->description_en) }}</textarea>
+    @error('description_en')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
 </div>
 <div class="mb-3">
     <label class="form-label">{{ __('admin.packages_page.description_ar') }} *</label>
-    <textarea name="description_ar" class="form-control" rows="2" dir="rtl" required>{{ old('description_ar', $package?->description_ar) }}</textarea>
+    <textarea name="description_ar" class="form-control @error('description_ar') is-invalid @enderror" rows="2" dir="rtl">{{ old('description_ar', $package?->description_ar) }}</textarea>
+    @error('description_ar')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
 </div>
 
 <div class="row">
-    <div class="col-md-4 mb-3">
+    <div class="col-md-6 mb-3">
         <label class="form-label">{{ __('admin.packages_page.stock') }} *</label>
-        <input type="number" min="0" name="stock" class="form-control" value="{{ old('stock', $package?->stock ?? 0) }}" required>
+        <input type="number" min="0" name="stock" class="form-control @error('stock') is-invalid @enderror" value="{{ old('stock', $package?->stock ?? 0) }}">
+        @error('stock')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
     </div>
-    <div class="col-md-4 mb-3">
+    <div class="col-md-6 mb-3">
         <label class="form-label">{{ __('admin.packages_page.reward_points') }}</label>
-        <input type="number" min="0" name="reward_points" class="form-control" value="{{ old('reward_points', $package?->reward_points ?? 0) }}">
-    </div>
-    <div class="col-md-4 mb-3 d-flex align-items-end">
-        <p class="text-muted small mb-2">{{ __('admin.packages_page.base_price_auto_hint') }}</p>
+        <input type="number" min="0" name="reward_points" class="form-control @error('reward_points') is-invalid @enderror" value="{{ old('reward_points', $package?->reward_points ?? 0) }}">
+        @error('reward_points')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
     </div>
 </div>
-<input type="hidden" name="price" value="{{ old('price', $package?->price ?? 0) }}">
 
 @include('partials.admin.package-country-prices', ['package' => $package])
 
 <div class="mb-3">
     <label class="form-label">{{ __('admin.packages_page.long_description') }}</label>
-    <textarea name="long_description" class="form-control" rows="6">{{ old('long_description', $package?->long_description) }}</textarea>
+    <textarea name="long_description" class="form-control @error('long_description') is-invalid @enderror" rows="6">{{ old('long_description', $package?->long_description) }}</textarea>
+    @error('long_description')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
 </div>
 
 <div class="mb-3">
@@ -49,7 +52,8 @@
     @if($package?->image)
         <div class="mb-2"><img src="{{ asset('storage/'.$package->image) }}" alt="" style="max-height:120px;" class="rounded border"></div>
     @endif
-    <input type="file" name="image" class="form-control" accept="image/*">
+    <input type="file" name="image" class="form-control @error('image') is-invalid @enderror" accept="image/*">
+    @error('image')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
 </div>
 
 <div class="mb-3">

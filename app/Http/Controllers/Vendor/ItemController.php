@@ -45,7 +45,6 @@ class ItemController extends Controller
             'description_en' => 'nullable|string',
             'description_ar' => 'nullable|string',
             'long_description' => 'nullable|string',
-            'price' => 'required|numeric|min:0',
             'country_prices' => 'nullable|array',
             'reward_points' => 'nullable|integer|min:0',
             'stock' => 'required|integer|min:0',
@@ -53,9 +52,14 @@ class ItemController extends Controller
             'images.*' => 'image|max:2048',
         ]);
 
+        if (! $this->hasEnabledCountryPricing($request->input('country_prices', []))) {
+            return back()->withErrors(['country_prices' => __('admin.validation.country_price_required')])->withInput();
+        }
+
         // Map bilingual fields to legacy columns
         $data['name'] = $data['name_en'];
         $data['description'] = $data['description_en'] ?? null;
+        $data['price'] = 0;
 
         $data['brand_id'] = $this->getBrandId();
         $data['status'] = 'pending';
@@ -103,13 +107,16 @@ class ItemController extends Controller
             'description_en' => 'nullable|string',
             'description_ar' => 'nullable|string',
             'long_description' => 'nullable|string',
-            'price' => 'required|numeric|min:0',
             'country_prices' => 'nullable|array',
             'reward_points' => 'nullable|integer|min:0',
             'stock' => 'required|integer|min:0',
             'image' => 'nullable|image|max:2048',
             'images.*' => 'image|max:2048',
         ]);
+
+        if (! $this->hasEnabledCountryPricing($request->input('country_prices', []))) {
+            return back()->withErrors(['country_prices' => __('admin.validation.country_price_required')])->withInput();
+        }
 
         // Map bilingual fields to legacy columns
         $data['name'] = $data['name_en'];
@@ -158,5 +165,21 @@ class ItemController extends Controller
         $item->delete();
 
         return redirect()->route('vendor.items.index')->with('success', 'Product deleted successfully.');
+    }
+
+    /**
+     * @param  array<string, mixed>  $countryPrices
+     */
+    private function hasEnabledCountryPricing(array $countryPrices): bool
+    {
+        foreach (['KSA', 'UAE'] as $code) {
+            $country = $countryPrices[$code] ?? null;
+
+            if (is_array($country) && ! empty($country['enabled']) && filled($country['member_price'] ?? null)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

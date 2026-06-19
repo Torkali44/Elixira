@@ -2,13 +2,22 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Http\Requests\Concerns\ValidatesCountryPrices;
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StorePackageRequest extends FormRequest
 {
+    use ValidatesCountryPrices;
+
     public function authorize(): bool
     {
         return true;
+    }
+
+    public function withValidator(Validator $validator): void
+    {
+        $this->validateCountryPrices($validator);
     }
 
     public function rules(): array
@@ -36,6 +45,17 @@ class StorePackageRequest extends FormRequest
             'package_items.*.selected' => 'nullable|boolean',
             'package_items.*.quantity' => 'nullable|integer|min:1',
             'tags' => 'nullable|string|max:1000',
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'name_en.required' => __('admin.validation.name_en_required'),
+            'name_ar.required' => __('admin.validation.name_ar_required'),
+            'description_en.required' => __('admin.validation.description_en_required'),
+            'description_ar.required' => __('admin.validation.description_ar_required'),
+            'stock.required' => __('admin.validation.stock_required'),
         ];
     }
 }

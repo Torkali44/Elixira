@@ -60,6 +60,7 @@ class ItemController extends Controller
         $data = $request->validated();
         $data['is_featured'] = $request->has('is_featured');
         $data = $this->normalizeBilingualFields($data);
+        $data['price'] = 0;
 
         if ($request->hasFile('image')) {
             $data['image'] = $request->file('image')->store('items', 'public');

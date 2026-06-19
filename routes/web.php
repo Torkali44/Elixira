@@ -73,6 +73,7 @@ Route::delete('/cart/remove', [CartController::class, 'remove'])->name('cart.rem
 Route::post('/checkout', [CartController::class, 'checkout'])->name('checkout');
 
 Route::get('/track-order', [OrderController::class, 'track'])->name('orders.track');
+Route::get('/track-order/{order}/invoice', [OrderController::class, 'invoice'])->name('orders.invoice');
 
 Route::get('/testimonials', [TestimonialController::class, 'index'])->name('testimonials.index');
 Route::post('/testimonials', [TestimonialController::class, 'store'])->name('testimonials.store');

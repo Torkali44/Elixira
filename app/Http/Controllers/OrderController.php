@@ -10,12 +10,12 @@ class OrderController extends Controller
     public function track(Request $request)
     {
         if ($request->has('order_id') && $request->has('phone')) {
-            $order = Order::with('orderItems.item')
+            $order = Order::with(['orderItems.item', 'orderItems.package'])
                 ->where('id', $request->order_id)
                 ->where('customer_phone', $request->phone)
                 ->first();
 
-            if (!$order) {
+            if (! $order) {
                 return redirect()->route('orders.track')->with('error', 'We could not find that order. Check the order number and phone number.');
             }
 
@@ -35,5 +35,17 @@ class OrderController extends Controller
         }
 
         return view('orders.track');
+    }
+
+    public function invoice(Request $request, Order $order)
+    {
+        abort_unless(
+            $request->filled('phone') && $order->customer_phone === $request->query('phone'),
+            404
+        );
+
+        $order->load(['orderItems.item', 'orderItems.package']);
+
+        return view('profile.orders.invoice', compact('order'));
     }
 }

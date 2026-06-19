@@ -2,6 +2,11 @@
     $privateQty = (int) ($privateOfferQuantities[$product->id] ?? 0);
     $hasPrivateAccess = $privateQty > 0;
     $isOutOfStock = $product->stock <= 0 && !$hasPrivateAccess;
+    $pricingService = app(\App\Support\ItemPricingService::class);
+    $cardCountries = $pricingService->availableCountryCodes($product);
+    $cardCountry = $pricingService->resolveCountryCodeForItem($product, request('country')) ?? $pricingService->detectUserCountry();
+    $canAddToCart = count($cardCountries) > 0 && !$isOutOfStock;
+    $flags = $pricingService->countryFlags();
 @endphp
 
 <div class="elx-product-card" data-animate onclick="window.location='{{ route('menu.show', $product->id) }}'" style="cursor: pointer;">
@@ -81,19 +86,38 @@
             {{ Str::limit($product->local_description, 85) }}
         </p>
 
+        @if(count($cardCountries) > 1)
+            <div class="elx-product-card__country-selector" onclick="event.stopPropagation();" style="margin-bottom: 0.75rem; display: flex; gap: 0.35rem; flex-wrap: wrap;">
+                @foreach($cardCountries as $code)
+                    <button type="button"
+                        class="product-card-country-btn"
+                        data-product-id="{{ $product->id }}"
+                        data-country="{{ $code }}"
+                        onclick="selectProductCardCountry(this)"
+                        style="display:inline-flex;align-items:center;gap:0.25rem;padding:0.2rem 0.55rem;border-radius:999px;border:1px solid {{ $cardCountry === $code ? 'rgba(74,200,246,0.8)' : 'rgba(255,255,255,0.15)' }};background:{{ $cardCountry === $code ? 'rgba(74,200,246,0.15)' : 'rgba(255,255,255,0.04)' }};color:#fff;cursor:pointer;font-size:0.72rem;font-weight:600;">
+                        @if($flags[$code] ?? null)
+                            <img src="{{ $flags[$code] }}" alt="" style="width:16px;height:11px;border-radius:1px;object-fit:cover;">
+                        @endif
+                        {{ $code }}
+                    </button>
+                @endforeach
+            </div>
+        @endif
+
         <div class="elx-product-card__cart-form" onclick="event.stopPropagation();" style="position: relative; z-index: 20;">
             @if($isOutOfStock)
                     <button type="button" class="elx-product-card__add-btn"
                         onclick="event.stopPropagation(); showSpecialRequestModal({{ $product->id }}, '{{ addslashes($product->local_name) }}')" style="position: relative; z-index: 20; background: rgba(255, 77, 77, 0.1); color: #ff4d4d; border-color: rgba(255, 77, 77, 0.3);">
                     <i class="fas fa-hand-holding-heart"></i> {{ __('home.private_order') }}
                 </button>
-            @else
+            @elseif($canAddToCart)
                 <form action="{{ route('cart.add') }}" method="POST" onclick="event.stopPropagation();" style="position: relative; z-index: 20;">
                     @csrf
                     <input type="hidden" name="item_id" value="{{ $product->id }}">
                     <input type="hidden" name="quantity" value="1">
+                    <input type="hidden" name="country_code" value="{{ $cardCountry }}" id="product-country-{{ $product->id }}">
                     <button type="button" class="elx-product-card__add-btn" onclick="addToCartAjax(this, event);" style="position: relative; z-index: 20; width: 100%;">
-                        <i class="fas fa-cart-plus"></i> {{ $product->stock > 0 ? __('home.add_to_cart') : __('home.special_item') }}
+                        <i class="fas fa-cart-plus"></i> {{ __('home.add_to_cart') }}
                     </button>
                 </form>
             @endif

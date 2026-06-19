@@ -1,4 +1,4 @@
-﻿@extends('layouts.framer')
+@extends('layouts.framer')
 
 @section('title', 'Order #' . $order->id . ' - Elixira')
 
@@ -171,14 +171,14 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach($order->orderItems as $item)
+                                @foreach($order->orderItems as $orderItem)
                                 <tr>
                                     <td>
-                                        <div style="font-weight: 600;">{{ $item->item->name }}</div>
-                                        <div style="font-size: 0.8rem; color: var(--elx-gray);">﷼ {{ number_format($item->price, 2) }} each</div>
+                                        <div style="font-weight: 600;">{{ $orderItem->product_name ?: ($orderItem->item?->local_name ?? __('orders_page.product_removed')) }}</div>
+                                        <div style="font-size: 0.8rem; color: var(--elx-gray);">﷼ {{ number_format($orderItem->price, 2) }} each</div>
                                     </td>
-                                    <td>x{{ $item->quantity }}</td>
-                                    <td style="text-align: right; font-weight: 700; color: var(--elx-cyan);">﷼ {{ number_format($item->price * $item->quantity, 2) }}</td>
+                                    <td>x{{ $orderItem->quantity }}</td>
+                                    <td style="text-align: right; font-weight: 700; color: var(--elx-cyan);">﷼ {{ number_format($orderItem->price * $orderItem->quantity, 2) }}</td>
                                 </tr>
                                 @endforeach
                             </tbody>
@@ -186,9 +186,12 @@
                     </div>
                 </div>
 
-                <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 2rem;">
+                <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 2rem; flex-wrap: wrap;">
                     <a href="{{ route('orders.track', ['phone' => $order->customer_phone]) }}" class="elx-btn elx-btn--glass">
                         <i class="fas fa-arrow-left"></i> All My Orders
+                    </a>
+                    <a href="{{ route('orders.invoice', ['order' => $order->id, 'phone' => $order->customer_phone]) }}" target="_blank" class="elx-btn elx-btn--glass">
+                        <i class="fas fa-print"></i> {{ __('track.print_invoice') }}
                     </a>
                     <a href="{{ route('home') }}" class="elx-btn elx-btn--primary">Back to Home</a>
                 </div>

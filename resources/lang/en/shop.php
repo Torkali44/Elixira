@@ -27,6 +27,8 @@ return [
     'member_price_label' => 'Member',
     'guest_price_label' => 'Regular',
     'not_available_in_country' => 'This product is not available in the selected country.',
+    'product_missing_country_pricing' => 'This product is not configured for sale yet. Please choose another product.',
+    'package_missing_country_pricing' => 'This package is not configured for sale yet. Please choose another package.',
     'available_in' => 'Available in',
     'related_testimonials' => 'Related Testimonials & Videos',
     'view_all_testimonials' => 'View all testimonials',

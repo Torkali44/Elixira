@@ -22,7 +22,7 @@
 
     <div class="card border-0 shadow-sm">
         <div class="card-body">
-            <form action="{{ route('vendor.items.update', $item) }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('vendor.items.update', $item) }}" method="POST" enctype="multipart/form-data" novalidate>
                 @csrf
                 @method('PATCH')
                 <div class="row">
@@ -59,15 +59,12 @@
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="col-md-3 mb-3">
-                                <label class="form-label">{{ __('vendor.items_page.price') }} <span class="text-danger">*</span></label>
-                                <input type="number" step="0.01" name="price" class="form-control" value="{{ old('price', $item->price) }}" required>
-                            </div>
-                            <div class="col-md-3 mb-3">
+                            <div class="col-md-6 mb-3">
                                 <label class="form-label">{{ __('vendor.items_page.stock') }} <span class="text-danger">*</span></label>
-                                <input type="number" name="stock" class="form-control" value="{{ old('stock', $item->stock) }}" required>
+                                <input type="number" name="stock" class="form-control @error('stock') is-invalid @enderror" value="{{ old('stock', $item->stock) }}">
+                                @error('stock')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
                             </div>
-                            <div class="col-md-3 mb-3">
+                            <div class="col-md-6 mb-3">
                                 <label class="form-label">{{ __('admin.items_page.reward_points') }}</label>
                                 <input type="number" min="0" name="reward_points" class="form-control" value="{{ old('reward_points', $item->reward_points ?? 0) }}">
                             </div>

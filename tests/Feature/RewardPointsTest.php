@@ -129,9 +129,15 @@ test('admin can update reward points without providing arabic name', function ()
             'name_ar' => 'منتج قديم',
             'description_en' => 'Updated description',
             'description_ar' => 'وصف محدث',
-            'price' => 99,
             'stock' => 3,
             'reward_points' => 75,
+            'country_prices' => [
+                'KSA' => [
+                    'enabled' => '1',
+                    'member_price' => 99,
+                    'guest_price' => 99,
+                ],
+            ],
         ])
         ->assertRedirect(route('admin.items.index'));
 
@@ -152,12 +158,15 @@ test('buy now redirects user to cart page', function () {
         'description' => 'desc',
         'price' => 15,
         'stock' => 5,
+        'status' => 'approved',
     ]);
+    $item->countryPrices()->create(['country_code' => 'KSA', 'member_price' => 12, 'guest_price' => 15]);
 
     $this->actingAs($user)
         ->post(route('cart.add'), [
             'item_id' => $item->id,
             'quantity' => 1,
+            'country_code' => 'KSA',
             'buy_now' => 1,
         ])
         ->assertRedirect(route('cart.index'));

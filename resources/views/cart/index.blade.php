@@ -97,7 +97,7 @@
             </h1>
         </div>
 
-        @if(session('cart') && count(session('cart')) > 0)
+        @if(!empty($cart) && count($cart) > 0)
             <div class="elx-insights__grid" style="grid-template-columns: 2fr 1.2fr; gap: 2rem; align-items: start;">
                 {{-- Cart Items --}}
                 <div data-animate>
@@ -117,10 +117,10 @@
                                 @php
                                     $total = 0;
                                     $totalPoints = 0;
-                                    $itemIds = collect(array_keys(session('cart', [])))->filter(fn ($key) => is_numeric($key))->map(fn ($key) => (int) $key)->all();
+                                    $itemIds = collect(array_keys($cart))->filter(fn ($key) => is_numeric($key))->map(fn ($key) => (int) $key)->all();
                                     $cartItems = \App\Models\Item::whereIn('id', $itemIds)->get()->keyBy('id');
                                 @endphp
-                                @foreach(session('cart') as $id => $details)
+                                @foreach($cart as $id => $details)
                                     @php
                                         $total += $details['price'] * $details['quantity'];
                                         $points = $details['points'] ?? 0;

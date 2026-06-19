@@ -11,4 +11,5 @@ return [
     'new_search' => 'New Search',
     'order_label' => 'ORDER #:id',
     'items_count' => ':count items',
+    'print_invoice' => 'Print Invoice',
 ];

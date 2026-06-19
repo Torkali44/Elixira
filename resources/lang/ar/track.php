@@ -11,4 +11,5 @@ return [
     'new_search' => 'بحث جديد',
     'order_label' => 'طلب رقم :id',
     'items_count' => ':count منتج',
+    'print_invoice' => 'طباعة الفاتورة',
 ];

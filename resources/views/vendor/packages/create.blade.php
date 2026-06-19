@@ -6,7 +6,7 @@
     <a href="{{ route('vendor.packages.index') }}" class="btn btn-secondary">{{ __('admin.packages_page.back') }}</a>
 </div>
 <div class="card shadow-sm"><div class="card-body">
-    <form action="{{ route('vendor.packages.store') }}" method="POST" enctype="multipart/form-data">
+    <form action="{{ route('vendor.packages.store') }}" method="POST" enctype="multipart/form-data" novalidate>
         @csrf
         @include('admin.packages.partials.form', ['package' => null, 'items' => $items])
         <button type="submit" class="btn btn-primary">{{ __('admin.packages_page.save') }}</button>
