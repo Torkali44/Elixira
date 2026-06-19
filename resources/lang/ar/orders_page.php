@@ -51,4 +51,13 @@ return [
     'qty' => 'الكمية',
     'price' => 'السعر',
     'grand_total' => 'الإجمالي الكلي',
+    'invoice_number' => 'رقم الفاتورة:',
+    'invoice_date' => 'تاريخ الفاتورة:',
+    'time' => 'الوقت:',
+    'discount' => 'الخصم',
+    'shipping' => 'الشحن',
+    'description' => 'الوصف',
+    'unit_price' => 'سعر الوحدة',
+    'thank_you_footer' => 'شكراً لتعاملكم معنا!',
+    'contact_hint' => 'إذا كان لديك أي استفسار، يرجى التواصل معنا.',
 ];

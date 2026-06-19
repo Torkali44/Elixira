@@ -86,7 +86,8 @@ class ItemPricingService
      *     member_price: float,
      *     guest_price: float,
      *     active_price: float,
-     *     has_country_pricing: bool
+     *     has_country_pricing: bool,
+     *     discount_percent?: int
      * }
      */
     public function getPriceBreakdown(Item $item, ?User $user = null, ?string $countryCode = null): array
@@ -99,25 +100,52 @@ class ItemPricingService
         if ($countryPrice) {
             $memberPrice = (float) $countryPrice->member_price;
             $guestPrice = (float) $countryPrice->guest_price;
+            $hasHigherGuestPrice = $guestPrice > $memberPrice;
 
-            return [
+            $breakdown = [
                 'country_code' => $countryCode,
                 'member_price' => $memberPrice,
                 'guest_price' => $guestPrice,
-                'active_price' => $this->isMember($user) ? $memberPrice : $guestPrice,
+                'active_price' => $this->isMember($user) ? $memberPrice : ($hasHigherGuestPrice ? $guestPrice : $memberPrice),
                 'has_country_pricing' => true,
+                'has_higher_guest_price' => $hasHigherGuestPrice,
+            ];
+        } else {
+            $fallback = (float) $item->price;
+
+            $breakdown = [
+                'country_code' => $countryCode,
+                'member_price' => $fallback,
+                'guest_price' => $fallback,
+                'active_price' => $fallback,
+                'has_country_pricing' => false,
             ];
         }
 
-        $fallback = (float) $item->price;
+        return $this->applyDiscount($item, $breakdown, $user);
+    }
 
-        return [
-            'country_code' => $countryCode,
-            'member_price' => $fallback,
-            'guest_price' => $fallback,
-            'active_price' => $fallback,
-            'has_country_pricing' => false,
-        ];
+    /**
+     * @param  array<string, mixed>  $breakdown
+     * @return array<string, mixed>
+     */
+    private function applyDiscount(Item $item, array $breakdown, ?User $user): array
+    {
+        $discountPercent = (int) ($item->discount_percent ?? 0);
+
+        if ($discountPercent <= 0 || $discountPercent > 100) {
+            return $breakdown;
+        }
+
+        $factor = 1 - ($discountPercent / 100);
+        $breakdown['original_member_price'] = $breakdown['member_price'];
+        $breakdown['original_guest_price'] = $breakdown['guest_price'];
+        $breakdown['member_price'] = round((float) $breakdown['member_price'] * $factor, 2);
+        $breakdown['guest_price'] = round((float) $breakdown['guest_price'] * $factor, 2);
+        $breakdown['active_price'] = $this->isMember($user) ? $breakdown['member_price'] : $breakdown['guest_price'];
+        $breakdown['discount_percent'] = $discountPercent;
+
+        return $breakdown;
     }
 
     public function resolvePrice(Item $item, ?User $user = null, ?string $countryCode = null): float
@@ -164,20 +192,25 @@ class ItemPricingService
                 continue;
             }
 
-            if (! isset($prices['member_price'], $prices['guest_price'])) {
+            if (! isset($prices['member_price']) || $prices['member_price'] === '' || $prices['member_price'] === null) {
                 continue;
             }
 
+            $memberPrice = $prices['member_price'];
+            $guestPrice = (isset($prices['guest_price']) && $prices['guest_price'] !== '' && $prices['guest_price'] !== null)
+                ? $prices['guest_price']
+                : $memberPrice;
+
             $item->countryPrices()->create([
                 'country_code' => $countryCode,
-                'member_price' => $prices['member_price'],
-                'guest_price' => $prices['guest_price'],
+                'member_price' => $memberPrice,
+                'guest_price' => $guestPrice,
             ]);
         }
 
         $firstPrice = $item->countryPrices()->orderBy('country_code')->first();
         if ($firstPrice) {
-            $item->update(['price' => $firstPrice->guest_price]);
+            $item->update(['price' => $firstPrice->member_price]);
         }
     }
 }

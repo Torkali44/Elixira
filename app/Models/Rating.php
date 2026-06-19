@@ -3,8 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class Rating extends Model
 {
@@ -13,7 +13,8 @@ class Rating extends Model
         'rateable_id',
         'rateable_type',
         'rating',
-        'comment'
+        'comment',
+        'image',
     ];
 
     public function rateable(): MorphTo

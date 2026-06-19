@@ -132,5 +132,7 @@ return [
         'brand_placeholder' => 'أدخل اسم علامتك التجارية',
         'create_account' => 'إنشاء حساب',
         'login_btn' => 'تسجيل الدخول',
+        'phone' => 'رقم الهاتف',
+        'phone_placeholder' => '5XXXXXXXX',
     ],
 ];

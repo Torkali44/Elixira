@@ -35,6 +35,21 @@
                         @endforeach
                     </ul>
                 @endif
+
+                <div style="margin-top: 2rem;">
+                    <form action="{{ route('cart.add-package') }}" method="POST" style="display:flex; gap:1rem; flex-wrap:wrap;">
+                        @csrf
+                        <input type="hidden" name="package_id" value="{{ $package->id }}">
+                        <input type="hidden" name="country_code" value="{{ $selectedCountry }}">
+                        <input type="number" name="quantity" value="1" min="1" max="{{ max(1, $package->stock) }}" class="form-input" style="width:90px; margin:0;">
+                        <button type="submit" class="elx-btn elx-btn--primary" style="flex:1; min-width:180px; justify-content:center;">
+                            <i class="fas fa-shopping-cart"></i> {{ __('home.add_to_cart') }}
+                        </button>
+                        <button type="submit" name="buy_now" value="1" class="elx-btn elx-btn--glass" style="flex:1; min-width:180px; justify-content:center;">
+                            <i class="fas fa-bolt"></i> {{ __('home.buy_now') }}
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
 
@@ -43,6 +58,12 @@
                 {!! nl2br(e($package->long_description)) !!}
             </div>
         @endif
+
+        @include('partials.tag-related-sections', [
+            'relatedBlogs' => $relatedBlogs ?? collect(),
+            'relatedReviews' => $relatedReviews ?? collect(),
+            'relatedPackages' => $relatedPackages ?? collect(),
+        ])
     </div>
 </div>
 @endsection

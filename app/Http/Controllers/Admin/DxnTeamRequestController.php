@@ -52,8 +52,18 @@ class DxnTeamRequestController extends Controller
         $dxnTeamRequest->update([
             'status' => $request->status,
             'assigned_dxn_member_code' => $request->assigned_dxn_member_code,
+            'dxn_tag_color' => $request->dxn_tag_color,
             'admin_notes' => $request->admin_notes,
         ]);
+
+        if ($request->hasFile('dxn_badge_image')) {
+            if ($dxnTeamRequest->dxn_badge_image) {
+                Storage::disk('public')->delete($dxnTeamRequest->dxn_badge_image);
+            }
+            $dxnTeamRequest->update([
+                'dxn_badge_image' => $request->file('dxn_badge_image')->store('dxn_badges', 'public'),
+            ]);
+        }
 
         if ($request->status === 'approved') {
             $memberCode = $request->assigned_dxn_member_code ?: $dxnTeamRequest->member_code;

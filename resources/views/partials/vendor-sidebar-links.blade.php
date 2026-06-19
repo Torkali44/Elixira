@@ -9,6 +9,10 @@
         <span class="badge bg-danger rounded-pill" title="{{ __('vendor.nav.rejected_products') }}">{{ $vendorRejectedProductsCount }}</span>
     @endif
 </a>
+<a href="{{ route('vendor.packages.index') }}" class="dashboard-nav-link {{ request()->routeIs('vendor.packages.*') ? 'active' : '' }}">
+    <i class="fas fa-box-open"></i>
+    <span>{{ __('vendor.nav.packages') }}</span>
+</a>
 <a href="{{ route('vendor.orders') }}" class="dashboard-nav-link {{ request()->routeIs('vendor.orders') ? 'active' : '' }}">
     <i class="fas fa-receipt"></i>
     <span>{{ __('vendor.nav.orders') }}</span>

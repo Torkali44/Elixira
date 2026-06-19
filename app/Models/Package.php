@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\Concerns\HasTags;
 use App\Support\PackagePricingService;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -13,6 +14,7 @@ class Package extends Model
     use HasTags;
 
     protected $fillable = [
+        'brand_id',
         'name',
         'name_en',
         'name_ar',
@@ -44,6 +46,11 @@ class Package extends Model
         return $this->belongsToMany(Item::class, 'package_item')
             ->withPivot('quantity')
             ->withTimestamps();
+    }
+
+    public function brand(): BelongsTo
+    {
+        return $this->belongsTo(Brand::class);
     }
 
     public function countryPrices(): HasMany

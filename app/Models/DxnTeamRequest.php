@@ -38,6 +38,8 @@ class DxnTeamRequest extends Model
         'postal_code',
         'status',
         'assigned_dxn_member_code',
+        'dxn_tag_color',
+        'dxn_badge_image',
         'admin_notes',
         'contract_accepted_at',
         'read_at',

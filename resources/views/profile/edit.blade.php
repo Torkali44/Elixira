@@ -512,6 +512,22 @@
                                         DXN.Mem: {{ $user->dxn_member_code }}
                                     </span>
                                 </div>
+                            @elseif($latestDxnApplication ?? null)
+                                @php
+                                    $dxnColor = $latestDxnApplication->dxn_tag_color ?: config('dxn.default_tag_colors.primary');
+                                    $dxnBadge = $latestDxnApplication->dxn_badge_image ? asset('storage/'.$latestDxnApplication->dxn_badge_image) : null;
+                                @endphp
+                                <div style="display: inline-flex; align-items: center; gap: 0.5rem; margin-top: 0.65rem; padding: 0.35rem 0.75rem; border-radius: 999px; border: 1px solid {{ $dxnColor }}; box-shadow: 0 0 12px {{ $dxnColor }}55; background: {{ $dxnColor }}15;">
+                                    @if($dxnBadge)
+                                        <img src="{{ $dxnBadge }}" alt="" style="width: 22px; height: 22px; object-fit: contain; border-radius: 4px;">
+                                    @endif
+                                    <span style="font-size: 0.78rem; font-weight: 700; color: {{ $dxnColor }};">
+                                        DXN {{ __('admin.dxn_team_requests.status_'.$latestDxnApplication->status) }}
+                                        @if($latestDxnApplication->assigned_dxn_member_code)
+                                            · {{ $latestDxnApplication->assigned_dxn_member_code }}
+                                        @endif
+                                    </span>
+                                </div>
                             @endif
                             <h2 style="margin: 0.9rem 0 0.25rem; font-size: 1.5rem;">{{ $user->name }}</h2>
                             <p class="account-muted">{{ $user->email }}</p>

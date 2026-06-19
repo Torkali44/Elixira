@@ -5,6 +5,7 @@ namespace App\Support;
 use App\Models\Blog;
 use App\Models\Brand;
 use App\Models\Item;
+use App\Models\Package;
 use App\Models\Review;
 use App\Models\Tag;
 use Illuminate\Database\Eloquent\Collection;
@@ -129,6 +130,66 @@ class TagService
             return new Collection;
         }
 
+        return $this->approvedReviewsWithSharedTags($tagIds, $limit);
+    }
+
+    /**
+     * @return Collection<int, Blog>
+     */
+    public function relatedBlogsForPackage(Package $package, int $limit = 4): Collection
+    {
+        $tagIds = $package->tags()->pluck('tags.id');
+
+        if ($tagIds->isEmpty()) {
+            return new Collection;
+        }
+
+        return $this->publishedBlogsWithSharedTags($tagIds, null, $limit);
+    }
+
+    /**
+     * @return Collection<int, Review>
+     */
+    public function relatedReviewsForPackage(Package $package, int $limit = 6): Collection
+    {
+        $tagIds = $package->tags()->pluck('tags.id');
+
+        if ($tagIds->isEmpty()) {
+            return new Collection;
+        }
+
+        return $this->approvedReviewsWithSharedTags($tagIds, $limit);
+    }
+
+    /**
+     * @return Collection<int, Package>
+     */
+    public function relatedPackages(Package $package, int $limit = 4): Collection
+    {
+        $tagIds = $package->tags()->pluck('tags.id');
+
+        if ($tagIds->isEmpty()) {
+            return new Collection;
+        }
+
+        return Package::query()
+            ->with(['countryPrices', 'items'])
+            ->active()
+            ->where('id', '!=', $package->id)
+            ->whereHas('tags', fn ($query) => $query->whereIn('tags.id', $tagIds))
+            ->withCount(['tags as shared_tags_count' => fn ($query) => $query->whereIn('tags.id', $tagIds)])
+            ->orderByDesc('shared_tags_count')
+            ->orderByDesc('created_at')
+            ->limit($limit)
+            ->get();
+    }
+
+    /**
+     * @param  \Illuminate\Support\Collection<int, int>|array<int, int>  $tagIds
+     * @return Collection<int, Review>
+     */
+    private function approvedReviewsWithSharedTags($tagIds, int $limit): Collection
+    {
         return Review::query()
             ->where('status', 'approved')
             ->whereHas('tags', fn ($query) => $query->whereIn('tags.id', $tagIds))

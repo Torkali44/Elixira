@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="{{ $currentLocale ?? 'en' }}" dir="{{ ($isRtl ?? false) ? 'rtl' : 'ltr' }}">
+@php Illuminate\Pagination\Paginator::defaultView('pagination.bootstrap-admin'); @endphp
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">

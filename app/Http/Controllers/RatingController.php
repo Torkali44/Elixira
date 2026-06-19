@@ -14,20 +14,25 @@ class RatingController extends Controller
             'rateable_type' => 'required|string',
             'rating' => 'required|integer|min:1|max:5',
             'comment' => 'nullable|string|max:1000',
+            'image' => 'nullable|image|max:4096',
         ]);
 
-        if (!auth()->check()) {
-            return back()->with('error', 'You must be logged in to rate.');
+        if (! auth()->check()) {
+            return back()->with('error', __('shop.login_to_rate'));
         }
 
-        // Validate that the rateable type is allowed
         $allowedTypes = [
             'App\Models\Brand',
-            'App\Models\Item'
+            'App\Models\Item',
         ];
 
-        if (!in_array($request->rateable_type, $allowedTypes)) {
+        if (! in_array($request->rateable_type, $allowedTypes, true)) {
             return back()->with('error', 'Invalid rating target.');
+        }
+
+        $imagePath = null;
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('ratings', 'public');
         }
 
         Rating::updateOrCreate(
@@ -39,9 +44,10 @@ class RatingController extends Controller
             [
                 'rating' => $request->rating,
                 'comment' => $request->comment,
+                'image' => $imagePath,
             ]
         );
 
-        return back()->with('success', 'Your rating has been saved successfully!');
+        return back()->with('success', __('shop.rating_saved'));
     }
 }

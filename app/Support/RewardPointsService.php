@@ -17,7 +17,7 @@ class RewardPointsService
             return;
         }
 
-        $order->loadMissing(['orderItems.item', 'user']);
+        $order->loadMissing(['orderItems.item', 'orderItems.package', 'user']);
         $user = $order->user;
 
         if (! $user) {
@@ -25,6 +25,36 @@ class RewardPointsService
         }
 
         foreach ($order->orderItems as $orderItem) {
+            if ($orderItem->package_id) {
+                $package = $orderItem->package;
+
+                if (! $package) {
+                    continue;
+                }
+
+                $points = (int) ($package->reward_points ?? 0) * (int) $orderItem->quantity;
+
+                if ($points <= 0) {
+                    continue;
+                }
+
+                $user->increment('total_points', $points);
+
+                $nameEn = $package->name_en ?: $package->name;
+                $nameAr = $package->name_ar ?: $nameEn;
+
+                UserPointsTransaction::create([
+                    'user_id' => $user->id,
+                    'order_id' => $order->id,
+                    'item_id' => null,
+                    'points' => $points,
+                    'description_en' => "Earned {$points} points from {$nameEn} (Order #{$order->id})",
+                    'description_ar' => "حصلت على {$points} نقطة من {$nameAr} (الطلب رقم {$order->id})",
+                ]);
+
+                continue;
+            }
+
             $item = $orderItem->item;
 
             if (! $item) {

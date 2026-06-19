@@ -19,7 +19,7 @@ class StorePackageRequest extends FormRequest
             'description_en' => 'required|string',
             'description_ar' => 'required|string',
             'long_description' => 'nullable|string',
-            'price' => 'required|numeric|min:0',
+            'price' => 'nullable|numeric|min:0',
             'stock' => 'required|integer|min:0',
             'reward_points' => 'nullable|integer|min:0',
             'image' => 'nullable|image|max:10240',

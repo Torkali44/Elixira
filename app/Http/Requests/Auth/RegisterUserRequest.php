@@ -21,13 +21,21 @@ class RegisterUserRequest extends FormRequest
                 'email' => Str::lower(trim((string) $this->input('email'))),
             ]);
         }
+
+        if ($this->filled('phone')) {
+            $this->merge([
+                'phone' => preg_replace('/\D+/', '', (string) $this->input('phone')),
+            ]);
+        }
     }
 
     public function rules(): array
     {
         return [
             'name' => ['required', 'string', 'max:255', 'regex:/^[\pL\s.\'-]+$/u'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:' . User::class],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:'.User::class],
+            'phone_country_code' => ['required', 'in:+966,+971'],
+            'phone' => ['required', 'string', 'regex:/^\d{8,12}$/'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'avatar' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'account_type' => ['required', 'string', 'in:customer,vendor'],
@@ -43,6 +51,10 @@ class RegisterUserRequest extends FormRequest
             'email.required' => 'Please enter your email address.',
             'email.email' => 'Please enter a valid email address.',
             'email.unique' => 'This email is already registered.',
+            'phone.required' => 'Please enter your phone number.',
+            'phone.regex' => 'Please enter a valid phone number (digits only, 8–12 digits).',
+            'phone_country_code.required' => 'Please select your country code.',
+            'phone_country_code.in' => 'Please select a valid country code.',
             'avatar.image' => 'The avatar must be an image file.',
             'avatar.mimes' => 'The avatar must be a JPG, PNG, or WEBP image.',
             'avatar.max' => 'The avatar image must be 2MB or smaller.',

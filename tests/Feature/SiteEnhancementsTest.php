@@ -9,6 +9,7 @@ use App\Models\DxnTeamRequest;
 use App\Models\Faq;
 use App\Models\HomePageSection;
 use App\Models\Item;
+use App\Models\Package;
 use App\Models\Review;
 use App\Models\User;
 use App\Models\VendorProfile;
@@ -16,6 +17,7 @@ use App\Support\ItemPricingService;
 use App\Support\SiteBroadcastService;
 use App\Support\TagService;
 use App\Support\UserNotifier;
+use App\Support\YoutubeEmbed;
 
 test('contact form stores a message for admin review', function () {
     $response = $this->post(route('contact.store'), [
@@ -168,6 +170,70 @@ test('item pricing resolves member and guest prices by country', function () {
 
     expect($pricing->resolvePrice($item, $member, 'KSA'))->toBe(80.0)
         ->and($pricing->resolvePrice($item, $guest, 'KSA'))->toBe(100.0);
+});
+
+test('country pricing saves with member price only and no guest strikethrough', function () {
+    $category = Category::query()->create(['name' => 'Cat', 'name_en' => 'Cat', 'name_ar' => 'قسم']);
+    $item = Item::query()->create([
+        'category_id' => $category->id,
+        'name' => 'Member Only Item',
+        'name_en' => 'Member Only Item',
+        'name_ar' => 'منتج',
+        'description' => 'desc',
+        'price' => 50,
+        'stock' => 5,
+        'status' => 'approved',
+    ]);
+
+    app(ItemPricingService::class)->syncCountryPrices($item, [
+        'KSA' => [
+            'enabled' => true,
+            'member_price' => 75,
+            'guest_price' => '',
+        ],
+    ]);
+
+    $item->refresh()->load('countryPrices');
+    $pricing = app(ItemPricingService::class)->getPriceBreakdown($item, null, 'KSA');
+
+    expect($item->countryPrices)->toHaveCount(1)
+        ->and((float) $item->countryPrices->first()->member_price)->toBe(75.0)
+        ->and((float) $item->countryPrices->first()->guest_price)->toBe(75.0)
+        ->and($pricing['has_higher_guest_price'] ?? false)->toBeFalse();
+});
+
+test('authenticated user can checkout package cart entries keyed as p_id', function () {
+    $user = User::factory()->create();
+    $package = Package::query()->create([
+        'name' => 'Checkout Package',
+        'name_en' => 'Checkout Package',
+        'name_ar' => 'باكيدج',
+        'description' => 'desc',
+        'price' => 120,
+        'stock' => 5,
+        'reward_points' => 10,
+        'is_active' => true,
+    ]);
+
+    session()->put('cart', [
+        'p_'.$package->id => [
+            'name' => $package->local_name,
+            'quantity' => 1,
+            'price' => 120,
+            'points' => 10,
+            'image' => null,
+        ],
+    ]);
+
+    $this->actingAs($user)->post(route('checkout'), [
+        'customer_name' => 'Test User',
+        'phone_number' => '501234567',
+        'country_code' => '+966',
+        'address' => '123 Test Street, Riyadh, Saudi Arabia',
+    ])->assertRedirect();
+
+    expect($package->fresh()->stock)->toBe(4)
+        ->and($user->fresh()->total_points)->toBe(10);
 });
 
 test('monthly reward points reset command clears user totals', function () {
@@ -383,7 +449,7 @@ test('admin can manage homepage hero section', function () {
 
     $this->actingAs($admin)
         ->get(route('admin.home-sections.index'))
-        ->assertSuccessful();
+        ->assertRedirect(route('admin.home-sections.edit', HomePageSection::query()->where('slug', 'hero')->first()));
 
     $this->get(route('home'))
         ->assertSuccessful()
@@ -440,6 +506,17 @@ test('related testimonials appear on product page by shared tags', function () {
         ->assertSee('Amazing hair results');
 });
 
+test('youtube embed helper parses common video urls', function () {
+    $helper = YoutubeEmbed::class;
+
+    expect($helper::fromUrl('https://www.youtube.com/watch?v=dQw4w9WgXcQ'))
+        ->toBe('https://www.youtube.com/embed/dQw4w9WgXcQ')
+        ->and($helper::fromUrl('https://youtu.be/dQw4w9WgXcQ'))
+        ->toBe('https://www.youtube.com/embed/dQw4w9WgXcQ')
+        ->and($helper::fromUrl('https://www.youtube.com/shorts/dQw4w9WgXcQ'))
+        ->toBe('https://www.youtube.com/embed/dQw4w9WgXcQ');
+});
+
 test('site broadcast notifications respect daily cap', function () {
     $user = User::factory()->create(['role' => 'user']);
     $service = app(SiteBroadcastService::class);
@@ -449,4 +526,100 @@ test('site broadcast notifications respect daily cap', function () {
     $service->broadcastIfAllowed('new_product', ['product' => 'Three']);
 
     expect($user->fresh()->notifications()->count())->toBe(2);
+});
+
+test('product page shows discount badge when admin sets discount percent', function () {
+    $category = Category::query()->create(['name' => 'Cat', 'name_en' => 'Cat', 'name_ar' => 'قسم']);
+    $item = Item::query()->create([
+        'category_id' => $category->id,
+        'name' => 'Sale Item',
+        'name_en' => 'Sale Item',
+        'name_ar' => 'منتج',
+        'description' => 'desc',
+        'price' => 100,
+        'stock' => 5,
+        'status' => 'approved',
+        'discount_percent' => 20,
+    ]);
+
+    $this->get(route('menu.show', $item))
+        ->assertSuccessful()
+        ->assertSee('-20%', false);
+});
+
+test('package can be added to cart from storefront', function () {
+    $package = Package::query()->create([
+        'name' => 'Glow Bundle',
+        'name_en' => 'Glow Bundle',
+        'name_ar' => 'باكيدج',
+        'description' => 'Bundle desc',
+        'price' => 150,
+        'stock' => 10,
+        'reward_points' => 25,
+        'is_active' => true,
+    ]);
+    $package->countryPrices()->create(['country_code' => 'KSA', 'member_price' => 120, 'guest_price' => 150]);
+
+    $this->post(route('cart.add-package'), [
+        'package_id' => $package->id,
+        'quantity' => 1,
+        'country_code' => 'KSA',
+    ])->assertRedirect();
+
+    expect(session('cart'))->toHaveKey('p_'.$package->id)
+        ->and(session('cart')['p_'.$package->id]['type'])->toBe('package');
+});
+
+test('package page shows related content by shared tags', function () {
+    $package = Package::query()->create([
+        'name' => 'Tagged Package',
+        'name_en' => 'Tagged Package',
+        'name_ar' => 'باكيدج',
+        'description' => 'desc',
+        'price' => 100,
+        'stock' => 5,
+        'is_active' => true,
+    ]);
+    app(TagService::class)->syncFromInput($package, 'glow, skin');
+
+    $related = Package::query()->create([
+        'name' => 'Glow Duo',
+        'name_en' => 'Glow Duo',
+        'name_ar' => 'باكيدج 2',
+        'description' => 'desc',
+        'price' => 80,
+        'stock' => 3,
+        'is_active' => true,
+    ]);
+    app(TagService::class)->syncFromInput($related, 'glow');
+
+    $blog = Blog::query()->create([
+        'title_en' => 'Glow Tips Article',
+        'title_ar' => 'مقال التوهج',
+        'slug' => 'glow-tips-article',
+        'summary_en' => 'Skin glow advice',
+        'summary_ar' => 'نصائح للبشرة',
+        'content_en' => 'Full article',
+        'content_ar' => 'مقال كامل',
+        'is_published' => true,
+        'published_at' => now(),
+    ]);
+    app(TagService::class)->syncFromInput($blog, 'glow');
+
+    $review = Review::query()->create([
+        'type' => 'whatsapp',
+        'avatar' => 'reviews/sample.jpg',
+        'content' => 'Amazing glow results',
+        'status' => 'approved',
+    ]);
+    app(TagService::class)->syncFromInput($review, 'glow');
+
+    $this->get(route('packages.show', $package))
+        ->assertSuccessful()
+        ->assertSee(__('shop.related_blogs'))
+        ->assertSee('Glow Tips Article')
+        ->assertSee(__('shop.related_testimonials'))
+        ->assertSee('Amazing glow results')
+        ->assertSee(__('shop.related_packages'))
+        ->assertSee('Glow Duo');
 });

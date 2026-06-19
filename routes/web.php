@@ -67,6 +67,7 @@ Route::post('/shopping-country', [ShoppingCountryController::class, 'update'])->
 
 Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
 Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
+Route::post('/cart/add-package', [CartController::class, 'addPackage'])->name('cart.add-package');
 Route::patch('/cart/update', [CartController::class, 'update'])->name('cart.update');
 Route::delete('/cart/remove', [CartController::class, 'remove'])->name('cart.remove');
 Route::post('/checkout', [CartController::class, 'checkout'])->name('checkout');
@@ -217,6 +218,7 @@ Route::prefix('vendor')->name('vendor.')->middleware(['auth', 'vendor'])->group(
 
     // Vendor Products
     Route::resource('items', App\Http\Controllers\Vendor\ItemController::class);
+    Route::resource('packages', App\Http\Controllers\Vendor\PackageController::class);
 
     // Vendor Orders Details
     Route::get('/orders/{order}', [App\Http\Controllers\Vendor\DashboardController::class, 'showOrder'])->name('orders.show');

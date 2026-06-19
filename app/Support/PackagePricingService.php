@@ -73,20 +73,25 @@ class PackagePricingService
                 continue;
             }
 
-            if (! isset($prices['member_price'], $prices['guest_price'])) {
+            if (! isset($prices['member_price']) || $prices['member_price'] === '' || $prices['member_price'] === null) {
                 continue;
             }
 
+            $memberPrice = $prices['member_price'];
+            $guestPrice = (isset($prices['guest_price']) && $prices['guest_price'] !== '' && $prices['guest_price'] !== null)
+                ? $prices['guest_price']
+                : $memberPrice;
+
             $package->countryPrices()->create([
                 'country_code' => $countryCode,
-                'member_price' => $prices['member_price'],
-                'guest_price' => $prices['guest_price'],
+                'member_price' => $memberPrice,
+                'guest_price' => $guestPrice,
             ]);
         }
 
         $firstPrice = $package->countryPrices()->orderBy('country_code')->first();
         if ($firstPrice) {
-            $package->update(['price' => $firstPrice->guest_price]);
+            $package->update(['price' => $firstPrice->member_price]);
         }
     }
 }

@@ -25,6 +25,7 @@ class Item extends Model
         'description_en',
         'description_ar',
         'price',
+        'discount_percent',
         'stock',
         'points',
         'reward_points',
@@ -37,6 +38,7 @@ class Item extends Model
 
     protected $casts = [
         'price' => 'decimal:2',
+        'discount_percent' => 'integer',
         'stock' => 'integer',
         'is_featured' => 'boolean',
     ];

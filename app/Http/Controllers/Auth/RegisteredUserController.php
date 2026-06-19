@@ -5,10 +5,12 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\RegisterUserRequest;
 use App\Models\User;
+use App\Models\VendorProfile;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class RegisteredUserController extends Controller
@@ -24,13 +26,14 @@ class RegisteredUserController extends Controller
     /**
      * Handle an incoming registration request.
      *
-     * @throws \Illuminate\Validation\ValidationException
+     * @throws ValidationException
      */
     public function store(RegisterUserRequest $request): RedirectResponse
     {
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
+            'phone' => ($request->phone_country_code ?? '+966').ltrim((string) $request->phone, '0'),
             'avatar' => $request->hasFile('avatar')
                 ? $request->file('avatar')->store('users/avatars', 'public')
                 : null,
@@ -38,7 +41,7 @@ class RegisteredUserController extends Controller
         ]);
 
         if ($request->account_type === 'vendor') {
-            \App\Models\VendorProfile::create([
+            VendorProfile::create([
                 'user_id' => $user->id,
                 'brand_name' => $request->brand_name,
                 'status' => 'draft',

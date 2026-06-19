@@ -37,6 +37,7 @@ class PackageController extends Controller
         $data['is_featured'] = $request->has('is_featured');
         $data['is_active'] = $request->has('is_active');
         $data = $this->normalizeBilingualFields($data);
+        $data['price'] = $data['price'] ?? 0;
 
         if ($request->hasFile('image')) {
             $data['image'] = $request->file('image')->store('packages', 'public');
@@ -53,7 +54,7 @@ class PackageController extends Controller
             route('packages.show', $package)
         );
 
-        return redirect()->route('admin.packages.index')->with('success', 'Package created successfully.');
+        return redirect()->route('admin.packages.index')->with('success', __('admin.packages_page.created'));
     }
 
     public function edit(Package $package): View
@@ -70,6 +71,7 @@ class PackageController extends Controller
         $data['is_featured'] = $request->has('is_featured');
         $data['is_active'] = $request->has('is_active');
         $data = $this->normalizeBilingualFields($data);
+        $data['price'] = $data['price'] ?? $package->price;
 
         if ($request->hasFile('image')) {
             if ($package->image) {
@@ -85,7 +87,7 @@ class PackageController extends Controller
         app(PackagePricingService::class)->syncCountryPrices($package, $request->input('country_prices', []));
         app(TagService::class)->syncFromInput($package, $request->input('tags'));
 
-        return redirect()->route('admin.packages.index')->with('success', 'Package updated successfully.');
+        return redirect()->route('admin.packages.index')->with('success', __('admin.packages_page.updated'));
     }
 
     public function destroy(Package $package): RedirectResponse
@@ -96,7 +98,7 @@ class PackageController extends Controller
 
         $package->delete();
 
-        return redirect()->route('admin.packages.index')->with('success', 'Package deleted successfully.');
+        return redirect()->route('admin.packages.index')->with('success', __('admin.packages_page.deleted'));
     }
 
     /**

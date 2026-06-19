@@ -51,4 +51,13 @@ return [
     'qty' => 'Qty',
     'price' => 'Price',
     'grand_total' => 'Grand Total',
+    'invoice_number' => 'Invoice #:',
+    'invoice_date' => 'Invoice Date:',
+    'time' => 'Time:',
+    'discount' => 'Discount',
+    'shipping' => 'Shipping',
+    'description' => 'Description',
+    'unit_price' => 'Unit Price',
+    'thank_you_footer' => 'Thank you for your business!',
+    'contact_hint' => 'If you have any questions, please contact us.',
 ];

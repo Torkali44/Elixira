@@ -21,6 +21,7 @@
         border-radius: var(--elx-radius-sm);
         padding: 2rem;
         overflow: hidden;
+        position: relative;
     }
     .main-img-container img {
         width: 100%;
@@ -82,6 +83,7 @@
             {{-- Left: Image --}}
             <div class="product-gallery" data-animate>
                 <div class="main-img-container">
+
                     @if($item->image)
                         <img src="{{ asset('storage/' . $item->image) }}" alt="{{ $item->local_name }}" id="mainProductImage">
                     @else
@@ -391,16 +393,14 @@
                 @foreach($relatedReviews as $review)
                     <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 18px; overflow: hidden;">
                         @if($review->type === 'video')
-                            @php
-                                $videoUrl = $review->content;
-                                $embed = $videoUrl;
-                                if (str_contains($videoUrl, 'watch?v=')) {
-                                    $embed = 'https://www.youtube.com/embed/' . explode('watch?v=', $videoUrl)[1];
-                                }
-                            @endphp
+                            @php $embed = \App\Support\YoutubeEmbed::fromUrl($review->content); @endphp
+                            @if($embed)
                             <div style="position: relative; padding-top: 56.25%; background: #000;">
-                                <iframe src="{{ $embed }}" style="position:absolute; inset:0; width:100%; height:100%; border:0;" allowfullscreen loading="lazy"></iframe>
+                                <iframe src="{{ $embed }}" title="YouTube video" style="position:absolute; inset:0; width:100%; height:100%; border:0;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy"></iframe>
                             </div>
+                            @else
+                            <div style="padding: 1.5rem; color: rgba(255,255,255,0.6); font-size: 0.9rem;">{{ __('shop.video_unavailable') }}</div>
+                            @endif
                         @elseif($review->avatar)
                             <img src="{{ asset('storage/'.$review->avatar) }}" alt="" style="width: 100%; height: 220px; object-fit: cover;">
                         @endif
@@ -463,6 +463,11 @@
                                     <p>{{ $rating->comment }}</p>
                                 </div>
                             @endif
+                            @if($rating->image)
+                                <div style="margin-top: 0.75rem;">
+                                    <img src="{{ asset('storage/'.$rating->image) }}" alt="" style="max-width: 100%; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+                                </div>
+                            @endif
                         </div>
                     @endforeach
                 </div>
@@ -484,7 +489,7 @@
                 <h5 class="custom-modal-title">Rate {{ $item->name }}</h5>
                 <button type="button" class="custom-modal-close" onclick="document.getElementById('rateItemModal').classList.remove('show')">&times;</button>
             </div>
-            <form action="{{ route('ratings.store') }}" method="POST">
+            <form action="{{ route('ratings.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="custom-modal-body">
                     <input type="hidden" name="rateable_id" value="{{ $item->id }}">
@@ -511,8 +516,13 @@
                     </div>
                     
                     <div class="rating-comment-container">
-                        <label for="comment" class="rating-label">Comment (Optional)</label>
-                        <textarea class="rating-textarea" name="comment" id="comment" rows="3" placeholder="Tell us what you think..."></textarea>
+                        <label for="comment" class="rating-label">{{ __('shop.review_comment') }}</label>
+                        <textarea class="rating-textarea" name="comment" id="comment" rows="3" placeholder="{{ __('shop.review_comment_placeholder') }}"></textarea>
+                    </div>
+
+                    <div class="rating-comment-container" style="margin-top: 1rem;">
+                        <label for="rating_image" class="rating-label">{{ __('shop.review_image') }}</label>
+                        <input type="file" name="image" id="rating_image" accept="image/*" class="form-control" style="background: rgba(255,255,255,0.05); border-color: var(--elx-border); color: #fff;">
                     </div>
                 </div>
                 <div class="custom-modal-footer">
@@ -725,6 +735,8 @@
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
         gap: 1.5rem;
+        margin-top: 2rem;
+        padding-top: 1rem;
     }
 
     .review-card {

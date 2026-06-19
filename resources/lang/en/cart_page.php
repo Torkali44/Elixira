@@ -26,4 +26,5 @@ return [
     'shop_collections' => 'Shop Collections',
     'remove_confirm' => 'Remove this item from your bag?',
     'error_title' => 'Something went wrong',
+    'added' => 'Added to your cart.',
 ];

@@ -16,15 +16,15 @@
         @endif
         
         @if($isOutOfStock)
-            <div class="elx-product-card__badge" style="position: absolute; top: 1rem; right: 1rem; background: #ff4d4d; padding: 0.3rem 0.8rem; border-radius: 100px; color: white; font-size: 0.7rem; font-weight: 700; z-index: 10;">
+            <div class="elx-product-card__badge" style="position: absolute; top: 1rem; right: 1rem; left: auto; background: #ff4d4d; padding: 0.3rem 0.8rem; border-radius: 100px; color: white; font-size: 0.7rem; font-weight: 700; z-index: 10;">
                 <span>{{ __('shop.out_of_stock') }}</span>
             </div>
         @elseif($product->stock <= 0 && $hasPrivateAccess)
-            <div class="elx-product-card__badge" style="position: absolute; top: 1rem; right: 1rem; background: rgba(74, 200, 246, 0.2); border: 1px solid rgba(74, 200, 246, 0.4); padding: 0.3rem 0.8rem; border-radius: 100px; color: #4ac8f6; font-size: 0.7rem; font-weight: 700; z-index: 10;">
+            <div class="elx-product-card__badge" style="position: absolute; top: 1rem; right: 1rem; left: auto; background: rgba(74, 200, 246, 0.2); border: 1px solid rgba(74, 200, 246, 0.4); padding: 0.3rem 0.8rem; border-radius: 100px; color: #4ac8f6; font-size: 0.7rem; font-weight: 700; z-index: 10;">
                 <span>{{ __('shop.private_access') }}</span>
             </div>
         @elseif($product->stock <= 5)
-            <div class="elx-product-card__badge" style="position: absolute; top: 1rem; right: 1rem; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); padding: 0.3rem 0.8rem; border-radius: 100px; color: white; font-size: 0.7rem; font-weight: 700; z-index: 10;">
+            <div class="elx-product-card__badge" style="position: absolute; top: 1rem; right: 1rem; left: auto; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); padding: 0.3rem 0.8rem; border-radius: 100px; color: white; font-size: 0.7rem; font-weight: 700; z-index: 10;">
                 <span>{{ __('shop.limited') }}</span>
             </div>
         @endif
@@ -32,17 +32,22 @@
 
     {{-- Bottom Div: Info Split (Name/Price) with Gradient --}}
     <div class="elx-product-card__info">
-        <div class="elx-product-card__header" style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
-            <a href="{{ route('menu.show', $product->id) }}" style="text-decoration: none; color: inherit; max-width: 65%; word-wrap: break-word;" onclick="event.stopPropagation();">
-                <h3 class="elx-product-card__name">{{ $product->local_name }}</h3>
+        <div class="elx-product-card__header" style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 0.5rem;">
+            <a href="{{ route('menu.show', $product->id) }}" style="text-decoration: none; color: inherit; flex-grow: 1; min-width: 0; word-wrap: break-word;" onclick="event.stopPropagation();">
+                <h3 class="elx-product-card__name" style="margin: 0; font-size: 1.1rem; line-height: 1.3;">{{ $product->local_name }}</h3>
             </a>
-            <span class="elx-product-card__price" style="flex-shrink: 0; white-space: nowrap;">
-                <x-product-pricing :item="$product" align="flex-end" />
-            </span>
+            <div class="elx-product-card__price" style="flex-shrink: 0; text-align: right;">
+                <x-product-pricing :item="$product" :showSelector="false" align="flex-end" />
+            </div>
+        </div>
+
+        {{-- Country Selector Form --}}
+        <div class="elx-product-card__country-selector" style="margin-bottom: 0.75rem;">
+            <x-product-pricing :item="$product" :showPrice="false" :hideCountryName="true" align="flex-start" />
         </div>
 
         {{-- Meta Info: Category, Brand, Points, Stock --}}
-        <div class="elx-product-card__meta" style="display: flex; flex-wrap: wrap; gap: 0.35rem; margin-bottom: 0.5rem;">
+        <div class="elx-product-card__meta" style="display: flex; flex-wrap: wrap; gap: 0.35rem; margin-bottom: 0.75rem;">
             @if($product->category)
                 <span class="elx-product-card__tag" style="background: rgba(74, 200, 246, 0.1); color: #4ac8f6; padding: 0.15rem 0.55rem; border-radius: 50px; font-size: 0.7rem; font-weight: 600; border: 1px solid rgba(74, 200, 246, 0.2);">
                     <i class="fas fa-layer-group" style="margin-right: 2px;"></i>{{ $product->category->local_name }}
@@ -72,8 +77,8 @@
             </span>
         </div>
         
-        <p class="elx-product-card__desc">
-            {{ $product->local_description }}
+        <p class="elx-product-card__desc" style="flex-grow: 1; margin-bottom: 1rem;">
+            {{ Str::limit($product->local_description, 85) }}
         </p>
 
         <div class="elx-product-card__cart-form" onclick="event.stopPropagation();" style="position: relative; z-index: 20;">

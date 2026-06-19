@@ -234,6 +234,8 @@
 
             .testimonial-carousel-track-container {
                 overflow: hidden;
+                padding: 30px 0;
+                margin: -30px 0;
             }
 
             .testimonial-carousel-track {
@@ -337,8 +339,7 @@
         <section class="elx-section" style="padding: 6rem 0; background-color: #0b161c;">
             <div class="elx-container">
                 <h2 class="elx-section__title"
-                    style="text-align: center; color: #4ac8f6; margin-bottom: 4rem; font-family: 'Istok Web', sans-serif;">What
-                    {{ __('home.community_title') }}</h2>
+                    style="text-align: center; color: #4ac8f6; margin-bottom: 4rem; font-family: 'Istok Web', sans-serif;">{{ __('home.community_title') }}</h2>
 
                 <div class="testimonial-carousel-container">
                     <button class="carousel-btn prev" id="carouselPrev"><i class="fas fa-chevron-left"></i></button>

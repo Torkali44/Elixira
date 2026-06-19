@@ -4,6 +4,7 @@ return [
     'nav' => [
         'dashboard' => 'لوحة التحكم',
         'products' => 'منتجاتي',
+        'packages' => 'باكيدجاتي',
         'orders' => 'طلباتي',
         'special_requests' => 'الطلبات الخاصة',
         'brand' => 'علامتي التجارية',

@@ -34,7 +34,8 @@ class ProfileController extends Controller
             ->get();
 
         return view('profile.edit', [
-            'user' => $user->load(['pointsTransactions.item', 'pointsTransactions.order']),
+            'user' => $user->load(['pointsTransactions.item', 'pointsTransactions.order', 'dxnTeamRequests']),
+            'latestDxnApplication' => $user->dxnTeamRequests()->latest()->first(),
             'accountStats' => [
                 'total_orders' => (clone $ordersQuery)->count(),
                 'active_orders' => (clone $ordersQuery)

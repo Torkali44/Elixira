@@ -786,6 +786,8 @@
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
         gap: 1.5rem;
+        margin-top: 2rem;
+        padding-top: 1rem;
     }
 
     .review-card {

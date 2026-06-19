@@ -22,6 +22,7 @@ class UpdateItemRequest extends FormRequest
             'description_en' => 'required|string',
             'description_ar' => 'required|string',
             'price' => 'required|numeric|min:0',
+            'discount_percent' => 'nullable|integer|min:0|max:100',
             'country_prices' => 'nullable|array',
             'country_prices.KSA' => 'nullable|array',
             'country_prices.KSA.member_price' => 'nullable|numeric|min:0',

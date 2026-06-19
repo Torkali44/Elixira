@@ -130,5 +130,7 @@ return [
         'brand_placeholder' => 'Enter your brand name',
         'create_account' => 'Create Account',
         'login_btn' => 'Log in',
+        'phone' => 'Phone Number',
+        'phone_placeholder' => '5XXXXXXXX',
     ],
 ];

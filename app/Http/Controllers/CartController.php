@@ -9,12 +9,15 @@ use App\Http\Requests\UpdateCartRequest;
 use App\Models\Item;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\Package;
 use App\Models\SpecialItemOffer;
 use App\Models\User;
 use App\Models\UserAddress;
 use App\Support\ItemPricingService;
+use App\Support\PackagePricingService;
 use App\Support\RewardPointsService;
 use App\Support\UserNotifier;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class CartController extends Controller
@@ -114,6 +117,60 @@ class CartController extends Controller
         return redirect()->back()->with('success', 'Added to your cart.');
     }
 
+    public function addPackage(Request $request)
+    {
+        $request->validate([
+            'package_id' => 'required|exists:packages,id',
+            'quantity' => 'nullable|integer|min:1|max:50',
+            'country_code' => 'nullable|in:KSA,UAE',
+        ]);
+
+        $package = Package::with('countryPrices')->where('is_active', true)->findOrFail($request->package_id);
+        $pricing = app(PackagePricingService::class);
+        $countryCode = app(ItemPricingService::class)->resolveCountryCode($request->input('country_code'));
+        $resolvedPrice = $pricing->resolvePrice($package, $request->user(), $countryCode);
+        session(['shopping_country' => $countryCode]);
+
+        $cart = session()->get('cart', []);
+        $cartKey = 'p_'.$package->id;
+        $quantity = (int) ($request->quantity ?? 1);
+        $maxAllowed = max(0, (int) $package->stock);
+
+        if ($maxAllowed <= 0) {
+            return redirect()->back()->with('error', __('shop.package_out_of_stock'));
+        }
+
+        $existingQty = $cart[$cartKey]['quantity'] ?? 0;
+        if ($existingQty + $quantity > $maxAllowed) {
+            return redirect()->back()->with('error', __('shop.maximum_units', ['count' => $maxAllowed]));
+        }
+
+        if (isset($cart[$cartKey])) {
+            $cart[$cartKey]['quantity'] += $quantity;
+            $cart[$cartKey]['type'] = 'package';
+            $cart[$cartKey]['package_id'] = $package->id;
+        } else {
+            $cart[$cartKey] = [
+                'type' => 'package',
+                'package_id' => $package->id,
+                'name' => $package->local_name,
+                'quantity' => $quantity,
+                'price' => $resolvedPrice,
+                'country_code' => $countryCode,
+                'points' => $package->reward_points ?? 0,
+                'image' => $package->image,
+            ];
+        }
+
+        session()->put('cart', $cart);
+
+        if ($request->boolean('buy_now')) {
+            return redirect()->route('cart.index')->with('success', __('cart_page.added'));
+        }
+
+        return redirect()->back()->with('success', __('cart_page.added'));
+    }
+
     public function update(UpdateCartRequest $request)
     {
         $cart = session()->get('cart', []);
@@ -122,11 +179,17 @@ class CartController extends Controller
             return response()->json(['success' => false, 'message' => 'Item not found in cart.'], 404);
         }
 
-        $item = Item::find($request->id);
+        $entry = $cart[$request->id];
+        if ($this->isCartPackageEntry($request->id, $entry)) {
+            $packageId = $this->resolvePackageIdFromCart($request->id, $entry);
+            $package = $packageId ? Package::find($packageId) : null;
+            $maxAllowed = $package ? (int) $package->stock : 0;
+        } else {
+            $item = Item::find($request->id);
+            $maxAllowed = $item ? $item->stock + $this->availablePrivateQuantity($request->user(), (int) $item->id) : 0;
+        }
 
-        $maxAllowed = $item ? $item->stock + $this->availablePrivateQuantity($request->user(), $item->id) : 0;
-
-        if ($item && $request->quantity > $maxAllowed) {
+        if ($request->quantity > $maxAllowed) {
             return response()->json([
                 'success' => false,
                 'message' => 'Only '.$maxAllowed.' units available for your account.',
@@ -171,6 +234,19 @@ class CartController extends Controller
         }
 
         foreach ($cart as $id => $details) {
+            if ($this->isCartPackageEntry($id, $details)) {
+                $packageId = $this->resolvePackageIdFromCart($id, $details);
+                $pkg = $packageId ? Package::find($packageId) : null;
+                if (! $pkg || $pkg->stock < $details['quantity']) {
+                    $pkgName = $pkg ? $pkg->local_name : ($details['name'] ?? 'Package');
+                    $available = $pkg ? (int) $pkg->stock : 0;
+
+                    return redirect()->back()->with('error', "'{$pkgName}' only has {$available} units available. Please update your cart.");
+                }
+
+                continue;
+            }
+
             $item = Item::find($id);
             $maxAllowed = $item ? $item->stock + $this->availablePrivateQuantity($request->user(), (int) $id) : 0;
 
@@ -253,6 +329,24 @@ class CartController extends Controller
             ]);
 
             foreach ($cart as $id => $details) {
+                if ($this->isCartPackageEntry($id, $details)) {
+                    $packageId = $this->resolvePackageIdFromCart($id, $details);
+
+                    OrderItem::create([
+                        'order_id' => $order->id,
+                        'package_id' => $packageId,
+                        'product_name' => $details['name'],
+                        'quantity' => $details['quantity'],
+                        'price' => $details['price'],
+                    ]);
+
+                    if ($packageId) {
+                        Package::query()->where('id', $packageId)->decrement('stock', (int) $details['quantity']);
+                    }
+
+                    continue;
+                }
+
                 OrderItem::create([
                     'order_id' => $order->id,
                     'item_id' => $id,
@@ -290,8 +384,12 @@ class CartController extends Controller
                 }
 
                 $vendorsToNotify = [];
-                foreach ($cart as $itemId => $details) {
-                    $item = Item::find($itemId);
+                foreach ($cart as $cartKey => $details) {
+                    if ($this->isCartPackageEntry($cartKey, $details)) {
+                        continue;
+                    }
+
+                    $item = Item::find($cartKey);
                     if ($item && $item->vendor) {
                         $vendorsToNotify[$item->vendor->id] = $item->vendor;
                     }
@@ -409,5 +507,31 @@ class CartController extends Controller
     private function normalizePhone(string $value): string
     {
         return preg_replace('/\D+/', '', $value) ?? '';
+    }
+
+    /**
+     * @param  array<string, mixed>  $details
+     */
+    private function isCartPackageEntry(string|int $cartKey, array $details): bool
+    {
+        return ($details['type'] ?? null) === 'package'
+            || str_starts_with((string) $cartKey, 'p_')
+            || isset($details['package_id']);
+    }
+
+    /**
+     * @param  array<string, mixed>  $details
+     */
+    private function resolvePackageIdFromCart(string|int $cartKey, array $details): ?int
+    {
+        if (isset($details['package_id'])) {
+            return (int) $details['package_id'];
+        }
+
+        if (preg_match('/^p_(\d+)$/', (string) $cartKey, $matches)) {
+            return (int) $matches[1];
+        }
+
+        return null;
     }
 }

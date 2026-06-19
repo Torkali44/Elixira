@@ -29,4 +29,9 @@ class OrderItem extends Model
     {
         return $this->belongsTo(Item::class);
     }
+
+    public function package(): BelongsTo
+    {
+        return $this->belongsTo(Package::class);
+    }
 }

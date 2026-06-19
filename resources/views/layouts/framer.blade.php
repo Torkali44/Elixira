@@ -291,10 +291,14 @@
 
             <ul class="elx-nav__links" id="navLinks">
                 <li><a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'active' : '' }}">{{ __('app.home') }}</a></li>
-                <li><a href="{{ route('menu.index') }}"
-                        class="{{ request()->routeIs('menu.*') ? 'active' : '' }}">{{ __('app.shop') }}</a></li>
-                <li><a href="{{ route('packages.index') }}"
-                        class="{{ request()->routeIs('packages.*') ? 'active' : '' }}">{{ __('shop.packages_title') }}</a></li>
+                <li class="elx-nav__dropdown">
+                    <a href="{{ route('menu.index') }}"
+                        class="{{ request()->routeIs('menu.*') || request()->routeIs('packages.*') ? 'active' : '' }}">{{ __('app.shop') }} <i class="fas fa-chevron-down"></i></a>
+                    <div class="elx-nav__dropdown-menu">
+                        <a href="{{ route('menu.index') }}" class="{{ request()->routeIs('menu.*') ? 'active' : '' }}">{{ __('shop.all_products') }}</a>
+                        <a href="{{ route('packages.index') }}" class="{{ request()->routeIs('packages.*') ? 'active' : '' }}">{{ __('shop.packages_title') }}</a>
+                    </div>
+                </li>
                 <li class="elx-nav__dropdown">
                     <a href="{{ route('about') }}" class="{{ request()->routeIs('about') || request()->routeIs('brands.*') || request()->routeIs('faqs.*') ? 'active' : '' }}">{{ __('app.about') }} <i class="fas fa-chevron-down"></i></a>
                     <div class="elx-nav__dropdown-menu">
@@ -311,8 +315,15 @@
                         <a href="{{ route('blogs.index') }}" class="{{ request()->routeIs('blogs.*') ? 'active' : '' }}">{{ __('app.blogs') }}</a>
                     </div>
                 </li>
-                <li><a href="{{ route('orders.track') }}"
-                        class="{{ request()->routeIs('orders.*') ? 'active' : '' }}">{{ __('app.track_order') }}</a></li>
+                <li>
+                    @auth
+                        <a href="{{ route('profile.orders.index') }}"
+                            class="{{ request()->routeIs('profile.orders.*') ? 'active' : '' }}">{{ __('app.orders') }}</a>
+                    @else
+                        <a href="{{ route('login') }}"
+                            class="{{ request()->routeIs('login') ? 'active' : '' }}">{{ __('app.orders') }}</a>
+                    @endauth
+                </li>
             </ul>
 
             <div class="elx-nav__actions">
@@ -419,9 +430,9 @@
                                 <span>{{ __('app.profile_settings') }}</span>
                                 <i class="fas fa-user"></i>
                             </a>
-                            <a href="{{ route('profile.orders.index') }}">
-                                <span>{{ __('app.orders') }}</span>
-                                <i class="fas fa-receipt"></i>
+                            <a href="{{ route('orders.track') }}">
+                                <span>{{ __('app.track_order') }}</span>
+                                <i class="fas fa-truck"></i>
                             </a>
                                <form method="POST" action="{{ route('logout') }}" class="elx-nav__profile-form">
                                 @csrf

@@ -62,6 +62,17 @@
             <p class="dxn-status-meta">{{ __('dxn_team.status_submitted_at', ['date' => $application->created_at->format('Y-m-d H:i')]) }}</p>
             <p style="color: var(--elx-light); margin-bottom: 1.5rem;">{{ $statusMessage }}</p>
 
+            @if($application->dxn_tag_color || $application->dxn_badge_image)
+                <div style="display:inline-flex; align-items:center; gap:0.6rem; margin-bottom:1.5rem; padding:0.5rem 1rem; border-radius:999px; border:1px solid {{ $application->dxn_tag_color ?: config('dxn.default_tag_colors.primary') }}; background: {{ ($application->dxn_tag_color ?: config('dxn.default_tag_colors.primary')) }}15;">
+                    @if($application->dxn_badge_image)
+                        <img src="{{ asset('storage/'.$application->dxn_badge_image) }}" alt="" style="width:28px; height:28px; object-fit:contain; border-radius:6px;">
+                    @endif
+                    <span style="font-weight:700; color:{{ $application->dxn_tag_color ?: config('dxn.default_tag_colors.primary') }};">
+                        DXN {{ $application->assigned_dxn_member_code ?: __('dxn_team.status_pending') }}
+                    </span>
+                </div>
+            @endif
+
             <div class="dxn-status-grid">
                 <div class="dxn-status-item"><label>{{ __('admin.dxn_team_requests.col_name') }}</label><div>{{ $application->name }}</div></div>
                 <div class="dxn-status-item"><label>{{ __('admin.dxn_team_requests.col_sponsor_code') }}</label><div>{{ $application->sponsor_code ?: '—' }}</div></div>

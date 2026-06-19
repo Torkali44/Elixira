@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Package;
 use App\Support\PackagePricingService;
+use App\Support\TagService;
 use Illuminate\View\View;
 
 class PackageController extends Controller
@@ -30,6 +31,17 @@ class PackageController extends Controller
             request('country')
         )['country_code'];
 
-        return view('packages.show', compact('package', 'selectedCountry'));
+        $tagService = app(TagService::class);
+        $relatedBlogs = $tagService->relatedBlogsForPackage($package, 4);
+        $relatedReviews = $tagService->relatedReviewsForPackage($package, 6);
+        $relatedPackages = $tagService->relatedPackages($package, 4);
+
+        return view('packages.show', compact(
+            'package',
+            'selectedCountry',
+            'relatedBlogs',
+            'relatedReviews',
+            'relatedPackages',
+        ));
     }
 }

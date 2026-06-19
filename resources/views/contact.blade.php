@@ -37,7 +37,7 @@
         border-radius: 20px;
         resize: none;
     }
-    .info-item i {
+    .info-item > i {
         color: var(--elx-cyan);
         width: 40px;
     }

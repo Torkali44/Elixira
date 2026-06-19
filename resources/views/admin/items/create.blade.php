@@ -92,6 +92,14 @@
                 </div>
 
                 <div class="col-md-6 mb-3">
+                    <label for="discount_percent" class="form-label">{{ __('admin.items_page.discount_percent') }}</label>
+                    <input type="number" min="0" max="100" class="form-control" id="discount_percent" name="discount_percent" value="{{ old('discount_percent') }}" placeholder="20">
+                    <small class="text-muted">{{ __('admin.items_page.discount_percent_hint') }}</small>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
                     <label for="stock" class="form-label">{{ __('admin.items_page.stock') }} <span class="text-danger">*</span></label>
                     <input type="number" min="0" class="form-control" id="stock" name="stock" value="{{ old('stock', 0) }}" required>
                 </div>

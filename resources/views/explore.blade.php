@@ -62,12 +62,11 @@
                         <span>{{ $item->category->local_name }}</span>
                     </div>
                     <div class="elx-product-card__info">
-                        <h3 class="elx-product-card__name">{{ $item->local_name }}</h3>
-                        <div class="elx-product-card__price-row">
-                            <span class="elx-product-card__currency">﷼</span>
-                            <span class="elx-product-card__price"><x-product-pricing :item="$item" align="flex-end" /></span>
+                        <h3 class="elx-product-card__name" style="margin-bottom: 0.5rem;">{{ $item->local_name }}</h3>
+                        <div class="elx-product-card__price-row" style="margin-bottom: 0.5rem;">
+                            <x-product-pricing :item="$item" :showSelector="false" align="flex-start" />
                         </div>
-                        <p class="elx-product-card__desc">{{ Str::limit($item->local_description, 80) }}</p>
+                        <p class="elx-product-card__desc" style="flex-grow: 1; margin-bottom: 1rem;">{{ Str::limit($item->local_description, 85) }}</p>
                         @if(($item->reward_points ?? 0) > 0)
                             <p class="elx-product-card__desc" style="color: #00ff88; margin-top: 0.5rem;">
                                 <i class="fas fa-star"></i> {{ __('home.reward_points', ['count' => $item->reward_points]) }}

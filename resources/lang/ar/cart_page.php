@@ -26,4 +26,5 @@ return [
     'shop_collections' => 'تصفح المجموعات',
     'remove_confirm' => 'إزالة هذا المنتج من السلة؟',
     'error_title' => 'حدث خطأ ما',
+    'added' => 'تمت الإضافة إلى السلة.',
 ];

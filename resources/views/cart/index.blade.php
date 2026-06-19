@@ -114,13 +114,18 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @php $total = 0; $totalPoints = 0; $cartItems = \App\Models\Item::whereIn('id', array_keys(session('cart')))->get()->keyBy('id'); @endphp
+                                @php
+                                    $total = 0;
+                                    $totalPoints = 0;
+                                    $itemIds = collect(array_keys(session('cart', [])))->filter(fn ($key) => is_numeric($key))->map(fn ($key) => (int) $key)->all();
+                                    $cartItems = \App\Models\Item::whereIn('id', $itemIds)->get()->keyBy('id');
+                                @endphp
                                 @foreach(session('cart') as $id => $details)
-                                    @php 
+                                    @php
                                         $total += $details['price'] * $details['quantity'];
-                                        $points = isset($details['points']) ? $details['points'] : 0;
+                                        $points = $details['points'] ?? 0;
                                         $totalPoints += $points * $details['quantity'];
-                                        $displayName = $cartItems->get($id)?->local_name ?? $details['name'];
+                                        $displayName = $details['name'] ?? ($cartItems->get((int) $id)?->local_name ?? __('shop.package_badge'));
                                     @endphp
                                     <tr class="cart-row" data-id="{{ $id }}">
                                         <td>

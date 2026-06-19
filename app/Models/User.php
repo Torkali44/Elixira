@@ -80,6 +80,11 @@ class User extends Authenticatable
         return $this->hasMany(Order::class);
     }
 
+    public function dxnTeamRequests()
+    {
+        return $this->hasMany(DxnTeamRequest::class);
+    }
+
     public function addresses()
     {
         return $this->hasMany(UserAddress::class);

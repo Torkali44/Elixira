@@ -4,6 +4,7 @@ return [
     'nav' => [
         'dashboard' => 'Dashboard',
         'products' => 'My Products',
+        'packages' => 'My Packages',
         'orders' => 'My Orders',
         'special_requests' => 'Special Requests',
         'brand' => 'My Brand',
