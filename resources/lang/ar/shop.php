@@ -4,6 +4,7 @@ return [
     'page_title' => 'مجموعاتنا - إيليكسيرا',
     'hero_title' => 'مجموعاتنا',
     'hero_subtitle' => 'اكتشف مجموعات منتجاتنا النقية والطبيعية',
+    'select_country' => 'اختر دولتك',
     'filter_all' => 'الكل',
     'out_of_stock' => 'نفد المخزون',
     'limited' => 'كمية محدودة',

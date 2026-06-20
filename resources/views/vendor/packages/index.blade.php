@@ -14,6 +14,7 @@
                     <th>{{ __('admin.packages_page.name') }}</th>
                     <th>{{ __('admin.packages_page.items_count') }}</th>
                     <th>{{ __('admin.packages_page.price') }}</th>
+                    <th>{{ __('admin.packages_page.status') }}</th>
                     <th></th>
                 </tr>
             </thead>
@@ -23,6 +24,17 @@
                         <td>{{ $package->local_name }}</td>
                         <td>{{ $package->items_count }}</td>
                         <td>﷼ {{ number_format($package->price, 2) }}</td>
+                        <td>
+                            @if($package->status === 'approved')
+                                <span class="badge bg-success">{{ __('admin.items.status_approved') }}</span>
+                            @elseif($package->status === 'pending')
+                                <span class="badge bg-warning text-dark">{{ __('admin.items.status_pending') }}</span>
+                            @elseif($package->status === 'rejected_with_notes')
+                                <span class="badge bg-danger">{{ __('admin.items.status_rejected_notes') }}</span>
+                            @elseif($package->status === 'rejected')
+                                <span class="badge bg-danger">{{ __('admin.items.status_rejected') }}</span>
+                            @endif
+                        </td>
                         <td class="text-end">
                             <a href="{{ route('vendor.packages.edit', $package) }}" class="btn btn-sm btn-outline-primary">{{ __('admin.home_sections_page.edit') }}</a>
                             <form action="{{ route('vendor.packages.destroy', $package) }}" method="POST" class="d-inline" onsubmit="return confirm(@json(__('admin.packages_page.confirm_delete')))">
@@ -32,7 +44,7 @@
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="4" class="text-center text-muted py-4">{{ __('admin.packages_page.empty') }}</td></tr>
+                    <tr><td colspan="5" class="text-center text-muted py-4">{{ __('admin.packages_page.empty') }}</td></tr>
                 @endforelse
             </tbody>
         </table>

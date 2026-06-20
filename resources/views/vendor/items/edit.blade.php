@@ -28,24 +28,7 @@
                 <div class="row">
                     <div class="col-md-8">
 
-                        {{-- Bilingual Name --}}
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">{{ __('vendor.items_page.product_name') }} <span class="text-danger">*</span></label>
-                            <ul class="nav nav-tabs mb-2" role="tablist">
-                                <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#name-en-tab">English</a></li>
-                                <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#name-ar-tab">العربية</a></li>
-                            </ul>
-                            <div class="tab-content">
-                                <div class="tab-pane fade show active" id="name-en-tab">
-                                    <input type="text" name="name_en" class="form-control @error('name_en') is-invalid @enderror" value="{{ old('name_en', $item->name_en ?: $item->name) }}" placeholder="Product name in English" required>
-                                    @error('name_en')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                                </div>
-                                <div class="tab-pane fade" id="name-ar-tab">
-                                    <input type="text" name="name_ar" class="form-control @error('name_ar') is-invalid @enderror" value="{{ old('name_ar', $item->name_ar) }}" dir="rtl" placeholder="اسم المنتج بالعربي">
-                                    @error('name_ar')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                                </div>
-                            </div>
-                        </div>
+                        @include('partials.admin.item-bilingual-fields', ['item' => $item])
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
@@ -72,27 +55,7 @@
 
                         @include('partials.admin.item-country-prices', ['item' => $item])
 
-                        {{-- Bilingual Short Description --}}
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">{{ __('vendor.items_page.short_description') }}</label>
-                            <ul class="nav nav-tabs mb-2" role="tablist">
-                                <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#desc-en-tab">English</a></li>
-                                <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#desc-ar-tab">العربية</a></li>
-                            </ul>
-                            <div class="tab-content">
-                                <div class="tab-pane fade show active" id="desc-en-tab">
-                                    <textarea name="description_en" class="form-control" rows="2" placeholder="Short description in English">{{ old('description_en', $item->description_en ?: $item->description) }}</textarea>
-                                </div>
-                                <div class="tab-pane fade" id="desc-ar-tab">
-                                    <textarea name="description_ar" class="form-control" rows="2" dir="rtl" placeholder="وصف مختصر بالعربي">{{ old('description_ar', $item->description_ar) }}</textarea>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">{{ __('vendor.items_page.long_description') }}</label>
-                            <textarea name="long_description" class="form-control" rows="5">{{ old('long_description', $item->long_description) }}</textarea>
-                        </div>
+                        @include('partials.admin.bilingual-long-description', ['model' => $item, 'prefix' => 'vendor-item-long-desc'])
                     </div>
 
                     <div class="col-md-4">

@@ -8,6 +8,7 @@ use App\Http\Requests\Admin\UpdatePackageRequest;
 use App\Models\Item;
 use App\Models\Package;
 use App\Models\Tag;
+use App\Support\AdminNotifier;
 use App\Support\PackagePricingService;
 use App\Support\TagService;
 use Illuminate\Http\RedirectResponse;
@@ -53,18 +54,25 @@ class PackageController extends Controller
         $data = $this->prepareData($request);
         $data['brand_id'] = $this->getBrandId();
         $data['is_featured'] = false;
-        $data['is_active'] = true;
+        $data['is_active'] = false;
+        $data['status'] = 'pending';
 
         if ($request->hasFile('image')) {
             $data['image'] = $request->file('image')->store('packages', 'public');
         }
 
         $package = Package::create($data);
+        $package->load('brand');
         $package->items()->sync($this->itemQuantitiesFromRequest($request));
         app(PackagePricingService::class)->syncCountryPrices($package, $request->input('country_prices', []));
         app(TagService::class)->syncFromInput($package, $request->input('tags'));
 
-        return redirect()->route('vendor.packages.index')->with('success', __('admin.packages_page.created'));
+        AdminNotifier::notifyAll('vendor_package_submitted', [
+            'package' => $package->local_name,
+            'brand' => $package->brand?->name ?? auth()->user()->name,
+        ], route('admin.packages.index', ['status' => 'new']));
+
+        return redirect()->route('vendor.packages.index')->with('success', __('admin.packages_page.submitted_for_approval'));
     }
 
     public function edit(Package $package): View
@@ -84,7 +92,13 @@ class PackageController extends Controller
     {
         $this->authorizePackage($package);
         $data = $this->prepareData($request);
-        $data['is_active'] = $request->has('is_active');
+        $resubmitted = $package->status === 'rejected_with_notes';
+
+        if (in_array($package->status, ['rejected_with_notes', 'rejected'], true)) {
+            $data['status'] = 'pending';
+            $data['rejection_reason'] = null;
+            $data['is_active'] = false;
+        }
 
         if ($request->hasFile('image')) {
             if ($package->image) {
@@ -100,7 +114,16 @@ class PackageController extends Controller
         app(PackagePricingService::class)->syncCountryPrices($package, $request->input('country_prices', []));
         app(TagService::class)->syncFromInput($package, $request->input('tags'));
 
-        return redirect()->route('vendor.packages.index')->with('success', __('admin.packages_page.updated'));
+        if ($resubmitted) {
+            AdminNotifier::notifyAll('vendor_package_submitted', [
+                'package' => $package->local_name,
+                'brand' => $package->brand?->name ?? auth()->user()->name,
+            ], route('admin.packages.index', ['status' => 'new']));
+        }
+
+        return redirect()->route('vendor.packages.index')->with('success', $resubmitted
+            ? __('admin.packages_page.resubmitted_for_approval')
+            : __('admin.packages_page.updated'));
     }
 
     public function destroy(Package $package): RedirectResponse

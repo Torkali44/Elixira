@@ -135,7 +135,11 @@ class CartController extends Controller
         $countryCode = $itemPricing->resolveCountryCodeForPackage($package, $request->input('country_code'));
 
         if ($countryCode === null) {
-            return redirect()->back()->with('error', __('shop.package_missing_country_pricing'));
+            $message = __('shop.package_missing_country_pricing');
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => $message]);
+            }
+            return redirect()->back()->with('error', $message);
         }
 
         $resolvedPrice = $pricing->resolvePrice($package, $request->user(), $countryCode);
@@ -147,12 +151,20 @@ class CartController extends Controller
         $maxAllowed = max(0, (int) $package->stock);
 
         if ($maxAllowed <= 0) {
-            return redirect()->back()->with('error', __('shop.package_out_of_stock'));
+            $message = __('shop.package_out_of_stock');
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => $message]);
+            }
+            return redirect()->back()->with('error', $message);
         }
 
         $existingQty = $cart[$cartKey]['quantity'] ?? 0;
         if ($existingQty + $quantity > $maxAllowed) {
-            return redirect()->back()->with('error', __('shop.maximum_units', ['count' => $maxAllowed]));
+            $message = __('shop.maximum_units', ['count' => $maxAllowed]);
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => $message]);
+            }
+            return redirect()->back()->with('error', $message);
         }
 
         if (isset($cart[$cartKey])) {
@@ -175,7 +187,19 @@ class CartController extends Controller
         $this->cartService->put($cart);
 
         if ($request->boolean('buy_now')) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => __('cart_page.added'),
+                    'cartCount' => count($cart),
+                    'redirect' => route('cart.index'),
+                ]);
+            }
             return redirect()->route('cart.index')->with('success', __('cart_page.added'));
+        }
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json(['success' => true, 'message' => __('cart_page.added'), 'cartCount' => count($cart)]);
         }
 
         return redirect()->back()->with('success', __('cart_page.added'));
@@ -237,6 +261,12 @@ class CartController extends Controller
 
     public function checkout(CheckoutRequest $request)
     {
+        $authenticatedUser = $request->user();
+
+        if ($authenticatedUser && ! $authenticatedUser->hasVerifiedEmail()) {
+            return redirect()->route('verification.notice');
+        }
+
         $cart = $this->cartService->get();
 
         if (empty($cart)) {

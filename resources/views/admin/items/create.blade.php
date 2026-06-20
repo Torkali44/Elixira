@@ -11,24 +11,7 @@
         <form action="{{ route('admin.items.store') }}" method="POST" enctype="multipart/form-data" novalidate>
             @csrf
 
-            {{-- Bilingual Name --}}
-            <div class="mb-3">
-                <label class="form-label fw-semibold">{{ __('admin.items_page.product_name') }} <span class="text-danger">*</span></label>
-                <ul class="nav nav-tabs mb-2" role="tablist">
-                    <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#name-en-tab">English</a></li>
-                    <li class="nav-item"><a class="nav-link @error('name_ar') text-danger fw-bold @enderror" data-bs-toggle="tab" href="#name-ar-tab">العربية @error('name_ar')<span class="badge bg-danger ms-1">!</span>@enderror</a></li>
-                </ul>
-                <div class="tab-content">
-                    <div class="tab-pane fade show active" id="name-en-tab">
-                        <input type="text" class="form-control @error('name_en') is-invalid @enderror" id="name_en" name="name_en" value="{{ old('name_en') }}" maxlength="255" placeholder="Product name in English">
-                        @error('name_en')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
-                    </div>
-                    <div class="tab-pane fade" id="name-ar-tab">
-                        <input type="text" class="form-control @error('name_ar') is-invalid @enderror" id="name_ar" name="name_ar" value="{{ old('name_ar') }}" maxlength="255" dir="rtl" placeholder="اسم المنتج بالعربي">
-                        @error('name_ar')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
-                    </div>
-                </div>
-            </div>
+            @include('partials.admin.item-bilingual-fields', ['item' => null])
 
             <div class="row">
                 <div class="col-md-6 mb-3">
@@ -66,25 +49,6 @@
                 </div>
             </div>
 
-            {{-- Bilingual Description --}}
-            <div class="mb-3">
-                <label class="form-label fw-semibold">{{ __('admin.items_page.description') }} <span class="text-danger">*</span></label>
-                <ul class="nav nav-tabs mb-2" role="tablist">
-                    <li class="nav-item"><a class="nav-link active @error('description_en') text-danger fw-bold @enderror" data-bs-toggle="tab" href="#desc-en-tab">English @error('description_en')<span class="badge bg-danger ms-1">!</span>@enderror</a></li>
-                    <li class="nav-item"><a class="nav-link @error('description_ar') text-danger fw-bold @enderror" data-bs-toggle="tab" href="#desc-ar-tab">العربية @error('description_ar')<span class="badge bg-danger ms-1">!</span>@enderror</a></li>
-                </ul>
-                <div class="tab-content">
-                    <div class="tab-pane fade show active" id="desc-en-tab">
-                        <textarea class="form-control @error('description_en') is-invalid @enderror" id="description_en" name="description_en" rows="3" placeholder="Short description in English">{{ old('description_en') }}</textarea>
-                        @error('description_en')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
-                    </div>
-                    <div class="tab-pane fade" id="desc-ar-tab">
-                        <textarea class="form-control @error('description_ar') is-invalid @enderror" id="description_ar" name="description_ar" rows="3" dir="rtl" placeholder="وصف مختصر بالعربي">{{ old('description_ar') }}</textarea>
-                        @error('description_ar')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
-                    </div>
-                </div>
-            </div>
-
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label for="stock" class="form-label">{{ __('admin.items_page.stock') }} <span class="text-danger">*</span></label>
@@ -95,11 +59,7 @@
 
             @include('partials.admin.item-country-prices', ['item' => null])
 
-            <div class="mb-3">
-                <label for="long_description" class="form-label">{{ __('admin.items_page.long_description') }}</label>
-                <textarea class="form-control" id="long_description" name="long_description" rows="10" placeholder="Write detailed information about the product here...">{{ old('long_description') }}</textarea>
-                <small class="text-muted">{{ __('admin.items_page.long_description_hint') }}</small>
-            </div>
+            @include('partials.admin.bilingual-long-description', ['model' => null, 'prefix' => 'item-long-desc'])
 
             <div class="mb-3">
                 <label for="image" class="form-label">{{ __('admin.items_page.main_image') }}</label>

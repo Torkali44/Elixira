@@ -12,20 +12,16 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
+use Throwable;
 
 class RegisteredUserController extends Controller
 {
-    /**
-     * Display the registration view.
-     */
     public function create(): View
     {
         return view('auth.register');
     }
 
     /**
-     * Handle an incoming registration request.
-     *
      * @throws ValidationException
      */
     public function store(RegisterUserRequest $request): RedirectResponse
@@ -49,14 +45,20 @@ class RegisteredUserController extends Controller
             ]);
         }
 
-        event(new Registered($user));
-
         Auth::login($user);
 
-        if ($request->account_type === 'vendor') {
-            return redirect()->route('vendor.onboarding')->with('status', 'Welcome! Please complete your vendor profile.');
+        try {
+            event(new Registered($user));
+        } catch (Throwable $exception) {
+            report($exception);
+
+            return redirect()
+                ->route('verification.notice')
+                ->with('error', __('app.auth.verify_otp_send_failed'));
         }
 
-        return redirect(route('dashboard', absolute: false));
+        return redirect()
+            ->route('verification.notice')
+            ->with('status', 'verification-otp-sent');
     }
 }

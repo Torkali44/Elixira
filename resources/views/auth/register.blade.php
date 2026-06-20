@@ -43,44 +43,6 @@
         margin-bottom: 0.5rem;
         margin-top: 1rem;
     }
-    .auth-phone-row {
-        display: flex;
-        gap: 0.75rem;
-        align-items: stretch;
-        margin-bottom: 0.5rem;
-    }
-    .auth-phone-codes {
-        display: flex;
-        gap: 0.5rem;
-        flex-shrink: 0;
-    }
-    .auth-phone-code {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.35rem;
-        padding: 0.65rem 0.75rem;
-        border-radius: 10px;
-        border: 1px solid var(--elx-border);
-        background: rgba(255, 255, 255, 0.05);
-        cursor: pointer;
-        color: var(--elx-white);
-        font-size: 0.85rem;
-        font-weight: 600;
-        transition: var(--elx-transition);
-    }
-    .auth-phone-code input { display: none; }
-    .auth-phone-code.active,
-    .auth-phone-code:has(input:checked) {
-        border-color: var(--elx-cyan);
-        background: rgba(74, 200, 246, 0.12);
-        color: var(--elx-cyan);
-    }
-    .auth-phone-code img {
-        width: 22px;
-        height: 15px;
-        border-radius: 2px;
-        object-fit: cover;
-    }
 </style>
 @endsection
 
@@ -93,7 +55,13 @@
                 <p style="color: var(--elx-gray);">{{ __('app.auth.register_subtitle') }}</p>
             </div>
 
-            <form method="POST" action="{{ route('register') }}" enctype="multipart/form-data">
+            @if (session('error'))
+                <div style="background: rgba(255, 77, 77, 0.1); border: 1px solid rgba(255, 77, 77, 0.25); color: #ff8a8a; padding: 0.85rem 1rem; border-radius: 10px; margin-bottom: 1.25rem; font-size: 0.9rem; text-align: center;">
+                    {{ session('error') }}
+                </div>
+            @endif
+
+            <form method="POST" action="{{ route('register', [], false) }}" enctype="multipart/form-data">
                 @csrf
 
                 <label class="auth-label">{{ __('app.auth.full_name') }}</label>
@@ -106,25 +74,16 @@
 
                 @php
                     $phoneCountry = old('phone_country_code', '+966');
-                    $ksaFlag = app(\App\Support\ItemPricingService::class)->countryFlag('KSA');
-                    $uaeFlag = app(\App\Support\ItemPricingService::class)->countryFlag('UAE');
+                    $phoneNumber = old('phone');
                 @endphp
                 <label class="auth-label">{{ __('app.auth.phone') }}</label>
-                <div class="auth-phone-row">
-                    <div class="auth-phone-codes">
-                        <label class="auth-phone-code {{ $phoneCountry === '+966' ? 'active' : '' }}">
-                            <input type="radio" name="phone_country_code" value="+966" @checked($phoneCountry === '+966')>
-                            @if($ksaFlag)<img src="{{ $ksaFlag }}" alt="KSA">@endif
-                            <span>+966</span>
-                        </label>
-                        <label class="auth-phone-code {{ $phoneCountry === '+971' ? 'active' : '' }}">
-                            <input type="radio" name="phone_country_code" value="+971" @checked($phoneCountry === '+971')>
-                            @if($uaeFlag)<img src="{{ $uaeFlag }}" alt="UAE">@endif
-                            <span>+971</span>
-                        </label>
-                    </div>
-                    <input type="text" name="phone" class="form-input" value="{{ old('phone') }}" required placeholder="{{ __('app.auth.phone_placeholder') }}" style="margin-bottom: 0; flex: 1;">
-                </div>
+                <x-phone-country-input
+                    :country-code="$phoneCountry"
+                    :phone="$phoneNumber"
+                    input-class="form-input"
+                    :placeholder="__('app.auth.phone_placeholder')"
+                    input-style="margin-bottom: 0;"
+                />
                 <x-input-error :messages="$errors->get('phone')" style="color: #ff8a8a; font-size: 0.8rem; margin-bottom: 0.5rem;" />
                 <x-input-error :messages="$errors->get('phone_country_code')" style="color: #ff8a8a; font-size: 0.8rem; margin-bottom: 0.5rem;" />
 
@@ -168,15 +127,7 @@
                         }
                     }
 
-                    // Run on load to set initial state
                     document.addEventListener('DOMContentLoaded', toggleVendorFields);
-
-                    document.querySelectorAll('.auth-phone-code input').forEach((input) => {
-                        input.addEventListener('change', () => {
-                            document.querySelectorAll('.auth-phone-code').forEach((label) => label.classList.remove('active'));
-                            input.closest('.auth-phone-code')?.classList.add('active');
-                        });
-                    });
                 </script>
 
                 <button type="submit" class="elx-btn elx-btn--primary" style="width: 100%; justify-content: center; padding: 1rem; margin-top: 1.5rem;">

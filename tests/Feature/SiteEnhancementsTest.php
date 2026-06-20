@@ -9,6 +9,7 @@ use App\Models\DxnTeamRequest;
 use App\Models\Faq;
 use App\Models\HomePageSection;
 use App\Models\Item;
+use App\Models\Notification;
 use App\Models\Order;
 use App\Models\Package;
 use App\Models\Review;
@@ -18,6 +19,7 @@ use App\Support\ItemPricingService;
 use App\Support\SiteBroadcastService;
 use App\Support\TagService;
 use App\Support\UserNotifier;
+use App\Support\VendorSubscriptionService;
 use App\Support\YoutubeEmbed;
 
 test('contact form stores a message for admin review', function () {
@@ -396,8 +398,29 @@ test('vendor products stay visible during subscription grace period', function (
         'stock' => 3,
         'status' => 'approved',
     ]);
+    $item->countryPrices()->create(['country_code' => 'KSA', 'member_price' => 45, 'guest_price' => 50]);
 
     expect(Item::query()->publiclyVisible()->where('id', $item->id)->exists())->toBeTrue();
+});
+
+test('admin users list hides accounts until email is verified', function () {
+    $admin = User::factory()->create(['role' => 'admin']);
+    $pending = User::factory()->unverified()->create([
+        'name' => 'Pending User',
+        'email' => 'pending-user@example.com',
+    ]);
+    $verified = User::factory()->create([
+        'name' => 'Verified User',
+        'email' => 'verified-user@example.com',
+    ]);
+
+    $this->actingAs($admin)
+        ->get(route('admin.users.index'))
+        ->assertSuccessful()
+        ->assertSee('verified-user@example.com')
+        ->assertDontSee('pending-user@example.com');
+
+    expect($pending->exists())->toBeTrue();
 });
 
 test('admin users list can filter verified dxn members by tag color', function () {
@@ -446,7 +469,7 @@ test('cart page loads without controller resolution error', function () {
 
 test('global search finds products blogs and faqs', function () {
     $category = Category::query()->create(['name' => 'Hair', 'name_en' => 'Hair', 'name_ar' => 'شعر']);
-    Item::query()->create([
+    $item = Item::query()->create([
         'category_id' => $category->id,
         'name' => 'Hair Cream',
         'name_en' => 'Hair Cream',
@@ -456,6 +479,7 @@ test('global search finds products blogs and faqs', function () {
         'stock' => 3,
         'status' => 'approved',
     ]);
+    $item->countryPrices()->create(['country_code' => 'KSA', 'member_price' => 45, 'guest_price' => 50]);
 
     Blog::query()->create([
         'title_en' => 'Hair Care Tips',
@@ -546,6 +570,7 @@ test('related testimonials appear on product page by shared tags', function () {
         'stock' => 3,
         'status' => 'approved',
     ]);
+    $item->countryPrices()->create(['country_code' => 'KSA', 'member_price' => 45, 'guest_price' => 50]);
 
     app(TagService::class)->syncFromInput($item, 'hair, glow');
 
@@ -717,3 +742,258 @@ test('track order detail page renders package line items without errors', functi
         ->assertSee('Invoice Package')
         ->assertSee(__('track.print_invoice'));
 });
+
+test('menu page filters products by selected country', function () {
+    $category = Category::query()->create(['name' => 'Cat', 'name_en' => 'Cat', 'name_ar' => 'قسم']);
+    $ksaItem = Item::query()->create([
+        'category_id' => $category->id,
+        'name' => 'KSA Only Item',
+        'name_en' => 'KSA Only Item',
+        'name_ar' => 'منتج سعودي',
+        'description' => 'desc',
+        'price' => 100,
+        'stock' => 5,
+        'status' => 'approved',
+    ]);
+    $ksaItem->countryPrices()->create(['country_code' => 'KSA', 'member_price' => 80, 'guest_price' => 100]);
+
+    $uaeItem = Item::query()->create([
+        'category_id' => $category->id,
+        'name' => 'UAE Only Item',
+        'name_en' => 'UAE Only Item',
+        'name_ar' => 'منتج إماراتي',
+        'description' => 'desc',
+        'price' => 90,
+        'stock' => 5,
+        'status' => 'approved',
+    ]);
+    $uaeItem->countryPrices()->create(['country_code' => 'UAE', 'member_price' => 70, 'guest_price' => 90]);
+
+    $this->get(route('menu.index', ['country' => 'KSA']))
+        ->assertSuccessful()
+        ->assertSee(__('shop.select_country'))
+        ->assertSee('KSA Only Item')
+        ->assertDontSee('UAE Only Item');
+
+    $this->get(route('menu.index', ['country' => 'UAE']))
+        ->assertSuccessful()
+        ->assertSee('UAE Only Item')
+        ->assertDontSee('KSA Only Item');
+});
+
+test('vendor free slots count only active approved vendors', function () {
+    config(['vendor.free_vendor_slots' => 10]);
+
+    $service = app(VendorSubscriptionService::class);
+
+    for ($i = 0; $i < 5; $i++) {
+        $user = User::factory()->create(['role' => 'vendor', 'is_suspended' => false]);
+        VendorProfile::query()->create([
+            'user_id' => $user->id,
+            'brand_name' => "Active Brand {$i}",
+            'status' => 'approved',
+            'subscription_payment_status' => 'not_required',
+        ]);
+    }
+
+    for ($i = 0; $i < 3; $i++) {
+        $user = User::factory()->create(['role' => 'vendor', 'is_suspended' => true]);
+        VendorProfile::query()->create([
+            'user_id' => $user->id,
+            'brand_name' => "Suspended Brand {$i}",
+            'status' => 'approved',
+            'subscription_payment_status' => 'not_required',
+        ]);
+    }
+
+    expect($service->activeVendorCount())->toBe(5)
+        ->and($service->freeSlotsRemaining())->toBe(5)
+        ->and($service->requiresPayment())->toBeFalse();
+});
+
+test('vendor package submission is pending and notifies admins', function () {
+    $admin = User::factory()->create(['role' => 'admin']);
+    $vendor = User::factory()->create(['role' => 'vendor']);
+    $profile = VendorProfile::query()->create([
+        'user_id' => $vendor->id,
+        'brand_name' => 'Package Brand',
+        'status' => 'approved',
+        'subscription_payment_status' => 'not_required',
+    ]);
+    $brand = Brand::query()->create([
+        'vendor_profile_id' => $profile->id,
+        'name' => 'Package Brand',
+        'is_active' => true,
+    ]);
+    $category = Category::query()->create(['name' => 'Pkg', 'name_en' => 'Pkg', 'name_ar' => 'باك']);
+    $item = Item::query()->create([
+        'category_id' => $category->id,
+        'brand_id' => $brand->id,
+        'name' => 'Bundle Item',
+        'name_en' => 'Bundle Item',
+        'name_ar' => 'منتج',
+        'description' => 'desc',
+        'price' => 50,
+        'stock' => 5,
+        'status' => 'approved',
+    ]);
+
+    $this->actingAs($vendor)
+        ->post(route('vendor.packages.store'), [
+            'name_en' => 'Vendor Bundle',
+            'name_ar' => 'باكيدج البائع',
+            'description_en' => 'English description',
+            'description_ar' => 'وصف عربي',
+            'stock' => 10,
+            'country_prices' => [
+                'KSA' => ['enabled' => '1', 'member_price' => 90, 'guest_price' => 100],
+            ],
+            'package_items' => [
+                $item->id => ['selected' => 1, 'quantity' => 2],
+            ],
+        ])
+        ->assertRedirect(route('vendor.packages.index'));
+
+    $package = Package::query()->where('name_en', 'Vendor Bundle')->first();
+
+    expect($package)->not->toBeNull()
+        ->and($package->status)->toBe('pending')
+        ->and($package->is_active)->toBeFalse()
+        ->and($package->items)->toHaveCount(1);
+
+    expect(Notification::query()->where('user_id', $admin->id)->where('title_key', 'notifications.vendor_package_submitted.title')->exists())->toBeTrue();
+});
+
+test('admin can approve vendor package and make it publicly visible', function () {
+    $admin = User::factory()->create(['role' => 'admin']);
+    $vendor = User::factory()->create(['role' => 'vendor']);
+    $profile = VendorProfile::query()->create([
+        'user_id' => $vendor->id,
+        'brand_name' => 'Approve Brand',
+        'status' => 'approved',
+        'subscription_payment_status' => 'not_required',
+    ]);
+    $brand = Brand::query()->create([
+        'vendor_profile_id' => $profile->id,
+        'name' => 'Approve Brand',
+        'is_active' => true,
+    ]);
+    $package = Package::query()->create([
+        'brand_id' => $brand->id,
+        'name' => 'Pending Bundle',
+        'name_en' => 'Pending Bundle',
+        'name_ar' => 'باكيدج',
+        'description' => 'desc',
+        'price' => 100,
+        'stock' => 5,
+        'status' => 'pending',
+        'is_active' => false,
+    ]);
+    $package->countryPrices()->create(['country_code' => 'KSA', 'member_price' => 90, 'guest_price' => 100]);
+
+    $this->actingAs($admin)
+        ->patch(route('admin.packages.approve', $package))
+        ->assertRedirect(route('admin.packages.index'));
+
+    $package->refresh();
+
+    expect($package->status)->toBe('approved')
+        ->and($package->is_active)->toBeTrue()
+        ->and($package->isPubliclyVisible())->toBeTrue();
+
+    $this->get(route('packages.show', $package))->assertSuccessful();
+});
+
+test('packages page filters by selected country', function () {
+    $ksaPackage = Package::query()->create([
+        'name' => 'KSA Package',
+        'name_en' => 'KSA Package',
+        'name_ar' => 'باكيدج السعودية',
+        'description' => 'desc',
+        'price' => 100,
+        'stock' => 5,
+        'is_active' => true,
+        'status' => 'approved',
+    ]);
+    $ksaPackage->countryPrices()->create(['country_code' => 'KSA', 'member_price' => 90, 'guest_price' => 100]);
+
+    $uaePackage = Package::query()->create([
+        'name' => 'UAE Package',
+        'name_en' => 'UAE Package',
+        'name_ar' => 'باكيدج الإمارات',
+        'description' => 'desc',
+        'price' => 120,
+        'stock' => 5,
+        'is_active' => true,
+        'status' => 'approved',
+    ]);
+    $uaePackage->countryPrices()->create(['country_code' => 'UAE', 'member_price' => 100, 'guest_price' => 120]);
+
+    $this->get(route('packages.index', ['country' => 'KSA']))
+        ->assertSuccessful()
+        ->assertSee('KSA Package')
+        ->assertDontSee('UAE Package');
+
+    $this->get(route('packages.index', ['country' => 'UAE']))
+        ->assertSuccessful()
+        ->assertSee('UAE Package')
+        ->assertDontSee('KSA Package');
+});
+
+test('package can be added to cart from storefront via AJAX', function () {
+    $package = Package::query()->create([
+        'name' => 'Glow Bundle 2',
+        'name_en' => 'Glow Bundle 2',
+        'name_ar' => 'باكيدج 2',
+        'description' => 'Bundle desc 2',
+        'price' => 150,
+        'stock' => 10,
+        'reward_points' => 25,
+        'is_active' => true,
+    ]);
+    $package->countryPrices()->create(['country_code' => 'KSA', 'member_price' => 120, 'guest_price' => 150]);
+
+    $response = $this->postJson(route('cart.add-package'), [
+        'package_id' => $package->id,
+        'quantity' => 1,
+        'country_code' => 'KSA',
+    ]);
+
+    $response->assertJson([
+        'success' => true,
+    ]);
+
+    expect(session('cart'))->toHaveKey('p_'.$package->id)
+        ->and(session('cart')['p_'.$package->id]['type'])->toBe('package');
+});
+
+test('user can submit a testimonial review', function () {
+    $avatar = \App\Models\AvatarOption::create([
+        'name' => 'Avatar 1',
+        'image_url' => 'https://framerusercontent.com/images/cTc7CUtNbTmlTgoiKuHSwOHME.png',
+        'is_active' => true,
+        'sort_order' => 1,
+    ]);
+
+    $response = $this->post(route('testimonials.store'), [
+        'name' => 'John Doe',
+        'email' => 'john@example.com',
+        'age' => '25-34',
+        'gender' => 'Male',
+        'rating' => '5',
+        'content' => 'This is a great product!',
+        'avatar' => $avatar->image_url,
+        'type' => 'direct',
+    ]);
+
+    $response->assertRedirect();
+    $response->assertSessionHas('success');
+
+    $this->assertDatabaseHas('reviews', [
+        'name' => 'John Doe',
+        'rating' => 5,
+        'content' => 'This is a great product!',
+    ]);
+});
+
+

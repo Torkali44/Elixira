@@ -44,6 +44,7 @@ return [
     'no_orders_hint' => 'عند تقديم طلب وأنت مسجّل الدخول، سيظهر هنا تلقائياً.',
     'placed_with' => 'تم الطلب عبر',
     'print_invoice' => 'طباعة الفاتورة',
+    'download_invoice' => 'تحميل الفاتورة',
     'back_to_order' => 'العودة للطلب',
     'customer' => 'العميل',
     'date' => 'التاريخ',

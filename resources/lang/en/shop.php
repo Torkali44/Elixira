@@ -4,6 +4,7 @@ return [
     'page_title' => 'Our Collections - Elixira',
     'hero_title' => 'Our Collections',
     'hero_subtitle' => 'Discover our pure and natural product ranges',
+    'select_country' => 'Select your country',
     'filter_all' => 'All',
     'out_of_stock' => 'Out of Stock',
     'limited' => 'Limited',

@@ -18,6 +18,19 @@ class StorePackageRequest extends FormRequest
     public function withValidator(Validator $validator): void
     {
         $this->validateCountryPrices($validator);
+
+        $validator->after(function (Validator $validator): void {
+            if (! $this->routeIs('vendor.packages.store', 'vendor.packages.update')) {
+                return;
+            }
+
+            $hasSelectedItem = collect($this->input('package_items', []))
+                ->contains(fn (mixed $row): bool => is_array($row) && ! empty($row['selected']));
+
+            if (! $hasSelectedItem) {
+                $validator->errors()->add('package_items', __('admin.packages_page.products_required'));
+            }
+        });
     }
 
     public function rules(): array
@@ -27,7 +40,8 @@ class StorePackageRequest extends FormRequest
             'name_ar' => 'required|string|max:255',
             'description_en' => 'required|string',
             'description_ar' => 'required|string',
-            'long_description' => 'nullable|string',
+            'long_description_en' => 'nullable|string',
+            'long_description_ar' => 'nullable|string',
             'price' => 'nullable|numeric|min:0',
             'stock' => 'required|integer|min:0',
             'reward_points' => 'nullable|integer|min:0',

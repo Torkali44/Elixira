@@ -278,6 +278,7 @@
         body.light-mode .page-content { color: #13252d; }
     </style>
     @yield('head')
+    @stack('head')
 </head>
 
 <body>
@@ -898,7 +899,8 @@
                 method: 'POST',
                 body: formData,
                 headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
                 }
             })
             .then(response => response.json())
@@ -1087,6 +1089,7 @@
         @endif
     </script>
     @yield('scripts')
+    @stack('scripts')
     <script>
         window.setTimeout(function () {
             document.querySelectorAll('[data-animate]:not(.animate-in)').forEach(function (el) {

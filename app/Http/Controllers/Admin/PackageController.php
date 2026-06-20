@@ -19,7 +19,22 @@ class PackageController extends Controller
 {
     public function index(): View
     {
-        $packages = Package::query()->withCount('items')->latest()->paginate(20);
+        $status = request('status');
+        $query = Package::query()->with('brand')->withCount('items')->latest();
+
+        if ($status === 'new') {
+            $query->where('status', 'pending')
+                ->where('created_at', '>=', now()->subHours(24));
+        } elseif ($status === 'pending') {
+            $query->where('status', 'pending')
+                ->where('created_at', '<', now()->subHours(24));
+        } elseif ($status === 'approved') {
+            $query->where('status', 'approved');
+        } elseif ($status === 'rejected') {
+            $query->whereIn('status', ['rejected', 'rejected_with_notes']);
+        }
+
+        $packages = $query->paginate(20)->withQueryString();
 
         return view('admin.packages.index', compact('packages'));
     }
@@ -36,6 +51,7 @@ class PackageController extends Controller
         $data = $request->validated();
         $data['is_featured'] = $request->has('is_featured');
         $data['is_active'] = $request->has('is_active');
+        $data['status'] = 'approved';
         $data = $this->normalizeBilingualFields($data);
         $data['price'] = $data['price'] ?? 0;
 

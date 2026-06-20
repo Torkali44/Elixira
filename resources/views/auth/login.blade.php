@@ -57,7 +57,13 @@
 
             <x-auth-session-status class="mb-4" style="color: var(--elx-cyan); text-align: center;" :status="session('status')" />
 
-            <form method="POST" action="{{ route('login') }}">
+            @if (session('error'))
+                <div style="background: rgba(255, 77, 77, 0.1); border: 1px solid rgba(255, 77, 77, 0.25); color: #ff8a8a; padding: 0.85rem 1rem; border-radius: 10px; margin-bottom: 1.25rem; font-size: 0.9rem; text-align: center;">
+                    {{ session('error') }}
+                </div>
+            @endif
+
+            <form method="POST" action="{{ route('login', [], false) }}">
                 @csrf
 
                 <label class="auth-label">{{ __('app.auth.email') }}</label>

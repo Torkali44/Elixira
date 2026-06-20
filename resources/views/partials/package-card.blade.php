@@ -2,12 +2,12 @@
     $pricingService = app(\App\Support\PackagePricingService::class);
     $itemPricing = app(\App\Support\ItemPricingService::class);
     $availableCountries = $pricingService->availableCountryCodes($package);
-    $selectedCountry = $itemPricing->resolveCountryCodeForPackage($package, request('country')) ?? $itemPricing->detectUserCountry();
+    $selectedCountry = $itemPricing->resolveCountryCodeForPackage($package, $selectedCountry ?? request('country')) ?? $itemPricing->detectUserCountry();
     $flags = $itemPricing->countryFlags();
     $canAddToCart = count($availableCountries) > 0 && (int) $package->stock > 0;
 @endphp
 
-<div class="elx-product-card" data-animate style="cursor: default;">
+<div class="elx-product-card" data-animate style="cursor: pointer;" onclick="if(!event.target.closest('button') && !event.target.closest('form') && !event.target.closest('a')) window.location.href='{{ route('packages.show', $package) }}'">
     <a href="{{ route('packages.show', $package) }}" class="elx-product-card__image-container">
         @if($package->image)
             <img src="{{ asset('storage/'.$package->image) }}" alt="{{ $package->local_name }}">
@@ -29,7 +29,7 @@
         </div>
 
         @if(count($availableCountries) > 0)
-            <div style="margin-bottom:0.75rem; display:flex; gap:0.35rem; flex-wrap:wrap;">
+            <div onclick="event.stopPropagation();" style="position: relative; z-index: 20; margin-bottom:0.75rem; display:flex; gap:0.35rem; flex-wrap:wrap;">
                 @foreach($availableCountries as $code)
                     <button type="button"
                         class="package-card-country-btn"
@@ -60,15 +60,17 @@
         <p class="elx-product-card__desc" style="flex-grow:1; margin-bottom:1rem;">{{ Str::limit($package->local_description, 85) }}</p>
 
         @if($canAddToCart)
-            <form action="{{ route('cart.add-package') }}" method="POST">
-                @csrf
-                <input type="hidden" name="package_id" value="{{ $package->id }}">
-                <input type="hidden" name="quantity" value="1">
-                <input type="hidden" name="country_code" value="{{ $selectedCountry }}" id="package-country-{{ $package->id }}">
-                <button type="submit" class="elx-product-card__add-btn" style="width:100%;">
-                    <i class="fas fa-cart-plus"></i> {{ __('home.add_to_cart') }}
-                </button>
-            </form>
+            <div class="elx-product-card__cart-form" onclick="event.stopPropagation();" style="position: relative; z-index: 20; padding: 0;">
+                <form action="{{ route('cart.add-package') }}" method="POST" onclick="event.stopPropagation();" style="position: relative; z-index: 20;">
+                    @csrf
+                    <input type="hidden" name="package_id" value="{{ $package->id }}">
+                    <input type="hidden" name="quantity" value="1">
+                    <input type="hidden" name="country_code" value="{{ $selectedCountry }}" id="package-country-{{ $package->id }}">
+                    <button type="button" class="elx-product-card__add-btn" style="position: relative; z-index: 20; width:100%;" onclick="addToCartAjax(this, event);">
+                        <i class="fas fa-cart-plus"></i> {{ __('home.add_to_cart') }}
+                    </button>
+                </form>
+            </div>
         @endif
     </div>
 </div>

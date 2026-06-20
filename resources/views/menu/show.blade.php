@@ -331,11 +331,11 @@
         </div>
 
         {{-- Blog Section --}}
-        @if($item->long_description)
+        @if($item->local_long_description)
         <div class="blog-section" data-animate>
             <h2>The Ritual Insights</h2>
             <div class="blog-content">
-                {{ $item->long_description }}
+                {{ $item->local_long_description }}
             </div>
         </div>
         @endif

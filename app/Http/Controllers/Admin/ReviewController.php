@@ -34,7 +34,7 @@ class ReviewController extends Controller
         ]);
 
         $avatar = null;
-        $content = $request->content;
+        $content = $request->input('content');
 
         if ($request->type === 'video') {
             // Content must be the link

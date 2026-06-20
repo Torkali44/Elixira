@@ -14,11 +14,12 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         User::updateOrCreate(
-            ['email' => 'admin@elixira.com'],
+            ['email' => config('admin.email')],
             [
-                'name' => 'Elixira Admin',
-                'password' => bcrypt('12345678'),
+                'name' => config('admin.name'),
+                'password' => bcrypt(config('admin.password')),
                 'role' => 'admin',
+                'email_verified_at' => now(),
             ]
         );
 

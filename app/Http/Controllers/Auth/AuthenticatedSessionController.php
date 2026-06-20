@@ -32,9 +32,14 @@ class AuthenticatedSessionController extends Controller
             Auth::guard('web')->logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();
+
             return back()->withErrors([
                 'email' => 'Your account has been suspended by the administration.',
             ]);
+        }
+
+        if ($request->user()->role !== 'admin' && ! $request->user()->hasVerifiedEmail()) {
+            return redirect()->route('verification.notice');
         }
 
         if ($request->user()->role === 'admin') {

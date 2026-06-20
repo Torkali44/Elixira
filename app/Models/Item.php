@@ -31,7 +31,8 @@ class Item extends Model
         'reward_points',
         'image',
         'is_featured',
-        'long_description',
+        'long_description_en',
+        'long_description_ar',
         'status',
         'rejection_reason',
     ];
@@ -129,6 +130,15 @@ class Item extends Model
         }
 
         return $this->description_en ?: $this->description;
+    }
+
+    public function getLocalLongDescriptionAttribute(): ?string
+    {
+        if (app()->getLocale() === 'ar') {
+            return $this->long_description_ar ?: $this->long_description_en;
+        }
+
+        return $this->long_description_en ?: $this->long_description_ar;
     }
 
     public function scopePubliclyVisible(Builder $query): Builder

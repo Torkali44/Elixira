@@ -8,7 +8,7 @@
 <div class="card shadow-sm"><div class="card-body">
     <form action="{{ route('vendor.packages.update', $package) }}" method="POST" enctype="multipart/form-data" novalidate>
         @csrf @method('PUT')
-        @include('admin.packages.partials.form', ['package' => $package, 'items' => $items])
+        @include('admin.packages.partials.form', ['package' => $package, 'items' => $items, 'vendorMode' => true])
         <button type="submit" class="btn btn-primary">{{ __('admin.packages_page.update') }}</button>
     </form>
 </div></div>

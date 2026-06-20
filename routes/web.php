@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\HomeSectionController;
 use App\Http\Controllers\Admin\ItemController;
 use App\Http\Controllers\Admin\NewsletterController; // Breeze
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
+use App\Http\Controllers\Admin\PackageApprovalController;
 use App\Http\Controllers\Admin\ProductApprovalController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\ReviewController;
@@ -32,6 +33,7 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PackageController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RatingController;
+use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\ShoppingCountryController;
 use App\Http\Controllers\SpecialRequestController;
@@ -89,17 +91,25 @@ Route::view('/vendor/terms', 'vendor.terms')->name('vendor.terms');
 
 // Breeze Auth Routes
 Route::get('/dashboard', function () {
-    if (auth()->user()->role === 'admin') {
+    $user = auth()->user();
+
+    if ($user->role === 'admin') {
         return redirect()->route('admin.dashboard');
     }
-    if (auth()->user()->role === 'vendor') {
+
+    if ($user->role === 'vendor') {
+        $profile = $user->vendorProfile;
+        if ($profile && in_array($profile->status, ['draft', 'pending'], true)) {
+            return redirect()->route('vendor.onboarding');
+        }
+
         return redirect()->route('vendor.dashboard');
     }
 
     return redirect()->route('home');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'verified.or.admin'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::get('/profile/orders', [ProfileController::class, 'orders'])->name('profile.orders.index');
     Route::get('/profile/orders/{order}', [ProfileController::class, 'showOrder'])->name('profile.orders.show');
@@ -144,6 +154,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
 
     Route::resource('items', ItemController::class);
     Route::delete('items/images/{image}', [ItemController::class, 'deleteImage'])->name('items.delete-image');
+    Route::patch('packages/{package}/approve', [PackageApprovalController::class, 'approve'])->name('packages.approve');
+    Route::patch('packages/{package}/reject', [PackageApprovalController::class, 'reject'])->name('packages.reject');
     Route::resource('packages', App\Http\Controllers\Admin\PackageController::class);
     Route::get('home-sections', [HomeSectionController::class, 'index'])->name('home-sections.index');
     Route::get('home-sections/{home_section}/edit', [HomeSectionController::class, 'edit'])->name('home-sections.edit');
@@ -209,7 +221,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
 });
 
 // Vendor Routes (Protected)
-Route::prefix('vendor')->name('vendor.')->middleware(['auth', 'vendor'])->group(function () {
+Route::prefix('vendor')->name('vendor.')->middleware(['auth', 'verified', 'vendor'])->group(function () {
     Route::get('/', function () {
         return redirect()->route('vendor.dashboard');
     })->name('dashboard.redirect');

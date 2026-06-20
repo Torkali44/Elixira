@@ -72,6 +72,40 @@
         </div>
     </div>
 
+    {{-- Detailed Breakdown --}}
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm p-3" style="border-left: 5px solid #007bff; border-radius: 10px;">
+                <h6 class="text-muted fw-bold mb-2">📦 Product Sales Breakdown</h6>
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="fw-bold fs-5 text-primary">﷼ {{ number_format($productRevenue, 2) }}</div>
+                        <div class="text-muted small">Total Product Revenue</div>
+                    </div>
+                    <div class="text-end">
+                        <div class="fw-bold fs-5">{{ number_format($productsSold) }}</div>
+                        <div class="text-muted small">Products Sold</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm p-3" style="border-left: 5px solid #fd7e14; border-radius: 10px;">
+                <h6 class="text-muted fw-bold mb-2">🎁 Package Sales Breakdown</h6>
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="fw-bold fs-5 text-warning" style="color: #fd7e14 !important;">﷼ {{ number_format($packageRevenue, 2) }}</div>
+                        <div class="text-muted small">Total Package Revenue</div>
+                    </div>
+                    <div class="text-end">
+                        <div class="fw-bold fs-5">{{ number_format($packagesSold) }}</div>
+                        <div class="text-muted small">Packages Sold</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     {{-- Revenue by Month --}}
     @if($revenueByMonth->count() > 0)
     <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px; overflow: hidden;">

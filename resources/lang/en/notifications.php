@@ -73,6 +73,18 @@ return [
         'title' => 'New Package Available',
         'message' => 'Discover our new package: :package',
     ],
+    'vendor_package_submitted' => [
+        'title' => 'New Package Pending Approval',
+        'message' => ':brand submitted a new package ":package" for review.',
+    ],
+    'package_approved' => [
+        'title' => 'Package Approved',
+        'message' => 'Your package ":package" has been approved and is now live.',
+    ],
+    'package_rejected' => [
+        'title' => 'Package Rejected',
+        'message' => 'Your package ":package" was rejected.:reason',
+    ],
     'missed_packages' => [
         'title' => 'Packages you might have missed',
         'message' => 'Some curated packages are waiting for you — tap to explore.',

@@ -16,10 +16,9 @@
 <a href="{{ route('admin.packages.index') }}" class="dashboard-nav-link {{ request()->routeIs('admin.packages.*') ? 'active' : '' }}">
     <i class="fas fa-box-open"></i>
     <span>{{ __('admin.nav.packages') }}</span>
-</a>
-<a href="{{ route('admin.home-sections.index') }}" class="dashboard-nav-link {{ request()->routeIs('admin.home-sections.*') ? 'active' : '' }}">
-    <i class="fas fa-home"></i>
-    <span>{{ __('admin.nav.home_sections') }}</span>
+    @if($newPendingPackagesCount > 0)
+        <span class="badge bg-danger rounded-pill">{{ $newPendingPackagesCount }}</span>
+    @endif
 </a>
 <a href="{{ route('admin.users.index') }}" class="dashboard-nav-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
     <i class="fas fa-users"></i>
@@ -99,6 +98,10 @@
         <span>{{ __('admin.nav.blogs') }}</span>
     </a>
 @endif
+<a href="{{ route('admin.home-sections.index') }}" class="dashboard-nav-link {{ request()->routeIs('admin.home-sections.*') ? 'active' : '' }}">
+    <i class="fas fa-image"></i>
+    <span>{{ __('admin.nav.home_sections') }}</span>
+</a>
 <a href="{{ route('admin.settings.translations') }}" class="dashboard-nav-link {{ request()->routeIs('admin.settings.translations') ? 'active' : '' }}">
     <i class="fas fa-globe"></i>
     <span>{{ __('admin.nav.translations') }}</span>

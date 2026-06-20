@@ -44,6 +44,7 @@ return [
     'no_orders_hint' => 'Once you place an order while signed in, it will appear here automatically.',
     'placed_with' => 'Placed with',
     'print_invoice' => 'Print Invoice',
+    'download_invoice' => 'Download Invoice',
     'back_to_order' => 'Back to Order',
     'customer' => 'Customer',
     'date' => 'Date',

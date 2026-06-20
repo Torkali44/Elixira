@@ -13,7 +13,7 @@ class UserController extends Controller
 {
     public function index(Request $request): View
     {
-        $query = User::query()->with('vendorProfile')->latest();
+        $query = User::query()->verified()->with('vendorProfile')->latest();
 
         if ($request->filled('search')) {
             $search = $request->search;
@@ -52,18 +52,22 @@ class UserController extends Controller
             'users' => $users,
             'dxnTagColors' => config('dxn.default_tag_colors', []),
             'stats' => [
-                'total' => User::count(),
-                'admins' => User::where('role', 'admin')->count(),
-                'vendors' => User::where('role', 'vendor')->count(),
-                'with_avatars' => User::whereNotNull('avatar')->count(),
-                'suspended' => User::where('is_suspended', true)->count(),
-                'dxn_verified' => User::where('is_dxn_verified', true)->count(),
+                'total' => User::verified()->count(),
+                'admins' => User::verified()->where('role', 'admin')->count(),
+                'vendors' => User::verified()->where('role', 'vendor')->count(),
+                'with_avatars' => User::verified()->whereNotNull('avatar')->count(),
+                'suspended' => User::verified()->where('is_suspended', true)->count(),
+                'dxn_verified' => User::verified()->where('is_dxn_verified', true)->count(),
             ],
         ]);
     }
 
     public function edit(User $user): View
     {
+        if (! $user->hasVerifiedEmail()) {
+            abort(404);
+        }
+
         return view('admin.users.edit', compact('user'));
     }
 

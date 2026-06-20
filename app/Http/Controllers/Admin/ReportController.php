@@ -127,27 +127,103 @@ class ReportController extends Controller
             ->take(12)
             ->get();
 
-        // Vendor payouts (outgoing) - based on items sold per brand
-        $vendorPayouts = DB::table('order_items')
+        // 1. Item sales per brand (outgoing payout)
+        $itemSales = DB::table('order_items')
+            ->join('orders', 'order_items.order_id', '=', 'orders.id')
             ->join('items', 'order_items.item_id', '=', 'items.id')
             ->join('brands', 'items.brand_id', '=', 'brands.id')
             ->join('vendor_profiles', 'brands.vendor_profile_id', '=', 'vendor_profiles.id')
             ->join('users', 'vendor_profiles.user_id', '=', 'users.id')
+            ->where('orders.status', '!=', 'cancelled')
             ->select(
+                'brands.id as brand_id',
                 'brands.name as brand_name',
                 'users.name as vendor_name',
                 DB::raw('SUM(order_items.quantity) as items_sold'),
                 DB::raw('SUM(order_items.price * order_items.quantity) as total_payout')
             )
             ->groupBy('brands.id', 'brands.name', 'users.name')
-            ->orderBy('total_payout', 'desc')
             ->get();
+
+        // 2. Package sales per brand (outgoing payout)
+        $packageSales = DB::table('order_items')
+            ->join('orders', 'order_items.order_id', '=', 'orders.id')
+            ->join('packages', 'order_items.package_id', '=', 'packages.id')
+            ->join('brands', 'packages.brand_id', '=', 'brands.id')
+            ->join('vendor_profiles', 'brands.vendor_profile_id', '=', 'vendor_profiles.id')
+            ->join('users', 'vendor_profiles.user_id', '=', 'users.id')
+            ->where('orders.status', '!=', 'cancelled')
+            ->select(
+                'brands.id as brand_id',
+                'brands.name as brand_name',
+                'users.name as vendor_name',
+                DB::raw('SUM(order_items.quantity) as items_sold'),
+                DB::raw('SUM(order_items.price * order_items.quantity) as total_payout')
+            )
+            ->groupBy('brands.id', 'brands.name', 'users.name')
+            ->get();
+
+        // Combine item and package sales in PHP
+        $combined = [];
+        foreach ($itemSales as $sale) {
+            $brandId = $sale->brand_id;
+            $combined[$brandId] = [
+                'brand_name' => $sale->brand_name,
+                'vendor_name' => $sale->vendor_name,
+                'items_sold' => (int) $sale->items_sold,
+                'total_payout' => (float) $sale->total_payout,
+            ];
+        }
+
+        foreach ($packageSales as $sale) {
+            $brandId = $sale->brand_id;
+            if (isset($combined[$brandId])) {
+                $combined[$brandId]['items_sold'] += (int) $sale->items_sold;
+                $combined[$brandId]['total_payout'] += (float) $sale->total_payout;
+            } else {
+                $combined[$brandId] = [
+                    'brand_name' => $sale->brand_name,
+                    'vendor_name' => $sale->vendor_name,
+                    'items_sold' => (int) $sale->items_sold,
+                    'total_payout' => (float) $sale->total_payout,
+                ];
+            }
+        }
+
+        $vendorPayouts = collect(array_map(fn($item) => (object) $item, $combined))
+            ->sortByDesc('total_payout');
 
         $totalVendorPayouts = $vendorPayouts->sum('total_payout');
 
+        // Detailed product/package breakdown
+        $productRevenue = DB::table('order_items')
+            ->join('orders', 'order_items.order_id', '=', 'orders.id')
+            ->where('orders.status', '!=', 'cancelled')
+            ->whereNotNull('order_items.item_id')
+            ->sum(DB::raw('order_items.price * order_items.quantity'));
+
+        $packageRevenue = DB::table('order_items')
+            ->join('orders', 'order_items.order_id', '=', 'orders.id')
+            ->where('orders.status', '!=', 'cancelled')
+            ->whereNotNull('order_items.package_id')
+            ->sum(DB::raw('order_items.price * order_items.quantity'));
+
+        $productsSold = DB::table('order_items')
+            ->join('orders', 'order_items.order_id', '=', 'orders.id')
+            ->where('orders.status', '!=', 'cancelled')
+            ->whereNotNull('order_items.item_id')
+            ->sum('order_items.quantity');
+
+        $packagesSold = DB::table('order_items')
+            ->join('orders', 'order_items.order_id', '=', 'orders.id')
+            ->where('orders.status', '!=', 'cancelled')
+            ->whereNotNull('order_items.package_id')
+            ->sum('order_items.quantity');
+
         return view('admin.reports.financials', compact(
             'totalRevenue', 'cancelledOrdersCount',
-            'revenueByMonth', 'vendorPayouts', 'totalVendorPayouts'
+            'revenueByMonth', 'vendorPayouts', 'totalVendorPayouts',
+            'productRevenue', 'packageRevenue', 'productsSold', 'packagesSold'
         ));
     }
 }

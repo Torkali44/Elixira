@@ -6,9 +6,25 @@ use App\Models\VendorProfile;
 
 class VendorSubscriptionService
 {
+    public function activeVendorCount(): int
+    {
+        return VendorProfile::query()
+            ->where('status', 'approved')
+            ->whereHas('user', function ($query) {
+                $query->where('is_suspended', false);
+            })
+            ->where(function ($query) {
+                $query->whereDoesntHave('brand')
+                    ->orWhereHas('brand', function ($brandQuery) {
+                        $brandQuery->where('is_active', true);
+                    });
+            })
+            ->count();
+    }
+
     public function approvedVendorCount(): int
     {
-        return VendorProfile::query()->where('status', 'approved')->count();
+        return $this->activeVendorCount();
     }
 
     public function freeSlotsRemaining(): int

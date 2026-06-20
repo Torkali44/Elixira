@@ -10,15 +10,32 @@ use App\Support\TagService;
 
 class MenuController extends Controller
 {
-    public function index()
+    public function index(ItemPricingService $pricingService)
     {
-        $categories = Category::with(['items' => function ($query) {
-            $query->publiclyVisible()->with('category', 'brandModel');
+        $selectedCountry = $pricingService->resolveCountryCode(request('country'));
+
+        if (request()->has('country')) {
+            session(['shopping_country' => $selectedCountry]);
+        }
+
+        $itemsQuery = Item::with('category', 'brandModel', 'countryPrices')
+            ->publiclyVisible()
+            ->whereHas('countryPrices', function ($query) use ($selectedCountry) {
+                $query->where('country_code', $selectedCountry);
+            });
+
+        $categories = Category::with(['items' => function ($query) use ($selectedCountry) {
+            $query->publiclyVisible()
+                ->whereHas('countryPrices', function ($countryQuery) use ($selectedCountry) {
+                    $countryQuery->where('country_code', $selectedCountry);
+                })
+                ->with('category', 'brandModel');
         }])->get();
-        $items = Item::with('category', 'brandModel', 'countryPrices')->publiclyVisible()->get();
+
+        $items = $itemsQuery->get();
         $privateOfferQuantities = $this->privateOfferQuantitiesForCurrentUser();
 
-        return view('menu.index', compact('categories', 'items', 'privateOfferQuantities'));
+        return view('menu.index', compact('categories', 'items', 'privateOfferQuantities', 'selectedCountry'));
     }
 
     public function show(Item $item)

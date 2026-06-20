@@ -292,6 +292,11 @@ body.dashboard-dark .pagination .page-item.active .page-link {
     border-color: #0d9488;
 }
 
+body.dashboard-dark #vendorNotifDropdown {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    color: #fff !important;
+}
+
 @media (max-width: 767.98px) {
     .dashboard-navbar-actions {
         width: 100%;

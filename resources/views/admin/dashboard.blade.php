@@ -352,7 +352,7 @@
                     </div>
 
                     <div class="list-group list-group-flush">
-                        @forelse(\App\Models\User::with('vendorProfile')->latest()->take(6)->get() as $user)
+                        @forelse(\App\Models\User::verified()->with('vendorProfile')->latest()->take(6)->get() as $user)
                             <div class="list-group-item border-0 px-0 py-3 d-flex justify-content-between align-items-center">
                                 <div class="d-flex align-items-center gap-3">
                                     <x-user-avatar :user="$user" size="48" />

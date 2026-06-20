@@ -41,11 +41,12 @@
 
 @include('partials.admin.package-country-prices', ['package' => $package])
 
-<div class="mb-3">
-    <label class="form-label">{{ __('admin.packages_page.long_description') }}</label>
-    <textarea name="long_description" class="form-control @error('long_description') is-invalid @enderror" rows="6">{{ old('long_description', $package?->long_description) }}</textarea>
-    @error('long_description')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
-</div>
+@include('partials.admin.bilingual-long-description', [
+    'model' => $package,
+    'prefix' => 'package-long-desc',
+    'label' => __('admin.packages_page.long_description'),
+    'hintKey' => 'admin.packages_page.long_description_hint',
+])
 
 <div class="mb-3">
     <label class="form-label">{{ __('admin.packages_page.package_image') }}</label>
@@ -57,7 +58,7 @@
 </div>
 
 <div class="mb-3">
-    <label class="form-label fw-semibold">{{ __('admin.packages_page.included_products') }}</label>
+    <label class="form-label fw-semibold">{{ __('admin.packages_page.included_products') }} @if($vendorMode ?? false)<span class="text-danger">*</span>@endif</label>
     <div class="border rounded p-3" style="max-height: 280px; overflow-y: auto;">
         @foreach($items as $item)
             @php
@@ -72,8 +73,10 @@
             </div>
         @endforeach
     </div>
+    @error('package_items')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
 </div>
 
+@if(!($vendorMode ?? false))
 <div class="mb-3 form-check">
     <input type="checkbox" class="form-check-input" id="is_featured" name="is_featured" value="1" @checked(old('is_featured', $package?->is_featured))>
     <label class="form-check-label" for="is_featured">{{ __('admin.packages_page.featured') }}</label>
@@ -82,5 +85,8 @@
     <input type="checkbox" class="form-check-input" id="is_active" name="is_active" value="1" @checked(old('is_active', $package?->is_active ?? true))>
     <label class="form-check-label" for="is_active">{{ __('admin.packages_page.visible_in_shop') }}</label>
 </div>
+@else
+    <div class="alert alert-info py-2 small mb-3">{{ __('admin.packages_page.vendor_approval_hint') }}</div>
+@endif
 
 @include('admin.partials.tags-input', ['selectedTags' => $selectedTags ?? '', 'tagSuggestions' => $tagSuggestions ?? []])

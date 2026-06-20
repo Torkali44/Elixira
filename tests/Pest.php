@@ -1,5 +1,10 @@
 <?php
 
+use App\Models\Category;
+use App\Models\Item;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
+
 /*
 |--------------------------------------------------------------------------
 | Test Case
@@ -11,9 +16,12 @@
 |
 */
 
-pest()->extend(Tests\TestCase::class)
-    ->use(Illuminate\Foundation\Testing\RefreshDatabase::class)
+pest()->extend(TestCase::class)
+    ->use(RefreshDatabase::class)
     ->in('Feature');
+
+pest()->extend(TestCase::class)
+    ->in('Unit');
 
 /*
 |--------------------------------------------------------------------------
@@ -44,4 +52,34 @@ expect()->extend('toBeOne', function () {
 function something()
 {
     // ..
+}
+
+function createTestItem(array $attributes = [], array $countryPrice = []): Item
+{
+    $categoryId = $attributes['category_id'] ?? Category::query()->create([
+        'name' => 'Test Category',
+        'name_en' => 'Test Category',
+        'name_ar' => 'قسم تجريبي',
+    ])->id;
+
+    $item = Item::query()->create(array_merge([
+        'category_id' => $categoryId,
+        'name' => 'Test Item',
+        'name_en' => 'Test Item',
+        'name_ar' => 'منتج تجريبي',
+        'description' => 'desc',
+        'description_en' => 'desc',
+        'description_ar' => 'وصف',
+        'price' => 50,
+        'stock' => 5,
+        'status' => 'approved',
+    ], $attributes));
+
+    $item->countryPrices()->create(array_merge([
+        'country_code' => 'KSA',
+        'member_price' => 50,
+        'guest_price' => 60,
+    ], $countryPrice));
+
+    return $item->fresh(['countryPrices']);
 }

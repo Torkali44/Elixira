@@ -44,7 +44,8 @@ class UpdateItemRequest extends FormRequest
             'images' => 'nullable|array',
             'images.*' => 'image|max:10240',
             'is_featured' => 'boolean',
-            'long_description' => 'nullable|string',
+            'long_description_en' => 'nullable|string',
+            'long_description_ar' => 'nullable|string',
             'tags' => 'nullable|string|max:1000',
         ];
     }

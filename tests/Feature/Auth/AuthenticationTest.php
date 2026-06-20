@@ -20,6 +20,18 @@ test('users can authenticate using the login screen', function () {
     $response->assertRedirect(route('home', absolute: false));
 });
 
+test('unverified users are redirected to email verification after login', function () {
+    $user = User::factory()->unverified()->create();
+
+    $response = $this->post('/login', [
+        'email' => $user->email,
+        'password' => 'password',
+    ]);
+
+    $this->assertAuthenticated();
+    $response->assertRedirect(route('verification.notice'));
+});
+
 test('users can not authenticate with invalid password', function () {
     $user = User::factory()->create();
 

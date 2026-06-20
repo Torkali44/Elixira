@@ -2,8 +2,9 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Support\EmailVerificationOtpService;
 use Database\Factories\UserFactory;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -11,7 +12,7 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
@@ -49,6 +50,7 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'email_verification_code',
     ];
 
     /**
@@ -60,6 +62,7 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'email_verification_code_expires_at' => 'datetime',
             'is_suspended' => 'boolean',
             'is_dxn_verified' => 'boolean',
             'dxn_verified_at' => 'datetime',
@@ -149,5 +152,15 @@ class User extends Authenticatable
     public function resolvedDxnTagColor(): string
     {
         return $this->attributes['dxn_tag_color'] ?? (string) config('dxn.default_tag_colors.primary', '#00ff88');
+    }
+
+    public function scopeVerified($query)
+    {
+        return $query->whereNotNull('email_verified_at');
+    }
+
+    public function sendEmailVerificationNotification(): void
+    {
+        app(EmailVerificationOtpService::class)->send($this);
     }
 }

@@ -23,6 +23,7 @@ test('related products are matched by shared tags instead of random category', f
         'stock' => 5,
         'status' => 'approved',
     ]);
+    $source->countryPrices()->create(['country_code' => 'KSA', 'member_price' => 45, 'guest_price' => 50]);
 
     $taggedMatch = Item::query()->create([
         'category_id' => $categoryB->id,
@@ -34,6 +35,7 @@ test('related products are matched by shared tags instead of random category', f
         'stock' => 4,
         'status' => 'approved',
     ]);
+    $taggedMatch->countryPrices()->create(['country_code' => 'KSA', 'member_price' => 55, 'guest_price' => 60]);
 
     $untaggedSameCategory = Item::query()->create([
         'category_id' => $categoryA->id,
@@ -45,6 +47,7 @@ test('related products are matched by shared tags instead of random category', f
         'stock' => 3,
         'status' => 'approved',
     ]);
+    $untaggedSameCategory->countryPrices()->create(['country_code' => 'KSA', 'member_price' => 65, 'guest_price' => 70]);
 
     $tag = Tag::findOrCreateFromName('wellness');
     $source->tags()->sync([$tag->id]);

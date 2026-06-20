@@ -77,8 +77,12 @@
                         <td>{{ $item->description }}</td>
                     </tr>
                     <tr>
-                        <th>Long Description:</th>
-                        <td>{!! nl2br(e($item->long_description)) !!}</td>
+                        <th>Long Description (EN):</th>
+                        <td>{!! nl2br(e($item->long_description_en)) !!}</td>
+                    </tr>
+                    <tr>
+                        <th>Long Description (AR):</th>
+                        <td dir="rtl">{!! nl2br(e($item->long_description_ar)) !!}</td>
                     </tr>
                 </table>
             </div>

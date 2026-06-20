@@ -73,6 +73,18 @@ return [
         'title' => 'باكيدج جديد',
         'message' => 'اكتشف باكيدجنا الجديد: :package',
     ],
+    'vendor_package_submitted' => [
+        'title' => 'باكيدج جديد بانتظار الموافقة',
+        'message' => 'قدّم :brand باكيدجاً جديداً ":package" للمراجعة.',
+    ],
+    'package_approved' => [
+        'title' => 'تمت الموافقة على الباكيدج',
+        'message' => 'تمت الموافقة على باكيدج ":package" وهو متاح الآن في المتجر.',
+    ],
+    'package_rejected' => [
+        'title' => 'تم رفض الباكيدج',
+        'message' => 'تم رفض باكيدج ":package".:reason',
+    ],
     'missed_packages' => [
         'title' => 'باكيدجات قد تكون فاتتك',
         'message' => 'بعض الباكيدجات المميزة بانتظارك — اضغط للاطلاع.',

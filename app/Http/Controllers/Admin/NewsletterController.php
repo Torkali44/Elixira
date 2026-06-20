@@ -34,7 +34,7 @@ class NewsletterController extends Controller
 
         $subscriberEmails = NewsletterSubscriber::whereIn('id', $request->subscribers)->pluck('email');
         $subject = $request->subject;
-        $content = $request->content;
+        $content = $request->input('content');
 
         $successCount = 0;
         foreach ($subscriberEmails as $email) {

@@ -50,6 +50,9 @@
         if (request()->routeIs('admin.items.*')) {
             session(['items_last_viewed_at' => now()]);
         }
+        if (request()->routeIs('admin.packages.*')) {
+            session(['packages_last_viewed_at' => now()]);
+        }
 
         $ordersLastViewed = session('orders_last_viewed_at');
         $newOrdersCount = $ordersLastViewed ? \App\Models\Order::where('created_at', '>', $ordersLastViewed)->count() : \App\Models\Order::where('status', 'pending')->count();
@@ -71,6 +74,10 @@
         $newPendingItemsCount = $itemsLastViewed
             ? \App\Models\Item::where('status', 'pending')->where('created_at', '>', $itemsLastViewed)->count()
             : \App\Models\Item::where('status', 'pending')->count();
+        $packagesLastViewed = session('packages_last_viewed_at');
+        $newPendingPackagesCount = $packagesLastViewed
+            ? \App\Models\Package::where('status', 'pending')->where('created_at', '>', $packagesLastViewed)->count()
+            : \App\Models\Package::where('status', 'pending')->count();
     @endphp
 
     <div class="row g-0">

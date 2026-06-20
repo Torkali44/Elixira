@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Concerns\HasTags;
 use App\Support\PackagePricingService;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -21,13 +22,16 @@ class Package extends Model
         'description',
         'description_en',
         'description_ar',
-        'long_description',
+        'long_description_en',
+        'long_description_ar',
         'price',
         'stock',
         'reward_points',
         'image',
         'is_featured',
         'is_active',
+        'status',
+        'rejection_reason',
     ];
 
     protected function casts(): array
@@ -76,13 +80,31 @@ class Package extends Model
         return $this->description_en ?: $this->description;
     }
 
+    public function getLocalLongDescriptionAttribute(): ?string
+    {
+        if (app()->getLocale() === 'ar') {
+            return $this->long_description_ar ?: $this->long_description_en;
+        }
+
+        return $this->long_description_en ?: $this->long_description_ar;
+    }
+
     public function getDisplayPriceAttribute(): float
     {
         return app(PackagePricingService::class)->resolvePrice($this, auth()->user());
     }
 
-    public function scopeActive($query)
+    public function scopeActive(Builder $query): Builder
     {
-        return $query->where('is_active', true)->whereHas('countryPrices');
+        return $query->where('status', 'approved')
+            ->where('is_active', true)
+            ->whereHas('countryPrices');
+    }
+
+    public function isPubliclyVisible(): bool
+    {
+        return $this->status === 'approved'
+            && $this->is_active
+            && $this->countryPrices()->exists();
     }
 }

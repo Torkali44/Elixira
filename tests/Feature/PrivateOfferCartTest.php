@@ -1,18 +1,14 @@
 <?php
 
-use App\Models\Item;
 use App\Models\SpecialItemOffer;
 use App\Models\User;
-use App\Models\Category;
 
 test('user with private offer can add out of stock item to cart', function () {
     $user = User::factory()->create();
 
-    $item = Item::query()->create([
-        'category_id' => Category::query()->create(['name' => 'Cat A'])->id,
+    $item = createTestItem([
         'name' => 'Private Item',
-        'description' => 'desc',
-        'price' => 30,
+        'name_en' => 'Private Item',
         'stock' => 0,
     ]);
 
@@ -38,11 +34,9 @@ test('user with private offer can add out of stock item to cart', function () {
 test('user without private offer cannot add out of stock item to cart', function () {
     $user = User::factory()->create();
 
-    $item = Item::query()->create([
-        'category_id' => Category::query()->create(['name' => 'Cat B'])->id,
+    $item = createTestItem([
         'name' => 'Unavailable Item',
-        'description' => 'desc',
-        'price' => 30,
+        'name_en' => 'Unavailable Item',
         'stock' => 0,
     ]);
 

@@ -43,6 +43,14 @@ class VendorRequestController extends Controller
         $vendorProfile->save();
 
         if ($request->status === 'approved') {
+            $subscriptionService = app(VendorSubscriptionService::class);
+
+            if ($vendorProfile->subscription_payment_status === 'not_required' && $subscriptionService->requiresPayment()) {
+                $vendorProfile->subscription_payment_status = 'pending';
+                $vendorProfile->subscription_plan = $vendorProfile->subscription_plan ?: 'yearly';
+                $vendorProfile->save();
+            }
+
             $user = $vendorProfile->user;
             $user->role = 'vendor';
             $user->save();

@@ -3,13 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Item;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\User;
-use App\Models\Brand;
-use App\Models\VendorProfile;
 use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
@@ -18,7 +17,7 @@ class DashboardController extends Controller
     {
         $categoriesCount = Category::count();
         $itemsCount = Item::count();
-        
+
         $itemsBreakdown = [
             'approved' => Item::where('status', 'approved')->count(),
             'pending' => Item::where('status', 'pending')->count(),
@@ -28,11 +27,11 @@ class DashboardController extends Controller
         $ordersCount = Order::count();
         $pendingOrdersCount = Order::where('status', 'pending')->count();
         $totalRevenue = Order::where('status', '!=', 'cancelled')->sum('total_amount');
-        
-        $usersCount = User::count();
-        $suspendedUsersCount = User::where('is_suspended', true)->count();
-        $adminsCount = User::where('role', 'admin')->count();
-        $vendorsCount = User::where('role', 'vendor')->count();
+
+        $usersCount = User::verified()->count();
+        $suspendedUsersCount = User::verified()->where('is_suspended', true)->count();
+        $adminsCount = User::verified()->where('role', 'admin')->count();
+        $vendorsCount = User::verified()->where('role', 'vendor')->count();
 
         // Top Selling Vendors (Brands)
         $topVendors = Brand::join('items', 'brands.id', '=', 'items.brand_id')
@@ -63,13 +62,14 @@ class DashboardController extends Controller
             ->get()
             ->map(function ($brand) {
                 // Calculate total sales for this brand
-                $sales = OrderItem::whereHas('item', function($q) use ($brand) {
+                $sales = OrderItem::whereHas('item', function ($q) use ($brand) {
                     $q->where('brand_id', $brand->id);
-                })->whereHas('order', function($q) {
+                })->whereHas('order', function ($q) {
                     $q->where('status', '!=', 'cancelled');
                 })->selectRaw('SUM(price * quantity) as total')->value('total') ?? 0;
-                
+
                 $brand->total_sales = $sales;
+
                 return $brand;
             });
 

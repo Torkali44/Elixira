@@ -4,7 +4,7 @@
     $isOutOfStock = $product->stock <= 0 && !$hasPrivateAccess;
     $pricingService = app(\App\Support\ItemPricingService::class);
     $cardCountries = $pricingService->availableCountryCodes($product);
-    $cardCountry = $pricingService->resolveCountryCodeForItem($product, request('country')) ?? $pricingService->detectUserCountry();
+    $cardCountry = $pricingService->resolveCountryCodeForItem($product, $selectedCountry ?? request('country')) ?? $pricingService->detectUserCountry();
     $canAddToCart = count($cardCountries) > 0 && !$isOutOfStock;
     $flags = $pricingService->countryFlags();
 @endphp
@@ -42,7 +42,7 @@
                 <h3 class="elx-product-card__name" style="margin: 0; font-size: 1.1rem; line-height: 1.3;">{{ $product->local_name }}</h3>
             </a>
             <div class="elx-product-card__price" style="flex-shrink: 0; text-align: right;">
-                <x-product-pricing :item="$product" :showSelector="false" align="flex-end" />
+                <x-product-pricing :item="$product" :selectedCountry="$cardCountry" :showSelector="false" align="flex-end" />
             </div>
         </div>
 

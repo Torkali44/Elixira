@@ -292,6 +292,7 @@
             .inv-footer  { page-break-inside: avoid; }
         }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
 
@@ -305,7 +306,7 @@
             </a>
         </div>
 
-        {{-- Right: Language + Print --}}
+        {{-- Right: Language + Download --}}
         <div class="ctrl-group">
             @if(app()->getLocale() === 'ar')
                 <a href="{{ route('lang.switch', 'en') }}" class="ctrl-btn ctrl-btn--lang">
@@ -317,8 +318,8 @@
                 </a>
             @endif
 
-            <button onclick="window.print()" class="ctrl-btn ctrl-btn--primary">
-                <i class="fas fa-print"></i> {{ __('orders_page.print_invoice') }}
+            <button onclick="downloadInvoice()" class="ctrl-btn ctrl-btn--primary">
+                <i class="fas fa-download"></i> {{ __('orders_page.download_invoice') }}
             </button>
         </div>
     </div>
@@ -454,5 +455,34 @@
 
     </div>{{-- .inv --}}
 
+    <script>
+        function downloadInvoice() {
+            const element = document.querySelector('.inv');
+            const opt = {
+                margin:       [10, 10, 10, 10],
+                filename:     'Invoice-{{ $order->id }}.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            // Temporary styles for download to look perfect
+            const oldBoxShadow = element.style.boxShadow;
+            const oldBorderRadius = element.style.borderRadius;
+            const oldPadding = element.style.padding;
+
+            // Adjust card to fit print/pdf dimensions
+            element.style.boxShadow = 'none';
+            element.style.borderRadius = '0';
+            element.style.padding = '20px';
+
+            html2pdf().set(opt).from(element).save().then(() => {
+                // Restore old styles
+                element.style.boxShadow = oldBoxShadow;
+                element.style.borderRadius = oldBorderRadius;
+                element.style.padding = oldPadding;
+            });
+        }
+    </script>
 </body>
 </html>

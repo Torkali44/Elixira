@@ -48,13 +48,13 @@ class TestimonialController extends Controller
 
         try {
             Review::create([
-                'type' => $request->type,
-                'avatar' => $request->avatar,
-                'name' => $request->name,
-                'age' => $request->age,
-                'skin_type' => $request->gender,
-                'rating' => intval($request->rating),
-                'content' => $request->content,
+                'type' => $request->input('type'),
+                'avatar' => $request->input('avatar'),
+                'name' => $request->input('name'),
+                'age' => $request->input('age'),
+                'skin_type' => $request->input('gender'),
+                'rating' => intval($request->input('rating')),
+                'content' => $request->input('content'),
                 'status' => 'pending',
             ]);
 
@@ -100,7 +100,7 @@ class TestimonialController extends Controller
             });
 
             Mail::raw('A new user has subscribed to the newsletter: '.$email, function ($message) {
-                $message->to('admin@elixira.com')
+                $message->to(config('admin.email'))
                     ->subject('New Newsletter Subscriber');
             });
         } catch (\Exception $e) {
