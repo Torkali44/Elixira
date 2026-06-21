@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class CheckoutRequest extends FormRequest
 {
@@ -30,11 +31,17 @@ class CheckoutRequest extends FormRequest
 
     public function rules(): array
     {
+        $userCodeRules = ['nullable', 'string', 'max:100', 'regex:/^[A-Z0-9_-]+$/'];
+
+        if ($this->user() && ! $this->user()->user_code) {
+            $userCodeRules[] = Rule::unique('users', 'user_code');
+        }
+
         return [
             'customer_name' => ['required', 'string', 'min:2', 'max:255', 'regex:/^[\pL\s.\'-]+$/u'],
             'phone_number' => ['required', 'string', 'regex:/^[0-9]{7,15}$/'],
             'country_code' => ['required', 'string', 'in:+966,+971'],
-            'user_code' => ['nullable', 'string', 'max:100', 'regex:/^[A-Z0-9_-]+$/'],
+            'user_code' => $userCodeRules,
             'address' => ['required', 'string', 'min:10', 'max:500'],
             'notes' => ['nullable', 'string', 'max:1000'],
         ];
@@ -52,6 +59,7 @@ class CheckoutRequest extends FormRequest
             'country_code.required' => 'Please choose your country code.',
             'country_code.in' => 'Please choose a valid country code.',
             'user_code.regex' => 'Member codes may only contain letters, numbers, underscores, and dashes.',
+            'user_code.unique' => 'This member code is already assigned to another account.',
             'address.required' => 'A delivery address is required.',
             'address.min' => 'Please enter a more detailed address (at least 10 characters).',
             'address.max' => 'The address may not exceed 500 characters.',

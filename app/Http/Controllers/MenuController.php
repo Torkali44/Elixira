@@ -18,21 +18,24 @@ class MenuController extends Controller
             session(['shopping_country' => $selectedCountry]);
         }
 
-        $itemsQuery = Item::with('category', 'brandModel', 'countryPrices')
+        $categories = Category::query()
+            ->whereHas('items', function ($query) use ($selectedCountry) {
+                $query->publiclyVisible()
+                    ->whereHas('countryPrices', function ($countryQuery) use ($selectedCountry) {
+                        $countryQuery->where('country_code', $selectedCountry);
+                    });
+            })
+            ->orderBy('name')
+            ->get();
+
+        $items = Item::query()
+            ->with(['category', 'brandModel', 'countryPrices'])
             ->publiclyVisible()
             ->whereHas('countryPrices', function ($query) use ($selectedCountry) {
                 $query->where('country_code', $selectedCountry);
-            });
-
-        $categories = Category::with(['items' => function ($query) use ($selectedCountry) {
-            $query->publiclyVisible()
-                ->whereHas('countryPrices', function ($countryQuery) use ($selectedCountry) {
-                    $countryQuery->where('country_code', $selectedCountry);
-                })
-                ->with('category', 'brandModel');
-        }])->get();
-
-        $items = $itemsQuery->get();
+            })
+            ->orderBy('name')
+            ->get();
         $privateOfferQuantities = $this->privateOfferQuantitiesForCurrentUser();
 
         return view('menu.index', compact('categories', 'items', 'privateOfferQuantities', 'selectedCountry'));

@@ -439,7 +439,7 @@
                     </div>
                 @else
                 <div class="testimonials-grid"
-                    style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 30px; max-width: 1200px; margin: 0 auto;">
+                    style="display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); gap: 30px; max-width: 1200px; margin: 0 auto;">
                     @foreach($reviews as $rev)
                         @php
                             $isExpandable = \Illuminate\Support\Str::length((string) $rev->content) > 230;

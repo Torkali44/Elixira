@@ -57,11 +57,12 @@ class CartController extends Controller
         $maxAllowed = $item->stock + $privateAllowance;
 
         if ($maxAllowed <= 0) {
+            $message = __('cart_page.out_of_stock_account');
             if ($request->ajax() || $request->wantsJson()) {
-                return response()->json(['success' => false, 'message' => 'This product is currently out of stock for your account.']);
+                return response()->json(['success' => false, 'message' => $message]);
             }
 
-            return redirect()->back()->with('error', 'This product is currently out of stock for your account.');
+            return redirect()->back()->with('error', $message);
         }
 
         $existingQty = isset($cart[$item->id]) ? $cart[$item->id]['quantity'] : 0;
@@ -71,18 +72,23 @@ class CartController extends Controller
             $remaining = $maxAllowed - $existingQty;
 
             if ($remaining <= 0) {
+                $message = __('cart_page.max_qty_in_cart');
                 if ($request->ajax() || $request->wantsJson()) {
-                    return response()->json(['success' => false, 'message' => 'You already have the maximum available quantity of this product in your cart.']);
+                    return response()->json(['success' => false, 'message' => $message]);
                 }
 
-                return redirect()->back()->with('error', 'You already have the maximum allowed quantity of this product in your cart.');
+                return redirect()->back()->with('error', __('cart_page.max_qty_allowed'));
             }
 
+            $message = __('cart_page.only_n_more_available', [
+                'remaining' => $remaining,
+                'existing' => $existingQty,
+            ]);
             if ($request->ajax() || $request->wantsJson()) {
-                return response()->json(['success' => false, 'message' => 'Only '.$remaining.' more unit(s) available. You already have '.$existingQty.' in your cart.']);
+                return response()->json(['success' => false, 'message' => $message]);
             }
 
-            return redirect()->back()->with('error', 'Only '.$remaining.' more unit(s) available. You already have '.$existingQty.' in your cart.');
+            return redirect()->back()->with('error', $message);
         }
 
         if (isset($cart[$item->id])) {
@@ -105,20 +111,20 @@ class CartController extends Controller
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json([
                     'success' => true,
-                    'message' => 'Added to your cart.',
+                    'message' => __('cart_page.added'),
                     'cartCount' => count($cart),
                     'redirect' => route('cart.index'),
                 ]);
             }
 
-            return redirect()->route('cart.index')->with('success', 'Added to your cart.');
+            return redirect()->route('cart.index')->with('success', __('cart_page.added'));
         }
 
         if ($request->ajax() || $request->wantsJson()) {
-            return response()->json(['success' => true, 'message' => 'Added to your cart.', 'cartCount' => count($cart)]);
+            return response()->json(['success' => true, 'message' => __('cart_page.added'), 'cartCount' => count($cart)]);
         }
 
-        return redirect()->back()->with('success', 'Added to your cart.');
+        return redirect()->back()->with('success', __('cart_page.added'));
     }
 
     public function addPackage(Request $request)
@@ -139,6 +145,7 @@ class CartController extends Controller
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json(['success' => false, 'message' => $message]);
             }
+
             return redirect()->back()->with('error', $message);
         }
 
@@ -155,6 +162,7 @@ class CartController extends Controller
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json(['success' => false, 'message' => $message]);
             }
+
             return redirect()->back()->with('error', $message);
         }
 
@@ -164,6 +172,7 @@ class CartController extends Controller
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json(['success' => false, 'message' => $message]);
             }
+
             return redirect()->back()->with('error', $message);
         }
 
@@ -195,6 +204,7 @@ class CartController extends Controller
                     'redirect' => route('cart.index'),
                 ]);
             }
+
             return redirect()->route('cart.index')->with('success', __('cart_page.added'));
         }
 
@@ -210,7 +220,7 @@ class CartController extends Controller
         $cart = $this->cartService->get();
 
         if (! isset($cart[$request->id])) {
-            return response()->json(['success' => false, 'message' => 'Item not found in cart.'], 404);
+            return response()->json(['success' => false, 'message' => __('cart_page.item_not_in_cart')], 404);
         }
 
         $entry = $cart[$request->id];
@@ -226,7 +236,7 @@ class CartController extends Controller
         if ($request->quantity > $maxAllowed) {
             return response()->json([
                 'success' => false,
-                'message' => 'Only '.$maxAllowed.' units available for your account.',
+                'message' => __('cart_page.only_n_units_available', ['count' => $maxAllowed]),
             ], 422);
         }
 
@@ -243,10 +253,10 @@ class CartController extends Controller
 
         if (! isset($cart[$id])) {
             if ($request->ajax() || $request->wantsJson()) {
-                return response()->json(['success' => false, 'message' => 'Item not found in cart.'], 404);
+                return response()->json(['success' => false, 'message' => __('cart_page.item_not_in_cart')], 404);
             }
 
-            return redirect()->back()->with('error', 'Item not found in cart.');
+            return redirect()->back()->with('error', __('cart_page.item_not_in_cart'));
         }
 
         unset($cart[$id]);
@@ -256,7 +266,7 @@ class CartController extends Controller
             return response()->json(['success' => true]);
         }
 
-        return redirect()->back()->with('success', 'Item removed from your cart.');
+        return redirect()->back()->with('success', __('cart_page.item_removed'));
     }
 
     public function checkout(CheckoutRequest $request)
@@ -270,7 +280,7 @@ class CartController extends Controller
         $cart = $this->cartService->get();
 
         if (empty($cart)) {
-            return redirect()->back()->with('error', 'Your cart is empty.');
+            return redirect()->back()->with('error', __('cart_page.cart_empty'));
         }
 
         foreach ($cart as $id => $details) {
@@ -281,7 +291,10 @@ class CartController extends Controller
                     $pkgName = $pkg ? $pkg->local_name : ($details['name'] ?? 'Package');
                     $available = $pkg ? (int) $pkg->stock : 0;
 
-                    return redirect()->back()->with('error', "'{$pkgName}' only has {$available} units available. Please update your cart.");
+                    return redirect()->back()->with('error', __('cart_page.package_stock_error', [
+                        'name' => $pkgName,
+                        'available' => $available,
+                    ]));
                 }
 
                 continue;
@@ -291,10 +304,13 @@ class CartController extends Controller
             $maxAllowed = $item ? $item->stock + $this->availablePrivateQuantity($request->user(), (int) $id) : 0;
 
             if (! $item || $details['quantity'] > $maxAllowed) {
-                $name = $item ? $item->name : 'Unknown product';
+                $name = $item ? $item->name : __('cart_page.unknown_product');
                 $available = $item ? $maxAllowed : 0;
 
-                return redirect()->back()->with('error', "'{$name}' only has {$available} units available. Please update your cart.");
+                return redirect()->back()->with('error', __('cart_page.product_stock_error', [
+                    'name' => $name,
+                    'available' => $available,
+                ]));
             }
         }
 
@@ -312,7 +328,7 @@ class CartController extends Controller
                 ->back()
                 ->withInput()
                 ->withErrors([
-                    'user_code' => 'Use the member code already saved on your account, or update it from your profile first.',
+                    'user_code' => __('cart_page.user_code_mismatch'),
                 ]);
         }
 
@@ -330,11 +346,13 @@ class CartController extends Controller
                 if (! $authenticatedUser->user_code && $resolvedUserCode) {
                     $exists = User::where('user_code', $resolvedUserCode)->where('id', '!=', $authenticatedUser->id)->exists();
                     if ($exists) {
+                        DB::rollBack();
+
                         return redirect()
                             ->back()
                             ->withInput()
                             ->withErrors([
-                                'user_code' => 'This member code is already assigned to another account.',
+                                'user_code' => __('cart_page.user_code_taken'),
                             ]);
                     }
                     $updates['user_code'] = $resolvedUserCode;
@@ -460,7 +478,7 @@ class CartController extends Controller
                 'trace' => $exception->getTraceAsString(),
             ]);
 
-            return redirect()->back()->withInput()->with('error', 'Something went wrong while placing your order: '.$exception->getMessage());
+            return redirect()->back()->withInput()->with('error', __('orders_page.checkout_failed'));
         }
     }
 

@@ -449,3 +449,19 @@ body.light-mode .text-dark {
     margin-right: 0.5rem !important;
     margin-left: 0 !important;
 }
+
+html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+}
+
+@media (max-width: 768px) {
+    .elx-container,
+    .page-content {
+        padding-inline: 1rem;
+    }
+
+    .table-responsive {
+        -webkit-overflow-scrolling: touch;
+    }
+}

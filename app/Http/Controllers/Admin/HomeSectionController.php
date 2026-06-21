@@ -11,11 +11,17 @@ use Illuminate\View\View;
 
 class HomeSectionController extends Controller
 {
-    public function index(): RedirectResponse
+    public function index(): RedirectResponse|View
     {
-        $hero = HomePageSection::query()->where('slug', 'hero')->firstOrFail();
+        $hero = HomePageSection::query()->where('slug', 'hero')->first();
 
-        return redirect()->route('admin.home-sections.edit', $hero);
+        if ($hero) {
+            return redirect()->route('admin.home-sections.edit', $hero);
+        }
+
+        return view('admin.home-sections.index', [
+            'sections' => HomePageSection::query()->ordered()->get(),
+        ]);
     }
 
     public function edit(HomePageSection $home_section): View

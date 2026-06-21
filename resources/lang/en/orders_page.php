@@ -27,6 +27,7 @@ return [
     'view_details' => 'View Details',
     'no_orders' => 'You have not placed any orders yet.',
     'checkout_success' => 'Thank you! Your order #:order has been placed.',
+    'checkout_failed' => 'Something went wrong while placing your order. Please try again or contact support.',
     'points_earned' => 'Points earned from this order',
     'invoice_heading' => 'Order Invoice',
     'bill_to' => 'Bill To',
