@@ -40,8 +40,9 @@ return [
 
         'public' => [
             'driver' => 'local',
-            'root' => storage_path('app/public'),
-            'url' => rtrim(env('APP_URL'), '/').'/storage',
+            // Namecheap: set PUBLIC_STORAGE_PATH=/home/USER/public_html/storage in .env
+            'root' => env('PUBLIC_STORAGE_PATH', public_path('storage')),
+            'url' => rtrim(env('APP_URL', 'http://localhost'), '/').'/storage',
             'visibility' => 'public',
             'throw' => false,
             'report' => false,
@@ -74,6 +75,7 @@ return [
     */
 
     'links' => [
+        // Optional for local dev legacy paths; production uses public/storage directly.
         public_path('storage') => storage_path('app/public'),
     ],
 

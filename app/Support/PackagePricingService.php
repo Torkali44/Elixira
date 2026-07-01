@@ -24,7 +24,7 @@ class PackagePricingService
                 'country_code' => $countryCode,
                 'member_price' => $memberPrice,
                 'guest_price' => $guestPrice,
-                'active_price' => $pricing->isMember($user) ? $memberPrice : $guestPrice,
+                'active_price' => $memberPrice,
                 'has_country_pricing' => true,
             ];
         }

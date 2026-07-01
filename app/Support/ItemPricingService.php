@@ -107,7 +107,7 @@ class ItemPricingService
                 'country_code' => $countryCode,
                 'member_price' => $memberPrice,
                 'guest_price' => $guestPrice,
-                'active_price' => $this->isMember($user) ? $memberPrice : ($hasHigherGuestPrice ? $guestPrice : $memberPrice),
+                'active_price' => $memberPrice,
                 'has_country_pricing' => true,
                 'has_higher_guest_price' => $hasHigherGuestPrice,
             ];

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Concerns\HasTags;
 use App\Support\ItemPricingService;
+use App\Support\StorageUrl;
 use App\Support\VendorSubscriptionService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -139,6 +140,11 @@ class Item extends Model
         }
 
         return $this->long_description_en ?: $this->long_description_ar;
+    }
+
+    public function getImageUrlAttribute(): ?string
+    {
+        return StorageUrl::asset($this->image);
     }
 
     public function scopePubliclyVisible(Builder $query): Builder

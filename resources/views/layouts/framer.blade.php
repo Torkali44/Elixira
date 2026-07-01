@@ -26,7 +26,7 @@
 
     {{-- Icons & Styles --}}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="{{ asset('css/elixira-home.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/elixira-home.css') }}?v={{ file_exists(public_path('css/elixira-home.css')) ? filemtime(public_path('css/elixira-home.css')) : 1 }}">
     <link rel="stylesheet" href="{{ asset('css/theme.css') }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 
@@ -220,6 +220,86 @@
             height: 40px;
         }
 
+        /* ─── Mobile nav (critical — works even if CSS file is cached/old) ─── */
+        @media (max-width: 1024px) {
+            .elx-nav {
+                padding: 0.65rem 0;
+            }
+
+            .elx-nav__inner {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 0.5rem;
+                padding: 0 1rem;
+            }
+
+            .elx-nav__logo {
+                flex-shrink: 0;
+                min-width: 0;
+            }
+
+            .elx-nav__logo-img {
+                height: 24px !important;
+                width: auto !important;
+            }
+
+            .elx-nav__links--desktop,
+            .elx-nav__desktop-only {
+                display: none !important;
+            }
+
+            .elx-nav__actions {
+                display: flex;
+                align-items: center;
+                flex-wrap: nowrap;
+                gap: 0.35rem;
+                flex-shrink: 0;
+                margin-inline-start: auto;
+            }
+
+            .elx-nav__header-essential {
+                display: flex;
+                align-items: center;
+                gap: 0.35rem;
+            }
+
+            .elx-nav__header-join {
+                display: inline-flex !important;
+                padding: 0.38rem 0.72rem;
+                font-size: 0.72rem;
+            }
+
+            .elx-nav__toggle {
+                display: flex !important;
+            }
+
+            .elx-nav__notifications-trigger {
+                width: 36px;
+                height: 36px;
+                font-size: 0.95rem;
+            }
+
+            .elx-mobile-sidebar {
+                display: block;
+            }
+
+            body.nav-open {
+                overflow: hidden;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .elx-nav__header-join {
+                padding: 0.35rem 0.6rem;
+                font-size: 0.68rem;
+            }
+
+            .page-content {
+                padding-top: 88px;
+            }
+        }
+
         /* ─── Light Theme Override ─── */
         body.light-mode {
             --elx-dark: #f5f7fa;
@@ -294,176 +374,232 @@
 <body>
 
     {{-- NAVIGATION BAR (Global) --}}
-     <nav class="elx-nav @yield('nav-class', 'scrolled')" id="elxNav">
+    @php
+        $langQuery = request()->getQueryString();
+        $cartCount = count(session('cart', []));
+        $navUnreadNotifications = auth()->check()
+            ? \App\Support\NavUserData::unreadCount(auth()->user())
+            : 0;
+        $navRecentNotifications = auth()->check()
+            ? \App\Support\NavUserData::recentNotifications(auth()->user())
+            : collect();
+    @endphp
+    <div class="elx-nav__overlay" id="navOverlay" aria-hidden="true"></div>
+    <nav class="elx-nav @yield('nav-class', 'scrolled')" id="elxNav">
         <div class="elx-nav__inner">
             <a href="{{ route('home') }}" class="elx-nav__logo">
                 <img src="https://framerusercontent.com/images/uXbQX90j2iRjfRCUW6NdMiNzUVM.png" alt="Elixira" class="elx-nav__logo-img" style="height: 28px; width: auto;">
             </a>
 
-            <ul class="elx-nav__links" id="navLinks">
-                <li><a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'active' : '' }}">{{ __('app.home') }}</a></li>
-                <li class="elx-nav__dropdown">
-                    <a href="{{ route('menu.index') }}"
-                        class="{{ request()->routeIs('menu.*') || request()->routeIs('packages.*') ? 'active' : '' }}">{{ __('app.shop') }} <i class="fas fa-chevron-down"></i></a>
-                    <div class="elx-nav__dropdown-menu">
-                        <a href="{{ route('menu.index') }}" class="{{ request()->routeIs('menu.*') ? 'active' : '' }}">{{ __('shop.all_products') }}</a>
-                        <a href="{{ route('packages.index') }}" class="{{ request()->routeIs('packages.*') ? 'active' : '' }}">{{ __('shop.packages_title') }}</a>
-                    </div>
-                </li>
-                <li class="elx-nav__dropdown">
-                    <a href="{{ route('about') }}" class="{{ request()->routeIs('about') || request()->routeIs('brands.*') || request()->routeIs('faqs.*') ? 'active' : '' }}">{{ __('app.about') }} <i class="fas fa-chevron-down"></i></a>
-                    <div class="elx-nav__dropdown-menu">
-                        <a href="{{ route('about') }}" class="{{ request()->routeIs('about') ? 'active' : '' }}">{{ __('app.about_us') }}</a>
-                        <a href="{{ route('brands.index') }}" class="{{ request()->routeIs('brands.*') ? 'active' : '' }}">{{ __('app.brands') }}</a>
-                        <a href="{{ route('faqs.index') }}" class="{{ request()->routeIs('faqs.*') ? 'active' : '' }}">{{ __('app.faqs') }}</a>
-                    </div>
-                </li>
-                <li><a href="{{ route('testimonials.index') }}" class="{{ request()->routeIs('testimonials.*') ? 'active' : '' }}">{{ __('app.testimonials') }}</a></li>
-                <li class="elx-nav__dropdown">
-                    <a href="{{ route('contact') }}" class="{{ request()->routeIs('contact') || request()->routeIs('blogs.*') ? 'active' : '' }}">{{ __('app.contact') }} <i class="fas fa-chevron-down"></i></a>
-                    <div class="elx-nav__dropdown-menu">
-                        <a href="{{ route('contact') }}" class="{{ request()->routeIs('contact') ? 'active' : '' }}">{{ __('app.contact_us') }}</a>
-                        <a href="{{ route('blogs.index') }}" class="{{ request()->routeIs('blogs.*') ? 'active' : '' }}">{{ __('app.blogs') }}</a>
-                    </div>
-                </li>
-                <li>
-                    @auth
-                        <a href="{{ route('profile.orders.index') }}"
-                            class="{{ request()->routeIs('profile.orders.*') ? 'active' : '' }}">{{ __('app.orders') }}</a>
-                    @else
-                        <a href="{{ route('login') }}"
-                            class="{{ request()->routeIs('login') ? 'active' : '' }}">{{ __('app.orders') }}</a>
-                    @endauth
-                </li>
+            <ul class="elx-nav__links elx-nav__links--desktop">
+                @include('partials.nav-links-items')
             </ul>
 
             <div class="elx-nav__actions">
-                <form action="{{ route('search.index') }}" method="GET" class="d-none d-lg-flex" style="margin-inline-end: 0.5rem;">
-                    <input type="search" name="q" value="{{ request('q') }}" placeholder="{{ __('shop.search_placeholder') }}"
-                        style="width: 180px; padding: 0.45rem 0.9rem; border-radius: 999px; border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.05); color: #fff; font-size: 0.85rem;">
-                </form>
-                <div class="elx-nav__actions-cluster">
-                @auth
-                    <div class="elx-nav__notifications-wrapper" id="notificationsMenu">
-                        <button type="button" class="elx-nav__notifications-trigger" id="notificationsTrigger" aria-expanded="false" aria-controls="notificationsDropdown">
-                            <i class="fas fa-bell"></i>
-                            @php $unreadCount = auth()->user()->unreadNotifications()->count(); @endphp
-                            @if($unreadCount > 0)
-                                <span class="elx-nav__notifications-badge">{{ $unreadCount }}</span>
-                            @endif
-                        </button>
-                        <div class="elx-nav__notifications-dropdown" id="notificationsDropdown" style="position: absolute; inset-inline-end: 0; top: calc(100% + 0.8rem); width: 320px; background: #13252d; border: 1px solid rgba(20, 204, 255, 0.15); border-radius: 24px; box-shadow: 0 24px 80px rgba(0,0,0,0.5); display: none; z-index: 1100; overflow: hidden; font-family: var(--elx-font);">
-                            <div class="elx-nav__notifications-head" style="display: flex; justify-content: space-between; align-items: center; padding: 16px; border-bottom: 1px solid rgba(255,255,255,0.08); background: rgba(0,0,0,0.15);">
-                                <strong style="color: #fff; font-size: 0.95rem;">{{ __('app.notifications') }}</strong>
-                                @if($unreadCount > 0)
-                                    <button onclick="markAllNotificationsAsRead(event)" class="elx-nav__notifications-clear" style="background: none; border: none; color: #4ac8f6; font-size: 0.8rem; cursor: pointer; padding: 0; font-weight: 500;">{{ __('app.mark_all_read') }}</button>
+                <div class="elx-nav__header-essential">
+                    @auth
+                        <div class="elx-nav__notifications-wrapper" id="notificationsMenu">
+                            <button type="button" class="elx-nav__notifications-trigger" id="notificationsTrigger" aria-expanded="false" aria-controls="notificationsDropdown">
+                                <i class="fas fa-bell"></i>
+                                @if($navUnreadNotifications > 0)
+                                    <span class="elx-nav__notifications-badge">{{ $navUnreadNotifications }}</span>
                                 @endif
+                            </button>
+                            <div class="elx-nav__notifications-dropdown" id="notificationsDropdown" style="position: absolute; inset-inline-end: 0; top: calc(100% + 0.8rem); width: 320px; background: #13252d; border: 1px solid rgba(20, 204, 255, 0.15); border-radius: 24px; box-shadow: 0 24px 80px rgba(0,0,0,0.5); display: none; z-index: 1100; overflow: hidden; font-family: var(--elx-font);">
+                                <div class="elx-nav__notifications-head" style="display: flex; justify-content: space-between; align-items: center; padding: 16px; border-bottom: 1px solid rgba(255,255,255,0.08); background: rgba(0,0,0,0.15);">
+                                    <strong style="color: #fff; font-size: 0.95rem;">{{ __('app.notifications') }}</strong>
+                                    @if($navUnreadNotifications > 0)
+                                        <button onclick="markAllNotificationsAsRead(event)" class="elx-nav__notifications-clear" style="background: none; border: none; color: #4ac8f6; font-size: 0.8rem; cursor: pointer; padding: 0; font-weight: 500;">{{ __('app.mark_all_read') }}</button>
+                                    @endif
+                                </div>
+                                <div class="elx-nav__notifications-list" style="max-height: 350px; overflow-y: auto;">
+                                    @forelse($navRecentNotifications as $notif)
+                                        <div class="elx-nav__notifications-item {{ $notif->is_read ? '' : 'unread' }}"
+                                             data-read-url="{{ route('notifications.read', $notif->id) }}"
+                                             data-redirect-url="{{ $notif->url ?: route('home') }}"
+                                             onclick="handleNotificationClick(event, this)"
+                                             style="padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.08); cursor: pointer; transition: background 0.25s; background: {{ $notif->is_read ? 'rgba(0, 0, 0, 0.2)' : 'rgba(74, 200, 246, 0.12)' }}; text-align: left;">
+                                            <div style="display: flex; align-items: start; gap: 8px;">
+                                                @if(!$notif->is_read)
+                                                    <span class="unread-dot" style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background-color: #4ac8f6; box-shadow: 0 0 8px #4ac8f6; margin-top: 6px; flex-shrink: 0;"></span>
+                                                @endif
+                                                <div style="flex-grow: 1;">
+                                                    <div class="notif-title" style="color: {{ $notif->is_read ? '#8fa4af' : '#4ac8f6' }}; font-weight: {{ $notif->is_read ? 'normal' : 'bold' }}; font-size: 0.9rem; margin-bottom: 4px;">{{ $notif->display_title }}</div>
+                                                    <div class="notif-message" style="color: rgba(255,255,255,0.6); font-size: 0.8rem; line-height: 1.4; margin-bottom: 6px;">{{ $notif->display_message }}</div>
+                                                    <div class="notif-time" style="color: rgba(255,255,255,0.35); font-size: 0.7rem;">{{ $notif->created_at->diffForHumans() }}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @empty
+                                        <div class="elx-nav__notifications-empty" style="padding: 32px 16px; text-align: center; color: rgba(255,255,255,0.4); font-size: 0.85rem;">
+                                            <i class="fas fa-bell-slash" style="display: block; font-size: 1.8rem; margin-bottom: 10px; opacity: 0.4;"></i>
+                                            {{ __('app.no_notifications') }}
+                                        </div>
+                                    @endforelse
+                                </div>
                             </div>
-                            <div class="elx-nav__notifications-list" style="max-height: 350px; overflow-y: auto;">
-                                @forelse(auth()->user()->notifications()->take(10)->get() as $notif)
-                                    <div class="elx-nav__notifications-item {{ $notif->is_read ? '' : 'unread' }}"
-                                         data-read-url="{{ route('notifications.read', $notif->id) }}"
-                                         data-redirect-url="{{ $notif->url ?: route('home') }}"
-                                         onclick="handleNotificationClick(event, this)"
-                                         style="padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.08); cursor: pointer; transition: background 0.25s; background: {{ $notif->is_read ? 'rgba(0, 0, 0, 0.2)' : 'rgba(74, 200, 246, 0.12)' }}; text-align: left;">
-                                        <div style="display: flex; align-items: start; gap: 8px;">
-                                            @if(!$notif->is_read)
-                                                <span class="unread-dot" style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background-color: #4ac8f6; box-shadow: 0 0 8px #4ac8f6; margin-top: 6px; flex-shrink: 0;"></span>
-                                            @endif
-                                            <div style="flex-grow: 1;">
-                                                <div class="notif-title" style="color: {{ $notif->is_read ? '#8fa4af' : '#4ac8f6' }}; font-weight: {{ $notif->is_read ? 'normal' : 'bold' }}; font-size: 0.9rem; margin-bottom: 4px;">{{ $notif->display_title }}</div>
-                                                <div class="notif-message" style="color: rgba(255,255,255,0.6); font-size: 0.8rem; line-height: 1.4; margin-bottom: 6px;">{{ $notif->display_message }}</div>
-                                                <div class="notif-time" style="color: rgba(255,255,255,0.35); font-size: 0.7rem;">{{ $notif->created_at->diffForHumans() }}</div>
+                        </div>
+                    @endauth
+
+                    @guest
+                        <a href="{{ route('login') }}" class="elx-nav__btn elx-nav__btn--login elx-nav__header-join">{{ __('app.join_us') }}</a>
+                    @endguest
+                </div>
+
+                <div class="elx-nav__desktop-only">
+                    <form action="{{ route('search.index') }}" method="GET" class="elx-nav__search-form">
+                        <input type="search" name="q" value="{{ request('q') }}" placeholder="{{ __('shop.search_placeholder') }}" class="elx-nav__search-input">
+                    </form>
+
+                    <div class="elx-nav__actions-cluster">
+                        @if(app()->getLocale() === 'ar')
+                            <a href="{{ route('lang.switch', 'en') }}{{ $langQuery ? '?'.$langQuery : '' }}" class="elx-nav__icon-btn elx-nav__lang-btn" title="Switch to English" onclick="return preserveVendorOnboardingStep(this, event)">EN</a>
+                        @else
+                            <a href="{{ route('lang.switch', 'ar') }}{{ $langQuery ? '?'.$langQuery : '' }}" class="elx-nav__icon-btn elx-nav__lang-btn" title="التبديل إلى العربية" onclick="return preserveVendorOnboardingStep(this, event)">ع</a>
+                        @endif
+
+                        <a href="{{ route('cart.index') }}" class="elx-nav__cart" title="{{ __('app.cart') }}">
+                            <i class="fas fa-shopping-bag"></i>
+                            @if($cartCount > 0)
+                                <span class="elx-nav__cart-badge">{{ $cartCount }}</span>
+                            @endif
+                        </a>
+                    </div>
+
+                    <div class="elx-nav__actions-user">
+                        @auth
+                            @if(auth()->user()->role === 'admin')
+                                <a href="{{ route('admin.dashboard') }}" class="elx-nav__btn elx-nav__btn--admin">
+                                    <i class="fas fa-cog"></i> <span>{{ __('app.admin_btn') }}</span>
+                                </a>
+                            @elseif(auth()->user()->role === 'vendor')
+                                <a href="{{ route('vendor.dashboard') }}" class="elx-nav__btn elx-nav__btn--admin" style="background-color: #6a1b9a;">
+                                    <i class="fas fa-store"></i> <span>{{ __('app.vendor_portal') }}</span>
+                                </a>
+                            @endif
+                            <div class="elx-nav__profile" id="profileMenu">
+                                <button type="button" class="elx-nav__profile-trigger" id="profileTrigger" aria-expanded="false" aria-controls="profileDropdown">
+                                    <x-user-avatar :user="auth()->user()" size="34" class="elx-nav__profile-avatar" />
+                                    <span class="elx-nav__profile-meta">
+                                        <strong>{{ \Illuminate\Support\Str::limit(auth()->user()->name, 16) }}</strong>
+                                        <small>{{ __('app.my_account') }}</small>
+                                    </span>
+                                    <i class="fas fa-chevron-down"></i>
+                                </button>
+
+                                <div class="elx-nav__profile-menu" id="profileDropdown">
+                                    <div class="elx-nav__profile-head">
+                                        <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                            <x-user-avatar :user="auth()->user()" size="42" />
+                                            <div style="display: grid; gap: 0.15rem;">
+                                                <strong>{{ auth()->user()->name }}</strong>
+                                                <span>{{ auth()->user()->email }}</span>
                                             </div>
                                         </div>
                                     </div>
-                                @empty
-                                    <div class="elx-nav__notifications-empty" style="padding: 32px 16px; text-align: center; color: rgba(255,255,255,0.4); font-size: 0.85rem;">
-                                        <i class="fas fa-bell-slash" style="display: block; font-size: 1.8rem; margin-bottom: 10px; opacity: 0.4;"></i>
-                                        {{ __('app.no_notifications') }}
-                                    </div>
-                                @endforelse
-                            </div>
-                        </div>
-                    </div>
-                @endauth
 
-                {{-- Language Toggle --}}
-                @php $langQuery = request()->getQueryString(); @endphp
-                @if(app()->getLocale() === 'ar')
-                    <a href="{{ route('lang.switch', 'en') }}{{ $langQuery ? '?'.$langQuery : '' }}" class="elx-nav__icon-btn elx-nav__lang-btn" title="Switch to English" onclick="return preserveVendorOnboardingStep(this, event)">EN</a>
-                @else
-                    <a href="{{ route('lang.switch', 'ar') }}{{ $langQuery ? '?'.$langQuery : '' }}" class="elx-nav__icon-btn elx-nav__lang-btn" title="التبديل إلى العربية" onclick="return preserveVendorOnboardingStep(this, event)">ع</a>
-                @endif
-
-                <a href="{{ route('cart.index') }}" class="elx-nav__cart" title="Cart">
-                    <i class="fas fa-shopping-bag"></i>
-                    @php $cartCount = count(session('cart', [])); @endphp
-                    @if($cartCount > 0)
-                        <span class="elx-nav__cart-badge">{{ $cartCount }}</span>
-                    @endif
-                </a>
-                </div>
-
-                <div class="elx-nav__actions-user">
-               @auth
-                    @if(auth()->user()->role === 'admin')
-                        <a href="{{ route('admin.dashboard') }}" class="elx-nav__btn elx-nav__btn--admin">
-                            <i class="fas fa-cog"></i> <span>{{ __('app.admin_btn') }}</span>
-                        </a>
-                    @elseif(auth()->user()->role === 'vendor')
-                        <a href="{{ route('vendor.dashboard') }}" class="elx-nav__btn elx-nav__btn--admin" style="background-color: #6a1b9a;">
-                            <i class="fas fa-store"></i> <span>{{ __('app.vendor_portal') }}</span>
-                        </a>
-                    @endif
-                    <div class="elx-nav__profile" id="profileMenu">
-                        <button type="button" class="elx-nav__profile-trigger" id="profileTrigger" aria-expanded="false" aria-controls="profileDropdown">
-                            <x-user-avatar :user="auth()->user()" size="34" class="elx-nav__profile-avatar" />
-                            <span class="elx-nav__profile-meta">
-                                <strong>{{ \Illuminate\Support\Str::limit(auth()->user()->name, 16) }}</strong>
-                                <small>{{ __('app.my_account') }}</small>
-                            </span>
-                            <i class="fas fa-chevron-down"></i>
-                        </button>
-
-                        <div class="elx-nav__profile-menu" id="profileDropdown">
-                            <div class="elx-nav__profile-head">
-                                <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                    <x-user-avatar :user="auth()->user()" size="42" />
-                                    <div style="display: grid; gap: 0.15rem;">
-                                        <strong>{{ auth()->user()->name }}</strong>
-                                        <span>{{ auth()->user()->email }}</span>
-                                    </div>
+                                    <a href="{{ route('profile.edit') }}">
+                                        <span>{{ __('app.profile_settings') }}</span>
+                                        <i class="fas fa-user"></i>
+                                    </a>
+                                    <a href="{{ route('orders.track') }}">
+                                        <span>{{ __('app.track_order') }}</span>
+                                        <i class="fas fa-truck"></i>
+                                    </a>
+                                    <form method="POST" action="{{ route('logout') }}" class="elx-nav__profile-form">
+                                        @csrf
+                                        <button type="submit" class="elx-nav__profile-logout">
+                                            <span>{{ __('app.logout') }}</span>
+                                            <i class="fas fa-sign-out-alt"></i>
+                                        </button>
+                                    </form>
                                 </div>
                             </div>
-
-                            <a href="{{ route('profile.edit') }}">
-                                <span>{{ __('app.profile_settings') }}</span>
-                                <i class="fas fa-user"></i>
-                            </a>
-                            <a href="{{ route('orders.track') }}">
-                                <span>{{ __('app.track_order') }}</span>
-                                <i class="fas fa-truck"></i>
-                            </a>
-                               <form method="POST" action="{{ route('logout') }}" class="elx-nav__profile-form">
-                                @csrf
-                                <button type="submit" class="elx-nav__profile-logout">
-                                    <span>{{ __('app.logout') }}</span>
-                                    <i class="fas fa-sign-out-alt"></i>
-                                </button>
-                            </form>
-                        </div>
+                        @else
+                            <a href="{{ route('login') }}" class="elx-nav__btn elx-nav__btn--login">{{ __('app.join_us') }}</a>
+                        @endauth
                     </div>
-                @else
-                    <a href="{{ route('login') }}" class="elx-nav__btn elx-nav__btn--login">{{ __('app.join_us') }}</a>
-                @endauth
                 </div>
-                <button class="elx-nav__toggle" id="navToggle">
+
+                <button type="button" class="elx-nav__toggle" id="navToggle" aria-label="{{ __('app.menu') }}" aria-expanded="false" aria-controls="mobileSidebar">
                     <span></span><span></span><span></span>
                 </button>
             </div>
         </div>
     </nav>
+
+    <aside class="elx-mobile-sidebar" id="mobileSidebar" aria-hidden="true">
+        <div class="elx-mobile-sidebar__head">
+            <span class="elx-mobile-sidebar__title">{{ __('app.menu') }}</span>
+            <button type="button" class="elx-mobile-sidebar__close" id="mobileSidebarClose" aria-label="{{ __('app.close') }}">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <form action="{{ route('search.index') }}" method="GET" class="elx-mobile-sidebar__search">
+            <i class="fas fa-search"></i>
+            <input type="search" name="q" value="{{ request('q') }}" placeholder="{{ __('shop.search_placeholder') }}">
+        </form>
+
+        <div class="elx-mobile-sidebar__quick">
+            @if(app()->getLocale() === 'ar')
+                <a href="{{ route('lang.switch', 'en') }}{{ $langQuery ? '?'.$langQuery : '' }}" class="elx-mobile-sidebar__quick-link" onclick="return preserveVendorOnboardingStep(this, event)">
+                    <i class="fas fa-language"></i>
+                    <span>{{ __('app.english') }}</span>
+                </a>
+            @else
+                <a href="{{ route('lang.switch', 'ar') }}{{ $langQuery ? '?'.$langQuery : '' }}" class="elx-mobile-sidebar__quick-link" onclick="return preserveVendorOnboardingStep(this, event)">
+                    <i class="fas fa-language"></i>
+                    <span>{{ __('app.arabic') }}</span>
+                </a>
+            @endif
+
+            <a href="{{ route('cart.index') }}" class="elx-mobile-sidebar__quick-link">
+                <i class="fas fa-shopping-bag"></i>
+                <span>{{ __('app.cart') }}</span>
+                @if($cartCount > 0)
+                    <span class="elx-mobile-sidebar__badge">{{ $cartCount }}</span>
+                @endif
+            </a>
+        </div>
+
+        @auth
+            <div class="elx-mobile-sidebar__account">
+                <div class="elx-mobile-sidebar__account-head">
+                    <x-user-avatar :user="auth()->user()" size="48" />
+                    <div>
+                        <strong>{{ auth()->user()->name }}</strong>
+                        <span>{{ auth()->user()->email }}</span>
+                    </div>
+                </div>
+                <div class="elx-mobile-sidebar__account-links">
+                    <a href="{{ route('profile.edit') }}"><i class="fas fa-user"></i> {{ __('app.profile_settings') }}</a>
+                    <a href="{{ route('profile.orders.index') }}"><i class="fas fa-box"></i> {{ __('app.orders') }}</a>
+                    <a href="{{ route('orders.track') }}"><i class="fas fa-truck"></i> {{ __('app.track_order') }}</a>
+                    @if(auth()->user()->role === 'admin')
+                        <a href="{{ route('admin.dashboard') }}"><i class="fas fa-cog"></i> {{ __('app.admin_btn') }}</a>
+                    @elseif(auth()->user()->role === 'vendor')
+                        <a href="{{ route('vendor.dashboard') }}"><i class="fas fa-store"></i> {{ __('app.vendor_portal') }}</a>
+                    @endif
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit"><i class="fas fa-sign-out-alt"></i> {{ __('app.logout') }}</button>
+                    </form>
+                </div>
+            </div>
+        @endauth
+
+        <ul class="elx-nav__links elx-nav__links--sidebar">
+            @include('partials.nav-links-items')
+        </ul>
+
+        @guest
+            <div class="elx-mobile-sidebar__guest">
+                <a href="{{ route('login') }}" class="elx-nav__btn elx-nav__btn--login elx-mobile-sidebar__guest-btn">{{ __('app.join_us') }}</a>
+                <a href="{{ route('register') }}" class="elx-mobile-sidebar__guest-link">{{ __('app.auth.create_account') }}</a>
+            </div>
+        @endguest
+    </aside>
 
     <main>
         @yield('content')
@@ -749,10 +885,47 @@
         });
 
         const navToggle = document.getElementById('navToggle');
-        const navLinks = document.getElementById('navLinks');
+        const mobileSidebar = document.getElementById('mobileSidebar');
+        const mobileSidebarClose = document.getElementById('mobileSidebarClose');
+        const navOverlay = document.getElementById('navOverlay');
+
+        const closeMobileNav = () => {
+            mobileSidebar?.classList.remove('open');
+            navToggle?.classList.remove('active');
+            navToggle?.setAttribute('aria-expanded', 'false');
+            mobileSidebar?.setAttribute('aria-hidden', 'true');
+            navOverlay?.classList.remove('open');
+            document.body.classList.remove('nav-open');
+        };
+
+        const openMobileNav = () => {
+            mobileSidebar?.classList.add('open');
+            navToggle?.classList.add('active');
+            navToggle?.setAttribute('aria-expanded', 'true');
+            mobileSidebar?.setAttribute('aria-hidden', 'false');
+            navOverlay?.classList.add('open');
+            document.body.classList.add('nav-open');
+        };
+
         navToggle?.addEventListener('click', () => {
-            navLinks.classList.toggle('open');
-            navToggle.classList.toggle('active');
+            if (mobileSidebar?.classList.contains('open')) {
+                closeMobileNav();
+            } else {
+                openMobileNav();
+            }
+        });
+
+        mobileSidebarClose?.addEventListener('click', closeMobileNav);
+        navOverlay?.addEventListener('click', closeMobileNav);
+
+        mobileSidebar?.querySelectorAll('a').forEach((link) => {
+            link.addEventListener('click', () => {
+                const isDropdownTrigger = link.parentElement?.classList.contains('elx-nav__dropdown');
+
+                if (! isDropdownTrigger) {
+                    closeMobileNav();
+                }
+            });
         });
 
         document.querySelectorAll('.elx-nav__dropdown').forEach((dropdown) => {
@@ -762,7 +935,7 @@
                 return;
             }
 
-            const touchNavQuery = window.matchMedia('(max-width: 768px), (hover: none), (pointer: coarse)');
+            const touchNavQuery = window.matchMedia('(max-width: 1024px), (hover: none), (pointer: coarse)');
             let closeTimer = null;
 
             const openMenu = () => {
@@ -1143,9 +1316,6 @@
         }, 2500);
     </script>
     
-    <!-- Language Selector Component -->
-    <x-language-selector />
-
     <a href="https://wa.me/971545920050" target="_blank" rel="noopener noreferrer" class="whatsapp-btn" aria-label="WhatsApp">
         <i class="fab fa-whatsapp"></i>
     </a>

@@ -130,6 +130,10 @@ class UserController extends Controller
         $user->is_suspended = ! $user->is_suspended;
         $user->save();
 
+        if ($user->is_suspended) {
+            \Illuminate\Support\Facades\DB::table('sessions')->where('user_id', $user->id)->delete();
+        }
+
         $status = $user->is_suspended ? 'suspended' : 'activated';
 
         return redirect()->back()->with('success', "User account has been {$status}.");
@@ -144,6 +148,8 @@ class UserController extends Controller
         if ($user->role === 'admin') {
             return redirect()->back()->with('error', 'Admin accounts cannot be deleted.');
         }
+
+        \Illuminate\Support\Facades\DB::table('sessions')->where('user_id', $user->id)->delete();
 
         $user->delete();
 

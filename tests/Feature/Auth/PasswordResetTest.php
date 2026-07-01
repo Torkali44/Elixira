@@ -1,60 +1,44 @@
 <?php
 
 use App\Models\User;
-use Illuminate\Auth\Notifications\ResetPassword;
-use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 
-test('reset password link screen can be rendered', function () {
+test('forgot password screen can be rendered', function () {
     $response = $this->get('/forgot-password');
 
-    $response->assertStatus(200);
+    $response->assertOk();
 });
 
-test('reset password link can be requested', function () {
-    Notification::fake();
+test('reset code can be requested', function () {
+    Mail::fake();
 
     $user = User::factory()->create();
 
-    $this->post('/forgot-password', ['email' => $user->email]);
+    $response = $this->post('/forgot-password', ['email' => $user->email]);
 
-    Notification::assertSentTo($user, ResetPassword::class);
+    $response->assertRedirect(route('password.verify'));
 });
 
-test('reset password screen can be rendered', function () {
-    Notification::fake();
-
+test('password can be reset with otp flow', function () {
     $user = User::factory()->create();
+    $code = '654321';
 
-    $this->post('/forgot-password', ['email' => $user->email]);
+    $user->forceFill([
+        'password_reset_code' => Hash::make($code),
+        'password_reset_code_expires_at' => now()->addMinutes(5),
+    ])->save();
 
-    Notification::assertSentTo($user, ResetPassword::class, function ($notification) {
-        $response = $this->get('/reset-password/'.$notification->token);
+    $this->withSession(['password_reset_email' => $user->email])
+        ->post('/forgot-password/verify', ['code' => $code])
+        ->assertRedirect(route('password.reset.form'));
 
-        $response->assertStatus(200);
-
-        return true;
-    });
-});
-
-test('password can be reset with valid token', function () {
-    Notification::fake();
-
-    $user = User::factory()->create();
-
-    $this->post('/forgot-password', ['email' => $user->email]);
-
-    Notification::assertSentTo($user, ResetPassword::class, function ($notification) use ($user) {
-        $response = $this->post('/reset-password', [
-            'token' => $notification->token,
-            'email' => $user->email,
+    $this->withSession(['password_reset_verified_user_id' => $user->id])
+        ->post('/reset-password', [
             'password' => 'password',
             'password_confirmation' => 'password',
-        ]);
+        ])
+        ->assertRedirect(route('login'));
 
-        $response
-            ->assertSessionHasNoErrors()
-            ->assertRedirect(route('login'));
-
-        return true;
-    });
+    expect(Hash::check('password', $user->fresh()->password))->toBeTrue();
 });

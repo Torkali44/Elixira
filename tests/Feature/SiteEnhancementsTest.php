@@ -172,7 +172,35 @@ test('item pricing resolves member and guest prices by country', function () {
     $pricing = app(ItemPricingService::class);
 
     expect($pricing->resolvePrice($item, $member, 'KSA'))->toBe(80.0)
-        ->and($pricing->resolvePrice($item, $guest, 'KSA'))->toBe(100.0);
+        ->and($pricing->resolvePrice($item, $guest, 'KSA'))->toBe(80.0);
+});
+
+test('cart stores member price shown on product cards for guests', function () {
+    $category = Category::query()->create(['name' => 'Cat', 'name_en' => 'Cat', 'name_ar' => 'قسم']);
+    $item = Item::query()->create([
+        'category_id' => $category->id,
+        'name' => 'Card Price Item',
+        'name_en' => 'Card Price Item',
+        'name_ar' => 'منتج',
+        'description' => 'desc',
+        'price' => 100,
+        'stock' => 5,
+        'status' => 'approved',
+    ]);
+
+    $item->countryPrices()->create([
+        'country_code' => 'KSA',
+        'member_price' => 80,
+        'guest_price' => 100,
+    ]);
+
+    $this->post(route('cart.add'), [
+        'item_id' => $item->id,
+        'quantity' => 1,
+        'country_code' => 'KSA',
+    ])->assertRedirect();
+
+    expect(session('cart')[$item->id]['price'])->toBe(80.0);
 });
 
 test('country pricing saves with member price only and no guest strikethrough', function () {
@@ -629,7 +657,7 @@ test('guest price is shown exactly as entered even when legacy discount percent 
 
     expect($pricing['guest_price'])->toBe(100.0)
         ->and($pricing['member_price'])->toBe(80.0)
-        ->and($pricing['active_price'])->toBe(100.0);
+        ->and($pricing['active_price'])->toBe(80.0);
 });
 
 test('package can be added to cart from storefront', function () {

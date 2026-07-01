@@ -85,7 +85,7 @@
                 <div class="main-img-container">
 
                     @if($item->image)
-                        <img src="{{ asset('storage/' . $item->image) }}" alt="{{ $item->local_name }}" id="mainProductImage">
+                        <img src="{{ $item->image_url }}" alt="{{ $item->local_name }}" id="mainProductImage">
                     @else
                         <div style="aspect-ratio: 1/1; background: #1a2e38; display: flex; align-items: center; justify-content: center; color: var(--elx-cyan); font-size: 5rem;">
                             <i class="fas fa-seedling"></i>

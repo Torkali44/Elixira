@@ -65,3 +65,17 @@ test('verification otp can be resent', function () {
 
     Mail::assertSent(EmailVerificationOtpMail::class);
 });
+
+test('verify page still loads when otp delivery fails', function () {
+    $user = User::factory()->unverified()->create();
+
+    $this->mock(\App\Support\EmailVerificationOtpService::class, function ($mock): void {
+        $mock->shouldReceive('hasValidCode')->andReturn(false);
+        $mock->shouldReceive('send')->andReturn(false);
+    });
+
+    $this->actingAs($user)
+        ->get('/verify-email')
+        ->assertOk()
+        ->assertSee(__('app.auth.verify_otp_send_failed'), false);
+});

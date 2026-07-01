@@ -7,7 +7,6 @@ use App\Support\EmailVerificationOtpService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
-use Throwable;
 
 class EmailVerificationPromptController extends Controller
 {
@@ -25,11 +24,9 @@ class EmailVerificationPromptController extends Controller
         }
 
         if (! $otpService->hasValidCode($user)) {
-            try {
-                $otpService->send($user);
+            if ($otpService->send($user)) {
                 session()->flash('status', 'verification-otp-sent');
-            } catch (Throwable $exception) {
-                report($exception);
+            } else {
                 session()->flash('error', __('app.auth.verify_otp_send_failed'));
             }
         }

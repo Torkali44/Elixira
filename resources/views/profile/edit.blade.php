@@ -416,7 +416,67 @@
         }
 
         .account-card {
-            padding: 1.4rem;
+            padding: 1.25rem;
+            border-radius: 22px;
+        }
+
+        .account-hero {
+            margin-bottom: 1.25rem;
+        }
+
+        .account-hero__copy h1,
+        .account-hero .elx-hero__title {
+            font-size: clamp(1.75rem, 8vw, 2.25rem);
+        }
+
+        .account-hero__actions {
+            width: 100%;
+        }
+
+        .account-hero__actions .elx-btn {
+            flex: 1 1 calc(50% - 0.375rem);
+            justify-content: center;
+            text-align: center;
+            min-width: 0;
+            padding-inline: 0.75rem;
+            font-size: 0.85rem;
+        }
+
+        .account-sidebar__top {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .account-sidebar__top h2 {
+            font-size: 1.25rem;
+            word-break: break-word;
+        }
+
+        .account-muted {
+            word-break: break-word;
+        }
+
+        .account-links {
+            gap: 0.55rem;
+        }
+
+        .account-link {
+            justify-content: flex-start;
+            text-align: start;
+            padding: 0.85rem 1rem;
+            font-size: 0.92rem;
+        }
+
+        .account-section__header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .account-order__top,
+        .account-order__bottom,
+        .account-pagination {
+            flex-direction: column;
+            align-items: stretch;
         }
 
         .account-avatar {
@@ -427,6 +487,33 @@
 
         .account-avatar-panel {
             grid-template-columns: 1fr;
+        }
+
+        .page-content {
+            padding-top: 88px;
+            padding-bottom: 48px;
+        }
+
+        #addresses form div[style*="display: flex"] {
+            flex-direction: column !important;
+            align-items: stretch !important;
+        }
+
+        #addresses form div[style*="display: flex"] .elx-btn {
+            width: 100%;
+            white-space: normal;
+        }
+
+        #addresses div[style*="display: flex"][style*="justify-content: space-between"] {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            gap: 0.85rem !important;
+        }
+
+        #addresses div[style*="display: flex"][style*="justify-content: space-between"] > div:last-child {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
         }
     }
 </style>

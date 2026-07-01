@@ -34,7 +34,7 @@ class AuthenticatedSessionController extends Controller
             $request->session()->regenerateToken();
 
             return back()->withErrors([
-                'email' => 'Your account has been suspended by the administration.',
+                'email' => __('app.auth.account_suspended'),
             ]);
         }
 

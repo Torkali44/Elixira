@@ -21,18 +21,18 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        if ($this->app->environment('local') && ! $this->app->runningInConsole()) {
+        if ($this->app->environment('production')) {
+            URL::forceRootUrl(config('app.url'));
+
+            if (str_starts_with((string) config('app.url'), 'https://')) {
+                URL::forceScheme('https');
+                config(['session.secure' => true]);
+            }
+        } elseif ($this->app->environment('local') && ! $this->app->runningInConsole()) {
             URL::forceRootUrl(request()->getSchemeAndHttpHost());
         }
 
         Paginator::defaultView('pagination.elixira');
         Paginator::defaultSimpleView('pagination.elixira');
-
-        // Set default locale
-        if (session()->has('locale')) {
-            app()->setLocale(session('locale'));
-        } elseif (auth()->check() && auth()->user()->locale) {
-            app()->setLocale(auth()->user()->locale);
-        }
     }
 }

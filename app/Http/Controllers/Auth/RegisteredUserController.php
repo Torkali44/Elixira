@@ -6,13 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\RegisterUserRequest;
 use App\Models\User;
 use App\Models\VendorProfile;
-use Illuminate\Auth\Events\Registered;
+use App\Support\EmailVerificationOtpService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
-use Throwable;
 
 class RegisteredUserController extends Controller
 {
@@ -24,7 +23,7 @@ class RegisteredUserController extends Controller
     /**
      * @throws ValidationException
      */
-    public function store(RegisterUserRequest $request): RedirectResponse
+    public function store(RegisterUserRequest $request, EmailVerificationOtpService $otpService): RedirectResponse
     {
         $user = User::create([
             'name' => $request->name,
@@ -47,18 +46,12 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
-        try {
-            event(new Registered($user));
-        } catch (Throwable $exception) {
-            report($exception);
+        $redirect = redirect()->route('verification.notice');
 
-            return redirect()
-                ->route('verification.notice')
-                ->with('error', __('app.auth.verify_otp_send_failed'));
+        if ($otpService->send($user)) {
+            return $redirect->with('status', 'verification-otp-sent');
         }
 
-        return redirect()
-            ->route('verification.notice')
-            ->with('status', 'verification-otp-sent');
+        return $redirect->with('error', __('app.auth.verify_otp_send_failed'));
     }
 }

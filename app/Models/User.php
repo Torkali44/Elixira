@@ -51,6 +51,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'password',
         'remember_token',
         'email_verification_code',
+        'password_reset_code',
     ];
 
     /**
@@ -63,6 +64,7 @@ class User extends Authenticatable implements MustVerifyEmail
         return [
             'email_verified_at' => 'datetime',
             'email_verification_code_expires_at' => 'datetime',
+            'password_reset_code_expires_at' => 'datetime',
             'is_suspended' => 'boolean',
             'is_dxn_verified' => 'boolean',
             'dxn_verified_at' => 'datetime',
@@ -102,8 +104,12 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function getAvatarUrlAttribute(): ?string
     {
-        if ($this->avatarOption && $this->avatarOption->is_active) {
-            return $this->avatarOption->image_url;
+        try {
+            if ($this->avatarOption?->is_active) {
+                return $this->avatarOption->image_url;
+            }
+        } catch (\Throwable $exception) {
+            report($exception);
         }
 
         return $this->avatar ? asset('storage/'.$this->avatar) : null;

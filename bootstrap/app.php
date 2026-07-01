@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\ApplyUserPreferences;
+use App\Http\Middleware\EnsureAccountIsActive;
 use App\Http\Middleware\EnsureVerifiedOrAdmin;
 use App\Http\Middleware\VendorMiddleware;
 use Illuminate\Foundation\Application;
@@ -19,6 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->web(append: [
             ApplyUserPreferences::class,
+            EnsureAccountIsActive::class,
         ]);
         $middleware->alias([
             'admin'              => AdminMiddleware::class,

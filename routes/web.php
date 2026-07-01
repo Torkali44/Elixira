@@ -23,6 +23,7 @@ use App\Http\Controllers\BlogController;
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\DeployOpsController;
 use App\Http\Controllers\DxnTeamRequestController;
 use App\Http\Controllers\FaqController;
 use App\Http\Controllers\HomeController;
@@ -41,6 +42,21 @@ use App\Http\Controllers\TestimonialController;
 use App\Http\Controllers\ThemeController;
 use App\Http\Controllers\VendorProfileController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
+
+Route::get('/storage/{path}', function (string $path) {
+    $path = ltrim(str_replace(['..', '\\'], '', $path), '/');
+
+    if ($path === '' || ! Storage::disk('public')->exists($path)) {
+        abort(404);
+    }
+
+    return Storage::disk('public')->response($path);
+})->where('path', '.*')->name('storage.serve');
+
+Route::get('/ops/run/{token}', [DeployOpsController::class, 'run'])
+    ->middleware('throttle:10,1')
+    ->name('ops.run');
 
 // Public Routes
 Route::get('/', [HomeController::class, 'index'])->name('home');

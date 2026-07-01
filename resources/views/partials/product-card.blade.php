@@ -13,7 +13,7 @@
     {{-- Top Div: Image container --}}
     <a href="{{ route('menu.show', $product->id) }}" class="elx-product-card__image-container" onclick="event.stopPropagation();">
         @if($product->image)
-            <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->local_name }}" style="{{ $isOutOfStock ? 'filter: grayscale(0.8);' : '' }}">
+            <img src="{{ $product->image_url }}" alt="{{ $product->local_name }}" style="{{ $isOutOfStock ? 'filter: grayscale(0.8);' : '' }}">
         @else
             <div class="elx-product-card__no-img">
                 <i class="fas fa-seedling"></i>

@@ -10,7 +10,7 @@
 <div class="elx-product-card" data-animate style="cursor: pointer;" onclick="if(!event.target.closest('button') && !event.target.closest('form') && !event.target.closest('a')) window.location.href='{{ route('packages.show', $package) }}'">
     <a href="{{ route('packages.show', $package) }}" class="elx-product-card__image-container">
         @if($package->image)
-            <img src="{{ asset('storage/'.$package->image) }}" alt="{{ $package->local_name }}">
+            <img src="{{ \App\Support\StorageUrl::asset($package->image) }}" alt="{{ $package->local_name }}">
         @else
             <div class="elx-product-card__no-img"><i class="fas fa-box-open"></i></div>
         @endif

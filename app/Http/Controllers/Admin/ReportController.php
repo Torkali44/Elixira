@@ -8,6 +8,7 @@ use App\Models\Item;
 use App\Models\Order;
 use App\Models\User;
 use App\Models\VendorProfile;
+use App\Support\SqlDateExpressions;
 use Illuminate\Support\Facades\DB;
 
 class ReportController extends Controller
@@ -120,8 +121,10 @@ class ReportController extends Controller
         $cancelledOrdersCount = Order::where('status', 'cancelled')->count();
 
         // Monthly revenue breakdown
+        $monthExpression = SqlDateExpressions::yearMonth('created_at');
+
         $revenueByMonth = Order::where('status', '!=', 'cancelled')
-            ->selectRaw("strftime('%Y-%m', created_at) as month, COUNT(*) as order_count, SUM(total_amount) as revenue")
+            ->selectRaw("{$monthExpression} as month, COUNT(*) as order_count, SUM(total_amount) as revenue")
             ->groupBy('month')
             ->orderBy('month', 'desc')
             ->take(12)

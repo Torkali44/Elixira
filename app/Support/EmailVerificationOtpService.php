@@ -24,14 +24,24 @@ class EmailVerificationOtpService
             && $user->email_verification_code_expires_at->isFuture();
     }
 
-    public function send(User $user): void
+    public function send(User $user): bool
     {
         $code = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
 
-        $user->forceFill([
-            'email_verification_code' => Hash::make($code),
-            'email_verification_code_expires_at' => now()->addMinutes($this->ttlMinutes()),
-        ])->save();
+        try {
+            $user->forceFill([
+                'email_verification_code' => Hash::make($code),
+                'email_verification_code_expires_at' => now()->addMinutes($this->ttlMinutes()),
+            ])->save();
+        } catch (Throwable $exception) {
+            Log::error('Verification OTP could not be saved.', [
+                'user_id' => $user->id,
+                'email' => $user->email,
+                'message' => $exception->getMessage(),
+            ]);
+
+            return false;
+        }
 
         try {
             Mail::mailer(config('mail.default'))->to($user->email)->send(new EmailVerificationOtpMail($user, $code));
@@ -46,6 +56,8 @@ class EmailVerificationOtpService
                 Log::channel('otp')->info("OTP for {$user->email}: {$code}");
                 cache()->put("dev_otp:{$user->id}", $code, now()->addMinutes($this->ttlMinutes()));
             }
+
+            return true;
         } catch (Throwable $exception) {
             Log::error('Verification OTP email failed.', [
                 'user_id' => $user->id,
@@ -53,7 +65,7 @@ class EmailVerificationOtpService
                 'message' => $exception->getMessage(),
             ]);
 
-            throw $exception;
+            return false;
         }
     }
 
