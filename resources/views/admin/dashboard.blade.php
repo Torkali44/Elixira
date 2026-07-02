@@ -383,8 +383,12 @@
                                         </div>
                                     </div>
                                 </div>
-                                <a href="{{ route('admin.users.edit', $user) }}"
-                                    class="btn btn-sm btn-outline-secondary">{{ __('admin.dashboard.edit') }}</a>
+                                @if($user->role !== 'admin')
+                                    <a href="{{ route('admin.users.edit', $user) }}"
+                                        class="btn btn-sm btn-outline-secondary">{{ __('admin.dashboard.edit') }}</a>
+                                @else
+                                    <span class="badge bg-light text-muted">{{ __('admin.users_page.protected') }}</span>
+                                @endif
                             </div>
                         @empty
                             <div class="text-center py-4 text-muted">{{ __('admin.dashboard.no_users') }}</div>

@@ -47,6 +47,11 @@
             
             <div class="elx-products__grid" data-animate>
                 @foreach($featuredItems as $item)
+                @php
+                    $explorePricing = app(\App\Support\ItemPricingService::class);
+                    $exploreCountry = $explorePricing->resolveCountryCodeForItem($item, request('country')) ?? $explorePricing->detectUserCountry();
+                    $exploreRewardPoints = $explorePricing->resolveRewardPoints($item, $exploreCountry);
+                @endphp
                 <a href="{{ route('menu.show', $item->id) }}" class="elx-product-card">
                     <div class="elx-product-card__glow"></div>
                     <div class="elx-product-card__image">
@@ -63,13 +68,13 @@
                     </div>
                     <div class="elx-product-card__info">
                         <h3 class="elx-product-card__name" style="margin-bottom: 0.5rem;">{{ $item->local_name }}</h3>
-                        <div class="elx-product-card__price-row" style="margin-bottom: 0.5rem;">
-                            <x-product-pricing :item="$item" :showSelector="false" align="flex-start" />
+                        <div class="elx-product-card__price" style="margin-bottom: 0.5rem;">
+                            <x-product-pricing :item="$item" :selectedCountry="$exploreCountry" :showSelector="false" />
                         </div>
                         <p class="elx-product-card__desc" style="flex-grow: 1; margin-bottom: 1rem;">{{ Str::limit($item->local_description, 85) }}</p>
-                        @if(($item->reward_points ?? 0) > 0)
+                        @if($exploreRewardPoints > 0)
                             <p class="elx-product-card__desc" style="color: #00ff88; margin-top: 0.5rem;">
-                                <i class="fas fa-star"></i> {{ __('home.reward_points', ['count' => $item->reward_points]) }}
+                                <i class="fas fa-star"></i> {{ __('home.reward_points', ['count' => $exploreRewardPoints]) }}
                             </p>
                         @endif
                     </div>

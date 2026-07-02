@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasLocalizedDetailSections;
 use App\Models\Concerns\HasTags;
 use App\Support\PackagePricingService;
 use Illuminate\Database\Eloquent\Builder;
@@ -12,18 +13,28 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Package extends Model
 {
-    use HasTags;
+    use HasLocalizedDetailSections, HasTags;
 
     protected $fillable = [
         'brand_id',
         'name',
         'name_en',
         'name_ar',
+        'size_en',
+        'size_ar',
         'description',
         'description_en',
         'description_ar',
         'long_description_en',
         'long_description_ar',
+        'benefits_en',
+        'benefits_ar',
+        'ingredients_en',
+        'ingredients_ar',
+        'usage_instructions_en',
+        'usage_instructions_ar',
+        'warnings_en',
+        'warnings_ar',
         'price',
         'stock',
         'reward_points',
@@ -69,6 +80,15 @@ class Package extends Model
         }
 
         return $this->name_en ?: $this->name;
+    }
+
+    public function getLocalSizeAttribute(): ?string
+    {
+        if (app()->getLocale() === 'ar') {
+            return $this->size_ar ?: $this->size_en;
+        }
+
+        return $this->size_en ?: $this->size_ar;
     }
 
     public function getLocalDescriptionAttribute(): ?string

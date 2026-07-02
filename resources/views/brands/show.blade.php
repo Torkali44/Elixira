@@ -454,6 +454,7 @@
             </div>
         </div>
         @endif
+        
         {{-- Reviews Section --}}
         <div class="mt-5 mb-5">
             <div class="reviews-header mb-4">

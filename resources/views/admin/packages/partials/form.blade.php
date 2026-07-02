@@ -15,6 +15,19 @@
     </div>
 </div>
 
+<div class="row">
+    <div class="col-md-6 mb-3">
+        <label class="form-label">{{ __('admin.items_page.size_en') }}</label>
+        <input type="text" name="size_en" class="form-control @error('size_en') is-invalid @enderror" value="{{ old('size_en', $package?->size_en) }}" maxlength="120" placeholder="e.g. 500ml">
+        @error('size_en')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+    </div>
+    <div class="col-md-6 mb-3">
+        <label class="form-label">{{ __('admin.items_page.size_ar') }}</label>
+        <input type="text" name="size_ar" class="form-control @error('size_ar') is-invalid @enderror" value="{{ old('size_ar', $package?->size_ar) }}" maxlength="120" dir="rtl" placeholder="مثال: 500 مل">
+        @error('size_ar')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+    </div>
+</div>
+
 <div class="mb-3">
     <label class="form-label">{{ __('admin.packages_page.description_en') }} *</label>
     <textarea name="description_en" class="form-control @error('description_en') is-invalid @enderror" rows="2">{{ old('description_en', $package?->description_en) }}</textarea>
@@ -32,11 +45,6 @@
         <input type="number" min="0" name="stock" class="form-control @error('stock') is-invalid @enderror" value="{{ old('stock', $package?->stock ?? 0) }}">
         @error('stock')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
     </div>
-    <div class="col-md-6 mb-3">
-        <label class="form-label">{{ __('admin.packages_page.reward_points') }}</label>
-        <input type="number" min="0" name="reward_points" class="form-control @error('reward_points') is-invalid @enderror" value="{{ old('reward_points', $package?->reward_points ?? 0) }}">
-        @error('reward_points')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
-    </div>
 </div>
 
 @include('partials.admin.package-country-prices', ['package' => $package])
@@ -47,6 +55,8 @@
     'label' => __('admin.packages_page.long_description'),
     'hintKey' => 'admin.packages_page.long_description_hint',
 ])
+
+@include('partials.admin.bilingual-detail-sections', ['model' => $package, 'prefix' => 'package-detail-sections'])
 
 <div class="mb-3">
     <label class="form-label">{{ __('admin.packages_page.package_image') }}</label>

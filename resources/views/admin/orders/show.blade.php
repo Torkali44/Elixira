@@ -93,10 +93,29 @@
                             default => ucfirst($order->status),
                         };
                     @endphp
-                    <div class="d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
                         <span class="fw-bold">{{ __('admin.orders.status') }}:</span>
                         <span class="badge bg-{{ $badge }} fs-6 px-3 py-2 rounded-pill">{{ $label }}</span>
                     </div>
+
+                    <form action="{{ route('admin.orders.update', $order) }}" method="POST">
+                        @csrf
+                        @method('PATCH')
+                        <div class="mb-3">
+                            <label for="status" class="form-label fw-bold small text-muted">{{ __('admin.orders.update_status') }}</label>
+                            <select name="status" id="status" class="form-select">
+                                <option value="pending" @selected($order->status === 'pending')>{{ __('admin.orders.status_pending') }}</option>
+                                <option value="confirmed" @selected($order->status === 'confirmed')>{{ __('admin.orders.status_confirmed') }}</option>
+                                <option value="preparing" @selected($order->status === 'preparing')>{{ __('admin.orders.status_preparing') }}</option>
+                                <option value="ready" @selected($order->status === 'ready')>{{ __('admin.orders.status_ready') }}</option>
+                                <option value="delivered" @selected($order->status === 'delivered')>{{ __('admin.orders.status_delivered') }}</option>
+                                <option value="cancelled" @selected($order->status === 'cancelled')>{{ __('admin.orders.status_cancelled') }}</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-save me-1"></i> {{ __('admin.orders.save_changes') }}
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>

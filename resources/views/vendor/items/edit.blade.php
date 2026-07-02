@@ -47,15 +47,13 @@
                                 <input type="number" name="stock" class="form-control @error('stock') is-invalid @enderror" value="{{ old('stock', $item->stock) }}">
                                 @error('stock')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">{{ __('admin.items_page.reward_points') }}</label>
-                                <input type="number" min="0" name="reward_points" class="form-control" value="{{ old('reward_points', $item->reward_points ?? 0) }}">
-                            </div>
                         </div>
 
                         @include('partials.admin.item-country-prices', ['item' => $item])
 
                         @include('partials.admin.bilingual-long-description', ['model' => $item, 'prefix' => 'vendor-item-long-desc'])
+
+                        @include('partials.admin.bilingual-detail-sections', ['model' => $item, 'prefix' => 'vendor-item-detail-sections'])
                     </div>
 
                     <div class="col-md-4">

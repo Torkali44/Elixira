@@ -50,7 +50,12 @@ class MenuController extends Controller
         $item->load('category', 'images', 'brandModel', 'ratings.user', 'countryPrices', 'tags');
 
         $pricingService = app(ItemPricingService::class);
-        $selectedCountry = $pricingService->resolveCountryCode(request('country'));
+
+        if (request()->has('country')) {
+            session(['shopping_country' => $pricingService->resolveCountryCode(request('country'))]);
+        }
+
+        $selectedCountry = $pricingService->resolveCountryCodeForItem($item, request('country'));
 
         // Find other approved products with the same name sold by different brands
         $otherSellers = Item::with('brandModel')
@@ -73,7 +78,7 @@ class MenuController extends Controller
             'relatedReviews',
             'otherSellers',
             'privateOfferQuantities',
-            'selectedCountry'
+            'selectedCountry',
         ));
     }
 

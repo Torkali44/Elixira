@@ -1167,32 +1167,242 @@
             });
         }
 
-        function selectProductCardCountry(btn) {
-            const productId = btn.dataset.productId;
-            const country = btn.dataset.country;
-            const input = document.getElementById(`product-country-${productId}`);
-            if (input) {
-                input.value = country;
+        function elxSyncCountrySelection(select) {
+            const inputId = select.dataset?.countryInput;
+            if (inputId) {
+                const input = document.getElementById(inputId);
+                if (input) {
+                    input.value = select.value;
+                }
             }
-            document.querySelectorAll(`.product-card-country-btn[data-product-id="${productId}"]`).forEach((el) => {
-                const active = el.dataset.country === country;
-                el.style.borderColor = active ? 'rgba(74,200,246,0.8)' : 'rgba(255,255,255,0.15)';
-                el.style.background = active ? 'rgba(74,200,246,0.15)' : 'rgba(255,255,255,0.04)';
+
+            const form = select.closest('form');
+            if (form) {
+                form.submit();
+            }
+        }
+
+        function elxSelectCountryCustom(wrapper, value, flag, label) {
+            const hidden = wrapper.querySelector('[data-country-select-value]');
+            const flagEl = wrapper.querySelector('[data-country-select-flag]');
+            const labelEl = wrapper.querySelector('[data-country-select-label]');
+            const menu = wrapper.querySelector('[data-country-select-menu]');
+            const toggle = wrapper.querySelector('[data-country-select-toggle]');
+            const inputId = wrapper.dataset.countryInput;
+
+            if (hidden) {
+                hidden.value = value;
+            }
+            if (flagEl && flag) {
+                flagEl.src = flag;
+                flagEl.hidden = false;
+            }
+            if (labelEl) {
+                labelEl.textContent = label;
+            }
+
+            wrapper.querySelectorAll('[data-country-value]').forEach((option) => {
+                option.classList.toggle('is-active', option.dataset.countryValue === value);
+            });
+
+            if (menu) {
+                menu.hidden = true;
+            }
+            if (toggle) {
+                toggle.setAttribute('aria-expanded', 'false');
+            }
+            wrapper.classList.remove('is-open');
+
+            if (inputId) {
+                const input = document.getElementById(inputId);
+                if (input) {
+                    input.value = value;
+                }
+            }
+
+            const form = wrapper.closest('form');
+            if (form) {
+                form.submit();
+            }
+        }
+
+        function initCountrySelectCustom() {
+            document.querySelectorAll('[data-country-select-custom]').forEach((wrapper) => {
+                const toggle = wrapper.querySelector('[data-country-select-toggle]');
+                const menu = wrapper.querySelector('[data-country-select-menu]');
+
+                toggle?.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    const willOpen = menu.hidden;
+                    document.querySelectorAll('[data-country-select-menu]').forEach((otherMenu) => {
+                        if (otherMenu !== menu) {
+                            otherMenu.hidden = true;
+                            otherMenu.closest('[data-country-select-custom]')?.classList.remove('is-open');
+                        }
+                    });
+                    menu.hidden = !willOpen;
+                    wrapper.classList.toggle('is-open', willOpen);
+                    toggle.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+                });
+
+                wrapper.querySelectorAll('[data-country-value]').forEach((option) => {
+                    option.addEventListener('click', (event) => {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        elxSelectCountryCustom(
+                            wrapper,
+                            option.dataset.countryValue,
+                            option.dataset.countryFlag,
+                            option.dataset.countryLabel
+                        );
+                    });
+                });
+            });
+
+            document.addEventListener('click', () => {
+                document.querySelectorAll('[data-country-select-custom]').forEach((wrapper) => {
+                    const menu = wrapper.querySelector('[data-country-select-menu]');
+                    const toggle = wrapper.querySelector('[data-country-select-toggle]');
+                    if (menu) {
+                        menu.hidden = true;
+                    }
+                    wrapper.classList.remove('is-open');
+                    toggle?.setAttribute('aria-expanded', 'false');
+                });
             });
         }
 
-        function selectPackageCardCountry(btn) {
-            const packageId = btn.dataset.packageId;
-            const country = btn.dataset.country;
-            const input = document.getElementById(`package-country-${packageId}`);
-            if (input) {
-                input.value = country;
-            }
-            document.querySelectorAll(`.package-card-country-btn[data-package-id="${packageId}"]`).forEach((el) => {
-                const active = el.dataset.country === country;
-                el.style.borderColor = active ? 'rgba(74,200,246,0.8)' : 'rgba(255,255,255,0.15)';
-                el.style.background = active ? 'rgba(74,200,246,0.15)' : 'rgba(255,255,255,0.04)';
+        function initImageGalleries() {
+            document.querySelectorAll('[data-gallery]').forEach((gallery) => {
+                const main = gallery.querySelector('[data-gallery-main]');
+                const thumbs = Array.from(gallery.querySelectorAll('[data-gallery-index]'));
+                if (!main || thumbs.length === 0) {
+                    return;
+                }
+
+                let current = thumbs.findIndex((thumb) => thumb.classList.contains('is-active'));
+                if (current < 0) {
+                    current = 0;
+                }
+
+                const thumbTrack = gallery.querySelector('[data-thumb-track]');
+                let thumbOffset = 0;
+                const maxVisible = 5;
+
+                const updateThumbScroll = () => {
+                    if (!thumbTrack || thumbs.length <= maxVisible) {
+                        return;
+                    }
+
+                    const thumbWidth = thumbs[0].getBoundingClientRect().width;
+                    const gap = 10;
+                    const offset = thumbOffset * (thumbWidth + gap);
+                    const isRtl = document.documentElement.getAttribute('dir') === 'rtl';
+                    thumbTrack.style.transform = isRtl
+                        ? `translateX(${offset}px)`
+                        : `translateX(-${offset}px)`;
+                };
+
+                const setActive = (index) => {
+                    current = index;
+                    const nextSrc = thumbs[index].dataset.gallerySrc;
+
+                    if (main.src === nextSrc || main.getAttribute('src') === nextSrc) {
+                        thumbs.forEach((thumb, i) => thumb.classList.toggle('is-active', i === index));
+                        return;
+                    }
+
+                    const preload = new Image();
+                    preload.decoding = 'async';
+                    preload.onload = () => {
+                        main.classList.remove('is-loading');
+                        main.src = nextSrc;
+                        thumbs.forEach((thumb, i) => thumb.classList.toggle('is-active', i === index));
+                    };
+                    preload.onerror = () => {
+                        main.classList.remove('is-loading');
+                        main.src = nextSrc;
+                        thumbs.forEach((thumb, i) => thumb.classList.toggle('is-active', i === index));
+                    };
+                    main.classList.add('is-loading');
+                    preload.src = nextSrc;
+
+                    if (thumbs.length > maxVisible) {
+                        const maxOffset = thumbs.length - maxVisible;
+                        thumbOffset = Math.max(0, Math.min(index - 2, maxOffset));
+                        updateThumbScroll();
+                    }
+                };
+
+                thumbs.forEach((thumb) => {
+                    thumb.addEventListener('click', () => setActive(Number(thumb.dataset.galleryIndex)));
+                });
+
+                thumbs.forEach((thumb) => {
+                    const preload = new Image();
+                    preload.decoding = 'async';
+                    preload.src = thumb.dataset.gallerySrc;
+                });
+
+                gallery.querySelector('[data-gallery-prev]')?.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    setActive(current > 0 ? current - 1 : thumbs.length - 1);
+                });
+
+                gallery.querySelector('[data-gallery-next]')?.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    setActive(current < thumbs.length - 1 ? current + 1 : 0);
+                });
+
+                gallery.querySelector('[data-thumb-prev]')?.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    if (thumbOffset > 0) {
+                        thumbOffset--;
+                        updateThumbScroll();
+                    }
+                });
+
+                gallery.querySelector('[data-thumb-next]')?.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    const maxOffset = Math.max(0, thumbs.length - maxVisible);
+                    if (thumbOffset < maxOffset) {
+                        thumbOffset++;
+                        updateThumbScroll();
+                    }
+                });
             });
+        }
+
+        function initDetailAccordions() {
+            document.querySelectorAll('.elx-detail-accordion__trigger').forEach((trigger) => {
+                trigger.addEventListener('click', () => {
+                    const accordion = trigger.closest('.elx-detail-accordion');
+                    const panel = accordion?.querySelector('.elx-detail-accordion__panel');
+                    if (!accordion || !panel) {
+                        return;
+                    }
+
+                    const isOpen = accordion.classList.contains('is-open');
+                    accordion.classList.toggle('is-open', !isOpen);
+                    panel.hidden = isOpen;
+                    trigger.setAttribute('aria-expanded', isOpen ? 'false' : 'true');
+                });
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initDetailAccordions();
+            initImageGalleries();
+            initCountrySelectCustom();
+        });
+
+        function selectProductCardCountry(btn) {
+            // Legacy hook — country selectors removed from product cards.
+        }
+
+        function selectPackageCardCountry(btn) {
+            // Legacy hook — country selectors removed from package cards.
         }
 
         function showSpecialRequestModal(itemId, itemName) {

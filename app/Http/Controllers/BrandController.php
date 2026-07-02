@@ -41,7 +41,7 @@ class BrandController extends Controller
 
         $brand->load(['vendorProfile.user', 'items.category', 'ratings.user']);
 
-        $products = $brand->items()->publiclyVisible()->with('category')->paginate(12);
+        $products = $brand->items()->visibleOnBrandPage()->with('category')->latest()->paginate(12);
 
         $privateOfferQuantities = $this->privateOfferQuantitiesForCurrentUser();
 

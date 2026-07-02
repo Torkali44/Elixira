@@ -98,7 +98,6 @@
                             <select id="role" name="role" class="form-select @error('role') is-invalid @enderror" required>
                                 <option value="user" {{ old('role', $user->role) === 'user' ? 'selected' : '' }}>{{ __('admin.users_page.user') }}</option>
                                 <option value="vendor" {{ old('role', $user->role) === 'vendor' ? 'selected' : '' }}>{{ __('admin.users_page.vendors') }}</option>
-                                <option value="admin" {{ old('role', $user->role) === 'admin' ? 'selected' : '' }}>{{ __('admin.users_page.admins') }}</option>
                             </select>
                             @error('role')
                                 <div class="invalid-feedback">{{ $message }}</div>

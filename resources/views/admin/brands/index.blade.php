@@ -1,11 +1,16 @@
 @extends('layouts.admin')
 
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
     <h2>{{ __('vendor.brands_page.title') }}</h2>
-    <a href="{{ route('brands.index') }}" target="_blank" class="btn btn-outline-primary">
-        <i class="fas fa-external-link-alt"></i> {{ __('vendor.brands_page.view_public') }}
-    </a>
+    <div class="d-flex gap-2">
+        <a href="{{ route('admin.brands.create') }}" class="btn btn-primary">
+            <i class="fas fa-plus me-1"></i> {{ __('admin.brands_page.add_brand') }}
+        </a>
+        <a href="{{ route('brands.index') }}" target="_blank" class="btn btn-outline-primary">
+            <i class="fas fa-external-link-alt"></i> {{ __('vendor.brands_page.view_public') }}
+        </a>
+    </div>
 </div>
 
 <div class="card border-0 shadow-sm">
@@ -80,6 +85,15 @@
                                 <a href="{{ route('brands.show', $brand->slug) }}" target="_blank" class="btn btn-outline-secondary" title="{{ __('vendor.brands_page.view_store') }}">
                                     <i class="fas fa-eye"></i>
                                 </a>
+                                @if($brand->items_count === 0)
+                                    <form action="{{ route('admin.brands.destroy', $brand) }}" method="POST" class="d-inline" onsubmit="return confirm(@json(__('admin.brands_page.confirm_delete')));">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-outline-danger" title="{{ __('admin.brands_page.delete') }}">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                @endif
                             </div>
                         </td>
                     </tr>

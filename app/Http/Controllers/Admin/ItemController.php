@@ -60,6 +60,7 @@ class ItemController extends Controller
         $data = $request->validated();
         $data['is_featured'] = $request->has('is_featured');
         $data = $this->normalizeBilingualFields($data);
+        $data = $this->normalizeBrandFields($data);
         $data['price'] = 0;
 
         if ($request->hasFile('image')) {
@@ -94,6 +95,7 @@ class ItemController extends Controller
         $data = $request->validated();
         $data['is_featured'] = $request->has('is_featured');
         $data = $this->normalizeBilingualFields($data);
+        $data = $this->normalizeBrandFields($data);
 
         if ($request->hasFile('image')) {
             if ($item->image) {
@@ -145,6 +147,22 @@ class ItemController extends Controller
     {
         $data['name'] = $data['name_en'];
         $data['description'] = $data['description_en'];
+
+        return $data;
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    private function normalizeBrandFields(array $data): array
+    {
+        $brandId = $data['brand_id'] ?? null;
+        $data['brand_id'] = filled($brandId) ? (int) $brandId : null;
+
+        if ($data['brand_id']) {
+            $data['brand'] = Brand::query()->whereKey($data['brand_id'])->value('name');
+        }
 
         return $data;
     }

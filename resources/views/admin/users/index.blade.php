@@ -179,9 +179,11 @@
                             </td>
                             <td class="text-end">
                                 <div class="d-inline-flex gap-2">
-                                    <a href="{{ route('admin.users.edit', $user) }}" class="btn btn-sm btn-outline-primary">
-                                        <i class="fas fa-pen"></i>
-                                    </a>
+                                    @if($user->role !== 'admin')
+                                        <a href="{{ route('admin.users.edit', $user) }}" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-pen"></i>
+                                        </a>
+                                    @endif
 
                                     @if($user->role !== 'admin' && $user->id !== auth()->id())
                                         <form action="{{ route('admin.users.suspend', $user) }}" method="POST" class="d-inline">

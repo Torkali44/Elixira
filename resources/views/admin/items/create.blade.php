@@ -41,14 +41,6 @@
                     <small class="text-muted">{{ __('admin.items_page.brand_fallback') }}</small>
                 </div>
 
-                <div class="col-md-6 mb-3">
-                    <label for="reward_points" class="form-label">{{ __('admin.items_page.reward_points') }}</label>
-                    <input type="number" min="0" class="form-control @error('reward_points') is-invalid @enderror" id="reward_points" name="reward_points" value="{{ old('reward_points', 0) }}">
-                    <small class="text-muted">{{ __('admin.items_page.reward_points_hint') }}</small>
-                    @error('reward_points')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                </div>
-            </div>
-
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label for="stock" class="form-label">{{ __('admin.items_page.stock') }} <span class="text-danger">*</span></label>
@@ -60,6 +52,8 @@
             @include('partials.admin.item-country-prices', ['item' => null])
 
             @include('partials.admin.bilingual-long-description', ['model' => null, 'prefix' => 'item-long-desc'])
+
+            @include('partials.admin.bilingual-detail-sections', ['model' => null, 'prefix' => 'item-detail-sections'])
 
             <div class="mb-3">
                 <label for="image" class="form-label">{{ __('admin.items_page.main_image') }}</label>

@@ -62,7 +62,7 @@ class UpdateUserRequest extends FormRequest
             'dxn_badge_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'avatar' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'remove_avatar' => ['nullable', 'boolean'],
-            'role' => ['required', 'string', Rule::in(['user', 'admin', 'vendor'])],
+            'role' => ['required', 'string', Rule::in(['user', 'vendor'])],
         ];
     }
 

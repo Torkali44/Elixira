@@ -76,6 +76,67 @@ class ItemPricingService
         };
     }
 
+    public function currencySymbol(?string $countryCode = null): string
+    {
+        $countryCode = $this->resolveCountryCode($countryCode);
+
+        return match ($countryCode) {
+            'UAE' => __('shop.currency_aed'),
+            'KSA' => __('shop.currency_sar'),
+            default => __('shop.currency_sar'),
+        };
+    }
+
+    public function formatPrice(float $amount, ?string $countryCode = null): string
+    {
+        $formattedAmount = number_format($amount, 2);
+        $currency = $this->currencySymbol($countryCode);
+
+        if (app()->getLocale() === 'ar') {
+            return $formattedAmount.' '.$currency;
+        }
+
+        return $currency.' '.$formattedAmount;
+    }
+
+    public function resolveRewardPoints(Item $item, ?string $countryCode = null): int
+    {
+        $countryCode = $this->resolveCountryCodeForItem($item, $countryCode);
+
+        if ($countryCode === null) {
+            return 0;
+        }
+
+        $countryPrice = $item->relationLoaded('countryPrices')
+            ? $item->countryPrices->firstWhere('country_code', $countryCode)
+            : $item->countryPrices()->where('country_code', $countryCode)->first();
+
+        if ($countryPrice && $countryPrice->reward_points !== null) {
+            return (int) $countryPrice->reward_points;
+        }
+
+        return 0;
+    }
+
+    public function resolvePackageRewardPoints(Package $package, ?string $countryCode = null): int
+    {
+        $countryCode = $this->resolveCountryCodeForPackage($package, $countryCode);
+
+        if ($countryCode === null) {
+            return 0;
+        }
+
+        $countryPrice = $package->relationLoaded('countryPrices')
+            ? $package->countryPrices->firstWhere('country_code', $countryCode)
+            : $package->countryPrices()->where('country_code', $countryCode)->first();
+
+        if ($countryPrice && $countryPrice->reward_points !== null) {
+            return (int) $countryPrice->reward_points;
+        }
+
+        return 0;
+    }
+
     public function isMember(?User $user): bool
     {
         return $user !== null && filled($user->user_code);
@@ -217,6 +278,9 @@ class ItemPricingService
                 'country_code' => $countryCode,
                 'member_price' => $memberPrice,
                 'guest_price' => $guestPrice,
+                'reward_points' => (isset($prices['reward_points']) && $prices['reward_points'] !== '' && is_numeric($prices['reward_points']))
+                    ? (int) $prices['reward_points']
+                    : null,
             ]);
         }
 

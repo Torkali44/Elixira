@@ -17,16 +17,10 @@
     .package-image-wrap {
         position: relative;
         border-radius: 28px;
-        overflow: hidden;
-        background: linear-gradient(135deg, rgba(74,200,246,0.08), rgba(0,255,136,0.05));
-        border: 1px solid rgba(255,255,255,0.08);
-        box-shadow: 0 30px 80px rgba(0,0,0,0.5), 0 0 60px rgba(74,200,246,0.08);
-    }
-    .package-image-wrap img {
-        width: 100%;
-        aspect-ratio: 1/1;
-        object-fit: cover;
-        display: block;
+        overflow: visible;
+        background: transparent;
+        border: none;
+        box-shadow: none;
     }
     .package-image-wrap .pkg-badge {
         position: absolute;
@@ -96,6 +90,13 @@
 @endsection
 
 @section('content')
+@php
+    $pricingService = app(\App\Support\ItemPricingService::class);
+    $displayRewardPoints = $pricingService->resolvePackageRewardPoints($package, $selectedCountry ?? null);
+    $packageGalleryImages = $package->image
+        ? collect([['url' => asset('storage/'.$package->image)]])
+        : collect();
+@endphp
 <div class="page-content" style="padding-top: 0;">
 
     <section class="package-hero-section">
@@ -104,8 +105,12 @@
 
                 {{-- Image Column --}}
                 <div class="package-image-wrap" data-animate>
-                    @if($package->image)
-                        <img src="{{ asset('storage/'.$package->image) }}" alt="{{ $package->local_name }}">
+                    @if($packageGalleryImages->isNotEmpty())
+                        @include('partials.product-image-gallery', [
+                            'images' => $packageGalleryImages,
+                            'alt' => $package->local_name,
+                            'galleryId' => 'package-gallery',
+                        ])
                     @else
                         <div class="package-gallery-placeholder"><i class="fas fa-box-open"></i></div>
                     @endif
@@ -122,14 +127,28 @@
                     </div>
 
                     <div style="margin-bottom: 1.5rem;">
-                        <x-package-pricing :package="$package" :selected-country="$selectedCountry" align="{{ app()->getLocale() === 'ar' ? 'flex-end' : 'flex-start' }}" size="2rem" smallSize="1rem" />
+                        <x-package-pricing
+                            :package="$package"
+                            :selected-country="$selectedCountry"
+                            size="2rem"
+                            smallSize="1rem"
+                            countrySelector="dropdown"
+                            countryInputId="package-show-country"
+                        />
                     </div>
 
-                    @if(($package->reward_points ?? 0) > 0 || (int) $package->stock > 0)
+                    @if(filled($package->local_size))
+                        <div class="product-detail__size" style="margin-bottom: 1rem;">
+                            <span class="product-detail__size-label">{{ __('shop.size') }}:</span>
+                            <span class="product-detail__size-value">{{ $package->local_size }}</span>
+                        </div>
+                    @endif
+
+                    @if($displayRewardPoints > 0 || (int) $package->stock > 0)
                     <div style="display: flex; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
-                        @if(($package->reward_points ?? 0) > 0)
+                        @if($displayRewardPoints > 0)
                             <span style="background: rgba(0,255,136,0.1); color:#00ff88; padding:0.3rem 0.75rem; border-radius:999px; font-size:0.8rem; font-weight:600; border:1px solid rgba(0,255,136,0.2);">
-                                <i class="fas fa-star"></i> {{ __('home.reward_points', ['count' => $package->reward_points]) }}
+                                <i class="fas fa-star"></i> {{ __('home.reward_points', ['count' => $displayRewardPoints]) }}
                             </span>
                         @endif
                         @if((int) $package->stock > 0)
@@ -138,12 +157,6 @@
                             </span>
                         @endif
                     </div>
-                    @endif
-
-                    @if($package->local_description)
-                        <p style="color: rgba(255,255,255,0.6); margin: 0 0 1.5rem; line-height: 1.7; font-size: 0.95rem; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 1.25rem;">
-                            {{ $package->local_description }}
-                        </p>
                     @endif
 
                     @if($package->items->isNotEmpty())
@@ -195,20 +208,12 @@
                             <p style="color:#ff8a8a; font-weight:600; margin:0;"><i class="fas fa-exclamation-circle"></i> {{ __('shop.package_out_of_stock') }}</p>
                         </div>
                     @endif
+
+                    @include('partials.product-detail-accordions', ['model' => $package])
                 </div>
             </div>
         </div>
     </section>
-
-    @if($package->local_long_description)
-        <section class="elx-section" style="background: var(--elx-darker); padding: 60px 0;">
-            <div class="elx-container">
-                <div data-animate style="max-width: 860px; margin: 0 auto; padding: 2.5rem; background: var(--elx-glass); border: 1px solid var(--elx-border); border-radius: var(--elx-radius-sm); color: rgba(255,255,255,0.8); line-height: 1.8; font-size: 1rem;">
-                    {!! nl2br(e($package->local_long_description)) !!}
-                </div>
-            </div>
-        </section>
-    @endif
 
     <div class="elx-container" style="padding-bottom: 4rem;">
         @include('partials.tag-related-sections', [
@@ -218,22 +223,4 @@
         ])
     </div>
 </div>
-@endsection
-
-@section('scripts')
-<script>
-document.querySelectorAll('.elx-product-pricing button[name="country"]').forEach((btn) => {
-    btn.addEventListener('click', function (e) {
-        e.preventDefault();
-        const country = this.value;
-        const input = document.getElementById('package-show-country');
-        if (input) {
-            input.value = country;
-        }
-        const url = new URL(window.location.href);
-        url.searchParams.set('country', country);
-        window.location.href = url.toString();
-    });
-});
-</script>
 @endsection

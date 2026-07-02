@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasLocalizedDetailSections;
 use App\Models\Concerns\HasTags;
 use App\Support\ItemPricingService;
 use App\Support\StorageUrl;
@@ -13,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Item extends Model
 {
-    use HasTags;
+    use HasLocalizedDetailSections, HasTags;
 
     protected $fillable = [
         'category_id',
@@ -21,6 +22,8 @@ class Item extends Model
         'name',
         'name_en',
         'name_ar',
+        'size_en',
+        'size_ar',
         'brand',
         'description',
         'description_en',
@@ -34,6 +37,14 @@ class Item extends Model
         'is_featured',
         'long_description_en',
         'long_description_ar',
+        'benefits_en',
+        'benefits_ar',
+        'ingredients_en',
+        'ingredients_ar',
+        'usage_instructions_en',
+        'usage_instructions_ar',
+        'warnings_en',
+        'warnings_ar',
         'status',
         'rejection_reason',
     ];
@@ -121,6 +132,15 @@ class Item extends Model
         return $this->name_en ?: $this->name;
     }
 
+    public function getLocalSizeAttribute(): ?string
+    {
+        if (app()->getLocale() === 'ar') {
+            return $this->size_ar ?: $this->size_en;
+        }
+
+        return $this->size_en ?: $this->size_ar;
+    }
+
     /**
      * Get localised description.
      */
@@ -158,21 +178,30 @@ class Item extends Model
                 $q->whereNull('brand_id')
                     ->orWhereHas('brandModel', function (Builder $brandQuery) use ($graceCutoff) {
                         $brandQuery->where('is_active', true)
-                            ->whereHas('vendorProfile', function (Builder $vpQuery) use ($graceCutoff) {
-                                $vpQuery->where('status', 'approved')
-                                    ->where(function (Builder $subQuery) use ($graceCutoff) {
-                                        $subQuery->where('subscription_payment_status', 'not_required')
-                                            ->orWhere(function (Builder $paidQuery) use ($graceCutoff) {
-                                                $paidQuery->where('subscription_payment_status', 'confirmed')
-                                                    ->where(function (Builder $dateQuery) use ($graceCutoff) {
-                                                        $dateQuery->whereNull('subscription_ends_at')
-                                                            ->orWhere('subscription_ends_at', '>', $graceCutoff);
+                            ->where(function (Builder $brandScope) use ($graceCutoff) {
+                                $brandScope->whereNull('vendor_profile_id')
+                                    ->orWhereHas('vendorProfile', function (Builder $vpQuery) use ($graceCutoff) {
+                                        $vpQuery->where('status', 'approved')
+                                            ->where(function (Builder $subQuery) use ($graceCutoff) {
+                                                $subQuery->where('subscription_payment_status', 'not_required')
+                                                    ->orWhere(function (Builder $paidQuery) use ($graceCutoff) {
+                                                        $paidQuery->where('subscription_payment_status', 'confirmed')
+                                                            ->where(function (Builder $dateQuery) use ($graceCutoff) {
+                                                                $dateQuery->whereNull('subscription_ends_at')
+                                                                    ->orWhere('subscription_ends_at', '>', $graceCutoff);
+                                                            });
                                                     });
                                             });
                                     });
                             });
                     });
             });
+    }
+
+    public function scopeVisibleOnBrandPage(Builder $query): Builder
+    {
+        return $query->where('status', 'approved')
+            ->whereHas('countryPrices');
     }
 
     public function isPubliclyVisible(): bool
@@ -189,8 +218,16 @@ class Item extends Model
             return true;
         }
 
-        $profile = $this->brandModel?->vendorProfile;
+        $brand = $this->brandModel;
 
-        return app(VendorSubscriptionService::class)->productsPubliclyVisible($profile);
+        if ($brand === null || ! $brand->is_active) {
+            return false;
+        }
+
+        if ($brand->vendor_profile_id === null) {
+            return true;
+        }
+
+        return app(VendorSubscriptionService::class)->productsPubliclyVisible($brand->vendorProfile);
     }
 }

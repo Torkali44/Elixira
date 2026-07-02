@@ -17,6 +17,21 @@
     </div>
 </div>
 
+<div class="row">
+    <div class="col-md-6 mb-3">
+        <label for="size_en" class="form-label">{{ __('admin.items_page.size_en') }}</label>
+        <input type="text" class="form-control @error('size_en') is-invalid @enderror" id="size_en" name="size_en"
+            value="{{ old('size_en', $item?->size_en) }}" maxlength="120" placeholder="e.g. 500ml">
+        @error('size_en')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+    </div>
+    <div class="col-md-6 mb-3">
+        <label for="size_ar" class="form-label">{{ __('admin.items_page.size_ar') }}</label>
+        <input type="text" class="form-control @error('size_ar') is-invalid @enderror" id="size_ar" name="size_ar"
+            value="{{ old('size_ar', $item?->size_ar) }}" maxlength="120" dir="rtl" placeholder="مثال: 500 مل">
+        @error('size_ar')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+    </div>
+</div>
+
 <div class="mb-3">
     <label for="description_en" class="form-label">{{ __('admin.items_page.description_en') }} <span class="text-danger">*</span></label>
     <textarea class="form-control @error('description_en') is-invalid @enderror" id="description_en" name="description_en" rows="3" placeholder="Short description in English">{{ old('description_en', $item?->description_en ?: $item?->description) }}</textarea>

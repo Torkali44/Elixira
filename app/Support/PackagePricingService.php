@@ -86,6 +86,9 @@ class PackagePricingService
                 'country_code' => $countryCode,
                 'member_price' => $memberPrice,
                 'guest_price' => $guestPrice,
+                'reward_points' => (isset($prices['reward_points']) && $prices['reward_points'] !== '' && is_numeric($prices['reward_points']))
+                    ? (int) $prices['reward_points']
+                    : null,
             ]);
         }
 

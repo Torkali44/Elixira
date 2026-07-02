@@ -336,6 +336,7 @@
                 }
             }
         </style>
+        {{-- TESTIMONIALS SECTION --}}
         <section class="elx-section" style="padding: 6rem 0; background-color: #0b161c;">
             <div class="elx-container">
                 <h2 class="elx-section__title"

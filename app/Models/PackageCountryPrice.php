@@ -12,6 +12,7 @@ class PackageCountryPrice extends Model
         'country_code',
         'member_price',
         'guest_price',
+        'reward_points',
     ];
 
     protected function casts(): array
@@ -19,6 +20,7 @@ class PackageCountryPrice extends Model
         return [
             'member_price' => 'decimal:2',
             'guest_price' => 'decimal:2',
+            'reward_points' => 'integer',
         ];
     }
 

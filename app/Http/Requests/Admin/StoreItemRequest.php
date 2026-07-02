@@ -27,6 +27,8 @@ class StoreItemRequest extends FormRequest
             'brand_id' => 'nullable|exists:brands,id',
             'name_en' => 'required|string|max:255',
             'name_ar' => 'required|string|max:255',
+            'size_en' => 'nullable|string|max:120',
+            'size_ar' => 'nullable|string|max:120',
             'brand' => 'nullable|string|max:255',
             'description_en' => 'required|string',
             'description_ar' => 'required|string',
@@ -46,6 +48,14 @@ class StoreItemRequest extends FormRequest
             'is_featured' => 'boolean',
             'long_description_en' => 'nullable|string',
             'long_description_ar' => 'nullable|string',
+            'benefits_en' => 'nullable|string',
+            'benefits_ar' => 'nullable|string',
+            'ingredients_en' => 'nullable|string',
+            'ingredients_ar' => 'nullable|string',
+            'usage_instructions_en' => 'nullable|string',
+            'usage_instructions_ar' => 'nullable|string',
+            'warnings_en' => 'nullable|string',
+            'warnings_ar' => 'nullable|string',
             'tags' => 'nullable|string|max:1000',
         ];
     }

@@ -219,7 +219,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::delete('dxn-sponsor-codes/{dxnSponsorCode}', [DxnSponsorCodeController::class, 'destroy'])->name('dxn-sponsor-codes.destroy');
 
     // Brands Management
-    Route::resource('brands', App\Http\Controllers\Admin\BrandController::class)->only(['index', 'edit', 'update']);
+    Route::resource('brands', App\Http\Controllers\Admin\BrandController::class)->except(['show']);
 
     // Newsletter Subscribers
     Route::get('subscribers', [NewsletterController::class, 'index'])->name('subscribers.index');

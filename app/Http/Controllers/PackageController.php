@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Package;
 use App\Support\ItemPricingService;
-use App\Support\PackagePricingService;
 use App\Support\TagService;
 use Illuminate\View\View;
 
@@ -35,11 +34,17 @@ class PackageController extends Controller
         abort_unless($package->isPubliclyVisible(), 404);
 
         $package->load(['countryPrices', 'items.category', 'items.brandModel', 'tags']);
-        $selectedCountry = app(PackagePricingService::class)->getPriceBreakdown(
+
+        $pricingService = app(ItemPricingService::class);
+
+        if (request()->has('country')) {
+            session(['shopping_country' => $pricingService->resolveCountryCode(request('country'))]);
+        }
+
+        $selectedCountry = $pricingService->resolveCountryCodeForPackage(
             $package,
-            auth()->user(),
             request('country')
-        )['country_code'];
+        );
 
         $tagService = app(TagService::class);
         $relatedBlogs = $tagService->relatedBlogsForPackage($package, 4);

@@ -100,7 +100,7 @@ class CartController extends Controller
                 'quantity' => $quantity,
                 'price' => $resolvedPrice,
                 'country_code' => $countryCode,
-                'points' => $item->reward_points ?? 0,
+                'points' => $pricing->resolveRewardPoints($item, $countryCode),
                 'image' => $item->image,
             ];
         }
@@ -188,7 +188,7 @@ class CartController extends Controller
                 'quantity' => $quantity,
                 'price' => $resolvedPrice,
                 'country_code' => $countryCode,
-                'points' => $package->reward_points ?? 0,
+                'points' => $itemPricing->resolvePackageRewardPoints($package, $countryCode),
                 'image' => $package->image,
             ];
         }

@@ -27,6 +27,10 @@
                         <label class="form-label small">{{ __('admin.items_page.guest_price') }}</label>
                         <input type="number" step="0.01" min="0" class="form-control" name="country_prices[{{ $code }}][guest_price]" value="{{ old("country_prices.{$code}.guest_price", $row?->guest_price) }}">
                     </div>
+                    <div class="mt-2">
+                        <label class="form-label small">{{ __('admin.items_page.country_reward_points') }}</label>
+                        <input type="number" min="0" class="form-control" name="country_prices[{{ $code }}][reward_points]" value="{{ old("country_prices.{$code}.reward_points", $row?->reward_points) }}" placeholder="{{ __('admin.items_page.country_reward_points_placeholder') }}">
+                    </div>
                 </div>
             </div>
         @endforeach

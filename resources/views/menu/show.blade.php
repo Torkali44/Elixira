@@ -76,39 +76,32 @@
     $privateQty = (int) ($privateOfferQuantities[$item->id] ?? 0);
     $hasPrivateAccess = $privateQty > 0;
     $availableQty = $item->stock + $privateQty;
+    $pricingService = app(\App\Support\ItemPricingService::class);
+    $displayRewardPoints = $pricingService->resolveRewardPoints($item, $selectedCountry ?? null);
+
+    $galleryImages = collect();
+    if ($item->image) {
+        $galleryImages->push(['url' => $item->image_url]);
+    }
+    foreach ($item->images as $img) {
+        $galleryImages->push(['url' => asset('storage/'.$img->image)]);
+    }
 @endphp
 <div class="page-content">
     <div class="elx-container">
         <div class="product-detail-grid">
             {{-- Left: Image --}}
             <div class="product-gallery" data-animate>
-                <div class="main-img-container">
-
-                    @if($item->image)
-                        <img src="{{ $item->image_url }}" alt="{{ $item->local_name }}" id="mainProductImage">
-                    @else
-                        <div style="aspect-ratio: 1/1; background: #1a2e38; display: flex; align-items: center; justify-content: center; color: var(--elx-cyan); font-size: 5rem;">
-                            <i class="fas fa-seedling"></i>
-                        </div>
-                    @endif
-                </div>
-                
-                @if($item->images->count() > 0)
-                <div class="thumbnail-gallery" style="display: flex; gap: 1rem; margin-top: 1.5rem; overflow-x: auto; padding-bottom: 0.5rem;">
-                    {{-- Main Image Thumbnail --}}
-                    @if($item->image)
-                    <div class="thumb-item" onclick="document.getElementById('mainProductImage').src='{{ asset('storage/' . $item->image) }}'" style="flex: 0 0 80px; height: 80px; border-radius: 12px; border: 2px solid var(--elx-cyan); cursor: pointer; overflow: hidden; background: var(--elx-glass);">
-                        <img src="{{ asset('storage/' . $item->image) }}" style="width: 100%; height: 100%; object-fit: cover;">
+                @if($galleryImages->isNotEmpty())
+                    @include('partials.product-image-gallery', [
+                        'images' => $galleryImages,
+                        'alt' => $item->local_name,
+                        'galleryId' => 'item-gallery',
+                    ])
+                @else
+                    <div class="elx-image-gallery__stage elx-image-gallery__stage--placeholder">
+                        <i class="fas fa-seedling"></i>
                     </div>
-                    @endif
-                    
-                    {{-- Gallery Image Thumbnails --}}
-                    @foreach($item->images as $img)
-                    <div class="thumb-item" onclick="document.getElementById('mainProductImage').src='{{ asset('storage/' . $img->image) }}'" style="flex: 0 0 80px; height: 80px; border-radius: 12px; border: 1px solid var(--elx-border); cursor: pointer; overflow: hidden; background: var(--elx-glass);">
-                        <img src="{{ asset('storage/' . $img->image) }}" style="width: 100%; height: 100%; object-fit: cover;">
-                    </div>
-                    @endforeach
-                </div>
                 @endif
             </div>
 
@@ -158,14 +151,21 @@
                         @endforeach
                     @endif
 
-                    @if(($item->reward_points ?? 0) > 0)
+                    @if($displayRewardPoints > 0)
                         <span style="background: rgba(0, 255, 136, 0.1); color: #00ff88; padding: 0.35rem 1rem; border-radius: 50px; font-size: 0.8rem; font-weight: 600; border: 1px solid rgba(0, 255, 136, 0.2);">
-                            <i class="fas fa-star" style="margin-right: 5px;"></i>{{ __('home.reward_points', ['count' => $item->reward_points]) }}
+                            <i class="fas fa-star" style="margin-right: 5px;"></i>{{ __('home.reward_points', ['count' => $displayRewardPoints]) }}
                         </span>
                     @endif
                 </div>
+
+                @if(filled($item->local_size))
+                    <div class="product-detail__size">
+                        <span class="product-detail__size-label">{{ __('shop.size') }}:</span>
+                        <span class="product-detail__size-value">{{ $item->local_size }}</span>
+                    </div>
+                @endif
                 
-                <h1 class="elx-hero__title" style="font-size: 3.5rem; text-align: left; margin-bottom: 0.5rem;">
+                <h1 class="elx-hero__title product-detail__title" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
                     <span class="elx-hero__title-gradient">{{ $item->local_name }}</span>
                 </h1>
 
@@ -188,22 +188,25 @@
                     
                     @auth
                         <button type="button" class="glow-rate-btn" onclick="document.getElementById('rateItemModal').classList.add('show')">
-                            <i class="fas fa-star me-1"></i> Rate
+                            <i class="fas fa-star me-1"></i> {{ __('shop.rate') }}
                         </button>
                     @else
                         <a href="{{ route('login') }}" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #ccc; padding: 0.2rem 0.8rem; border-radius: 50px; font-size: 0.8rem; text-decoration: none;">
-                            Login to rate
+                            {{ __('shop.login_to_rate') }}
                         </a>
                     @endauth
                 </div>
                 
                 <div style="margin-bottom: 2rem;">
-                    <x-product-pricing :item="$item" :selected-country="$selectedCountry ?? null" align="flex-start" size="2rem" smallSize="1rem" />
+                    <x-product-pricing
+                        :item="$item"
+                        :selected-country="$selectedCountry ?? null"
+                        size="2rem"
+                        smallSize="1rem"
+                        countrySelector="dropdown"
+                        countryInputId="product-show-country"
+                    />
                 </div>
-
-                <p style="color: var(--elx-gray); font-size: 1.1rem; margin-bottom: 3rem; line-height: 1.6;">
-                    {{ $item->local_description }}
-                </p>
 
                 @if($item->stock <= 0 && !$hasPrivateAccess)
                     <button type="button" class="elx-btn" style="width: 100%; justify-content: center; padding: 1.2rem; font-size: 1.2rem; background: rgba(255, 77, 77, 0.1); color: #ff4d4d; border: 1px solid rgba(255, 77, 77, 0.3);" onclick="showSpecialRequestModal({{ $item->id }}, '{{ addslashes($item->local_name) }}')">
@@ -213,7 +216,7 @@
                     <form action="{{ route('cart.add') }}" method="POST">
                         @csrf
                         <input type="hidden" name="item_id" value="{{ $item->id }}">
-                        <input type="hidden" name="country_code" value="{{ $selectedCountry ?? app(\App\Support\ItemPricingService::class)->detectUserCountry() }}">
+                        <input type="hidden" name="country_code" value="{{ $selectedCountry }}" id="product-show-country">
                         
                         <div style="display: flex; gap: 1rem; align-items: center; margin-bottom: 2rem;">
                             <div style="display: flex; align-items: center; background: rgba(255,255,255,0.05); border: 1px solid var(--elx-border); border-radius: 100px; padding: 0.5rem 1rem;">
@@ -235,14 +238,16 @@
                     </form>
                 @endif
 
+                @include('partials.product-detail-accordions', ['model' => $item])
+
                 <div style="margin-top: 3rem; display: flex; gap: 2rem;">
                     <div style="display: flex; align-items: center; gap: 0.7rem; color: var(--elx-cyan);">
                         <i class="fas fa-truck-fast"></i>
-                        <span style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">Fast Delivery</span>
+                        <span style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">{{ __('shop.fast_delivery') }}</span>
                     </div>
                     <div style="display: flex; align-items: center; gap: 0.7rem; color: var(--elx-accent);">
                         <i class="fas fa-shield-halved"></i>
-                        <span style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">Organic Certified</span>
+                        <span style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">{{ __('shop.organic_certified') }}</span>
                     </div>
                 </div>
 
@@ -330,16 +335,6 @@
             </div>
         </div>
 
-        {{-- Blog Section --}}
-        @if($item->local_long_description)
-        <div class="blog-section" data-animate>
-            <h2>The Ritual Insights</h2>
-            <div class="blog-content">
-                {{ $item->local_long_description }}
-            </div>
-        </div>
-        @endif
-
         {{-- Related Products --}}
         @if(isset($relatedItems) && $relatedItems->count() > 0)
         <div class="elx-section" style="margin-top: 6rem;">
@@ -418,7 +413,9 @@
             </div>
         </div>
         @endif
-        {{-- Reviews Section --}}
+        <br><br>
+
+           {{-- Reviews Section --}}
         <div class="mt-5 mb-5">
             <div class="reviews-header mb-4">
                 <h3 class="text-white" style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 2rem;">{{ __('shop.customer_reviews') }}</h3>
@@ -474,7 +471,7 @@
             @else
                 <div class="no-reviews-box">
                     <i class="fas fa-comment-slash" style="font-size: 3rem; color: rgba(255,255,255,0.1); margin-bottom: 1rem;"></i>
-                    <p style="color: #ccc; margin: 0;">No reviews yet. Be the first to rate this product!</p>
+                    <p style="color: #ccc; margin: 0;">{{ __('shop.no_reviews_yet') }}</p>
                 </div>
             @endif
         </div>
@@ -486,7 +483,7 @@
     <div class="custom-modal-dialog">
         <div class="custom-modal-content">
             <div class="custom-modal-header">
-                <h5 class="custom-modal-title">Rate {{ $item->name }}</h5>
+                <h5 class="custom-modal-title">{{ __('shop.rate_product', ['name' => $item->local_name]) }}</h5>
                 <button type="button" class="custom-modal-close" onclick="document.getElementById('rateItemModal').classList.remove('show')">&times;</button>
             </div>
             <form action="{{ route('ratings.store') }}" method="POST" enctype="multipart/form-data">
@@ -496,7 +493,7 @@
                     <input type="hidden" name="rateable_type" value="App\Models\Item">
                     
                     <div class="rating-stars-container">
-                        <label class="rating-label">Your Rating</label>
+                        <label class="rating-label">{{ __('shop.your_rating') }}</label>
                         <div class="rating-stars-input">
                             <input type="radio" name="rating" id="star5" value="5" required>
                             <label for="star5" class="fas fa-star"></label>
@@ -526,8 +523,8 @@
                     </div>
                 </div>
                 <div class="custom-modal-footer">
-                    <button type="button" class="btn-cancel" onclick="document.getElementById('rateItemModal').classList.remove('show')">Cancel</button>
-                    <button type="submit" class="btn-submit">Submit Rating</button>
+                    <button type="button" class="btn-cancel" onclick="document.getElementById('rateItemModal').classList.remove('show')">{{ __('shop.cancel') }}</button>
+                    <button type="submit" class="btn-submit">{{ __('shop.submit_rating') }}</button>
                 </div>
             </form>
         </div>

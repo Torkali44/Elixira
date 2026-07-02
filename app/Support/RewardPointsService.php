@@ -17,8 +17,10 @@ class RewardPointsService
             return;
         }
 
-        $order->loadMissing(['orderItems.item', 'orderItems.package', 'user']);
+        $order->loadMissing(['orderItems.item.countryPrices', 'orderItems.package.countryPrices', 'user']);
         $user = $order->user;
+        $pricingService = app(ItemPricingService::class);
+        $countryCode = session('shopping_country');
 
         if (! $user) {
             return;
@@ -32,7 +34,7 @@ class RewardPointsService
                     continue;
                 }
 
-                $points = (int) ($package->reward_points ?? 0) * (int) $orderItem->quantity;
+                $points = $pricingService->resolvePackageRewardPoints($package, $countryCode) * (int) $orderItem->quantity;
 
                 if ($points <= 0) {
                     continue;
@@ -61,7 +63,7 @@ class RewardPointsService
                 continue;
             }
 
-            $points = (int) ($item->reward_points ?? 0) * (int) $orderItem->quantity;
+            $points = $pricingService->resolveRewardPoints($item, $countryCode) * (int) $orderItem->quantity;
 
             if ($points <= 0) {
                 continue;

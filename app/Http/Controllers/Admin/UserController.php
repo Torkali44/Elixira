@@ -64,6 +64,10 @@ class UserController extends Controller
 
     public function edit(User $user): View
     {
+        if ($user->role === 'admin') {
+            abort(403, 'Admin accounts cannot be edited from this panel.');
+        }
+
         if (! $user->hasVerifiedEmail()) {
             abort(404);
         }
@@ -73,6 +77,10 @@ class UserController extends Controller
 
     public function update(UpdateUserRequest $request, User $user)
     {
+        if ($user->role === 'admin') {
+            abort(403, 'Admin accounts cannot be edited from this panel.');
+        }
+
         $data = $request->validated();
         $removeAvatar = (bool) ($data['remove_avatar'] ?? false);
 
@@ -109,7 +117,7 @@ class UserController extends Controller
         }
 
         if ($user->isDirty('email')) {
-            $user->email_verified_at = null;
+            $user->email_verified_at = now();
         }
 
         $user->save();
