@@ -465,6 +465,7 @@ html.elx-animate-scroll [data-animate].animate-in {
     pointer-events: none;
     transform: translateY(-10px);
     transition: opacity 0.22s ease, transform 0.22s ease;
+    z-index: 1100;
 }
 
 .elx-nav__profile.open .elx-nav__profile-menu {
@@ -1232,7 +1233,7 @@ html.elx-animate-scroll [data-animate].animate-in {
 
 /* Product Card — Split Layout with Glowing Border */
 .product-item {
-    height: 100%;
+    height: auto;
 }
 
 .elx-product-card {
@@ -1245,7 +1246,7 @@ html.elx-animate-scroll [data-animate].animate-in {
     border: 1px solid rgba(255, 255, 255, 0.08);
     transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-    height: 100%;
+    height: auto;
     cursor: pointer;
 }
 
@@ -1839,6 +1840,18 @@ html[dir="ltr"] .elx-country-pricing-form__buttons {
     color: rgba(255, 255, 255, 0.45);
     text-decoration: line-through;
     font-weight: 600;
+}
+
+.elx-product-pricing__price-line--guest {
+    color: rgba(255, 255, 255, 0.42) !important;
+    text-decoration: line-through;
+    font-weight: 600;
+}
+
+.elx-product-pricing__price-line--guest .elx-product-pricing__amount,
+.elx-product-pricing__price-line--guest .elx-product-pricing__currency {
+    color: rgba(255, 255, 255, 0.42) !important;
+    text-decoration: line-through;
 }
 
 .product-detail__size {

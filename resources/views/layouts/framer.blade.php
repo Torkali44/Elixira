@@ -13,9 +13,26 @@
         })();
     </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    @php
+        $ogTitle = trim($__env->yieldContent('og_title')) ?: trim($__env->yieldContent('title')) ?: 'Elixira - Superfoods & Wellness';
+        $ogDescription = trim($__env->yieldContent('og_description')) ?: 'A blend of superfoods, science, and self-care rituals.';
+        $ogImage = trim($__env->yieldContent('og_image')) ?: asset('images/background-img.webp');
+        $ogUrl = url()->current();
+    @endphp
     <title>@yield('title', 'Elixira - Superfoods & Wellness')</title>
     @include('partials.favicon')
-    <meta name="description" content="A blend of superfoods, science, and self-care rituals.">
+    <meta name="description" content="{{ $ogDescription }}">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Elixira">
+    <meta property="og:title" content="{{ $ogTitle }}">
+    <meta property="og:description" content="{{ $ogDescription }}">
+    <meta property="og:image" content="{{ $ogImage }}">
+    <meta property="og:url" content="{{ $ogUrl }}">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ $ogTitle }}">
+    <meta name="twitter:description" content="{{ $ogDescription }}">
+    <meta name="twitter:image" content="{{ $ogImage }}">
+    @stack('meta')
 
     {{-- Fonts --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -448,7 +465,7 @@
 
                 <div class="elx-nav__desktop-only">
                     <form action="{{ route('search.index') }}" method="GET" class="elx-nav__search-form">
-                        <input type="search" name="q" value="{{ request('q') }}" placeholder="{{ __('shop.search_placeholder') }}" class="elx-nav__search-input">
+                        <input type="search" name="q" value="{{ request('q') }}" placeholder="{{ __('shop.search_placeholder') }}" class="elx-nav__search-input" style="border-radius: 30px">
                     </form>
 
                     <div class="elx-nav__actions-cluster">
@@ -538,7 +555,7 @@
 
         <form action="{{ route('search.index') }}" method="GET" class="elx-mobile-sidebar__search">
             <i class="fas fa-search"></i>
-            <input type="search" name="q" value="{{ request('q') }}" placeholder="{{ __('shop.search_placeholder') }}">
+            <input type="search" name="q" value="{{ request('q') }}" placeholder="{{ __('shop.search_placeholder') }}" style="border-radius: 30px ">
         </form>
 
         <div class="elx-mobile-sidebar__quick">
@@ -1059,6 +1076,20 @@
 
             const readUrl = element.dataset.readUrl;
             const redirectUrl = element.dataset.redirectUrl;
+            const title = element.querySelector('.notif-title')?.textContent?.trim() || @json(__('popups.success_title'));
+            const message = element.querySelector('.notif-message')?.textContent?.trim() || '';
+
+            element.classList.remove('unread');
+            element.style.background = 'rgba(0, 0, 0, 0.2)';
+            const unreadDot = element.querySelector('.unread-dot');
+            if (unreadDot) {
+                unreadDot.remove();
+            }
+            const titleEl = element.querySelector('.notif-title');
+            if (titleEl) {
+                titleEl.style.color = '#8fa4af';
+                titleEl.style.fontWeight = 'normal';
+            }
 
             fetch(readUrl, {
                 method: 'POST',
@@ -1067,11 +1098,30 @@
                     'Accept': 'application/json',
                     'X-Requested-With': 'XMLHttpRequest',
                 }
-            }).finally(() => {
-                if (redirectUrl) {
+            }).then((response) => {
+                if (response.ok) {
+                    const badge = document.querySelector('.elx-nav__notifications-badge');
+                    if (badge) {
+                        const remaining = document.querySelectorAll('.elx-nav__notifications-item.unread').length;
+                        if (remaining <= 0) {
+                            badge.remove();
+                        } else {
+                            badge.textContent = remaining;
+                        }
+                    }
+                }
+            }).catch(() => {});
+
+            Swal.fire({
+                icon: 'success',
+                title: title,
+                text: message,
+                confirmButtonText: redirectUrl && redirectUrl !== '#' ? @json(__('app.view_details')) : @json(__('popups.ok')),
+                showCancelButton: !!(redirectUrl && redirectUrl !== '#'),
+                cancelButtonText: @json(__('popups.ok')),
+            }).then((result) => {
+                if (result.isConfirmed && redirectUrl && redirectUrl !== '#') {
                     window.location.href = redirectUrl;
-                } else {
-                    window.location.reload();
                 }
             });
         }
@@ -1196,6 +1246,9 @@
             if (flagEl && flag) {
                 flagEl.src = flag;
                 flagEl.hidden = false;
+            } else if (flagEl) {
+                flagEl.removeAttribute('src');
+                flagEl.hidden = true;
             }
             if (labelEl) {
                 labelEl.textContent = label;
@@ -1220,18 +1273,33 @@
                 }
             }
 
-            const form = wrapper.closest('form');
-            if (form) {
-                form.submit();
+            if (!wrapper.hasAttribute('data-country-select-no-submit')) {
+                const form = wrapper.closest('form');
+                if (form) {
+                    form.submit();
+                }
             }
+
+            wrapper.dispatchEvent(new CustomEvent('elx-country-selected', {
+                bubbles: true,
+                detail: { value, label, flag },
+            }));
         }
 
         function initCountrySelectCustom() {
             document.querySelectorAll('[data-country-select-custom]').forEach((wrapper) => {
+                if (wrapper.dataset.countrySelectBound) {
+                    return;
+                }
+                wrapper.dataset.countrySelectBound = '1';
+
                 const toggle = wrapper.querySelector('[data-country-select-toggle]');
                 const menu = wrapper.querySelector('[data-country-select-menu]');
 
                 toggle?.addEventListener('click', (event) => {
+                    if (toggle.disabled) {
+                        return;
+                    }
                     event.preventDefault();
                     event.stopPropagation();
                     const willOpen = menu.hidden;
@@ -1260,17 +1328,20 @@
                 });
             });
 
-            document.addEventListener('click', () => {
-                document.querySelectorAll('[data-country-select-custom]').forEach((wrapper) => {
-                    const menu = wrapper.querySelector('[data-country-select-menu]');
-                    const toggle = wrapper.querySelector('[data-country-select-toggle]');
-                    if (menu) {
-                        menu.hidden = true;
-                    }
-                    wrapper.classList.remove('is-open');
-                    toggle?.setAttribute('aria-expanded', 'false');
+            if (!window.__elxCountrySelectDocBound) {
+                window.__elxCountrySelectDocBound = true;
+                document.addEventListener('click', () => {
+                    document.querySelectorAll('[data-country-select-custom]').forEach((wrapper) => {
+                        const menu = wrapper.querySelector('[data-country-select-menu]');
+                        const toggle = wrapper.querySelector('[data-country-select-toggle]');
+                        if (menu) {
+                            menu.hidden = true;
+                        }
+                        wrapper.classList.remove('is-open');
+                        toggle?.setAttribute('aria-expanded', 'false');
+                    });
                 });
-            });
+            }
         }
 
         function initImageGalleries() {
@@ -1405,29 +1476,31 @@
             // Legacy hook — country selectors removed from package cards.
         }
 
+        const specialOrderModalI18n = @json(__('shop.special_order_modal'));
+
         function showSpecialRequestModal(itemId, itemName) {
             Swal.fire({
-                title: `Special Order - ${itemName}`,
+                title: specialOrderModalI18n.title.replace(':name', itemName),
                 html: `
                     <p style="margin-bottom: 1rem; font-size: 0.95rem; color: #9fb2bc;">
-                        This product is currently out of stock. Leave your details and we will notify you on WhatsApp once it is available.
+                        ${specialOrderModalI18n.message}
                     </p>
-                    <input type="text" id="swal-name" style="width: 90%; padding: 0.75rem 1rem; background: #13252d; border: 1px solid rgba(255, 255, 255, 0.1); color: #fff; border-radius: 8px; outline: none; font-size: 1rem; margin-bottom: 1rem;" placeholder="Your Name" value="{{ auth()->check() ? auth()->user()->name : '' }}" required>
+                    <input type="text" id="swal-name" style="width: 90%; padding: 0.75rem 1rem; background: #13252d; border: 1px solid rgba(255, 255, 255, 0.1); color: #fff; border-radius: 8px; outline: none; font-size: 1rem; margin-bottom: 1rem;" placeholder="${specialOrderModalI18n.name_placeholder}" value="{{ auth()->check() ? auth()->user()->name : '' }}" required>
                     <div style="display:flex; gap:0.5rem; align-items: center; margin: 0 auto 1rem; width: 90%;">
                         <select id="swal-country-code" style="width: 100px; padding: 0.75rem 0.5rem; background: #13252d; border: 1px solid rgba(255, 255, 255, 0.1); color: #fff; border-radius: 8px; outline: none; font-size: 0.9rem;">
                             <option value="+966">+966</option>
                             <option value="+971">+971</option>
                         </select>
-                        <input type="text" id="swal-phone" style="flex-grow: 1; padding: 0.75rem 1rem; background: #13252d; border: 1px solid rgba(255, 255, 255, 0.1); color: #fff; border-radius: 8px; outline: none; font-size: 1rem;" placeholder="WhatsApp Number" required>
+                        <input type="text" id="swal-phone" style="flex-grow: 1; padding: 0.75rem 1rem; background: #13252d; border: 1px solid rgba(255, 255, 255, 0.1); color: #fff; border-radius: 8px; outline: none; font-size: 1rem;" placeholder="${specialOrderModalI18n.phone_placeholder}" required>
                     </div>
-                    <input type="email" id="swal-email" style="width: 90%; padding: 0.75rem 1rem; background: #13252d; border: 1px solid rgba(255, 255, 255, 0.1); color: #fff; border-radius: 8px; outline: none; font-size: 1rem;" placeholder="Email (optional)" value="{{ auth()->check() ? auth()->user()->email : '' }}">
+                    <input type="email" id="swal-email" style="width: 90%; padding: 0.75rem 1rem; background: #13252d; border: 1px solid rgba(255, 255, 255, 0.1); color: #fff; border-radius: 8px; outline: none; font-size: 1rem;" placeholder="${specialOrderModalI18n.email_placeholder}" value="{{ auth()->check() ? auth()->user()->email : '' }}">
                 `,
                 background: '#0d1a20',
                 color: '#eaf4f8',
                 focusConfirm: false,
                 showCancelButton: true,
-                confirmButtonText: 'Send Request',
-                cancelButtonText: 'Cancel',
+                confirmButtonText: specialOrderModalI18n.send,
+                cancelButtonText: specialOrderModalI18n.cancel,
                 confirmButtonColor: '#4ac8f6',
                 cancelButtonColor: '#6c757d',
                 preConfirm: () => {
@@ -1436,7 +1509,7 @@
                     const countryCode = Swal.getPopup().querySelector('#swal-country-code').value;
                     const email = Swal.getPopup().querySelector('#swal-email').value.trim();
                     if (!phoneInput) {
-                        Swal.showValidationMessage('Please enter your WhatsApp number.');
+                        Swal.showValidationMessage(specialOrderModalI18n.phone_required);
                         return false;
                     }
                     const phone = countryCode + phoneInput;
@@ -1458,8 +1531,8 @@
                         if (data.success) {
                             Swal.fire({
                                 icon: 'success',
-                                title: 'Request Sent',
-                                text: 'Your special order request has been received. We will contact you soon.',
+                                title: specialOrderModalI18n.success_title,
+                                text: specialOrderModalI18n.success_text,
                                 background: '#0d1a20',
                                 color: '#eaf4f8',
                                 confirmButtonColor: '#4ac8f6',
@@ -1467,8 +1540,8 @@
                         } else {
                             Swal.fire({
                                 icon: 'error',
-                                title: 'Request Failed',
-                                text: data.message || 'We could not submit your request. Please try again.',
+                                title: specialOrderModalI18n.failed_title,
+                                text: data.message || specialOrderModalI18n.failed_text,
                                 background: '#0d1a20',
                                 color: '#eaf4f8',
                                 confirmButtonColor: '#dc3545',
@@ -1478,8 +1551,8 @@
                     .catch(error => {
                         Swal.fire({
                             icon: 'error',
-                            title: 'Connection Error',
-                            text: 'A network error occurred while sending your request.',
+                            title: specialOrderModalI18n.connection_error_title,
+                            text: specialOrderModalI18n.connection_error_text,
                             background: '#0d1a20',
                             color: '#eaf4f8',
                             confirmButtonColor: '#dc3545',

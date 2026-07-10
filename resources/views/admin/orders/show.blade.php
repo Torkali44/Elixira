@@ -2,7 +2,7 @@
 
 @section('content')
     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-        <h2 class="mb-0">{{ __('admin.orders.order_number', ['id' => $order->id]) }}</h2>
+        <h2 class="mb-0">{{ __('admin.orders.order_number', ['id' => $order->reference]) }}</h2>
         <a href="{{ route('admin.orders.index') }}" class="btn btn-secondary"><i class="fas fa-arrow-left me-2"></i> {{ __('admin.orders.back_to_orders') }}</a>
     </div>
 
@@ -32,6 +32,23 @@
                                 </tr>
                             @endforeach
                             <tr class="table-light fw-bold">
+                                <td colspan="3" class="text-end">{{ __('admin.orders.subtotal') }}</td>
+                                <td>﷼ {{ number_format($order->subtotal_amount ?? $order->total_amount, 2) }}</td>
+                            </tr>
+                            @if(($order->delivery_fee ?? 0) > 0)
+                                <tr class="table-light">
+                                    <td colspan="3" class="text-end">{{ __('admin.orders.delivery_fee') }}</td>
+                                    <td>﷼ {{ number_format($order->delivery_fee, 2) }}</td>
+                                </tr>
+                            @elseif($order->usesSharedShipping())
+                                <tr class="table-light">
+                                    <td colspan="3" class="text-end">{{ __('admin.orders.delivery_fee') }}</td>
+                                    <td>
+                                        <span class="badge bg-success">{{ __('admin.orders.shared_shipping_free') }}</span>
+                                    </td>
+                                </tr>
+                            @endif
+                            <tr class="table-light fw-bold">
                                 <td colspan="3" class="text-end">{{ __('admin.orders.total') }}</td>
                                 <td>﷼ {{ number_format($order->total_amount, 2) }}</td>
                             </tr>
@@ -57,6 +74,16 @@
                     @endif
                     @if($order->address)
                         <p><strong>{{ __('admin.orders.address') }}:</strong> {{ $order->address }}</p>
+                    @endif
+                    @if($order->usesSharedShipping() && $order->sharedShippingOrder)
+                        <div class="alert alert-info py-2 px-3 mb-3">
+                            <div class="fw-bold mb-1">{{ __('admin.orders.shared_shipping_title') }}</div>
+                            <p class="mb-2 small">{{ __('admin.orders.shared_shipping_desc') }}</p>
+                            <a href="{{ route('admin.orders.show', $order->sharedShippingOrder) }}" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-link me-1"></i>
+                                {{ __('admin.orders.shared_shipping_view_parent', ['reference' => $order->sharedShippingOrder->reference]) }}
+                            </a>
+                        </div>
                     @endif
                     <p><strong>{{ __('admin.orders.placed') }}:</strong> {{ $order->created_at->format('Y-m-d h:i A') }}</p>
                     @if($order->notes)

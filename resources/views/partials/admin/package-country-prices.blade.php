@@ -1,7 +1,7 @@
 @php
     $countryPrices = $package->countryPrices ?? collect();
-    $ksa = $countryPrices->firstWhere('country_code', 'KSA');
-    $uae = $countryPrices->firstWhere('country_code', 'UAE');
+    $ksaVariants = $countryPrices->where('country_code', 'KSA')->values();
+    $uaeVariants = $countryPrices->where('country_code', 'UAE')->values();
 @endphp
 
 <div class="mb-4">
@@ -9,28 +9,51 @@
     <p class="text-muted small">{{ __('admin.items_page.country_pricing_hint') }}</p>
     @error('country_prices')<div class="text-danger small mb-2">{{ $message }}</div>@enderror
     <div class="row g-3">
-        @foreach(['KSA' => __('shop.country_ksa'), 'UAE' => __('shop.country_uae')] as $code => $label)
-            @php $row = $code === 'KSA' ? $ksa : $uae; @endphp
-            <div class="col-md-6">
-                <div class="border rounded p-3 h-100">
+        @foreach(['KSA' => ['label' => __('shop.country_ksa'), 'variants' => $ksaVariants], 'UAE' => ['label' => __('shop.country_uae'), 'variants' => $uaeVariants]] as $code => $meta)
+            @php
+                $variants = $meta['variants'];
+                $oldVariants = old("country_prices.{$code}.variants");
+                if (is_array($oldVariants) && count($oldVariants) > 0) {
+                    $rows = collect($oldVariants);
+                } elseif ($variants->isNotEmpty()) {
+                    $rows = $variants;
+                } else {
+                    $rows = collect([null]);
+                }
+            @endphp
+            <div class="col-12">
+                <div class="border rounded p-3">
                     <div class="form-check mb-3">
                         <input class="form-check-input" type="checkbox" name="country_prices[{{ $code }}][enabled]" value="1" id="pkg_country_{{ $code }}"
-                            @checked(old("country_prices.{$code}.enabled", $row !== null))>
-                        <label class="form-check-label fw-semibold" for="pkg_country_{{ $code }}">{{ $label }}</label>
+                            @checked(old("country_prices.{$code}.enabled", $variants->isNotEmpty()))>
+                        <label class="form-check-label fw-semibold" for="pkg_country_{{ $code }}">{{ $meta['label'] }}</label>
                     </div>
-                    <div class="mb-2">
-                        <label class="form-label small">{{ __('admin.items_page.member_price') }}</label>
-                        <input type="number" step="0.01" min="0" class="form-control @error("country_prices.{$code}.member_price") is-invalid @enderror" name="country_prices[{{ $code }}][member_price]" value="{{ old("country_prices.{$code}.member_price", $row?->member_price) }}">
-                        @error("country_prices.{$code}.member_price")<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+                    <div class="country-variants" data-country="{{ $code }}">
+                        @foreach($rows as $index => $row)
+                            @php
+                                $isOldArray = is_array($row);
+                                $memberPrice = $isOldArray ? ($row['member_price'] ?? '') : ($row?->member_price ?? '');
+                                $guestPrice = $isOldArray ? ($row['guest_price'] ?? '') : ($row?->guest_price ?? '');
+                                $sizeEn = $isOldArray ? ($row['size_en'] ?? '') : ($row?->size_en ?? '');
+                                $sizeAr = $isOldArray ? ($row['size_ar'] ?? '') : ($row?->size_ar ?? '');
+                                $rewardPoints = $isOldArray ? ($row['reward_points'] ?? '') : ($row?->reward_points ?? '');
+                                $stock = $isOldArray ? ($row['stock'] ?? '') : ($row?->stock ?? '');
+                            @endphp
+                            <div class="country-variant-row border rounded p-3 mb-3" data-variant-row>
+                                <div class="row g-2">
+                                    <div class="col-md-3"><label class="form-label small">{{ __('admin.items_page.size_en') ?? 'Size (EN)' }}</label><input type="text" class="form-control" name="country_prices[{{ $code }}][variants][{{ $index }}][size_en]" value="{{ $sizeEn }}"></div>
+                                    <div class="col-md-3"><label class="form-label small">{{ __('admin.items_page.size_ar') ?? 'Size (AR)' }}</label><input type="text" class="form-control" name="country_prices[{{ $code }}][variants][{{ $index }}][size_ar]" value="{{ $sizeAr }}"></div>
+                                    <div class="col-md-2"><label class="form-label small">{{ __('admin.items_page.member_price') }}</label><input type="number" step="0.01" min="0" class="form-control" name="country_prices[{{ $code }}][variants][{{ $index }}][member_price]" value="{{ $memberPrice }}"></div>
+                                    <div class="col-md-2"><label class="form-label small">{{ __('admin.items_page.guest_price') }}</label><input type="number" min="0" class="form-control" name="country_prices[{{ $code }}][variants][{{ $index }}][guest_price]" value="{{ $guestPrice }}"></div>
+                                    <div class="col-md-1"><label class="form-label small">{{ __('admin.items_page.stock') ?? 'Stock' }}</label><input type="number" min="0" class="form-control" name="country_prices[{{ $code }}][variants][{{ $index }}][stock]" value="{{ $stock }}"></div>
+                                    <div class="col-md-1"><label class="form-label small">{{ __('admin.items_page.country_reward_points') }}</label><input type="number" min="0" class="form-control" name="country_prices[{{ $code }}][variants][{{ $index }}][reward_points]" value="{{ $rewardPoints }}"></div>
+                                </div>
+                            </div>
+                        @endforeach
                     </div>
-                    <div>
-                        <label class="form-label small">{{ __('admin.items_page.guest_price') }}</label>
-                        <input type="number" step="0.01" min="0" class="form-control" name="country_prices[{{ $code }}][guest_price]" value="{{ old("country_prices.{$code}.guest_price", $row?->guest_price) }}">
-                    </div>
-                    <div class="mt-2">
-                        <label class="form-label small">{{ __('admin.items_page.country_reward_points') }}</label>
-                        <input type="number" min="0" class="form-control" name="country_prices[{{ $code }}][reward_points]" value="{{ old("country_prices.{$code}.reward_points", $row?->reward_points) }}" placeholder="{{ __('admin.items_page.country_reward_points_placeholder') }}">
-                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-primary add-variant-row" data-country="{{ $code }}">
+                        <i class="fas fa-plus me-1"></i> {{ __('admin.items_page.add_size_variant') }}
+                    </button>
                 </div>
             </div>
         @endforeach

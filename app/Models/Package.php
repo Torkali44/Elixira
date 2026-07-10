@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Concerns\HasLocalizedDetailSections;
 use App\Models\Concerns\HasTags;
+use App\Support\ItemPricingService;
 use App\Support\PackagePricingService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -84,6 +85,25 @@ class Package extends Model
 
     public function getLocalSizeAttribute(): ?string
     {
+        $countryCode = app(ItemPricingService::class)->resolveCountryCode();
+        $countryPrice = $this->relationLoaded('countryPrices')
+            ? $this->countryPrices->firstWhere('country_code', $countryCode)
+            : $this->countryPrices()->where('country_code', $countryCode)->first();
+
+        if ($countryPrice) {
+            if (app()->getLocale() === 'ar') {
+                $val = $countryPrice->size_ar ?: $countryPrice->size_en;
+                if ($val) {
+                    return $val;
+                }
+            } else {
+                $val = $countryPrice->size_en ?: $countryPrice->size_ar;
+                if ($val) {
+                    return $val;
+                }
+            }
+        }
+
         if (app()->getLocale() === 'ar') {
             return $this->size_ar ?: $this->size_en;
         }

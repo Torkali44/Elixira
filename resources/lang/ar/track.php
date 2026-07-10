@@ -9,7 +9,7 @@ return [
     'view_orders' => 'عرض طلباتي',
     'found_orders' => 'تم العثور على :count طلب',
     'new_search' => 'بحث جديد',
-    'order_label' => 'طلب رقم :id',
+    'order_label' => 'كود الطلب :id',
     'items_count' => ':count منتج',
     'print_invoice' => 'طباعة الفاتورة',
 ];

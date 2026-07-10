@@ -89,18 +89,34 @@ class ItemPricingService
 
     public function formatPrice(float $amount, ?string $countryCode = null): string
     {
-        $formattedAmount = number_format($amount, 2);
-        $currency = $this->currencySymbol($countryCode);
-
-        if (app()->getLocale() === 'ar') {
-            return $formattedAmount.' '.$currency;
-        }
-
-        return $currency.' '.$formattedAmount;
+        return $this->formatCompactPrice($amount, $this->currencySymbol($countryCode));
     }
 
-    public function resolveRewardPoints(Item $item, ?string $countryCode = null): int
+    public function formatCompactPrice(float $amount, string $currency): string
     {
+        $formatted = abs($amount - round($amount)) < 0.001
+            ? (string) (int) round($amount)
+            : rtrim(rtrim(number_format($amount, 2, '.', ''), '0'), '.');
+
+        if (app()->getLocale() === 'ar') {
+            return $formatted.' '.$currency;
+        }
+
+        return $currency.' '.$formatted;
+    }
+
+    public function resolveRewardPoints(Item $item, ?string $countryCode = null, ?int $countryPriceId = null): int
+    {
+        if ($countryPriceId) {
+            $countryPrice = $this->findVariant($item, $countryPriceId);
+
+            if ($countryPrice && $countryPrice->reward_points !== null) {
+                return (int) $countryPrice->reward_points;
+            }
+
+            return 0;
+        }
+
         $countryCode = $this->resolveCountryCodeForItem($item, $countryCode);
 
         if ($countryCode === null) {
@@ -152,12 +168,15 @@ class ItemPricingService
      *     has_higher_guest_price?: bool
      * }
      */
-    public function getPriceBreakdown(Item $item, ?User $user = null, ?string $countryCode = null): array
+    public function getPriceBreakdown(Item $item, ?User $user = null, ?string $countryCode = null, ?int $countryPriceId = null): array
     {
         $countryCode = $this->resolveCountryCode($countryCode);
-        $countryPrice = $item->relationLoaded('countryPrices')
-            ? $item->countryPrices->firstWhere('country_code', $countryCode)
-            : $item->countryPrices()->where('country_code', $countryCode)->first();
+
+        $countryPrice = $countryPriceId
+            ? $this->findVariant($item, $countryPriceId)
+            : ($item->relationLoaded('countryPrices')
+                ? $item->countryPrices->firstWhere('country_code', $countryCode)
+                : $item->countryPrices()->where('country_code', $countryCode)->first());
 
         if ($countryPrice) {
             $memberPrice = (float) $countryPrice->member_price;
@@ -166,6 +185,7 @@ class ItemPricingService
 
             $breakdown = [
                 'country_code' => $countryCode,
+                'country_price_id' => $countryPrice->id,
                 'member_price' => $memberPrice,
                 'guest_price' => $guestPrice,
                 'active_price' => $memberPrice,
@@ -187,9 +207,9 @@ class ItemPricingService
         return $breakdown;
     }
 
-    public function resolvePrice(Item $item, ?User $user = null, ?string $countryCode = null): float
+    public function resolvePrice(Item $item, ?User $user = null, ?string $countryCode = null, ?int $countryPriceId = null): float
     {
-        return $this->getPriceBreakdown($item, $user, $countryCode)['active_price'];
+        return $this->getPriceBreakdown($item, $user, $countryCode, $countryPriceId)['active_price'];
     }
 
     public function resolveCountryCodeForItem(Item $item, ?string $countryCode = null): ?string
@@ -246,15 +266,142 @@ class ItemPricingService
             $item->load('countryPrices');
         }
 
-        return $item->countryPrices->pluck('country_code')->all();
+        return $item->countryPrices->pluck('country_code')->unique()->values()->all();
     }
 
     /**
-     * @param  array<string, array{member_price: mixed, guest_price: mixed}>  $countryPrices
+     * @return \Illuminate\Support\Collection<int, ItemCountryPrice>
+     */
+    public function variantsForCountry(Item $item, ?string $countryCode = null): \Illuminate\Support\Collection
+    {
+        $countryCode = $this->resolveCountryCodeForItem($item, $countryCode);
+
+        if ($countryCode === null) {
+            return collect();
+        }
+
+        if (! $item->relationLoaded('countryPrices')) {
+            $item->load('countryPrices');
+        }
+
+        return $item->countryPrices->where('country_code', $countryCode)->values();
+    }
+
+    public function findVariant(Item $item, int $countryPriceId): ?\App\Models\ItemCountryPrice
+    {
+        if (! $item->relationLoaded('countryPrices')) {
+            $item->load('countryPrices');
+        }
+
+        $variant = $item->countryPrices->firstWhere('id', $countryPriceId);
+
+        if ($variant) {
+            return $variant;
+        }
+
+        return $item->countryPrices()->find($countryPriceId);
+    }
+
+    public function resolveDefaultVariant(Item $item, ?string $countryCode = null): ?\App\Models\ItemCountryPrice
+    {
+        $variants = $this->variantsForCountry($item, $countryCode);
+
+        if ($variants->isEmpty()) {
+            return null;
+        }
+
+        foreach ($variants as $variant) {
+            if ($this->resolveStock($item, $countryCode, $variant->id) > 0) {
+                return $variant;
+            }
+        }
+
+        return $variants->first();
+    }
+
+    public function hasStockInCountry(Item $item, ?string $countryCode = null): bool
+    {
+        $countryCode = $this->resolveCountryCodeForItem($item, $countryCode);
+
+        if ($countryCode === null) {
+            return false;
+        }
+
+        $variants = $this->variantsForCountry($item, $countryCode);
+
+        if ($variants->isEmpty()) {
+            return (int) $item->stock > 0;
+        }
+
+        foreach ($variants as $variant) {
+            if ($this->resolveStock($item, $countryCode, $variant->id) > 0) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public function resolveStock(Item $item, ?string $countryCode = null, ?int $countryPriceId = null): int
+    {
+        if ($countryPriceId) {
+            $variant = $this->findVariant($item, $countryPriceId);
+
+            if (! $variant) {
+                return 0;
+            }
+
+            if ($variant->stock !== null) {
+                return max(0, (int) $variant->stock);
+            }
+
+            $variants = $this->variantsForCountry($item, $variant->country_code);
+
+            if ($variants->count() === 1) {
+                return max(0, (int) $item->stock);
+            }
+
+            return 0;
+        }
+
+        $countryCode = $this->resolveCountryCodeForItem($item, $countryCode);
+
+        if ($countryCode === null) {
+            return 0;
+        }
+
+        $variants = $this->variantsForCountry($item, $countryCode);
+
+        if ($variants->isEmpty()) {
+            return (int) $item->stock;
+        }
+
+        $totalStock = 0;
+        $hasCountryStock = false;
+
+        foreach ($variants as $variant) {
+            if ($variant->stock !== null) {
+                $totalStock += (int) $variant->stock;
+                $hasCountryStock = true;
+            }
+        }
+
+        if ($hasCountryStock) {
+            return $totalStock;
+        }
+
+        return (int) $item->stock;
+    }
+
+    /**
+     * @param  array<string, array<string, mixed>>  $countryPrices
      */
     public function syncCountryPrices(Item $item, array $countryPrices): void
     {
         $item->countryPrices()->delete();
+
+        $totalStock = 0;
+        $hasCountryStock = false;
 
         foreach ($countryPrices as $countryCode => $prices) {
             if (! in_array($countryCode, ['KSA', 'UAE'], true)) {
@@ -265,28 +412,60 @@ class ItemPricingService
                 continue;
             }
 
-            if (! isset($prices['member_price']) || $prices['member_price'] === '' || $prices['member_price'] === null) {
-                continue;
+            $variants = $prices['variants'] ?? null;
+            if (! is_array($variants)) {
+                $variants = [$prices];
             }
 
-            $memberPrice = $prices['member_price'];
-            $guestPrice = (isset($prices['guest_price']) && $prices['guest_price'] !== '' && $prices['guest_price'] !== null)
-                ? $prices['guest_price']
-                : $memberPrice;
+            foreach ($variants as $variant) {
+                if (! is_array($variant)) {
+                    continue;
+                }
 
-            $item->countryPrices()->create([
-                'country_code' => $countryCode,
-                'member_price' => $memberPrice,
-                'guest_price' => $guestPrice,
-                'reward_points' => (isset($prices['reward_points']) && $prices['reward_points'] !== '' && is_numeric($prices['reward_points']))
-                    ? (int) $prices['reward_points']
-                    : null,
-            ]);
+                if (! isset($variant['member_price']) || $variant['member_price'] === '' || $variant['member_price'] === null) {
+                    continue;
+                }
+
+                $memberPrice = $variant['member_price'];
+                $guestPrice = (isset($variant['guest_price']) && $variant['guest_price'] !== '' && $variant['guest_price'] !== null)
+                    ? $variant['guest_price']
+                    : $memberPrice;
+
+                $stockVal = (isset($variant['stock']) && $variant['stock'] !== '' && is_numeric($variant['stock']))
+                    ? (int) $variant['stock']
+                    : null;
+
+                if ($stockVal !== null) {
+                    $totalStock += $stockVal;
+                    $hasCountryStock = true;
+                }
+
+                $item->countryPrices()->create([
+                    'country_code' => $countryCode,
+                    'size_en' => $variant['size_en'] ?? null,
+                    'size_ar' => $variant['size_ar'] ?? null,
+                    'member_price' => $memberPrice,
+                    'guest_price' => $guestPrice,
+                    'reward_points' => (isset($variant['reward_points']) && $variant['reward_points'] !== '' && is_numeric($variant['reward_points']))
+                        ? (int) $variant['reward_points']
+                        : null,
+                    'stock' => $stockVal,
+                ]);
+            }
         }
 
+        $updateData = [];
         $firstPrice = $item->countryPrices()->orderBy('country_code')->first();
         if ($firstPrice) {
-            $item->update(['price' => $firstPrice->member_price]);
+            $updateData['price'] = $firstPrice->member_price;
+        }
+
+        if ($hasCountryStock) {
+            $updateData['stock'] = $totalStock;
+        }
+
+        if (! empty($updateData)) {
+            $item->update($updateData);
         }
     }
 }

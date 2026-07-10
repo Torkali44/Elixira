@@ -9,7 +9,6 @@
     </div>
 </div>
 
-{{-- Statistics Dashboard --}}
 <div class="row g-3 mb-4">
     <div class="col-6 col-md-3">
         <div class="card border-0 shadow-sm text-center p-3" style="border-radius: 12px;">
@@ -38,12 +37,12 @@
 </div>
 
 <div class="card border-0 shadow-sm" style="border-radius: 16px;">
-    <div class="card-body">
+    <div class="card-body p-0">
         <div class="table-responsive">
-            <table class="table align-middle">
-                <thead>
+            <table class="table align-middle mb-0">
+                <thead class="table-light">
                     <tr>
-                        <th>{{ __('admin.special_requests_admin.product') }}</th>
+                        <th class="ps-3">{{ __('admin.special_requests_admin.product') }}</th>
                         <th>{{ __('admin.special_requests_admin.user') }}</th>
                         <th>{{ __('admin.special_requests_admin.country') }}</th>
                         <th>{{ __('admin.special_requests_admin.phone') }}</th>
@@ -51,23 +50,33 @@
                         <th>{{ __('admin.special_requests_admin.date') }}</th>
                         <th>{{ __('admin.special_requests_admin.status') }}</th>
                         <th>{{ __('admin.special_requests_admin.private_offers') }}</th>
+                        <th class="text-end pe-3">{{ __('admin.special_requests_admin.actions') }}</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($specialRequests as $request)
-                        <tr>
-                            <td>
+                        <tr class="{{ $request->admin_read_at ? '' : 'table-warning' }}">
+                            <td class="ps-3">
                                 @if($request->item)
                                     <div class="d-flex align-items-center gap-3">
                                         @if($request->item->image)
-                                            <img src="{{ asset('storage/' . $request->item->image) }}" alt="" style="width: 48px; height: 48px; object-fit: cover; border-radius: 8px;">
+                                            <img
+                                                src="{{ asset('storage/' . $request->item->image) }}"
+                                                alt=""
+                                                width="48"
+                                                height="48"
+                                                loading="lazy"
+                                                decoding="async"
+                                                style="width: 48px; height: 48px; object-fit: cover; border-radius: 8px;"
+                                            >
                                         @else
                                             <div style="width: 48px; height: 48px; background: #eee; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
                                                 <i class="fas fa-box text-muted"></i>
                                             </div>
                                         @endif
                                         <div>
-                                            <div class="fw-bold text-dark">{{ $request->item->name }}</div>
+                                            <div class="fw-bold text-dark">{{ $request->item->local_name }}</div>
+                                            <small class="text-muted">#{{ $request->item->id }}</small>
                                         </div>
                                     </div>
                                 @else
@@ -93,18 +102,18 @@
                                     }
                                 @endphp
                                 @if($country)
-                                    <img src="{{ asset($country) }}" alt="Country" width="22" height="16" style="flex-shrink: 0; object-fit: cover; border-radius: 2px; box-shadow: 0 0 0 1px rgba(0,0,0,.08);">
+                                    <img src="{{ asset($country) }}" alt="" width="22" height="16" loading="lazy" decoding="async" style="object-fit: cover; border-radius: 2px; box-shadow: 0 0 0 1px rgba(0,0,0,.08);">
                                 @else
                                     <span class="text-muted small">{{ __('admin.special_requests_admin.na') }}</span>
                                 @endif
                             </td>
-                            
                             <td>
-                                <span class="text-muted">{{ $request->phone }}</span>
+                                <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $request->phone) }}" target="_blank" rel="noopener" class="btn btn-sm btn-success">
+                                    <i class="fab fa-whatsapp me-1"></i>{{ $request->phone }}
+                                </a>
                             </td>
-
                             <td>{{ $request->email ?: '—' }}</td>
-                            <td>{{ $request->created_at->format('M d, Y h:i A') }}</td>
+                            <td><span class="small text-muted">{{ $request->created_at->format('M d, Y h:i A') }}</span></td>
                             <td>
                                 @if($request->status === 'pending')
                                     <span class="badge bg-warning text-dark">{{ __('admin.special_requests_admin.status_pending') }}</span>
@@ -132,19 +141,56 @@
                                     <span class="text-muted small">{{ __('admin.special_requests_admin.no_offer') }}</span>
                                 @endif
                             </td>
+                            <td class="text-end pe-3">
+                                <div class="d-flex flex-wrap justify-content-end align-items-center gap-2">
+                                    @if($request->item)
+                                        <form action="{{ route('admin.special-requests.assign-offer', $request) }}" method="POST" class="d-flex align-items-center gap-1">
+                                            @csrf
+                                            <input type="number" name="quantity" value="1" min="1" max="20" class="form-control form-control-sm" style="width: 64px;" title="{{ __('admin.special_requests_admin.quantity') }}">
+                                            <button type="submit" class="btn btn-sm btn-primary" title="{{ __('admin.special_requests_admin.offer_btn') }}">
+                                                <i class="fas fa-plus"></i> {{ __('admin.special_requests_admin.offer_btn') }}
+                                            </button>
+                                        </form>
+                                    @endif
+
+                                    <form action="{{ route('admin.special-requests.updateStatus', $request) }}" method="POST">
+                                        @csrf
+                                        @method('PATCH')
+                                        @if($request->status === 'pending')
+                                            <input type="hidden" name="status" value="notified">
+                                            <button type="submit" class="btn btn-sm btn-outline-success" title="{{ __('admin.special_requests_admin.mark_notified') }}">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                        @else
+                                            <input type="hidden" name="status" value="pending">
+                                            <button type="submit" class="btn btn-sm btn-outline-warning" title="{{ __('admin.special_requests_admin.mark_pending') }}">
+                                                <i class="fas fa-undo"></i>
+                                            </button>
+                                        @endif
+                                    </form>
+
+                                    <form action="{{ route('admin.special-requests.destroy', $request) }}" method="POST" onsubmit="return confirm(@json(__('admin.special_requests_admin.confirm_delete')));">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="{{ __('admin.common.delete') }}">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="text-center py-4 text-muted">{{ __('admin.special_requests_admin.empty') }}</td>
+                            <td colspan="9" class="text-center py-4 text-muted">{{ __('admin.special_requests_admin.empty') }}</td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
-
-        <div class="mt-4">
-            {{ $specialRequests->links() }}
-        </div>
     </div>
+</div>
+
+<div class="mt-4">
+    {{ $specialRequests->links() }}
 </div>
 @endsection

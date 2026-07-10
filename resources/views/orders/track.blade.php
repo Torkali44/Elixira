@@ -146,7 +146,7 @@
                         <a href="{{ route('orders.track', ['order_id' => $order->id, 'phone' => request('phone')]) }}" class="order-box">
                             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
                                 <div>
-                                    <span style="display: block; font-size: 0.8rem; color: var(--elx-cyan); letter-spacing: 1px; font-weight: 700;">{{ __('track.order_label', ['id' => $order->id]) }}</span>
+                                    <span style="display: block; font-size: 0.8rem; color: var(--elx-cyan); letter-spacing: 1px; font-weight: 700;">{{ __('track.order_label', ['id' => $order->reference]) }}</span>
                                     <span style="display: block; font-size: 1.2rem; font-weight: 600; margin: 0.3rem 0;">{{ $order->created_at->format('M j, Y') }}</span>
                                     <span style="color: var(--elx-gray); font-size: 0.9rem;">{{ __('track.items_count', ['count' => $order->orderItems->count()]) }}</span>
                                 </div>

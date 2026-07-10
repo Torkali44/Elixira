@@ -31,10 +31,10 @@
 <body class="{{ ($userTheme ?? 'light') === 'dark' ? 'dashboard-dark' : '' }}">
     @php
         if (request()->routeIs('admin.orders.*')) {
-            session(['orders_last_viewed_at' => now()]);
+            \App\Models\Order::markAllAdminRead();
         }
         if (request()->routeIs('admin.special-requests.*')) {
-            session(['special_requests_last_viewed_at' => now()]);
+            \App\Models\SpecialRequest::markAllAdminRead();
         }
         if (request()->routeIs('admin.vendors.requests.*')) {
             session(['vendors_last_viewed_at' => now()]);
@@ -55,22 +55,18 @@
             session(['packages_last_viewed_at' => now()]);
         }
 
-        $ordersLastViewed = session('orders_last_viewed_at');
-        $newOrdersCount = $ordersLastViewed ? \App\Models\Order::where('created_at', '>', $ordersLastViewed)->count() : \App\Models\Order::where('status', 'pending')->count();
-        $specialRequestsLastViewed = session('special_requests_last_viewed_at');
-        $newSpecialRequestsCount = $specialRequestsLastViewed ? \App\Models\SpecialRequest::where('created_at', '>', $specialRequestsLastViewed)->count() : \App\Models\SpecialRequest::where('status', 'pending')->count();
+        $newOrdersCount = \App\Models\Order::whereNull('admin_read_at')->count();
+        $newSpecialRequestsCount = \App\Models\SpecialRequest::whereNull('admin_read_at')->count();
         $vendorsLastViewed = session('vendors_last_viewed_at');
-        $newVendorsCount = $vendorsLastViewed ? \App\Models\VendorProfile::where('status', 'pending')->where('updated_at', '>', $vendorsLastViewed)->count() : \App\Models\VendorProfile::where('status', 'pending')->count();
+        $newVendorsCount = $vendorsLastViewed
+            ? \App\Models\VendorProfile::where('status', 'pending')->where('updated_at', '>', $vendorsLastViewed)->count()
+            : \App\Models\VendorProfile::where('status', 'pending')->count();
         $brandsLastViewed = session('brands_last_viewed_at');
-        $newBrandsCount = $brandsLastViewed ? \App\Models\Brand::where('created_at', '>', $brandsLastViewed)->count() : \App\Models\Brand::where('is_active', false)->count();
-        $contactMessagesLastViewed = session('contact_messages_last_viewed_at');
-        $newContactMessagesCount = $contactMessagesLastViewed
-            ? \App\Models\ContactMessage::where('created_at', '>', $contactMessagesLastViewed)->count()
-            : \App\Models\ContactMessage::whereNull('read_at')->count();
-        $dxnTeamLastViewed = session('dxn_team_requests_last_viewed_at');
-        $newDxnTeamRequestsCount = $dxnTeamLastViewed
-            ? \App\Models\DxnTeamRequest::where('created_at', '>', $dxnTeamLastViewed)->count()
-            : \App\Models\DxnTeamRequest::where('status', 'pending')->whereNull('read_at')->count();
+        $newBrandsCount = $brandsLastViewed
+            ? \App\Models\Brand::where('created_at', '>', $brandsLastViewed)->count()
+            : \App\Models\Brand::where('is_active', false)->count();
+        $newContactMessagesCount = \App\Models\ContactMessage::whereNull('read_at')->count();
+        $newDxnTeamRequestsCount = \App\Models\DxnTeamRequest::where('status', 'pending')->whereNull('read_at')->count();
         $itemsLastViewed = session('items_last_viewed_at');
         $newPendingItemsCount = $itemsLastViewed
             ? \App\Models\Item::where('status', 'pending')->where('created_at', '>', $itemsLastViewed)->count()

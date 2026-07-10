@@ -57,7 +57,7 @@ return [
         'no_sales_data' => 'لا توجد بيانات مبيعات بعد.',
         'sold' => 'مباع',
         'recent_orders' => 'أحدث الطلبات',
-        'order_num' => 'طلب #',
+        'order_num' => 'كود الطلب',
         'customer' => 'العميل',
         'products' => 'المنتجات',
         'amount' => 'المبلغ',
@@ -144,7 +144,7 @@ return [
     'orders' => [
         'title' => 'طلباتي',
         'subtitle' => 'الطلبات التي تحتوي على منتجاتك',
-        'col_id' => 'رقم الطلب',
+        'col_id' => 'كود الطلب',
         'col_customer' => 'العميل',
         'col_phone' => 'الهاتف',
         'col_products' => 'المنتجات المطلوبة',

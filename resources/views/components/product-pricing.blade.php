@@ -1,6 +1,7 @@
 @props([
     'item',
     'selectedCountry' => null,
+    'countryPriceId' => null,
     'align' => 'flex-end',
     'size' => 'inherit',
     'smallSize' => '0.85rem',
@@ -14,7 +15,7 @@
 @php
     $pricingService = app(\App\Support\ItemPricingService::class);
     $selectedCountry = $pricingService->resolveCountryCode($selectedCountry);
-    $pricing = $pricingService->getPriceBreakdown($item, auth()->user(), $selectedCountry);
+    $pricing = $pricingService->getPriceBreakdown($item, auth()->user(), $selectedCountry, $countryPriceId);
     $availableCountries = $pricingService->availableCountryCodes($item);
     $flags = $pricingService->countryFlags();
     $labels = $pricingService->supportedCountries();
@@ -53,36 +54,31 @@
 
     @if($showPrice)
         <div class="elx-product-pricing__prices">
-            <div class="elx-product-pricing__price-line" style="font-size: {{ $size }};">
+            <div class="elx-product-pricing__price-line" id="product-member-price-line" style="font-size: {{ $size }};">
                 @if($isRtl)
-                    <span class="elx-product-pricing__amount">{{ number_format($pricing['member_price'], 2) }}</span>
-                    <span class="elx-product-pricing__currency">{{ $pricingService->currencySymbol($selectedCountry) }}</span>
+                    <span class="elx-product-pricing__amount" id="product-member-price">{{ number_format($pricing['member_price'], 2) }}</span>
+                    <span class="elx-product-pricing__currency" id="product-member-currency">{{ $pricingService->currencySymbol($selectedCountry) }}</span>
                 @else
-                    <span class="elx-product-pricing__currency">{{ $pricingService->currencySymbol($selectedCountry) }}</span>
-                    <span class="elx-product-pricing__amount">{{ number_format($pricing['member_price'], 2) }}</span>
+                    <span class="elx-product-pricing__currency" id="product-member-currency">{{ $pricingService->currencySymbol($selectedCountry) }}</span>
+                    <span class="elx-product-pricing__amount" id="product-member-price">{{ number_format($pricing['member_price'], 2) }}</span>
                 @endif
             </div>
-            @if(!empty($pricing['original_member_price']) && $pricing['original_member_price'] > $pricing['member_price'])
-                <div class="elx-product-pricing__price-line elx-product-pricing__price-line--muted" style="font-size: {{ $smallSize }};">
-                    @if($isRtl)
-                        <span class="elx-product-pricing__amount">{{ number_format($pricing['original_member_price'], 2) }}</span>
-                        <span class="elx-product-pricing__currency">{{ $pricingService->currencySymbol($selectedCountry) }}</span>
-                    @else
-                        <span class="elx-product-pricing__currency">{{ $pricingService->currencySymbol($selectedCountry) }}</span>
-                        <span class="elx-product-pricing__amount">{{ number_format($pricing['original_member_price'], 2) }}</span>
-                    @endif
-                </div>
-            @elseif(!empty($pricing['has_higher_guest_price']))
-                <div class="elx-product-pricing__price-line elx-product-pricing__price-line--muted" style="font-size: {{ $smallSize }};">
-                    @if($isRtl)
-                        <span class="elx-product-pricing__amount">{{ number_format($pricing['guest_price'], 2) }}</span>
-                        <span class="elx-product-pricing__currency">{{ $pricingService->currencySymbol($selectedCountry) }}</span>
-                    @else
-                        <span class="elx-product-pricing__currency">{{ $pricingService->currencySymbol($selectedCountry) }}</span>
-                        <span class="elx-product-pricing__amount">{{ number_format($pricing['guest_price'], 2) }}</span>
-                    @endif
-                </div>
-            @endif
+            @php
+                $showGuestPrice = ! empty($pricing['has_higher_guest_price'])
+                    || (! empty($pricing['original_member_price']) && $pricing['original_member_price'] > $pricing['member_price']);
+                $guestDisplayPrice = ! empty($pricing['original_member_price']) && $pricing['original_member_price'] > $pricing['member_price']
+                    ? $pricing['original_member_price']
+                    : ($pricing['guest_price'] ?? $pricing['member_price']);
+            @endphp
+            <div class="elx-product-pricing__price-line elx-product-pricing__price-line--guest" id="product-guest-price-wrap" style="font-size: {{ $smallSize }}; {{ $showGuestPrice ? '' : 'display: none;' }}">
+                @if($isRtl)
+                    <span class="elx-product-pricing__amount" id="product-guest-price">{{ number_format($guestDisplayPrice, 2) }}</span>
+                    <span class="elx-product-pricing__currency" id="product-guest-currency">{{ $pricingService->currencySymbol($selectedCountry) }}</span>
+                @else
+                    <span class="elx-product-pricing__currency" id="product-guest-currency">{{ $pricingService->currencySymbol($selectedCountry) }}</span>
+                    <span class="elx-product-pricing__amount" id="product-guest-price">{{ number_format($guestDisplayPrice, 2) }}</span>
+                @endif
+            </div>
         </div>
     @endif
 </div>

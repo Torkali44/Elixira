@@ -43,6 +43,30 @@
         margin-bottom: 0.5rem;
         margin-top: 1rem;
     }
+    .password-wrap {
+        position: relative;
+        margin-bottom: 0.5rem;
+    }
+    .password-wrap .form-input {
+        margin-bottom: 0;
+        padding-inline-end: 3rem;
+    }
+    .password-toggle-btn {
+        position: absolute;
+        top: 50%;
+        inset-inline-end: 1rem;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: rgba(255, 255, 255, 0.6);
+        cursor: pointer;
+        padding: 0.25rem;
+        line-height: 1;
+        font-size: 1rem;
+        transition: color 0.2s;
+        z-index: 2;
+    }
+    .password-toggle-btn:hover { color: var(--elx-cyan); }
 </style>
 @endsection
 
@@ -88,11 +112,21 @@
                 <x-input-error :messages="$errors->get('phone_country_code')" style="color: #ff8a8a; font-size: 0.8rem; margin-bottom: 0.5rem;" />
 
                 <label class="auth-label">{{ __('app.auth.password') }}</label>
-                <input type="password" name="password" class="form-input" required autocomplete="new-password">
+                <div class="password-wrap">
+                    <input type="password" name="password" id="reg-password" class="form-input" required autocomplete="new-password">
+                    <button type="button" class="password-toggle-btn" onclick="togglePassword('reg-password', this)" aria-label="Toggle password visibility">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
                 <x-input-error :messages="$errors->get('password')" style="color: #ff8a8a; font-size: 0.8rem; margin-bottom: 0.5rem;" />
 
                 <label class="auth-label">{{ __('app.auth.confirm_password') }}</label>
-                <input type="password" name="password_confirmation" class="form-input" required autocomplete="new-password">
+                <div class="password-wrap">
+                    <input type="password" name="password_confirmation" id="reg-password-confirm" class="form-input" required autocomplete="new-password">
+                    <button type="button" class="password-toggle-btn" onclick="togglePassword('reg-password-confirm', this)" aria-label="Toggle confirm password visibility">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
                 <x-input-error :messages="$errors->get('password_confirmation')" style="color: #ff8a8a; font-size: 0.8rem; margin-bottom: 1rem;" />
 
                 <label class="auth-label">{{ __('app.auth.account_type') }}</label>
@@ -142,5 +176,20 @@
         </div>
     </div>
 </div>
-@endsection
 
+<script>
+function togglePassword(inputId, btn) {
+    var input = document.getElementById(inputId);
+    var icon = btn.querySelector('i');
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+    } else {
+        input.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+    }
+}
+</script>
+@endsection

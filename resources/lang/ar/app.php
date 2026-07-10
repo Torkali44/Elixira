@@ -48,6 +48,7 @@ return [
     'admin_btn' => 'الإدارة',
     'vendor_portal' => 'بوابة البائع',
     'notifications' => 'الإشعارات',
+    'view_details' => 'عرض التفاصيل',
     'mark_all_read' => 'تعليم الكل كمقروء',
     'no_notifications' => 'لا توجد إشعارات بعد.',
     'notifications_marked_read' => 'تم تعليم جميع الإشعارات كمقروءة.',

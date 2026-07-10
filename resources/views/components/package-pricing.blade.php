@@ -63,8 +63,8 @@
                     <span class="elx-product-pricing__amount">{{ number_format($pricing['member_price'], 2) }}</span>
                 @endif
             </div>
-            @if($pricing['guest_price'] > $pricing['member_price'])
-                <div class="elx-product-pricing__price-line elx-product-pricing__price-line--muted" style="font-size: {{ $smallSize }};">
+            @if(! empty($pricing['has_higher_guest_price']))
+                <div class="elx-product-pricing__price-line elx-product-pricing__price-line--guest" style="font-size: {{ $smallSize }};">
                     @if($isRtl)
                         <span class="elx-product-pricing__amount">{{ number_format($pricing['guest_price'], 2) }}</span>
                         <span class="elx-product-pricing__currency">{{ $itemPricing->currencySymbol($selectedCountry) }}</span>

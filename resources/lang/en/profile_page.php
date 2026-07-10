@@ -31,7 +31,7 @@ return [
     'points_history' => 'Points History',
     'points_from' => 'Earned from',
     'no_points_yet' => 'You have not earned any reward points yet. Purchase products to start collecting!',
-    'points_order' => 'Order #:id',
+    'points_order' => 'Order code :id',
     'account_snapshot' => 'Account Snapshot',
     'member_since' => 'Member Since',
     'recently_joined' => 'Recently joined',

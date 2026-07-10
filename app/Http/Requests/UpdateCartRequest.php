@@ -15,7 +15,7 @@ class UpdateCartRequest extends FormRequest
     {
         return [
             'id' => 'required|string|max:64',
-            'quantity' => 'required|integer|min:1|max:50',
+            'quantity' => 'required|integer|min:1|max:999',
         ];
     }
 }

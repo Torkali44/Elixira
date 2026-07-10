@@ -86,12 +86,21 @@
         .package-cta-row { flex-direction: column; }
         .package-cta-row .elx-btn { width: 100%; min-width: unset; justify-content: center; }
     }
+    .elx-product-pricing__price-line--guest,
+    .elx-product-pricing__price-line--guest .elx-product-pricing__amount,
+    .elx-product-pricing__price-line--guest .elx-product-pricing__currency {
+        color: rgba(255, 255, 255, 0.42) !important;
+        text-decoration: line-through;
+        font-weight: 600;
+    }
 </style>
 @endsection
 
 @section('content')
 @php
     $pricingService = app(\App\Support\ItemPricingService::class);
+    $packagePricingService = app(\App\Support\PackagePricingService::class);
+    $resolvedStock = $packagePricingService->resolveStock($package, $selectedCountry ?? null);
     $displayRewardPoints = $pricingService->resolvePackageRewardPoints($package, $selectedCountry ?? null);
     $packageGalleryImages = $package->image
         ? collect([['url' => asset('storage/'.$package->image)]])
@@ -144,16 +153,16 @@
                         </div>
                     @endif
 
-                    @if($displayRewardPoints > 0 || (int) $package->stock > 0)
+                    @if($displayRewardPoints > 0 || (int) $resolvedStock > 0)
                     <div style="display: flex; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
                         @if($displayRewardPoints > 0)
                             <span style="background: rgba(0,255,136,0.1); color:#00ff88; padding:0.3rem 0.75rem; border-radius:999px; font-size:0.8rem; font-weight:600; border:1px solid rgba(0,255,136,0.2);">
                                 <i class="fas fa-star"></i> {{ __('home.reward_points', ['count' => $displayRewardPoints]) }}
                             </span>
                         @endif
-                        @if((int) $package->stock > 0)
+                        @if((int) $resolvedStock > 0)
                             <span style="background: rgba(74,200,246,0.1); color:#4ac8f6; padding:0.3rem 0.75rem; border-radius:999px; font-size:0.8rem; font-weight:600; border:1px solid rgba(74,200,246,0.2);">
-                                <i class="fas fa-check-circle"></i> {{ __('shop.in_stock', ['count' => $package->stock]) }}
+                                <i class="fas fa-check-circle"></i> {{ __('shop.in_stock', ['count' => $resolvedStock]) }}
                             </span>
                         @endif
                     </div>
@@ -183,7 +192,7 @@
                         </div>
                     @endif
 
-                    @if((int) $package->stock > 0)
+                    @if((int) $resolvedStock > 0)
                         <div style="border-top: 1px solid rgba(255,255,255,0.06); padding-top: 1.5rem;">
                             <form action="{{ route('cart.add-package') }}" method="POST" id="package-show-form">
                                 @csrf
@@ -192,7 +201,7 @@
                                 <div class="package-cta-row">
                                     <div style="display:flex; align-items:center; gap:0.5rem; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:0.5rem 0.75rem;">
                                         <label style="color:rgba(255,255,255,0.5); font-size:0.8rem; font-weight:600; white-space:nowrap;">{{ app()->getLocale() === 'ar' ? 'الكمية' : 'Qty' }}</label>
-                                        <input type="number" name="quantity" value="1" min="1" max="{{ max(1, $package->stock) }}" style="width:60px; background:transparent; border:none; color:#fff; font-size:1rem; font-weight:700; outline:none; text-align:center;">
+                                        <input type="number" name="quantity" value="1" min="1" max="{{ max(1, $resolvedStock) }}" style="width:60px; background:transparent; border:none; color:#fff; font-size:1rem; font-weight:700; outline:none; text-align:center;">
                                     </div>
                                     <button type="submit" class="elx-btn elx-btn--primary" style="flex:1; min-width:160px; justify-content:center;" onclick="addToCartAjax(this, event)">
                                         <i class="fas fa-shopping-cart"></i> {{ __('home.add_to_cart') }}

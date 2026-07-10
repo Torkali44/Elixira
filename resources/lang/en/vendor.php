@@ -57,7 +57,7 @@ return [
         'no_sales_data' => 'No sales data yet.',
         'sold' => 'sold',
         'recent_orders' => 'Recent Orders',
-        'order_num' => 'Order #',
+        'order_num' => 'Order code',
         'customer' => 'Customer',
         'products' => 'Products',
         'amount' => 'Amount',
@@ -144,7 +144,7 @@ return [
     'orders' => [
         'title' => 'My Orders',
         'subtitle' => 'Orders containing your products',
-        'col_id' => 'Order #',
+        'col_id' => 'Order code',
         'col_customer' => 'Customer',
         'col_phone' => 'Phone',
         'col_products' => 'Products Ordered',

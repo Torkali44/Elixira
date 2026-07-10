@@ -9,7 +9,7 @@ return [
     'view_orders' => 'View My Orders',
     'found_orders' => 'Found :count orders',
     'new_search' => 'New Search',
-    'order_label' => 'ORDER #:id',
+    'order_label' => 'ORDER CODE :id',
     'items_count' => ':count items',
     'print_invoice' => 'Print Invoice',
 ];

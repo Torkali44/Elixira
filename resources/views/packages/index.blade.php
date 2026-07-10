@@ -14,9 +14,18 @@
     .menu-products-grid {
         display: grid;
         grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 3rem;
+        gap: 2rem;
         justify-content: center;
-        align-items: stretch;
+        align-items: start;
+    }
+    .menu-products-grid .elx-product-card {
+        height: auto;
+    }
+    .menu-products-grid .elx-product-pricing__price-line--guest,
+    .menu-products-grid .elx-product-pricing__price-line--guest .elx-product-pricing__amount,
+    .menu-products-grid .elx-product-pricing__price-line--guest .elx-product-pricing__currency {
+        color: rgba(255, 255, 255, 0.42) !important;
+        text-decoration: line-through;
     }
     @media (max-width: 1024px) {
         .menu-products-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2rem; }

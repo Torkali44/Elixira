@@ -85,6 +85,23 @@
     }
     .dxn-panel { display: none; }
     .dxn-panel.active { display: block; }
+    .dxn-country-picker {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    .dxn-country-picker__flag {
+        width: 28px;
+        height: 19px;
+        border-radius: 4px;
+        object-fit: cover;
+        flex-shrink: 0;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+    }
+    .dxn-country-picker__select {
+        flex: 1;
+        margin-bottom: 0;
+    }
     @media (max-width: 767px) {
         .dxn-grid-2, .dxn-grid-3 { grid-template-columns: 1fr; }
     }
@@ -184,20 +201,16 @@
                     <div class="dxn-grid-2">
                         <div class="dxn-field">
                             <label>{{ __('dxn_team.form_country') }}</label>
-                            <select class="dxn-select" name="country" required disabled>
-                                <option value="">{{ __('dxn_team.form_country_placeholder') }}</option>
-                                <option value="KSA" @selected(old('country') === 'KSA')>🇸🇦 {{ __('shop.country_ksa') }}</option>
-                                <option value="UAE" @selected(old('country') === 'UAE')>🇦🇪 {{ __('shop.country_uae') }}</option>
-                            </select>
+                            @include('partials.dxn-country-select', ['name' => 'country', 'value' => old('country'), 'required' => true, 'id' => 'dxnCountry'])
                         </div>
                         <div class="dxn-field">
                             <label>{{ __('dxn_team.form_sponsor_code') }}</label>
                             <select class="dxn-select" id="sponsorCodeSelect" disabled>
-                                <option value="">{{ __('dxn_team.form_sponsor_code_placeholder') }}</option>
-                                <option value="__manual__">{{ __('dxn_team.form_sponsor_code_manual') }}</option>
+                                <option value="" disabled selected hidden>{{ __('dxn_team.form_sponsor_code_hint') }}</option>
                                 @foreach($sponsorCodes as $code)
                                     <option value="{{ $code->code }}" data-name="{{ $code->sponsor_name }}" @selected(old('sponsor_code') === $code->code)>{{ $code->code }} — {{ $code->sponsor_name }}</option>
                                 @endforeach
+                                <option value="__manual__">{{ __('dxn_team.form_sponsor_code_manual') }}</option>
                             </select>
                         </div>
                     </div>
@@ -301,11 +314,7 @@
                     <div class="dxn-grid-3">
                         <div class="dxn-field">
                             <label>{{ __('dxn_team.form_address_country') }}</label>
-                            <select class="dxn-select" name="address_country" required disabled>
-                                <option value="">{{ __('dxn_team.form_country_placeholder') }}</option>
-                                <option value="KSA" @selected(old('address_country') === 'KSA')>🇸🇦 {{ __('shop.country_ksa') }}</option>
-                                <option value="UAE" @selected(old('address_country') === 'UAE')>🇦🇪 {{ __('shop.country_uae') }}</option>
-                            </select>
+                            @include('partials.dxn-country-select', ['name' => 'address_country', 'value' => old('address_country'), 'required' => true, 'id' => 'dxnAddressCountry'])
                         </div>
                         <div class="dxn-field">
                             <label>{{ __('dxn_team.form_address_city') }}</label>
@@ -365,7 +374,7 @@
 
     function setFieldsEnabled(enabled) {
         membershipFields.classList.toggle('dxn-form-locked', !enabled);
-        membershipFields.querySelectorAll('input, select, textarea, button[type="submit"]').forEach((el) => {
+        membershipFields.querySelectorAll('input, select, textarea, button').forEach((el) => {
             el.disabled = !enabled;
         });
         document.getElementById('contractHint').style.display = enabled ? 'none' : 'block';
@@ -384,7 +393,7 @@
 
     sponsorCodeSelect.addEventListener('change', () => {
         const value = sponsorCodeSelect.value;
-        if (!value) return;
+        if (!value || value === '') return;
         if (value === '__manual__') {
             sponsorCodeInput.value = '';
             sponsorNameInput.value = '';

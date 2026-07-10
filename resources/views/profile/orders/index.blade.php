@@ -58,7 +58,7 @@
                     <article class="orders-card" data-animate>
                         <div class="orders-row">
                             <div>
-                                <div class="orders-meta">{{ __('orders_page.order_title', ['id' => $order->id]) }} • {{ $order->created_at->format('M j, Y') }}</div>
+                                <div class="orders-meta">{{ __('orders_page.order_title', ['id' => $order->reference]) }} • {{ $order->created_at->format('M j, Y') }}</div>
                                 <h3 style="margin:.4rem 0 0;">{{ $order->customer_name }}</h3>
                             </div>
                             <div style="text-align:right;">

@@ -24,7 +24,14 @@ trait ValidatesCountryPrices
                     continue;
                 }
 
-                if (filled($country['member_price'] ?? null)) {
+                $variants = $country['variants'] ?? null;
+                if (is_array($variants)) {
+                    foreach ($variants as $variant) {
+                        if (is_array($variant) && filled($variant['member_price'] ?? null)) {
+                            return;
+                        }
+                    }
+                } elseif (filled($country['member_price'] ?? null)) {
                     return;
                 }
 

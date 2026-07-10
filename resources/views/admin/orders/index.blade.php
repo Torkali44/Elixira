@@ -223,7 +223,14 @@
                     <tbody>
                         @forelse($orders as $order)
                             <tr>
-                                <td class="fw-bold">#{{ $order->id }}</td>
+                                <td class="fw-bold">
+                                    <span class="font-monospace">{{ $order->reference }}</span>
+                                    @if($order->usesSharedShipping())
+                                        <span class="badge bg-success ms-1" title="{{ __('admin.orders.shared_shipping_badge') }}">
+                                            <i class="fas fa-truck-loading"></i>
+                                        </span>
+                                    @endif
+                                </td>
                                 <td>{{ $order->customer_name }}</td>
                                 <td>
                                     <x-phone-flag :phone="$order->customer_phone" />

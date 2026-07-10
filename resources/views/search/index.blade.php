@@ -8,8 +8,8 @@
         <div class="elx-section__header" data-animate>
             <h1 class="elx-hero__title"><span class="elx-hero__title-gradient">{{ __('shop.search_title') }}</span></h1>
             <form action="{{ route('search.index') }}" method="GET" style="max-width: 640px; margin: 2rem auto 0; display: flex; gap: 0.75rem;">
-                <input type="search" name="q" value="{{ $query }}" placeholder="{{ __('shop.search_placeholder') }}" class="form-input" style="flex: 1; margin: 0;">
-                <button type="submit" class="elx-btn elx-btn--primary">{{ __('shop.search_button') }}</button>
+                <input type="search" name="q" value="{{ $query }}" placeholder="{{ __('shop.search_placeholder') }}" class="form-input" style="flex: 1; margin: 0; border-radius: 30px;">
+                <button type="submit" class="elx-btn elx-btn--primary" >{{ __('shop.search_button') }}</button>
             </form>
         </div>
 

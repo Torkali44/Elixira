@@ -23,6 +23,7 @@ use App\Http\Controllers\BlogController;
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\DeliveryCityController;
 use App\Http\Controllers\DeployOpsController;
 use App\Http\Controllers\DxnTeamRequestController;
 use App\Http\Controllers\FaqController;
@@ -87,8 +88,11 @@ Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
 Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
 Route::post('/cart/add-package', [CartController::class, 'addPackage'])->name('cart.add-package');
 Route::patch('/cart/update', [CartController::class, 'update'])->name('cart.update');
+Route::patch('/cart/update-variant', [CartController::class, 'updateVariant'])->name('cart.update-variant');
 Route::delete('/cart/remove', [CartController::class, 'remove'])->name('cart.remove');
 Route::post('/checkout', [CartController::class, 'checkout'])->name('checkout');
+Route::get('/delivery-cities', [DeliveryCityController::class, 'index'])->name('delivery-cities.index');
+Route::get('/cart/shared-shipping-order', [CartController::class, 'lookupSharedShippingOrder'])->name('cart.shared-shipping-order');
 
 Route::get('/track-order', [OrderController::class, 'track'])->name('orders.track');
 Route::get('/track-order/{order}/invoice', [OrderController::class, 'invoice'])->name('orders.invoice');
@@ -148,7 +152,9 @@ Route::middleware(['auth', 'verified.or.admin'])->group(function () {
     // Notifications
     Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
     Route::post('/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
+});
 
+Route::middleware(['auth'])->group(function () {
     Route::get('/my-dxn-application/{application}', [DxnTeamRequestController::class, 'status'])->name('dxn-distributor.status');
 });
 
@@ -198,6 +204,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::get('special-requests', [SpecialRequestController::class, 'index'])->name('special-requests.index');
     Route::patch('special-requests/{specialRequest}/status', [SpecialRequestController::class, 'updateStatus'])->name('special-requests.updateStatus');
     Route::post('special-requests/{specialRequest}/assign-offer', [SpecialRequestController::class, 'assignOffer'])->name('special-requests.assign-offer');
+    Route::delete('special-requests/{specialRequest}', [SpecialRequestController::class, 'destroy'])->name('special-requests.destroy');
 
     Route::get('vendors/requests', [VendorRequestController::class, 'index'])->name('vendors.requests.index');
     Route::get('vendors/requests/{vendorProfile}', [VendorRequestController::class, 'show'])->name('vendors.requests.show');
@@ -220,6 +227,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
 
     // Brands Management
     Route::resource('brands', App\Http\Controllers\Admin\BrandController::class)->except(['show']);
+
+    Route::resource('delivery-countries', App\Http\Controllers\Admin\DeliveryCountryController::class)->except(['show']);
+    Route::post('delivery-countries/{deliveryCountry}/cities', [App\Http\Controllers\Admin\DeliveryCountryController::class, 'storeCity'])->name('delivery-countries.cities.store');
+    Route::patch('delivery-countries/{deliveryCountry}/cities/{deliveryCity}', [App\Http\Controllers\Admin\DeliveryCountryController::class, 'updateCity'])->name('delivery-countries.cities.update');
+    Route::delete('delivery-countries/{deliveryCountry}/cities/{deliveryCity}', [App\Http\Controllers\Admin\DeliveryCountryController::class, 'destroyCity'])->name('delivery-countries.cities.destroy');
 
     // Newsletter Subscribers
     Route::get('subscribers', [NewsletterController::class, 'index'])->name('subscribers.index');

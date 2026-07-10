@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ __('orders_page.invoice_title', ['id' => $order->id]) }} – Elixira</title>
+    <title>{{ __('orders_page.invoice_title', ['id' => $order->reference]) }} – Elixira</title>
     @include('partials.favicon')
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -350,7 +350,7 @@
                 <table class="inv-info-tbl">
                     <tr>
                         <td>{{ __('orders_page.invoice_number') }}</td>
-                        <td class="inv-num">INV-{{ $order->created_at->format('Y-m-d') }}-{{ str_pad($order->id, 4, '0', STR_PAD_LEFT) }}</td>
+                        <td class="inv-num">INV-{{ $order->created_at->format('Y-m-d') }}-{{ $order->reference }}</td>
                     </tr>
                     <tr>
                         <td>{{ __('orders_page.invoice_date') }}</td>
@@ -461,7 +461,7 @@
             const element = document.querySelector('.inv');
             const opt = {
                 margin:       [10, 10, 10, 10],
-                filename:     'Invoice-{{ $order->id }}.pdf',
+                filename:     'Invoice-{{ $order->reference }}.pdf',
                 image:        { type: 'jpeg', quality: 0.98 },
                 html2canvas:  { scale: 2, useCORS: true },
                 jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }

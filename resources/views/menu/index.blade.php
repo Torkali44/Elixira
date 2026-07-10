@@ -40,13 +40,16 @@
     .menu-products-grid {
         display: grid;
         grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 3rem;
+        gap: 2rem;
         justify-content: center;
-        align-items: stretch;
+        align-items: start;
     }
     .menu-products-grid .product-item {
         width: 100%;
         min-width: 0;
+    }
+    .menu-products-grid .elx-product-card {
+        height: auto;
     }
     @media (max-width: 1024px) {
         .menu-products-grid {
@@ -64,6 +67,12 @@
             margin: 0.35rem;
             font-size: 0.9rem;
         }
+    }
+    .menu-products-grid .elx-product-pricing__price-line--guest,
+    .menu-products-grid .elx-product-pricing__price-line--guest .elx-product-pricing__amount,
+    .menu-products-grid .elx-product-pricing__price-line--guest .elx-product-pricing__currency {
+        color: rgba(255, 255, 255, 0.42) !important;
+        text-decoration: line-through;
     }
 </style>
 @endsection
@@ -129,6 +138,10 @@
                     <p>{{ __('shop.not_available_in_country') }}</p>
                 </div>
             @endforelse
+            <div id="menu-category-empty" class="menu-empty-state" style="display: none;">
+                <i class="fas fa-hourglass-half"></i>
+                <p>{{ __('shop.category_coming_soon') }}</p>
+            </div>
         </div>
     </div>
 </div>
@@ -144,14 +157,21 @@
 
             const filter = btn.dataset.filter;
             const items = document.querySelectorAll('.product-item');
+            const categoryEmpty = document.getElementById('menu-category-empty');
+            let visibleCount = 0;
 
             items.forEach((item) => {
                 if (filter === 'all' || item.classList.contains(filter.substring(1))) {
                     item.style.display = 'block';
+                    visibleCount++;
                 } else {
                     item.style.display = 'none';
                 }
             });
+
+            if (categoryEmpty) {
+                categoryEmpty.style.display = (filter !== 'all' && visibleCount === 0) ? 'block' : 'none';
+            }
         });
     });
 </script>

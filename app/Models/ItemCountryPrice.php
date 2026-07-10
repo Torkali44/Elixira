@@ -10,9 +10,12 @@ class ItemCountryPrice extends Model
     protected $fillable = [
         'item_id',
         'country_code',
+        'size_en',
+        'size_ar',
         'member_price',
         'guest_price',
         'reward_points',
+        'stock',
     ];
 
     protected function casts(): array
@@ -21,11 +24,21 @@ class ItemCountryPrice extends Model
             'member_price' => 'decimal:2',
             'guest_price' => 'decimal:2',
             'reward_points' => 'integer',
+            'stock' => 'integer',
         ];
     }
 
     public function item(): BelongsTo
     {
         return $this->belongsTo(Item::class);
+    }
+
+    public function getLocalSizeAttribute(): ?string
+    {
+        if (app()->getLocale() === 'ar') {
+            return $this->size_ar ?: $this->size_en;
+        }
+
+        return $this->size_en ?: $this->size_ar;
     }
 }

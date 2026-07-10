@@ -31,20 +31,21 @@ class SpecialRequestController extends Controller
 
     public function index()
     {
-        session(['special_requests_last_viewed_at' => now()]);
+        SpecialRequest::markAllAdminRead();
 
         $totalRequests = SpecialRequest::count();
         $pendingRequestsCount = SpecialRequest::where('status', 'pending')->count();
         $notifiedRequestsCount = SpecialRequest::where('status', 'notified')->count();
 
-        // Top requested product name and count
         $topRequested = SpecialRequest::select('item_id', DB::raw('count(*) as count'))
             ->groupBy('item_id')
             ->orderBy('count', 'desc')
             ->with('item')
             ->first();
 
-        $topProductName = $topRequested && $topRequested->item ? $topRequested->item->name : 'N/A';
+        $topProductName = $topRequested && $topRequested->item
+            ? $topRequested->item->local_name
+            : __('admin.special_requests_admin.na');
         $topProductCount = $topRequested ? $topRequested->count : 0;
 
         $specialRequests = SpecialRequest::with(['item', 'user', 'offers' => function ($query) {
@@ -62,9 +63,12 @@ class SpecialRequestController extends Controller
             'status' => 'required|in:pending,notified',
         ]);
 
-        $specialRequest->update(['status' => $validated['status']]);
+        $specialRequest->update([
+            'status' => $validated['status'],
+            'admin_read_at' => $specialRequest->admin_read_at ?? now(),
+        ]);
 
-        return back()->with('success', 'Status updated successfully.');
+        return back()->with('success', __('admin.special_requests_admin.status_updated'));
     }
 
     public function assignOffer(Request $request, SpecialRequest $specialRequest)
@@ -74,7 +78,7 @@ class SpecialRequestController extends Controller
         ]);
 
         if (! $specialRequest->item) {
-            return back()->with('error', 'This request is no longer linked to an existing product.');
+            return back()->with('error', __('admin.special_requests_admin.product_missing'));
         }
 
         $normalizedPhone = $specialRequest->phone ? $this->normalizePhone($specialRequest->phone) : null;
@@ -105,21 +109,33 @@ class SpecialRequestController extends Controller
             'is_active' => true,
         ]);
 
-        $specialRequest->update(['status' => 'notified']);
+        $specialRequest->update([
+            'status' => 'notified',
+            'admin_read_at' => $specialRequest->admin_read_at ?? now(),
+        ]);
 
         try {
             if ($resolvedUser) {
                 UserNotifier::send($resolvedUser->id, 'special_request_offer', [
                     'quantity' => (string) $validated['quantity'],
-                    'product' => $specialRequest->item->name,
+                    'product' => $specialRequest->item->local_name,
                 ], route('menu.show', $specialRequest->item_id));
             }
         } catch (\Throwable $e) {
             \Log::error('Special request offer notification failed: '.$e->getMessage());
         }
 
-        return back()->with('success', 'Private offer has been assigned successfully.');
+        return back()->with('success', __('admin.special_requests_admin.offer_assigned'));
     }
+
+    public function destroy(SpecialRequest $specialRequest)
+    {
+        $specialRequest->offers()->delete();
+        $specialRequest->delete();
+
+        return back()->with('success', __('admin.special_requests_admin.deleted'));
+    }
+
 
     private function normalizePhone(string $phone): string
     {

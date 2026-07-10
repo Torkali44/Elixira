@@ -12,7 +12,7 @@ class OrderController extends Controller
 {
     public function index(Request $request)
     {
-        session(['orders_last_viewed_at' => now()]);
+        Order::markAllAdminRead();
         $query = Order::query();
 
         if ($request->filled('search')) {
@@ -21,6 +21,7 @@ class OrderController extends Controller
                 $q->where('customer_name', 'like', "%{$search}%")
                     ->orWhere('customer_phone', 'like', "%{$search}%")
                     ->orWhere('user_code', 'like', "%{$search}%")
+                    ->orWhere('reference', 'like', "%{$search}%")
                     ->orWhere('id', 'like', "%{$search}%");
             });
         }
@@ -39,7 +40,7 @@ class OrderController extends Controller
             }
         }
 
-        $orders = $query->latest()->paginate(20)->withQueryString();
+        $orders = $query->with('sharedShippingOrder')->latest()->paginate(20)->withQueryString();
 
         // Calculate statistics
         $stats = [
@@ -70,7 +71,8 @@ class OrderController extends Controller
 
     public function show(Order $order)
     {
-        $order->load('orderItems.item');
+        $order->markAdminRead();
+        $order->load(['orderItems.item', 'sharedShippingOrder', 'deliveryCity']);
 
         return view('admin.orders.show', compact('order'));
     }

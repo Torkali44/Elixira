@@ -172,6 +172,10 @@
                 flagImg.src = btn.getAttribute('data-flag') || flagImg.src;
                 codeEl.textContent = input.value;
                 closeAll();
+                input.dispatchEvent(new CustomEvent('elx-country-code-changed', {
+                    bubbles: true,
+                    detail: { code: input.value },
+                }));
             });
         });
     }

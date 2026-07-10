@@ -58,7 +58,7 @@ class ItemController extends Controller
             'warnings_ar' => 'nullable|string',
             'country_prices' => 'nullable|array',
             'reward_points' => 'nullable|integer|min:0',
-            'stock' => 'required|integer|min:0',
+            'stock' => 'nullable|integer|min:0',
             'image' => 'required|image|max:2048',
             'images.*' => 'image|max:2048',
         ]);
@@ -131,7 +131,7 @@ class ItemController extends Controller
             'warnings_ar' => 'nullable|string',
             'country_prices' => 'nullable|array',
             'reward_points' => 'nullable|integer|min:0',
-            'stock' => 'required|integer|min:0',
+            'stock' => 'nullable|integer|min:0',
             'image' => 'nullable|image|max:2048',
             'images.*' => 'image|max:2048',
         ]);

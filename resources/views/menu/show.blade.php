@@ -68,16 +68,121 @@
         .product-gallery { position: relative; top: 0; }
         .blog-section { padding: 2rem; }
     }
+
+    .product-title-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+        margin-bottom: 1.5rem;
+    }
+    .product-title-row .product-detail__title {
+        margin-bottom: 0;
+        flex: 1;
+        min-width: 0;
+    }
+    .product-size-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.55rem 1.1rem;
+        border-radius: 100px;
+        background: rgba(74, 200, 246, 0.1);
+        border: 1px solid rgba(74, 200, 246, 0.25);
+        color: var(--elx-cyan);
+        font-size: 0.95rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+    .product-size-badge-label {
+        color: rgba(255, 255, 255, 0.55);
+        font-weight: 500;
+    }
+    .product-size-select-wrap {
+        margin-top: 1.25rem;
+    }
+    .product-size-select-wrap label {
+        display: block;
+        color: var(--elx-light);
+        font-size: 0.9rem;
+        margin-bottom: 0.65rem;
+        font-weight: 600;
+    }
+    .product-size-select {
+        width: 100%;
+        padding: 1rem 1.4rem;
+        font-size: 1.05rem;
+        font-weight: 600;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--elx-border);
+        border-radius: 16px;
+        color: var(--elx-white);
+        cursor: pointer;
+        outline: none;
+        transition: var(--elx-transition);
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='%2399b5c5' viewBox='0 0 16 16'%3E%3Cpath d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 1.2rem center;
+        padding-right: 3rem;
+    }
+    [dir="rtl"] .product-size-select {
+        background-position: left 1.2rem center;
+        padding-right: 1.4rem;
+        padding-left: 3rem;
+    }
+    .product-size-select:focus {
+        border-color: var(--elx-cyan);
+        box-shadow: 0 0 0 3px rgba(74, 200, 246, 0.12);
+    }
+    .product-size-select option {
+        background: #13252d;
+        color: #fff;
+        padding: 0.75rem;
+    }
+    .elx-product-pricing__price-line--guest {
+        color: rgba(255, 255, 255, 0.42) !important;
+        text-decoration: line-through;
+        margin-top: 0.35rem;
+    }
+    .elx-product-pricing__price-line--guest .elx-product-pricing__amount,
+    .elx-product-pricing__price-line--guest .elx-product-pricing__currency {
+        color: rgba(255, 255, 255, 0.42) !important;
+        text-decoration: line-through;
+    }
 </style>
 @endsection
 
 @section('content')
 @php
+    $pricingService = app(\App\Support\ItemPricingService::class);
+    $resolvedStock = $pricingService->resolveStock($item, $selectedCountry ?? null, $selectedCountryPriceId ?? null);
     $privateQty = (int) ($privateOfferQuantities[$item->id] ?? 0);
     $hasPrivateAccess = $privateQty > 0;
-    $availableQty = $item->stock + $privateQty;
-    $pricingService = app(\App\Support\ItemPricingService::class);
-    $displayRewardPoints = $pricingService->resolveRewardPoints($item, $selectedCountry ?? null);
+    $availableQty = $resolvedStock + $privateQty;
+    $displayRewardPoints = $pricingService->resolveRewardPoints($item, $selectedCountry ?? null, $selectedCountryPriceId ?? null);
+    $activePrice = $pricingService->resolvePrice($item, auth()->user(), $selectedCountry ?? null, $selectedCountryPriceId ?? null);
+    $hasSizeOptions = ($countryVariants ?? collect())->isNotEmpty()
+        && (($countryVariants->count() > 1) || $countryVariants->contains(fn ($variant) => filled($variant->local_size)));
+    $currentSizeLabel = $selectedVariant?->local_size ?: $item->local_size;
+    $variantIsOutOfStock = $availableQty <= 0 && ! $hasPrivateAccess;
+    $variantPayload = ($countryVariants ?? collect())->map(function ($variant) use ($item, $pricingService, $selectedCountry, $privateQty) {
+        $stock = $pricingService->resolveStock($item, $selectedCountry, $variant->id);
+
+        return [
+            'id' => $variant->id,
+            'size' => $variant->local_size ?: __('shop.default_size'),
+            'stock' => $stock,
+            'max_qty' => $stock + $privateQty,
+            'member_price' => (float) $variant->member_price,
+            'guest_price' => (float) $variant->guest_price,
+            'points' => (int) ($variant->reward_points ?? 0),
+            'out_of_stock' => $stock <= 0 && $privateQty <= 0,
+        ];
+    })->values();
 
     $galleryImages = collect();
     if ($item->image) {
@@ -107,9 +212,9 @@
 
             {{-- Right: Info --}}
             <div class="product-info" data-animate>
-                <div class="stock-badge {{ ($item->stock > 0 || $hasPrivateAccess) ? 'stock-in' : 'stock-out' }}">
-                    <i class="fas {{ ($item->stock > 0 || $hasPrivateAccess) ? 'fa-check' : 'fa-times' }} me-1"></i>
-                    {{ $item->stock > 0 ? __('shop.in_stock_label', ['count' => $item->stock]) : ($hasPrivateAccess ? __('shop.private_access_available') : __('shop.out_of_stock')) }}
+                <div class="stock-badge {{ ($resolvedStock > 0 || $hasPrivateAccess) ? 'stock-in' : 'stock-out' }}">
+                    <i class="fas {{ ($resolvedStock > 0 || $hasPrivateAccess) ? 'fa-check' : 'fa-times' }} me-1"></i>
+                    {{ $resolvedStock > 0 ? __('shop.in_stock_label', ['count' => $resolvedStock]) : ($hasPrivateAccess ? __('shop.private_access_available') : __('shop.out_of_stock')) }}
                 </div>
 
                 {{-- Meta Tags: Category, Brand, Points --}}
@@ -158,16 +263,17 @@
                     @endif
                 </div>
 
-                @if(filled($item->local_size))
-                    <div class="product-detail__size">
-                        <span class="product-detail__size-label">{{ __('shop.size') }}:</span>
-                        <span class="product-detail__size-value">{{ $item->local_size }}</span>
-                    </div>
-                @endif
-                
-                <h1 class="elx-hero__title product-detail__title" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
-                    <span class="elx-hero__title-gradient">{{ $item->local_name }}</span>
-                </h1>
+                <div class="product-title-row">
+                    <h1 class="elx-hero__title product-detail__title" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
+                        <span class="elx-hero__title-gradient">{{ $item->local_name }}</span>
+                    </h1>
+                    @if(filled($currentSizeLabel))
+                        <div class="product-size-badge" id="product-size-badge">
+                            <span class="product-size-badge-label">{{ __('shop.size') }}:</span>
+                            <span id="product-size-display">{{ $currentSizeLabel }}</span>
+                        </div>
+                    @endif
+                </div>
 
                 @php
                     $itemRating = $item->average_rating ?: 0;
@@ -197,34 +303,64 @@
                     @endauth
                 </div>
                 
-                <div style="margin-bottom: 2rem;">
+                <div style="margin-bottom: 2rem;" id="product-pricing-block">
                     <x-product-pricing
                         :item="$item"
                         :selected-country="$selectedCountry ?? null"
+                        :country-price-id="$selectedCountryPriceId ?? null"
                         size="2rem"
                         smallSize="1rem"
                         countrySelector="dropdown"
                         countryInputId="product-show-country"
                     />
+                    @if($hasSizeOptions)
+                        <div class="product-size-select-wrap">
+                            <label for="product-size-select">{{ __('shop.select_size') }}</label>
+                            <select id="product-size-select" class="product-size-select">
+                                @foreach($countryVariants as $variant)
+                                    @php
+                                        $variantStock = $pricingService->resolveStock($item, $selectedCountry, $variant->id);
+                                    @endphp
+                                    <option value="{{ $variant->id }}"
+                                        @selected($selectedCountryPriceId === $variant->id)>
+                                        {{ $variant->local_size ?: __('shop.default_size') }}
+                                        @if($variantStock <= 0)
+                                            ({{ __('shop.out_of_stock') }})
+                                        @else
+                                            ({{ __('shop.in_stock', ['count' => $variantStock]) }})
+                                        @endif
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                    @endif
                 </div>
 
-                @if($item->stock <= 0 && !$hasPrivateAccess)
+                <div id="product-purchase-oos" style="margin-bottom: 2rem; {{ $variantIsOutOfStock ? '' : 'display:none;' }}">
+                    <p id="product-oos-message" style="color: var(--elx-gray); margin-bottom: 1rem; font-size: 0.95rem;">
+                        {{ __('shop.size_out_of_stock_hint') }}
+                    </p>
                     <button type="button" class="elx-btn" style="width: 100%; justify-content: center; padding: 1.2rem; font-size: 1.2rem; background: rgba(255, 77, 77, 0.1); color: #ff4d4d; border: 1px solid rgba(255, 77, 77, 0.3);" onclick="showSpecialRequestModal({{ $item->id }}, '{{ addslashes($item->local_name) }}')">
                         <i class="fas fa-hand-holding-heart"></i> {{ __('home.private_order') }}
                     </button>
-                @else
-                    <form action="{{ route('cart.add') }}" method="POST">
+                </div>
+
+                <div id="product-purchase-instock" style="{{ $variantIsOutOfStock ? 'display:none;' : '' }}">
+                    <form action="{{ route('cart.add') }}" method="POST" id="add-to-cart-form">
                         @csrf
                         <input type="hidden" name="item_id" value="{{ $item->id }}">
-                        <input type="hidden" name="country_code" value="{{ $selectedCountry }}" id="product-show-country">
-                        
+                        <input type="hidden" name="country_code" value="{{ $selectedCountry }}" id="product-show-country-hidden">
+                        @if($selectedCountryPriceId || $hasSizeOptions)
+                            <input type="hidden" name="country_price_id" value="{{ $selectedCountryPriceId ?? $countryVariants->first()?->id }}" id="product-country-price-id">
+                        @endif
+
                         <div style="display: flex; gap: 1rem; align-items: center; margin-bottom: 2rem;">
                             <div style="display: flex; align-items: center; background: rgba(255,255,255,0.05); border: 1px solid var(--elx-border); border-radius: 100px; padding: 0.5rem 1rem;">
                                 <button type="button" onclick="const i = this.nextElementSibling; if(i.value > 1) i.value--;" style="background: none; border: none; color: white; cursor: pointer; padding: 0 0.5rem;">&minus;</button>
-                                <input type="number" name="quantity" id="quantity" value="1" min="1" max="{{ $availableQty }}" style="width: 50px; text-align: center; background: none; border: none; color: white; font-weight: 700; outline: none;">
-                                <button type="button" onclick="const i = this.previousElementSibling; if(i.value < {{ $availableQty }}) i.value++;" style="background: none; border: none; color: white; cursor: pointer; padding: 0 0.5rem;">+</button>
+                                <input type="number" name="quantity" id="quantity" value="1" min="1" max="{{ max(1, $availableQty) }}" style="width: 50px; text-align: center; background: none; border: none; color: white; font-weight: 700; outline: none;">
+                                <button type="button" id="quantity-increase-btn" onclick="const i = this.previousElementSibling; if(i.value < parseInt(i.max || '1', 10)) i.value++;" style="background: none; border: none; color: white; cursor: pointer; padding: 0 0.5rem;">+</button>
                             </div>
-                            <span style="color: var(--elx-gray); font-size: 0.9rem;">{{ __('shop.maximum_units', ['count' => $availableQty]) }}</span>
+                            <span id="product-max-qty-label" style="color: var(--elx-gray); font-size: 0.9rem;">{{ __('shop.maximum_units', ['count' => $availableQty]) }}</span>
                         </div>
 
                         <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
@@ -236,6 +372,12 @@
                             </button>
                         </div>
                     </form>
+                </div>
+
+                @if(!$hasSizeOptions && $resolvedStock <= 0 && !$hasPrivateAccess)
+                    <button type="button" class="elx-btn" style="width: 100%; justify-content: center; padding: 1.2rem; font-size: 1.2rem; background: rgba(255, 77, 77, 0.1); color: #ff4d4d; border: 1px solid rgba(255, 77, 77, 0.3);" onclick="showSpecialRequestModal({{ $item->id }}, '{{ addslashes($item->local_name) }}')">
+                        <i class="fas fa-hand-holding-heart"></i> {{ __('home.private_order') }}
+                    </button>
                 @endif
 
                 @include('partials.product-detail-accordions', ['model' => $item])
@@ -817,4 +959,91 @@
         border: 1px dashed rgba(255, 255, 255, 0.1);
     }
 </style>
+
+@if($hasSizeOptions)
+<script>
+(function () {
+    const sizeSelect = document.getElementById('product-size-select');
+    if (!sizeSelect) return;
+
+    const variants = @json($variantPayload);
+    const variantMap = Object.fromEntries(variants.map((variant) => [String(variant.id), variant]));
+    const currencySymbol = @json($pricingService->currencySymbol($selectedCountry ?? null));
+    const isRtl = @json(app()->getLocale() === 'ar');
+    const maxUnitsTemplate = @json(__('shop.maximum_units', ['count' => ':count']));
+    const outOfStockHint = @json(__('shop.size_out_of_stock_hint'));
+    const hasOtherSizesHint = @json(__('shop.try_another_size_hint'));
+
+    function formatPrice(amount) {
+        const formatted = Number(amount).toFixed(2);
+        return isRtl ? formatted + ' ' + currencySymbol : currencySymbol + ' ' + formatted;
+    }
+
+    function applyVariant(variantId) {
+        const variant = variantMap[String(variantId)];
+        if (!variant) return;
+
+        const memberAmount = document.getElementById('product-member-price');
+        if (memberAmount) {
+            memberAmount.textContent = variant.member_price.toFixed(2);
+        }
+
+        const guestWrap = document.getElementById('product-guest-price-wrap');
+        const guestAmount = document.getElementById('product-guest-price');
+        if (guestWrap && guestAmount) {
+            if (variant.guest_price > variant.member_price) {
+                guestAmount.textContent = variant.guest_price.toFixed(2);
+                guestWrap.style.display = '';
+            } else {
+                guestWrap.style.display = 'none';
+            }
+        }
+
+        const sizeDisplay = document.getElementById('product-size-display');
+        if (sizeDisplay) {
+            sizeDisplay.textContent = variant.size;
+        }
+
+        const hiddenId = document.getElementById('product-country-price-id');
+        if (hiddenId) {
+            hiddenId.value = variant.id;
+        }
+
+        const purchaseOos = document.getElementById('product-purchase-oos');
+        const purchaseInstock = document.getElementById('product-purchase-instock');
+        const oosMessage = document.getElementById('product-oos-message');
+        const maxQtyLabel = document.getElementById('product-max-qty-label');
+        const qtyInput = document.getElementById('quantity');
+        const hasOtherInStock = variants.some((entry) => entry.id !== variant.id && entry.max_qty > 0);
+
+        if (variant.out_of_stock) {
+            if (purchaseOos) purchaseOos.style.display = '';
+            if (purchaseInstock) purchaseInstock.style.display = 'none';
+            if (oosMessage) {
+                oosMessage.textContent = hasOtherInStock ? hasOtherSizesHint : outOfStockHint;
+            }
+        } else {
+            if (purchaseOos) purchaseOos.style.display = 'none';
+            if (purchaseInstock) purchaseInstock.style.display = '';
+            if (maxQtyLabel) {
+                maxQtyLabel.textContent = maxUnitsTemplate.replace(':count', String(variant.max_qty));
+            }
+            if (qtyInput) {
+                qtyInput.max = Math.max(1, variant.max_qty);
+                qtyInput.min = 1;
+                if (parseInt(qtyInput.value, 10) > variant.max_qty) {
+                    qtyInput.value = Math.max(1, variant.max_qty);
+                }
+            }
+        }
+    }
+
+    sizeSelect.addEventListener('change', function () {
+        applyVariant(this.value);
+    });
+
+    applyVariant(sizeSelect.value);
+})();
+</script>
+@endif
 @endsection

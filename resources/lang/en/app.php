@@ -48,6 +48,7 @@ return [
     'admin_btn' => 'Admin',
     'vendor_portal' => 'Vendor Portal',
     'notifications' => 'Notifications',
+    'view_details' => 'View details',
     'mark_all_read' => 'Mark all as read',
     'no_notifications' => 'No notifications yet.',
     'notifications_marked_read' => 'All notifications marked as read.',

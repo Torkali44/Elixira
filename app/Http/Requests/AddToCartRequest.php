@@ -15,7 +15,9 @@ class AddToCartRequest extends FormRequest
     {
         return [
             'item_id' => 'required|exists:items,id',
-            'quantity' => 'nullable|integer|min:1|max:50'
+            'quantity' => 'nullable|integer|min:1|max:50',
+            'country_code' => 'nullable|in:KSA,UAE',
+            'country_price_id' => 'nullable|integer|exists:item_country_prices,id',
         ];
     }
 

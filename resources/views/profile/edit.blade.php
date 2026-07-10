@@ -108,6 +108,17 @@
         font-size: 0.92rem;
     }
 
+    .account-sidebar-code {
+        word-break: break-word;
+        overflow-wrap: anywhere;
+        max-width: 100%;
+        min-width: 0;
+    }
+
+    .account-profile-card > div {
+        min-width: 0;
+    }
+
     .account-grid {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -616,8 +627,10 @@
                                     </span>
                                 </div>
                             @endif
-                            <h2 style="margin: 0.9rem 0 0.25rem; font-size: 1.5rem;">{{ $user->name }}</h2>
-                            <p class="account-muted">{{ $user->email }}</p>
+                            <h2 style="margin: 0.9rem 0 0.25rem; font-size: 1.5rem; word-break: break-word;">{{ $user->name }}</h2>
+                            @if($user->user_code)
+                                <p class="account-muted account-sidebar-code">{{ $user->user_code }}</p>
+                            @endif
                         </div>
                     </div>
 

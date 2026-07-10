@@ -3,7 +3,7 @@
 return [
     'page_title' => 'Elixira - Superfoods, Science & Self-Care',
     'hero_title' => 'Welcome to Elixira',
-    'hero_subtitle' => 'A blend of superfoods, science, and self-care rituals that restores your glow, balance your energy, and elevate your daily wellbeing...',
+    'hero_subtitle' => 'Clean, potent skincare rooted in nature — curated for your daily ritual.',
     'enter_store' => 'Enter Store',
     'go_cart' => 'Go Cart',
     'products_count' => ':count products',

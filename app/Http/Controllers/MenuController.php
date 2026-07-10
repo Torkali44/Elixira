@@ -19,12 +19,6 @@ class MenuController extends Controller
         }
 
         $categories = Category::query()
-            ->whereHas('items', function ($query) use ($selectedCountry) {
-                $query->publiclyVisible()
-                    ->whereHas('countryPrices', function ($countryQuery) use ($selectedCountry) {
-                        $countryQuery->where('country_code', $selectedCountry);
-                    });
-            })
             ->orderBy('name')
             ->get();
 
@@ -57,6 +51,19 @@ class MenuController extends Controller
 
         $selectedCountry = $pricingService->resolveCountryCodeForItem($item, request('country'));
 
+        $countryVariants = $pricingService->variantsForCountry($item, $selectedCountry);
+        $requestedVariantId = request()->integer('country_price_id') ?: null;
+
+        if ($requestedVariantId && $pricingService->findVariant($item, $requestedVariantId)?->country_code === $selectedCountry) {
+            $selectedCountryPriceId = $requestedVariantId;
+        } else {
+            $selectedCountryPriceId = $pricingService->resolveDefaultVariant($item, $selectedCountry)?->id;
+        }
+
+        $selectedVariant = $selectedCountryPriceId
+            ? $pricingService->findVariant($item, $selectedCountryPriceId)
+            : null;
+
         // Find other approved products with the same name sold by different brands
         $otherSellers = Item::with('brandModel')
             ->where('name', $item->name)
@@ -79,6 +86,9 @@ class MenuController extends Controller
             'otherSellers',
             'privateOfferQuantities',
             'selectedCountry',
+            'countryVariants',
+            'selectedCountryPriceId',
+            'selectedVariant',
         ));
     }
 

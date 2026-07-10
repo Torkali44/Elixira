@@ -21,11 +21,19 @@
         $heroBg = $heroSection?->image
             ? asset('storage/' . $heroSection->image)
             : 'https://framerusercontent.com/images/8dBa4covRirMxiSicaHoAjMUTLw.jpeg?width=4000&height=1715';
-        $heroTitle = $heroSection?->title ?: __('home.hero_title');
-        $heroSubtitle = $heroSection?->subtitle ?: __('home.hero_subtitle');
-        $primaryLabel = $heroSection?->button_label ?: __('home.enter_store');
+        $heroTitle = app()->getLocale() === 'ar'
+            ? __('home.hero_title')
+            : ($heroSection?->title ?: __('home.hero_title'));
+        $heroSubtitle = app()->getLocale() === 'ar'
+            ? __('home.hero_subtitle')
+            : ($heroSection?->subtitle ?: __('home.hero_subtitle'));
+        $primaryLabel = app()->getLocale() === 'ar'
+            ? __('home.enter_store')
+            : ($heroSection?->button_label ?: __('home.enter_store'));
         $primaryUrl = $heroSection?->button_url ? (\Illuminate\Support\Str::startsWith($heroSection->button_url, ['http://', 'https://']) ? $heroSection->button_url : url($heroSection->button_url)) : route('menu.index');
-        $secondaryLabel = $heroExtras['secondary_button_label'] ?? __('home.go_cart');
+        $secondaryLabel = app()->getLocale() === 'ar'
+            ? __('home.go_cart')
+            : ($heroExtras['secondary_button_label'] ?? __('home.go_cart'));
         $secondaryUrl = isset($heroExtras['secondary_button_url'])
             ? (\Illuminate\Support\Str::startsWith($heroExtras['secondary_button_url'], ['http://', 'https://']) ? $heroExtras['secondary_button_url'] : url($heroExtras['secondary_button_url']))
             : route('cart.index');
@@ -137,12 +145,16 @@
             grid-template-columns: repeat(4, minmax(0, 1fr));
             gap: 3rem;
             justify-content: center;
-            align-items: stretch;
+            align-items: start;
         }
 
         .menu-products-grid .product-item {
             width: 100%;
             min-width: 0;
+        }
+
+        .menu-products-grid .elx-product-card {
+            height: auto;
         }
 
         /* Responsive Grid for Products */

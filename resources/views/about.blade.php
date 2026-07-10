@@ -30,7 +30,7 @@
                         </div>
                     </div>
                     <div style="flex: 1; min-width: 320px; border-radius: 40px; overflow: hidden; height: 500px; box-shadow: 0 30px 60px rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.05);">
-                        <img src="https://images.unsplash.com/photo-1556228578-0d85b1a4d571?auto=format&fit=crop&w=1000&q=80"
+                        <img src="{{ asset('images/about.jpg') }}"
                              alt="Natural Ingredients" style="width: 100%; height: 100%; object-fit: cover;">
                     </div>
                 </div>

@@ -65,7 +65,7 @@ class DxnTeamRequestController extends Controller
 
         $this->notifyAdmins($application);
 
-        return $this->redirectAfterSubmit($user, $application, __('dxn_team.form_success'));
+        return $this->redirectAfterSubmit($application, __('dxn_team.form_success'));
     }
 
     public function storeExistingMember(StoreDxnExistingMemberRequest $request): RedirectResponse
@@ -85,7 +85,7 @@ class DxnTeamRequestController extends Controller
 
         $this->notifyAdmins($application);
 
-        return $this->redirectAfterSubmit($user, $application, __('dxn_team.existing_member_success'));
+        return $this->redirectAfterSubmit($application, __('dxn_team.existing_member_success'));
     }
 
     public function status(Request $request, DxnTeamRequest $application): View|RedirectResponse
@@ -96,11 +96,14 @@ class DxnTeamRequestController extends Controller
             return redirect()->route('login');
         }
 
-        $ownsApplication = $application->user_id === $user->id
-            || ($application->user_id === null && strcasecmp($application->email, $user->email) === 0);
-
-        if (! $ownsApplication) {
-            abort(403);
+        if (! $this->userOwnsApplication($user, $application)) {
+            if ($this->canClaimApplication($user, $application)) {
+                $application->update(['user_id' => $user->id]);
+            } else {
+                return redirect()
+                    ->route('dxn-distributor.create')
+                    ->with('error', __('dxn_team.status_access_denied'));
+            }
         }
 
         $dxnService = app(DxnApplicationService::class);
@@ -122,18 +125,46 @@ class DxnTeamRequestController extends Controller
         }
     }
 
-    protected function redirectAfterSubmit(?User $user, DxnTeamRequest $application, string $message): RedirectResponse
+    protected function redirectAfterSubmit(DxnTeamRequest $application, string $message): RedirectResponse
     {
         $whatsAppUrl = app(DxnApplicationService::class)->whatsAppUrlForApplication($application);
 
-        if ($user) {
-            return redirect()->route('dxn-distributor.status', $application)
-                ->with('success', $message)
-                ->with('whatsapp_url', $whatsAppUrl);
+        return redirect()
+            ->route('dxn-distributor.create')
+            ->with('success', $message)
+            ->with('whatsapp_url', $whatsAppUrl)
+            ->with('dxn_application_submitted', true);
+    }
+
+    protected function userOwnsApplication(User $user, DxnTeamRequest $application): bool
+    {
+        if ($application->user_id !== null) {
+            return (int) $application->user_id === (int) $user->id;
         }
 
-        return redirect()->route('dxn-distributor.create')
-            ->with('success', $message)
-            ->with('whatsapp_url', $whatsAppUrl);
+        return strcasecmp((string) $application->email, (string) $user->email) === 0
+            || $this->phonesMatch((string) $user->phone, (string) $application->phone);
+    }
+
+    protected function canClaimApplication(User $user, DxnTeamRequest $application): bool
+    {
+        if ($application->user_id !== null) {
+            return false;
+        }
+
+        return strcasecmp((string) $application->email, (string) $user->email) === 0
+            || $this->phonesMatch((string) $user->phone, (string) $application->phone);
+    }
+
+    protected function phonesMatch(?string $left, ?string $right): bool
+    {
+        $leftDigits = preg_replace('/\D+/', '', (string) $left) ?? '';
+        $rightDigits = preg_replace('/\D+/', '', (string) $right) ?? '';
+
+        if ($leftDigits === '' || $rightDigits === '') {
+            return false;
+        }
+
+        return str_ends_with($leftDigits, $rightDigits) || str_ends_with($rightDigits, $leftDigits);
     }
 }

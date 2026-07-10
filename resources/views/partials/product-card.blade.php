@@ -1,16 +1,20 @@
 @php
     $privateQty = (int) ($privateOfferQuantities[$product->id] ?? 0);
     $hasPrivateAccess = $privateQty > 0;
-    $isOutOfStock = $product->stock <= 0 && !$hasPrivateAccess;
     $pricingService = app(\App\Support\ItemPricingService::class);
     $cardCountries = $pricingService->availableCountryCodes($product);
     $cardCountry = $pricingService->resolveCountryCodeForItem($product, $selectedCountry ?? request('country')) ?? $pricingService->detectUserCountry();
-    $canAddToCart = count($cardCountries) > 0 && !$isOutOfStock;
-    $cardRewardPoints = $pricingService->resolveRewardPoints($product, $cardCountry);
+    $defaultVariant = $pricingService->resolveDefaultVariant($product, $cardCountry);
+    $countryPriceId = $defaultVariant?->id;
+    $countryStock = $pricingService->resolveStock($product, $cardCountry, $countryPriceId);
+    $hasAnyCountryStock = $pricingService->hasStockInCountry($product, $cardCountry);
+    $isOutOfStock = ! $hasAnyCountryStock && ! $hasPrivateAccess;
+    $canAddToCart = count($cardCountries) > 0 && ! $isOutOfStock;
+    $cardRewardPoints = $pricingService->resolveRewardPoints($product, $cardCountry, $countryPriceId);
 @endphp
 
-<div class="elx-product-card" data-animate onclick="window.location='{{ route('menu.show', $product->id) }}'">
-    <a href="{{ route('menu.show', $product->id) }}" class="elx-product-card__image-container" onclick="event.stopPropagation();">
+<div class="elx-product-card" data-animate onclick="window.location='{{ route('menu.show', $product->id) }}?country={{ $cardCountry }}{{ $countryPriceId ? '&country_price_id='.$countryPriceId : '' }}'">
+    <a href="{{ route('menu.show', $product->id) }}?country={{ $cardCountry }}{{ $countryPriceId ? '&country_price_id='.$countryPriceId : '' }}" class="elx-product-card__image-container" onclick="event.stopPropagation();">
         @if($product->image)
             <img src="{{ $product->image_url }}" alt="{{ $product->local_name }}" width="400" height="400" loading="lazy" decoding="async" @class(['is-grayscale' => $isOutOfStock])>
         @else
@@ -23,11 +27,11 @@
             <div class="elx-product-card__badge elx-product-card__badge--danger">
                 <span>{{ __('shop.out_of_stock') }}</span>
             </div>
-        @elseif($product->stock <= 0 && $hasPrivateAccess)
+        @elseif($countryStock <= 0 && $hasPrivateAccess)
             <div class="elx-product-card__badge elx-product-card__badge--private">
                 <span>{{ __('shop.private_access') }}</span>
             </div>
-        @elseif($product->stock <= 5)
+        @elseif($countryStock <= 5 && $countryStock > 0)
             <div class="elx-product-card__badge">
                 <span>{{ __('shop.limited') }}</span>
             </div>
@@ -35,12 +39,12 @@
     </a>
 
     <div class="elx-product-card__info">
-        <a href="{{ route('menu.show', $product->id) }}" class="elx-product-card__name-link" onclick="event.stopPropagation();">
+        <a href="{{ route('menu.show', $product->id) }}?country={{ $cardCountry }}{{ $countryPriceId ? '&country_price_id='.$countryPriceId : '' }}" class="elx-product-card__name-link" onclick="event.stopPropagation();">
             <h3 class="elx-product-card__name">{{ $product->local_name }}</h3>
         </a>
 
         <div class="elx-product-card__price">
-            <x-product-pricing :item="$product" :selectedCountry="$cardCountry" :showSelector="false" size="1.05rem" smallSize="0.8rem" />
+            <x-product-pricing :item="$product" :selectedCountry="$cardCountry" :countryPriceId="$countryPriceId" :showSelector="false" size="1.05rem" smallSize="0.8rem" />
         </div>
 
         <div class="elx-product-card__meta">
@@ -69,7 +73,7 @@
                 </span>
             @endif
             <span class="elx-product-card__tag elx-product-card__tag--stock {{ $isOutOfStock ? 'is-out' : '' }}">
-                <i class="fas fa-box"></i>{{ $isOutOfStock ? __('shop.out_of_stock') : ($product->stock > 0 ? __('shop.in_stock', ['count' => $product->stock]) : __('shop.private_access_short')) }}
+                <i class="fas fa-box"></i>{{ $isOutOfStock ? __('shop.out_of_stock') : ($countryStock > 0 ? __('shop.in_stock', ['count' => $countryStock]) : __('shop.private_access_short')) }}
             </span>
         </div>
 
@@ -86,7 +90,10 @@
                     @csrf
                     <input type="hidden" name="item_id" value="{{ $product->id }}">
                     <input type="hidden" name="quantity" value="1">
-                    <input type="hidden" name="country_code" value="{{ $cardCountry }}" id="product-country-{{ $product->id }}">
+                    <input type="hidden" name="country_code" value="{{ $cardCountry }}">
+                    @if($countryPriceId)
+                        <input type="hidden" name="country_price_id" value="{{ $countryPriceId }}">
+                    @endif
                     <button type="button" class="elx-product-card__add-btn" onclick="addToCartAjax(this, event);">
                         <i class="fas fa-cart-plus"></i> {{ __('home.add_to_cart') }}
                     </button>

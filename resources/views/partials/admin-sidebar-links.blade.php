@@ -86,6 +86,10 @@
         <span class="badge bg-danger rounded-pill">{{ $newBrandsCount }}</span>
     @endif
 </a>
+<a href="{{ route('admin.delivery-countries.index') }}" class="dashboard-nav-link {{ request()->routeIs('admin.delivery-countries.*') ? 'active' : '' }}">
+    <i class="fas fa-truck"></i>
+    <span>{{ __('admin.nav.delivery_zones') }}</span>
+</a>
 @if(Route::has('admin.faqs.index'))
     <a href="{{ route('admin.faqs.index') }}" class="dashboard-nav-link {{ request()->routeIs('admin.faqs.*') ? 'active' : '' }}">
         <i class="fas fa-question-circle"></i>

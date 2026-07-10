@@ -32,7 +32,7 @@ return [
     'points_history' => 'سجل النقاط',
     'points_from' => 'مكتسبة من',
     'no_points_yet' => 'لم تحصل على نقاط مكافآت بعد. اشترِ منتجات لبدء جمع النقاط!',
-    'points_order' => 'الطلب رقم :id',
+    'points_order' => 'كود الطلب :id',
     'account_snapshot' => 'ملخص الحساب',
     'member_since' => 'عضو منذ',
     'recently_joined' => 'انضم مؤخراً',

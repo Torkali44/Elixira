@@ -13,7 +13,28 @@ class SpecialRequest extends Model
         'phone',
         'email',
         'status',
+        'admin_read_at',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'admin_read_at' => 'datetime',
+        ];
+    }
+
+    public function markAdminRead(): void
+    {
+        if ($this->admin_read_at === null) {
+            $this->update(['admin_read_at' => now()]);
+        }
+    }
+
+    public static function markAllAdminRead(): void
+    {
+        static::query()->whereNull('admin_read_at')->update(['admin_read_at' => now()]);
+    }
+
 
     public function item()
     {

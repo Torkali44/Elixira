@@ -31,18 +31,14 @@ class CheckoutRequest extends FormRequest
 
     public function rules(): array
     {
-        $userCodeRules = ['nullable', 'string', 'max:100', 'regex:/^[A-Z0-9_-]+$/'];
-
-        if ($this->user() && ! $this->user()->user_code) {
-            $userCodeRules[] = Rule::unique('users', 'user_code');
-        }
-
         return [
             'customer_name' => ['required', 'string', 'min:2', 'max:255', 'regex:/^[\pL\s.\'-]+$/u'],
             'phone_number' => ['required', 'string', 'regex:/^[0-9]{7,15}$/'],
             'country_code' => ['required', 'string', 'in:+966,+971'],
-            'user_code' => $userCodeRules,
+            'user_code' => ['required', 'string', 'max:100', 'regex:/^[A-Z0-9_-]+$/'],
             'address' => ['required', 'string', 'min:10', 'max:500'],
+            'delivery_city_id' => ['nullable', 'integer', Rule::exists('delivery_cities', 'id')->where('is_active', true)],
+            'shared_shipping_order_id' => ['nullable', 'integer', 'exists:orders,id'],
             'notes' => ['nullable', 'string', 'max:1000'],
         ];
     }
@@ -58,6 +54,7 @@ class CheckoutRequest extends FormRequest
             'phone_number.regex' => 'Enter a valid phone number using 7 to 15 digits.',
             'country_code.required' => 'Please choose your country code.',
             'country_code.in' => 'Please choose a valid country code.',
+            'user_code.required' => __('cart_page.code_required'),
             'user_code.regex' => 'Member codes may only contain letters, numbers, underscores, and dashes.',
             'user_code.unique' => 'This member code is already assigned to another account.',
             'address.required' => 'A delivery address is required.',

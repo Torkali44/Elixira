@@ -1,6 +1,6 @@
 @extends('layouts.framer')
 
-@section('title', __('orders_page.order_title', ['id' => $order->id]))
+@section('title', __('orders_page.order_title', ['id' => $order->reference]))
 
 @section('head')
 <style>
@@ -235,7 +235,7 @@
         <div class="account-order-page">
             <div class="elx-section__header" data-animate>
                 <h1 class="elx-hero__title">
-                    <span class="elx-hero__title-gradient">{{ __('orders_page.order_title', ['id' => $order->id]) }}</span>
+                    <span class="elx-hero__title-gradient">{{ __('orders_page.order_title', ['id' => $order->reference]) }}</span>
                 </h1>
                 <p class="elx-hero__subtitle">{{ $order->created_at->format('F j, Y \\a\\t g:i A') }}</p>
             </div>
@@ -331,15 +331,15 @@
 
                         <div class="account-order-block" style="margin-top: 1rem;">
                             <div class="account-order-row">
-                                <span>Order number</span>
-                                <strong>#{{ $order->id }}</strong>
+                                <span>{{ __('orders_page.order_number') }}</span>
+                                <strong>{{ $order->reference }}</strong>
                             </div>
                             <div class="account-order-row">
-                                <span>Placed on</span>
+                                <span>{{ __('orders_page.placed_on') }}</span>
                                 <strong>{{ $order->created_at->format('M j, Y') }}</strong>
                             </div>
                             <div class="account-order-row">
-                                <span>Total amount</span>
+                                <span>{{ __('orders_page.total_amount') }}</span>
                                 <strong>﷼ {{ number_format($order->total_amount, 2) }}</strong>
                             </div>
                         </div>
