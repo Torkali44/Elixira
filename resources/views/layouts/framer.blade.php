@@ -431,11 +431,9 @@
                                 </div>
                                 <div class="elx-nav__notifications-list" style="max-height: 350px; overflow-y: auto;">
                                     @forelse($navRecentNotifications as $notif)
-                                        <div class="elx-nav__notifications-item {{ $notif->is_read ? '' : 'unread' }}"
-                                             data-read-url="{{ route('notifications.read', $notif->id) }}"
-                                             data-redirect-url="{{ $notif->url ?: route('home') }}"
-                                             onclick="handleNotificationClick(event, this)"
-                                             style="padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.08); cursor: pointer; transition: background 0.25s; background: {{ $notif->is_read ? 'rgba(0, 0, 0, 0.2)' : 'rgba(74, 200, 246, 0.12)' }}; text-align: left;">
+                                        <a href="{{ route('notifications.open', $notif) }}"
+                                           class="elx-nav__notifications-item {{ $notif->is_read ? '' : 'unread' }}"
+                                           style="display:block; padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.08); cursor: pointer; transition: background 0.25s; background: {{ $notif->is_read ? 'rgba(0, 0, 0, 0.2)' : 'rgba(74, 200, 246, 0.12)' }}; text-align: start; text-decoration: none; color: inherit;">
                                             <div style="display: flex; align-items: start; gap: 8px;">
                                                 @if(!$notif->is_read)
                                                     <span class="unread-dot" style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background-color: #4ac8f6; box-shadow: 0 0 8px #4ac8f6; margin-top: 6px; flex-shrink: 0;"></span>
@@ -446,7 +444,7 @@
                                                     <div class="notif-time" style="color: rgba(255,255,255,0.35); font-size: 0.7rem;">{{ $notif->created_at->diffForHumans() }}</div>
                                                 </div>
                                             </div>
-                                        </div>
+                                        </a>
                                     @empty
                                         <div class="elx-nav__notifications-empty" style="padding: 32px 16px; text-align: center; color: rgba(255,255,255,0.4); font-size: 0.85rem;">
                                             <i class="fas fa-bell-slash" style="display: block; font-size: 1.8rem; margin-bottom: 10px; opacity: 0.4;"></i>
@@ -1038,92 +1036,70 @@
             }
         });
 
-        function markAllNotificationsAsRead(event) {
-            event.preventDefault();
-            event.stopPropagation();
-            fetch("{{ route('notifications.read-all') }}", {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    'Accept': 'application/json'
-                }
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    const badge = document.querySelector('.elx-nav__notifications-badge');
-                    if (badge) badge.remove();
-                    document.querySelectorAll('.elx-nav__notifications-item').forEach(item => {
-                        item.style.background = 'rgba(0, 0, 0, 0.2)';
-                        item.classList.remove('unread');
-                        const title = item.querySelector('.notif-title');
-                        if (title) {
-                            title.style.color = '#8fa4af';
-                            title.style.fontWeight = 'normal';
-                        }
-                        const dot = item.querySelector('.unread-dot');
-                        if (dot) dot.remove();
-                    });
-                    const clearBtn = document.querySelector('.elx-nav__notifications-clear');
-                    if (clearBtn) clearBtn.remove();
+        function updateNotificationBadges(remaining) {
+            document.querySelectorAll('.elx-nav__notifications-badge').forEach((badge) => {
+                if (remaining <= 0) {
+                    badge.remove();
+                } else {
+                    badge.textContent = remaining;
                 }
             });
         }
 
-        function handleNotificationClick(event, element) {
-            event.preventDefault();
-            event.stopPropagation();
-
-            const readUrl = element.dataset.readUrl;
-            const redirectUrl = element.dataset.redirectUrl;
-            const title = element.querySelector('.notif-title')?.textContent?.trim() || @json(__('popups.success_title'));
-            const message = element.querySelector('.notif-message')?.textContent?.trim() || '';
-
-            element.classList.remove('unread');
-            element.style.background = 'rgba(0, 0, 0, 0.2)';
-            const unreadDot = element.querySelector('.unread-dot');
+        function styleNotificationAsRead(item) {
+            item.classList.remove('unread');
+            item.style.background = 'rgba(0, 0, 0, 0.2)';
+            const unreadDot = item.querySelector('.unread-dot');
             if (unreadDot) {
                 unreadDot.remove();
             }
-            const titleEl = element.querySelector('.notif-title');
+            const titleEl = item.querySelector('.notif-title');
             if (titleEl) {
                 titleEl.style.color = '#8fa4af';
                 titleEl.style.fontWeight = 'normal';
             }
+        }
 
-            fetch(readUrl, {
+        function markAllNotificationsAsRead(event) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            const token = document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}';
+            const body = new FormData();
+            body.append('_token', token);
+
+            fetch("{{ route('notifications.read-all') }}", {
                 method: 'POST',
+                credentials: 'same-origin',
                 headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'X-CSRF-TOKEN': token,
                     'Accept': 'application/json',
                     'X-Requested-With': 'XMLHttpRequest',
+                },
+                body,
+            })
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error('Failed to mark notifications as read');
                 }
-            }).then((response) => {
-                if (response.ok) {
-                    const badge = document.querySelector('.elx-nav__notifications-badge');
-                    if (badge) {
-                        const remaining = document.querySelectorAll('.elx-nav__notifications-item.unread').length;
-                        if (remaining <= 0) {
-                            badge.remove();
-                        } else {
-                            badge.textContent = remaining;
-                        }
-                    }
+                return res.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    updateNotificationBadges(0);
+                    document.querySelectorAll('.elx-nav__notifications-item').forEach(styleNotificationAsRead);
+                    document.querySelectorAll('.elx-nav__notifications-clear').forEach((clearBtn) => clearBtn.remove());
                 }
-            }).catch(() => {});
+            })
+            .catch(() => {});
+        }
 
-            Swal.fire({
-                icon: 'success',
-                title: title,
-                text: message,
-                confirmButtonText: redirectUrl && redirectUrl !== '#' ? @json(__('app.view_details')) : @json(__('popups.ok')),
-                showCancelButton: !!(redirectUrl && redirectUrl !== '#'),
-                cancelButtonText: @json(__('popups.ok')),
-            }).then((result) => {
-                if (result.isConfirmed && redirectUrl && redirectUrl !== '#') {
-                    window.location.href = redirectUrl;
-                }
-            });
+        async function handleNotificationClick(event, element) {
+            // Kept for backwards compatibility if older markup still uses onclick.
+            event.preventDefault();
+            event.stopPropagation();
+            const href = element.getAttribute('href') || element.dataset.redirectUrl || @json(route('profile.edit'));
+            window.location.href = href;
         }
 
         const nav = document.getElementById('elxNav');
@@ -1359,7 +1335,7 @@
 
                 const thumbTrack = gallery.querySelector('[data-thumb-track]');
                 let thumbOffset = 0;
-                const maxVisible = 5;
+                const maxVisible = window.matchMedia('(max-width: 640px)').matches ? 4 : 5;
 
                 const updateThumbScroll = () => {
                     if (!thumbTrack || thumbs.length <= maxVisible) {
@@ -1625,6 +1601,15 @@
             transform: scale(1.1);
             color: white;
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+        }
+        @media (max-width: 640px) {
+            .whatsapp-btn {
+                bottom: 16px;
+                {{ app()->getLocale() === 'ar' ? 'left' : 'right' }}: 12px;
+                width: 46px;
+                height: 46px;
+                font-size: 24px;
+            }
         }
     </style>
 </body>

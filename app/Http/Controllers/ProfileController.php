@@ -211,16 +211,7 @@ class ProfileController extends Controller
 
     protected function canAccessOrder(User $user, Order $order): bool
     {
-        if ($order->user_id === $user->id) {
-            return true;
-        }
-
-        if ($order->user_id !== null) {
-            return false;
-        }
-
-        return ($user->phone && $order->customer_phone === $user->phone)
-            || ($user->user_code && $order->user_code === $user->user_code);
+        return $this->accountOrdersQuery($user)->whereKey($order->id)->exists();
     }
 
     public function addAddress(Request $request): RedirectResponse

@@ -142,7 +142,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function unreadNotifications()
     {
-        return $this->hasMany(Notification::class)->where('is_read', false)->latest();
+        return $this->hasMany(Notification::class)->where('is_read', 0)->latest();
     }
 
     public function pointsTransactions()

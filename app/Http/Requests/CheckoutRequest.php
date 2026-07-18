@@ -46,21 +46,35 @@ class CheckoutRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'customer_name.required' => 'Please enter your full name.',
-            'customer_name.min' => 'Your name should be at least 2 characters.',
-            'customer_name.max' => 'Your name may not be longer than 255 characters.',
-            'customer_name.regex' => 'Your name may only contain letters, spaces, apostrophes, dots, and dashes.',
-            'phone_number.required' => 'A phone number is required for order updates.',
-            'phone_number.regex' => 'Enter a valid phone number using 7 to 15 digits.',
-            'country_code.required' => 'Please choose your country code.',
-            'country_code.in' => 'Please choose a valid country code.',
+            'customer_name.required' => __('cart_page.validation.customer_name_required'),
+            'customer_name.min' => __('cart_page.validation.customer_name_min'),
+            'customer_name.max' => __('cart_page.validation.customer_name_max'),
+            'customer_name.regex' => __('cart_page.validation.customer_name_regex'),
+            'phone_number.required' => __('cart_page.validation.phone_required'),
+            'phone_number.regex' => __('cart_page.validation.phone_regex'),
+            'country_code.required' => __('cart_page.validation.country_code_required'),
+            'country_code.in' => __('cart_page.validation.country_code_invalid'),
             'user_code.required' => __('cart_page.code_required'),
-            'user_code.regex' => 'Member codes may only contain letters, numbers, underscores, and dashes.',
-            'user_code.unique' => 'This member code is already assigned to another account.',
-            'address.required' => 'A delivery address is required.',
-            'address.min' => 'Please enter a more detailed address (at least 10 characters).',
-            'address.max' => 'The address may not exceed 500 characters.',
-            'notes.max' => 'Notes may not exceed 1000 characters.',
+            'user_code.regex' => __('cart_page.validation.user_code_regex'),
+            'address.required' => __('cart_page.validation.address_required'),
+            'address.min' => __('cart_page.validation.address_min'),
+            'address.max' => __('cart_page.validation.address_max'),
+            'delivery_city_id.exists' => __('cart_page.invalid_delivery_city'),
+            'shared_shipping_order_id.exists' => __('cart_page.shared_shipping_not_found'),
+            'notes.max' => __('cart_page.validation.notes_max'),
+        ];
+    }
+
+    public function attributes(): array
+    {
+        return [
+            'customer_name' => __('cart_page.full_name'),
+            'phone_number' => __('cart_page.phone'),
+            'country_code' => __('cart_page.delivery_city_label'),
+            'user_code' => __('cart_page.enter_code'),
+            'address' => __('cart_page.shipping_address'),
+            'delivery_city_id' => __('cart_page.delivery_city_label'),
+            'notes' => __('cart_page.notes'),
         ];
     }
 }

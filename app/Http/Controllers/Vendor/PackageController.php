@@ -59,12 +59,24 @@ class PackageController extends Controller
 
         if ($request->hasFile('image')) {
             $data['image'] = $request->file('image')->store('packages', 'public');
+            \App\Support\UploadedImageOptimizer::optimize($data['image']);
         }
 
         $package = Package::create($data);
         $package->load('brand');
         $package->items()->sync($this->itemQuantitiesFromRequest($request));
-        app(PackagePricingService::class)->syncCountryPrices($package, $request->input('country_prices', []));
+
+        try {
+            app(PackagePricingService::class)->syncCountryPrices($package, $request->input('country_prices', []));
+        } catch (\Illuminate\Database\QueryException $exception) {
+            report($exception);
+
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', 'Could not save package country sizes/prices. Drop the unique index on package_country_prices (package_id, country_code).');
+        }
+
         app(TagService::class)->syncFromInput($package, $request->input('tags'));
 
         AdminNotifier::notifyAll('vendor_package_submitted', [
@@ -105,13 +117,25 @@ class PackageController extends Controller
                 Storage::disk('public')->delete($package->image);
             }
             $data['image'] = $request->file('image')->store('packages', 'public');
+            \App\Support\UploadedImageOptimizer::optimize($data['image']);
         } else {
             unset($data['image']);
         }
 
         $package->update($data);
         $package->items()->sync($this->itemQuantitiesFromRequest($request));
-        app(PackagePricingService::class)->syncCountryPrices($package, $request->input('country_prices', []));
+
+        try {
+            app(PackagePricingService::class)->syncCountryPrices($package, $request->input('country_prices', []));
+        } catch (\Illuminate\Database\QueryException $exception) {
+            report($exception);
+
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', 'Could not save package country sizes/prices. Drop the unique index on package_country_prices (package_id, country_code).');
+        }
+
         app(TagService::class)->syncFromInput($package, $request->input('tags'));
 
         if ($resubmitted) {

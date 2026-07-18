@@ -65,6 +65,14 @@ class EmailVerificationOtpService
                 'message' => $exception->getMessage(),
             ]);
 
+            // Local/dev: keep OTP usable even when SMTP is down (Gmail auth, etc.).
+            if (app()->environment('local', 'testing')) {
+                Log::channel('otp')->info("OTP for {$user->email}: {$code}");
+                cache()->put("dev_otp:{$user->id}", $code, now()->addMinutes($this->ttlMinutes()));
+
+                return true;
+            }
+
             return false;
         }
     }

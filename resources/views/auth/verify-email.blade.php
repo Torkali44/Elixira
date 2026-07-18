@@ -73,6 +73,15 @@
                 {{ __('app.auth.verify_otp_check_spam', ['email' => config('mail.from.address')]) }}
             </p>
 
+            @if (app()->environment('local') && auth()->check())
+                @php $devOtp = cache()->get('dev_otp:'.auth()->id()); @endphp
+                @if($devOtp)
+                    <div style="background: rgba(74, 200, 246, 0.12); border: 1px dashed rgba(74, 200, 246, 0.45); color: #7dd3fc; padding: 0.85rem 1rem; border-radius: 10px; margin-bottom: 1.25rem; font-size: 0.9rem; text-align: center;">
+                        Dev OTP: <strong style="letter-spacing: 0.2em; color: #fff;">{{ $devOtp }}</strong>
+                    </div>
+                @endif
+            @endif
+
 
             <form method="POST" action="{{ route('verification.verify', [], false) }}" style="margin-bottom: 1rem;">
                 @csrf

@@ -13,6 +13,8 @@
     .product-gallery {
         position: sticky;
         top: 100px;
+        align-self: start;
+        z-index: 2;
     }
     .main-img-container {
         background: var(--elx-glass);
@@ -65,8 +67,46 @@
 
     @media (max-width: 991px) {
         .product-detail-grid { grid-template-columns: 1fr; gap: 2rem; }
-        .product-gallery { position: relative; top: 0; }
+        .product-gallery { position: relative; top: auto; }
         .blog-section { padding: 2rem; }
+    }
+
+    @media (max-width: 640px) {
+        .product-detail-grid {
+            gap: 1.25rem;
+        }
+        .main-img-container {
+            padding: 0.75rem;
+            border-radius: 18px;
+        }
+        .product-purchase-actions {
+            flex-direction: column !important;
+            gap: 0.75rem !important;
+        }
+        .product-purchase-actions .elx-btn {
+            width: 100% !important;
+            min-width: 0 !important;
+            flex: 1 1 auto !important;
+        }
+        .product-meta-row {
+            max-width: 100%;
+            overflow: hidden;
+        }
+        .product-meta-row > * {
+            max-width: 100%;
+        }
+        .product-title-row {
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+        .product-size-badge {
+            white-space: normal;
+            max-width: 100%;
+        }
+        .elx-image-gallery__thumbs-wrap {
+            padding-inline-end: 3.5rem;
+            margin-bottom: 0.5rem;
+        }
     }
 
     .product-title-row {
@@ -212,13 +252,15 @@
 
             {{-- Right: Info --}}
             <div class="product-info" data-animate>
-                <div class="stock-badge {{ ($resolvedStock > 0 || $hasPrivateAccess) ? 'stock-in' : 'stock-out' }}">
-                    <i class="fas {{ ($resolvedStock > 0 || $hasPrivateAccess) ? 'fa-check' : 'fa-times' }} me-1"></i>
-                    {{ $resolvedStock > 0 ? __('shop.in_stock_label', ['count' => $resolvedStock]) : ($hasPrivateAccess ? __('shop.private_access_available') : __('shop.out_of_stock')) }}
+                <div id="product-stock-badge" class="stock-badge {{ ($resolvedStock > 0 || $hasPrivateAccess) ? 'stock-in' : 'stock-out' }}">
+                    <i id="product-stock-icon" class="fas {{ ($resolvedStock > 0 || $hasPrivateAccess) ? 'fa-check' : 'fa-times' }} me-1"></i>
+                    <span id="product-stock-text">
+                        {{ $resolvedStock > 0 ? __('shop.in_stock_label', ['count' => $resolvedStock]) : ($hasPrivateAccess ? __('shop.private_access_available') : __('shop.out_of_stock')) }}
+                    </span>
                 </div>
 
                 {{-- Meta Tags: Category, Brand, Points --}}
-                <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.5rem;">
+                <div class="product-meta-row" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.5rem;">
                     @if($item->category)
                         <span style="background: rgba(74, 200, 246, 0.1); color: #4ac8f6; padding: 0.35rem 1rem; border-radius: 50px; font-size: 0.8rem; font-weight: 600; border: 1px solid rgba(74, 200, 246, 0.2);">
                             <i class="fas fa-layer-group" style="margin-right: 5px;"></i>{{ $item->category->local_name }}
@@ -256,11 +298,9 @@
                         @endforeach
                     @endif
 
-                    @if($displayRewardPoints > 0)
-                        <span style="background: rgba(0, 255, 136, 0.1); color: #00ff88; padding: 0.35rem 1rem; border-radius: 50px; font-size: 0.8rem; font-weight: 600; border: 1px solid rgba(0, 255, 136, 0.2);">
-                            <i class="fas fa-star" style="margin-right: 5px;"></i>{{ __('home.reward_points', ['count' => $displayRewardPoints]) }}
-                        </span>
-                    @endif
+                    <span id="product-points-badge" style="background: rgba(0, 255, 136, 0.1); color: #00ff88; padding: 0.35rem 1rem; border-radius: 50px; font-size: 0.8rem; font-weight: 600; border: 1px solid rgba(0, 255, 136, 0.2); {{ $displayRewardPoints > 0 ? '' : 'display:none;' }}">
+                        <i class="fas fa-star" style="margin-right: 5px;"></i><span id="product-points-text">{{ __('home.reward_points', ['count' => $displayRewardPoints]) }}</span>
+                    </span>
                 </div>
 
                 <div class="product-title-row">
@@ -363,11 +403,11 @@
                             <span id="product-max-qty-label" style="color: var(--elx-gray); font-size: 0.9rem;">{{ __('shop.maximum_units', ['count' => $availableQty]) }}</span>
                         </div>
 
-                        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                            <button type="submit" class="elx-btn elx-btn--primary" style="flex: 1; min-width: 180px; justify-content: center; padding: 1.2rem; font-size: 1.1rem;">
+                        <div class="product-purchase-actions" style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                            <button type="submit" class="elx-btn elx-btn--primary" style="flex: 1; min-width: 140px; justify-content: center; padding: 1.2rem; font-size: 1.1rem;">
                                 <i class="fas fa-shopping-cart"></i> {{ __('home.add_to_cart') }}
                             </button>
-                            <button type="submit" name="buy_now" value="1" class="elx-btn elx-btn--glass" style="flex: 1; min-width: 180px; justify-content: center; padding: 1.2rem; font-size: 1.1rem; border-color: rgba(74, 200, 246, 0.4); color: #4ac8f6;">
+                            <button type="submit" name="buy_now" value="1" class="elx-btn elx-btn--glass" style="flex: 1; min-width: 140px; justify-content: center; padding: 1.2rem; font-size: 1.1rem; border-color: rgba(74, 200, 246, 0.4); color: #4ac8f6;">
                                 <i class="fas fa-bolt"></i> {{ __('home.buy_now') }}
                             </button>
                         </div>
@@ -973,6 +1013,11 @@
     const maxUnitsTemplate = @json(__('shop.maximum_units', ['count' => ':count']));
     const outOfStockHint = @json(__('shop.size_out_of_stock_hint'));
     const hasOtherSizesHint = @json(__('shop.try_another_size_hint'));
+    const pointsTemplate = @json(__('home.reward_points', ['count' => ':count']));
+    const inStockTemplate = @json(__('shop.in_stock_label', ['count' => ':count']));
+    const outOfStockLabel = @json(__('shop.out_of_stock'));
+    const privateAccessLabel = @json(__('shop.private_access_available'));
+    const hasPrivateAccess = @json($hasPrivateAccess);
 
     function formatPrice(amount) {
         const formatted = Number(amount).toFixed(2);
@@ -1002,6 +1047,45 @@
         const sizeDisplay = document.getElementById('product-size-display');
         if (sizeDisplay) {
             sizeDisplay.textContent = variant.size;
+        }
+
+        const pointsBadge = document.getElementById('product-points-badge');
+        const pointsText = document.getElementById('product-points-text');
+        if (pointsBadge && pointsText) {
+            if (variant.points > 0) {
+                pointsText.textContent = pointsTemplate.replace(':count', String(variant.points));
+                pointsBadge.style.display = '';
+            } else {
+                pointsBadge.style.display = 'none';
+            }
+        }
+
+        const stockBadge = document.getElementById('product-stock-badge');
+        const stockText = document.getElementById('product-stock-text');
+        const stockIcon = document.getElementById('product-stock-icon');
+        if (stockBadge && stockText) {
+            if (variant.stock > 0) {
+                stockBadge.classList.remove('stock-out');
+                stockBadge.classList.add('stock-in');
+                stockText.textContent = inStockTemplate.replace(':count', String(variant.stock));
+                if (stockIcon) {
+                    stockIcon.className = 'fas fa-check me-1';
+                }
+            } else if (hasPrivateAccess) {
+                stockBadge.classList.remove('stock-out');
+                stockBadge.classList.add('stock-in');
+                stockText.textContent = privateAccessLabel;
+                if (stockIcon) {
+                    stockIcon.className = 'fas fa-check me-1';
+                }
+            } else {
+                stockBadge.classList.remove('stock-in');
+                stockBadge.classList.add('stock-out');
+                stockText.textContent = outOfStockLabel;
+                if (stockIcon) {
+                    stockIcon.className = 'fas fa-times me-1';
+                }
+            }
         }
 
         const hiddenId = document.getElementById('product-country-price-id');

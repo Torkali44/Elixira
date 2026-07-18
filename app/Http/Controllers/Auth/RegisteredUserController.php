@@ -9,6 +9,7 @@ use App\Models\VendorProfile;
 use App\Support\EmailVerificationOtpService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
@@ -25,24 +26,44 @@ class RegisteredUserController extends Controller
      */
     public function store(RegisterUserRequest $request, EmailVerificationOtpService $otpService): RedirectResponse
     {
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'phone' => ($request->phone_country_code ?? '+966').ltrim((string) $request->phone, '0'),
-            'avatar' => $request->hasFile('avatar')
-                ? $request->file('avatar')->store('users/avatars', 'public')
-                : null,
-            'password' => Hash::make($request->password),
-        ]);
+        $user = DB::transaction(function () use ($request) {
+            $existing = User::query()
+                ->where('email', $request->email)
+                ->whereNull('email_verified_at')
+                ->first();
 
-        if ($request->account_type === 'vendor') {
-            VendorProfile::create([
-                'user_id' => $user->id,
-                'brand_name' => $request->brand_name,
-                'status' => 'draft',
-                'payment_method' => 'cash_on_delivery',
-            ]);
-        }
+            $payload = [
+                'name' => $request->name,
+                'email' => $request->email,
+                'phone' => ($request->phone_country_code ?? '+966').ltrim((string) $request->phone, '0'),
+                'password' => Hash::make($request->password),
+                'email_verified_at' => null,
+            ];
+
+            if ($request->hasFile('avatar')) {
+                $payload['avatar'] = $request->file('avatar')->store('users/avatars', 'public');
+            }
+
+            if ($existing) {
+                $existing->fill($payload)->save();
+                $user = $existing->fresh();
+            } else {
+                $user = User::create($payload);
+            }
+
+            if ($request->account_type === 'vendor') {
+                VendorProfile::query()->updateOrCreate(
+                    ['user_id' => $user->id],
+                    [
+                        'brand_name' => $request->brand_name,
+                        'status' => 'draft',
+                        'payment_method' => 'cash_on_delivery',
+                    ]
+                );
+            }
+
+            return $user;
+        });
 
         Auth::login($user);
 

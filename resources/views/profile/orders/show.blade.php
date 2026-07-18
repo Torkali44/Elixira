@@ -252,7 +252,7 @@
 
                     <div class="account-hero__actions">
                         <a href="{{ route('profile.orders.index') }}" class="elx-btn elx-btn--glass">{{ __('orders_page.back_to_orders') }}</a>
-                        <a href="{{ route('profile.orders.invoice', $order) }}" class="elx-btn elx-btn--glass">{{ __('orders_page.invoice') }}</a>
+                        <a href="{{ url('/profile/orders/'.$order->id.'/invoice') }}" class="elx-btn elx-btn--glass">{{ __('orders_page.invoice') }}</a>
                         <a href="{{ route('menu.index') }}" class="elx-btn elx-btn--primary">{{ __('orders_page.shop_again') }}</a>
                     </div>
                 </div>

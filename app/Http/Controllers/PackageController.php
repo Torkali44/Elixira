@@ -36,6 +36,7 @@ class PackageController extends Controller
         $package->load(['countryPrices', 'items.category', 'items.brandModel', 'tags']);
 
         $pricingService = app(ItemPricingService::class);
+        $packagePricing = app(\App\Support\PackagePricingService::class);
 
         if (request()->has('country')) {
             session(['shopping_country' => $pricingService->resolveCountryCode(request('country'))]);
@@ -46,6 +47,19 @@ class PackageController extends Controller
             request('country')
         );
 
+        $countryVariants = $packagePricing->variantsForCountry($package, $selectedCountry);
+        $requestedVariantId = request()->integer('country_price_id') ?: null;
+
+        if ($requestedVariantId && $packagePricing->findVariant($package, $requestedVariantId)?->country_code === $selectedCountry) {
+            $selectedCountryPriceId = $requestedVariantId;
+        } else {
+            $selectedCountryPriceId = $packagePricing->resolveDefaultVariant($package, $selectedCountry)?->id;
+        }
+
+        $selectedVariant = $selectedCountryPriceId
+            ? $packagePricing->findVariant($package, $selectedCountryPriceId)
+            : null;
+
         $tagService = app(TagService::class);
         $relatedBlogs = $tagService->relatedBlogsForPackage($package, 4);
         $relatedReviews = $tagService->relatedReviewsForPackage($package, 6);
@@ -54,6 +68,9 @@ class PackageController extends Controller
         return view('packages.show', compact(
             'package',
             'selectedCountry',
+            'countryVariants',
+            'selectedCountryPriceId',
+            'selectedVariant',
             'relatedBlogs',
             'relatedReviews',
             'relatedPackages',

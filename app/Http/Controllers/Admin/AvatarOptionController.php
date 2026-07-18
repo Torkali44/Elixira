@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreAvatarOptionRequest;
 use App\Http\Requests\Admin\UpdateAvatarOptionRequest;
 use App\Models\AvatarOption;
+use App\Support\UploadedImageOptimizer;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -50,6 +51,7 @@ class AvatarOptionController extends Controller
             $data = $request->validated();
             if ($request->hasFile('image')) {
                 $data['image_url'] = $request->file('image')->store('avatars', 'public');
+                UploadedImageOptimizer::optimize($data['image_url'], 'public', 512, 80);
             }
 
             AvatarOption::create([
@@ -90,6 +92,7 @@ class AvatarOptionController extends Controller
                     \Illuminate\Support\Facades\Storage::disk('public')->delete($avatarOption->image_url);
                 }
                 $data['image_url'] = $request->file('image')->store('avatars', 'public');
+                UploadedImageOptimizer::optimize($data['image_url'], 'public', 512, 80);
             }
 
             $avatarOption->update([

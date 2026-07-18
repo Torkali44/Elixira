@@ -134,7 +134,7 @@ class ItemPricingService
         return 0;
     }
 
-    public function resolvePackageRewardPoints(Package $package, ?string $countryCode = null): int
+    public function resolvePackageRewardPoints(Package $package, ?string $countryCode = null, ?int $countryPriceId = null): int
     {
         $countryCode = $this->resolveCountryCodeForPackage($package, $countryCode);
 
@@ -142,9 +142,10 @@ class ItemPricingService
             return 0;
         }
 
-        $countryPrice = $package->relationLoaded('countryPrices')
-            ? $package->countryPrices->firstWhere('country_code', $countryCode)
-            : $package->countryPrices()->where('country_code', $countryCode)->first();
+        $packagePricing = app(PackagePricingService::class);
+        $countryPrice = $countryPriceId
+            ? $packagePricing->findVariant($package, $countryPriceId)
+            : $packagePricing->resolveDefaultVariant($package, $countryCode);
 
         if ($countryPrice && $countryPrice->reward_points !== null) {
             return (int) $countryPrice->reward_points;

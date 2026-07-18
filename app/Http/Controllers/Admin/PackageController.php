@@ -11,6 +11,7 @@ use App\Models\Tag;
 use App\Support\PackagePricingService;
 use App\Support\SiteBroadcastService;
 use App\Support\TagService;
+use App\Support\UploadedImageOptimizer;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
@@ -57,11 +58,23 @@ class PackageController extends Controller
 
         if ($request->hasFile('image')) {
             $data['image'] = $request->file('image')->store('packages', 'public');
+            UploadedImageOptimizer::optimize($data['image']);
         }
 
         $package = Package::create($data);
         $package->items()->sync($this->itemQuantitiesFromRequest($request));
-        app(PackagePricingService::class)->syncCountryPrices($package, $request->input('country_prices', []));
+
+        try {
+            app(PackagePricingService::class)->syncCountryPrices($package, $request->input('country_prices', []));
+        } catch (\Illuminate\Database\QueryException $exception) {
+            report($exception);
+
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', $this->countryPricesErrorMessage($exception));
+        }
+
         app(TagService::class)->syncFromInput($package, $request->input('tags'));
 
         app(SiteBroadcastService::class)->broadcastIfAllowed(
@@ -94,13 +107,25 @@ class PackageController extends Controller
                 Storage::disk('public')->delete($package->image);
             }
             $data['image'] = $request->file('image')->store('packages', 'public');
+            UploadedImageOptimizer::optimize($data['image']);
         } else {
             unset($data['image']);
         }
 
         $package->update($data);
         $package->items()->sync($this->itemQuantitiesFromRequest($request));
-        app(PackagePricingService::class)->syncCountryPrices($package, $request->input('country_prices', []));
+
+        try {
+            app(PackagePricingService::class)->syncCountryPrices($package, $request->input('country_prices', []));
+        } catch (\Illuminate\Database\QueryException $exception) {
+            report($exception);
+
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', $this->countryPricesErrorMessage($exception));
+        }
+
         app(TagService::class)->syncFromInput($package, $request->input('tags'));
 
         return redirect()->route('admin.packages.index')->with('success', __('admin.packages_page.updated'));
@@ -155,5 +180,14 @@ class PackageController extends Controller
         }
 
         return $sync;
+    }
+
+    private function countryPricesErrorMessage(\Illuminate\Database\QueryException $exception): string
+    {
+        if (str_contains($exception->getMessage(), 'package_country_prices')) {
+            return 'Could not save package country sizes/prices. On the server database, drop the unique index on (package_id, country_code) so multiple sizes per country are allowed.';
+        }
+
+        return 'Could not save package country sizes/prices. Please check the database columns size_en, size_ar, stock, and reward_points.';
     }
 }

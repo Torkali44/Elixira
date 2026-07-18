@@ -148,13 +148,12 @@ Route::middleware(['auth', 'verified.or.admin'])->group(function () {
     Route::post('/vendor/onboarding', [VendorProfileController::class, 'store'])->name('vendor.store');
     Route::get('/vendor/pending', [VendorProfileController::class, 'pending'])->name('vendor.pending');
     Route::get('/vendor/rejected', [VendorProfileController::class, 'rejected'])->name('vendor.rejected');
-
-    // Notifications
-    Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
-    Route::post('/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
 });
 
 Route::middleware(['auth'])->group(function () {
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
+    Route::post('/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::get('/notifications/{notification}/open', [NotificationController::class, 'open'])->name('notifications.open');
     Route::get('/my-dxn-application/{application}', [DxnTeamRequestController::class, 'status'])->name('dxn-distributor.status');
 });
 

@@ -344,7 +344,18 @@
                     margin-right: 0;
                 }
                 .testimonial-carousel-container {
-                    padding: 0 40px;
+                    padding: 0 2.75rem;
+                }
+                .carousel-btn {
+                    width: 36px;
+                    height: 36px;
+                    font-size: 0.85rem;
+                }
+                .carousel-btn.prev { left: 0; }
+                .carousel-btn.next { right: 0; }
+                .home-testimonial-message {
+                    font-size: 1rem;
+                    -webkit-line-clamp: 6;
                 }
             }
         </style>

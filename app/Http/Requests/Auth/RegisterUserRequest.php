@@ -5,6 +5,7 @@ namespace App\Http\Requests\Auth;
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules;
 
 class RegisterUserRequest extends FormRequest
@@ -33,7 +34,14 @@ class RegisterUserRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255', 'regex:/^[\pL\s.\'-]+$/u'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:'.User::class],
+            'email' => [
+                'required',
+                'string',
+                'email',
+                'max:255',
+                // Unverified sign-ups may retry the same email until they confirm OTP.
+                Rule::unique(User::class)->where(fn ($query) => $query->whereNotNull('email_verified_at')),
+            ],
             'phone_country_code' => ['required', 'in:+966,+971'],
             'phone' => ['required', 'string', 'regex:/^\d{8,12}$/'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],

@@ -1,6 +1,7 @@
 @props([
     'package',
     'selectedCountry' => null,
+    'countryPriceId' => null,
     'align' => 'flex-end',
     'size' => 'inherit',
     'smallSize' => '0.85rem',
@@ -15,7 +16,7 @@
     $pricingService = app(\App\Support\PackagePricingService::class);
     $itemPricing = app(\App\Support\ItemPricingService::class);
     $selectedCountry = $itemPricing->resolveCountryCode($selectedCountry);
-    $pricing = $pricingService->getPriceBreakdown($package, auth()->user(), $selectedCountry);
+    $pricing = $pricingService->getPriceBreakdown($package, auth()->user(), $selectedCountry, $countryPriceId);
     $availableCountries = $pricingService->availableCountryCodes($package);
     $flags = $itemPricing->countryFlags();
     $labels = $itemPricing->supportedCountries();

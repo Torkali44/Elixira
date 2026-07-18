@@ -75,8 +75,8 @@
                                 <x-phone-flag :phone="$order->customer_phone" />
                             </span>
                             <div style="display:flex; gap:.5rem;">
-                                <a href="{{ route('profile.orders.invoice', $order) }}" class="elx-btn elx-btn--glass">{{ __('orders_page.invoice') }}</a>
-                                <a href="{{ route('profile.orders.show', $order) }}" class="elx-btn elx-btn--glass">{{ __('orders_page.view_details') }}</a>
+                                <a href="{{ url('/profile/orders/'.$order->id.'/invoice') }}" class="elx-btn elx-btn--glass">{{ __('orders_page.invoice') }}</a>
+                                <a href="{{ url('/profile/orders/'.$order->id) }}" class="elx-btn elx-btn--glass">{{ __('orders_page.view_details') }}</a>
                             </div>
                         </div>
                     </article>

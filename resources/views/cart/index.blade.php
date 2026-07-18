@@ -635,6 +635,17 @@
                         
                         <hr style="border: none; border-top: 1px solid var(--elx-border); margin: 2rem 0;">
 
+                        @if ($errors->any())
+                            <div class="cart-flash cart-flash--error" style="margin-bottom: 1rem;" data-animate>
+                                <strong>{{ __('cart_page.error_title') }}</strong>
+                                <ul style="margin: 0.5rem 0 0; padding-inline-start: 1.2rem;">
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+
                         <form action="{{ route('checkout') }}" method="POST">
                             @csrf
                             <input type="text" name="customer_name" class="form-input" placeholder="{{ __('cart_page.full_name') }}" value="{{ auth()->check() ? auth()->user()->name : old('customer_name') }}" required>
@@ -795,6 +806,7 @@
                             @else
                                 <input type="text" name="address" class="form-input" placeholder="{{ __('cart_page.shipping_address') }}" value="{{ old('address') }}" required>
                             @endauth
+                            @error('address')<div style="color: #ff8a8a; font-size: 0.8rem; margin-top: 0.35rem; margin-bottom: 1rem;">{{ $message }}</div>@enderror
                             
                             <textarea name="notes" class="form-input" style="border-radius: 15px;" placeholder="{{ __('cart_page.notes') }}" rows="2">{{ old('notes') }}</textarea>
                             @error('notes')<div style="color: #ff8a8a; font-size: 0.8rem; margin-top: -0.5rem; margin-bottom: 1rem;">{{ $message }}</div>@enderror

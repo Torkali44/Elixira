@@ -193,12 +193,14 @@ class CartController extends Controller
             'package_id' => 'required|exists:packages,id',
             'quantity' => 'nullable|integer|min:1|max:50',
             'country_code' => 'nullable|in:KSA,UAE',
+            'country_price_id' => 'nullable|integer|exists:package_country_prices,id',
         ]);
 
         $package = Package::with('countryPrices')->where('is_active', true)->findOrFail($request->package_id);
         $pricing = app(PackagePricingService::class);
         $itemPricing = app(ItemPricingService::class);
         $countryCode = $itemPricing->resolveCountryCodeForPackage($package, $request->input('country_code'));
+        $countryPriceId = $request->integer('country_price_id') ?: null;
 
         if ($countryCode === null) {
             $message = __('shop.package_missing_country_pricing');
@@ -209,13 +211,29 @@ class CartController extends Controller
             return redirect()->back()->with('error', $message);
         }
 
-        $resolvedPrice = $pricing->resolvePrice($package, $request->user(), $countryCode);
+        if (! $countryPriceId) {
+            $countryPriceId = $pricing->resolveDefaultVariant($package, $countryCode)?->id;
+        }
+
+        if ($countryPriceId) {
+            $variant = $pricing->findVariant($package, $countryPriceId);
+            if (! $variant || $variant->country_code !== $countryCode) {
+                $message = __('shop.invalid_size_selection');
+                if ($request->ajax() || $request->wantsJson()) {
+                    return response()->json(['success' => false, 'message' => $message]);
+                }
+
+                return redirect()->back()->with('error', $message);
+            }
+        }
+
+        $resolvedPrice = $pricing->resolvePrice($package, $request->user(), $countryCode, $countryPriceId);
         session(['shopping_country' => $countryCode]);
 
         $cart = $this->cartService->get();
-        $cartKey = 'p_'.$package->id;
+        $cartKey = $this->buildPackageCartKey($package->id, $countryPriceId);
         $quantity = (int) ($request->quantity ?? 1);
-        $pkgStock = $pricing->resolveStock($package, $countryCode);
+        $pkgStock = $pricing->resolveStock($package, $countryCode, $countryPriceId);
         $maxAllowed = max(0, (int) $pkgStock);
 
         if ($maxAllowed <= 0) {
@@ -237,19 +255,29 @@ class CartController extends Controller
             return redirect()->back()->with('error', $message);
         }
 
+        $variant = $countryPriceId ? $pricing->findVariant($package, $countryPriceId) : null;
+        $displayName = $package->local_name;
+        if ($variant?->local_size) {
+            $displayName .= ' — '.$variant->local_size;
+        }
+
         if (isset($cart[$cartKey])) {
             $cart[$cartKey]['quantity'] += $quantity;
             $cart[$cartKey]['type'] = 'package';
             $cart[$cartKey]['package_id'] = $package->id;
+            $cart[$cartKey]['country_price_id'] = $countryPriceId;
+            $cart[$cartKey]['name'] = $displayName;
+            $cart[$cartKey]['price'] = $resolvedPrice;
         } else {
             $cart[$cartKey] = [
                 'type' => 'package',
                 'package_id' => $package->id,
-                'name' => $package->local_name,
+                'name' => $displayName,
                 'quantity' => $quantity,
                 'price' => $resolvedPrice,
                 'country_code' => $countryCode,
-                'points' => $itemPricing->resolvePackageRewardPoints($package, $countryCode),
+                'country_price_id' => $countryPriceId,
+                'points' => $itemPricing->resolvePackageRewardPoints($package, $countryCode, $countryPriceId),
                 'image' => $package->image,
             ];
         }
@@ -290,7 +318,7 @@ class CartController extends Controller
         if ($this->isCartPackageEntry($request->id, $entry)) {
             $packageId = $this->resolvePackageIdFromCart($request->id, $entry);
             $package = $packageId ? Package::find($packageId) : null;
-            $maxAllowed = $package ? app(PackagePricingService::class)->resolveStock($package, $entryCountry) : 0;
+            $maxAllowed = $package ? app(PackagePricingService::class)->resolveStock($package, $entryCountry, $countryPriceId) : 0;
         } else {
             $itemId = $this->resolveItemIdFromCart($request->id, $entry);
             $item = $itemId ? Item::find($itemId) : null;
@@ -1201,6 +1229,11 @@ class CartController extends Controller
         return $countryPriceId ? "{$itemId}_v_{$countryPriceId}" : (string) $itemId;
     }
 
+    private function buildPackageCartKey(int $packageId, ?int $countryPriceId = null): string
+    {
+        return $countryPriceId ? "p_{$packageId}_v_{$countryPriceId}" : 'p_'.$packageId;
+    }
+
     /**
      * @param  array<string, mixed>  $details
      */
@@ -1236,7 +1269,7 @@ class CartController extends Controller
             return (int) $details['package_id'];
         }
 
-        if (preg_match('/^p_(\d+)$/', (string) $cartKey, $matches)) {
+        if (preg_match('/^p_(\d+)(?:_v_\d+)?$/', (string) $cartKey, $matches)) {
             return (int) $matches[1];
         }
 

@@ -23,7 +23,7 @@
                 }
             @endphp
             <div class="col-12">
-                <div class="border rounded p-3">
+                <div class="border rounded p-3 country-pricing-card">
                     <div class="form-check mb-3">
                         <input class="form-check-input" type="checkbox" name="country_prices[{{ $code }}][enabled]" value="1" id="country_{{ $code }}"
                             @checked(old("country_prices.{$code}.enabled", $variants->isNotEmpty()))>
@@ -43,35 +43,35 @@
                                 $rewardPoints = $isOldArray ? ($row['reward_points'] ?? '') : ($row?->reward_points ?? '');
                                 $stock = $isOldArray ? ($row['stock'] ?? '') : ($row?->stock ?? '');
                             @endphp
-                            <div class="country-variant-row border rounded p-3 mb-3 bg-light-subtle" data-variant-row>
+                            <div class="country-variant-row border rounded p-3 mb-3 country-pricing-variant" data-variant-row>
                                 <div class="d-flex justify-content-between align-items-center mb-2">
                                     <strong class="small text-muted">{{ __('admin.items_page.size_variant') }} #{{ $loop->iteration }}</strong>
                                     @if($loop->iteration > 1)
                                         <button type="button" class="btn btn-sm btn-outline-danger remove-variant-row">{{ __('admin.items_page.remove_variant') }}</button>
                                     @endif
                                 </div>
-                                <div class="row g-2">
-                                    <div class="col-md-3">
+                                <div class="row g-2 country-variant-fields">
+                                    <div class="col-6 col-md-3">
                                         <label class="form-label small">{{ __('admin.items_page.size_en') }}</label>
                                         <input type="text" class="form-control" name="country_prices[{{ $code }}][variants][{{ $index }}][size_en]" value="{{ $sizeEn }}" placeholder="500ml">
                                     </div>
-                                    <div class="col-md-3">
+                                    <div class="col-6 col-md-3">
                                         <label class="form-label small">{{ __('admin.items_page.size_ar') }}</label>
                                         <input type="text" class="form-control" name="country_prices[{{ $code }}][variants][{{ $index }}][size_ar]" value="{{ $sizeAr }}" placeholder="500 مل">
                                     </div>
-                                    <div class="col-md-2">
+                                    <div class="col-6 col-md-2">
                                         <label class="form-label small">{{ __('admin.items_page.member_price') }}</label>
                                         <input type="number" step="0.01" min="0" class="form-control @error("country_prices.{$code}.member_price") is-invalid @enderror" name="country_prices[{{ $code }}][variants][{{ $index }}][member_price]" value="{{ $memberPrice }}">
                                     </div>
-                                    <div class="col-md-2">
+                                    <div class="col-6 col-md-2">
                                         <label class="form-label small">{{ __('admin.items_page.guest_price') }}</label>
                                         <input type="number" step="0.01" min="0" class="form-control" name="country_prices[{{ $code }}][variants][{{ $index }}][guest_price]" value="{{ $guestPrice }}">
                                     </div>
-                                    <div class="col-md-1">
+                                    <div class="col-6 col-md-1">
                                         <label class="form-label small">{{ __('admin.items_page.stock') }}</label>
                                         <input type="number" min="0" class="form-control" name="country_prices[{{ $code }}][variants][{{ $index }}][stock]" value="{{ $stock }}">
                                     </div>
-                                    <div class="col-md-1">
+                                    <div class="col-6 col-md-1">
                                         <label class="form-label small">{{ __('admin.items_page.country_reward_points') }}</label>
                                         <input type="number" min="0" class="form-control" name="country_prices[{{ $code }}][variants][{{ $index }}][reward_points]" value="{{ $rewardPoints }}">
                                     </div>
@@ -96,20 +96,20 @@ document.addEventListener('DOMContentLoaded', function () {
             const container = document.querySelector('.country-variants[data-country="' + country + '"]');
             const index = container.querySelectorAll('[data-variant-row]').length;
             const row = document.createElement('div');
-            row.className = 'country-variant-row border rounded p-3 mb-3 bg-light-subtle';
+            row.className = 'country-variant-row border rounded p-3 mb-3 country-pricing-variant';
             row.dataset.variantRow = '';
             row.innerHTML = `
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <strong class="small text-muted">{{ __('admin.items_page.size_variant') }} #${index + 1}</strong>
                     <button type="button" class="btn btn-sm btn-outline-danger remove-variant-row">{{ __('admin.items_page.remove_variant') }}</button>
                 </div>
-                <div class="row g-2">
-                    <div class="col-md-3"><label class="form-label small">{{ __('admin.items_page.size_en') ?? 'Size (EN)' }}</label><input type="text" class="form-control" name="country_prices[${country}][variants][${index}][size_en]"></div>
-                    <div class="col-md-3"><label class="form-label small">{{ __('admin.items_page.size_ar') ?? 'Size (AR)' }}</label><input type="text" class="form-control" name="country_prices[${country}][variants][${index}][size_ar]"></div>
-                    <div class="col-md-2"><label class="form-label small">{{ __('admin.items_page.member_price') }}</label><input type="number" step="0.01" min="0" class="form-control" name="country_prices[${country}][variants][${index}][member_price]"></div>
-                    <div class="col-md-2"><label class="form-label small">{{ __('admin.items_page.guest_price') }}</label><input type="number" step="0.01" min="0" class="form-control" name="country_prices[${country}][variants][${index}][guest_price]"></div>
-                    <div class="col-md-1"><label class="form-label small">{{ __('admin.items_page.stock') ?? 'Stock' }}</label><input type="number" min="0" class="form-control" name="country_prices[${country}][variants][${index}][stock]"></div>
-                    <div class="col-md-1"><label class="form-label small">{{ __('admin.items_page.country_reward_points') }}</label><input type="number" min="0" class="form-control" name="country_prices[${country}][variants][${index}][reward_points]"></div>
+                <div class="row g-2 country-variant-fields">
+                    <div class="col-6 col-md-3"><label class="form-label small">{{ __('admin.items_page.size_en') ?? 'Size (EN)' }}</label><input type="text" class="form-control" name="country_prices[${country}][variants][${index}][size_en]"></div>
+                    <div class="col-6 col-md-3"><label class="form-label small">{{ __('admin.items_page.size_ar') ?? 'Size (AR)' }}</label><input type="text" class="form-control" name="country_prices[${country}][variants][${index}][size_ar]"></div>
+                    <div class="col-6 col-md-2"><label class="form-label small">{{ __('admin.items_page.member_price') }}</label><input type="number" step="0.01" min="0" class="form-control" name="country_prices[${country}][variants][${index}][member_price]"></div>
+                    <div class="col-6 col-md-2"><label class="form-label small">{{ __('admin.items_page.guest_price') }}</label><input type="number" step="0.01" min="0" class="form-control" name="country_prices[${country}][variants][${index}][guest_price]"></div>
+                    <div class="col-6 col-md-1"><label class="form-label small">{{ __('admin.items_page.stock') ?? 'Stock' }}</label><input type="number" min="0" class="form-control" name="country_prices[${country}][variants][${index}][stock]"></div>
+                    <div class="col-6 col-md-1"><label class="form-label small">{{ __('admin.items_page.country_reward_points') }}</label><input type="number" min="0" class="form-control" name="country_prices[${country}][variants][${index}][reward_points]"></div>
                 </div>`;
             container.appendChild(row);
         });

@@ -3,22 +3,41 @@
 namespace App\Support;
 
 use App\Models\Package;
+use App\Models\PackageCountryPrice;
 use App\Models\User;
+use Illuminate\Support\Collection;
 
 class PackagePricingService
 {
-    public function getPriceBreakdown(Package $package, ?User $user = null, ?string $countryCode = null): array
+    /**
+     * @return array{
+     *     country_code: string,
+     *     member_price: float,
+     *     guest_price: float,
+     *     active_price: float,
+     *     has_country_pricing: bool,
+     *     has_higher_guest_price: bool,
+     *     country_price_id?: int
+     * }
+     */
+    public function getPriceBreakdown(Package $package, ?User $user = null, ?string $countryCode = null, ?int $countryPriceId = null): array
     {
         $pricing = app(ItemPricingService::class);
         $countryCode = $pricing->resolveCountryCodeForPackage($package, $countryCode)
             ?? $pricing->resolveCountryCode($countryCode);
 
-        $countryPrice = $package->relationLoaded('countryPrices')
-            ? $package->countryPrices->firstWhere('country_code', $countryCode)
-            : $package->countryPrices()->where('country_code', $countryCode)->first();
+        $countryPrice = $countryPriceId
+            ? $this->findVariant($package, $countryPriceId)
+            : $this->resolveDefaultVariant($package, $countryCode);
 
         if ($countryPrice) {
-            return $this->buildCountryPriceBreakdown($countryCode, (float) $countryPrice->member_price, (float) $countryPrice->guest_price);
+            return $this->buildCountryPriceBreakdown(
+                $countryCode,
+                (float) $countryPrice->member_price,
+                (float) $countryPrice->guest_price,
+                true,
+                $countryPrice->id
+            );
         }
 
         $fallback = (float) $package->price;
@@ -33,11 +52,17 @@ class PackagePricingService
      *     guest_price: float,
      *     active_price: float,
      *     has_country_pricing: bool,
-     *     has_higher_guest_price: bool
+     *     has_higher_guest_price: bool,
+     *     country_price_id?: int
      * }
      */
-    private function buildCountryPriceBreakdown(string $countryCode, float $memberPrice, float $guestPrice, bool $hasCountryPricing = true): array
-    {
+    private function buildCountryPriceBreakdown(
+        string $countryCode,
+        float $memberPrice,
+        float $guestPrice,
+        bool $hasCountryPricing = true,
+        ?int $countryPriceId = null
+    ): array {
         if ($guestPrice <= 0) {
             $guestPrice = $memberPrice;
         }
@@ -45,7 +70,7 @@ class PackagePricingService
         $displayMember = min($memberPrice, $guestPrice);
         $displayGuest = max($memberPrice, $guestPrice);
 
-        return [
+        $breakdown = [
             'country_code' => $countryCode,
             'member_price' => $displayMember,
             'guest_price' => $displayGuest,
@@ -53,11 +78,17 @@ class PackagePricingService
             'has_country_pricing' => $hasCountryPricing,
             'has_higher_guest_price' => $displayGuest > $displayMember,
         ];
+
+        if ($countryPriceId !== null) {
+            $breakdown['country_price_id'] = $countryPriceId;
+        }
+
+        return $breakdown;
     }
 
-    public function resolvePrice(Package $package, ?User $user = null, ?string $countryCode = null): float
+    public function resolvePrice(Package $package, ?User $user = null, ?string $countryCode = null, ?int $countryPriceId = null): float
     {
-        return $this->getPriceBreakdown($package, $user, $countryCode)['active_price'];
+        return $this->getPriceBreakdown($package, $user, $countryCode, $countryPriceId)['active_price'];
     }
 
     /**
@@ -69,10 +100,65 @@ class PackagePricingService
             $package->load('countryPrices');
         }
 
-        return $package->countryPrices->pluck('country_code')->all();
+        return $package->countryPrices
+            ->pluck('country_code')
+            ->unique()
+            ->values()
+            ->all();
     }
 
-    public function resolveStock(Package $package, ?string $countryCode = null): int
+    /**
+     * @return Collection<int, PackageCountryPrice>
+     */
+    public function variantsForCountry(Package $package, ?string $countryCode = null): Collection
+    {
+        $pricing = app(ItemPricingService::class);
+        $countryCode = $pricing->resolveCountryCodeForPackage($package, $countryCode);
+
+        if ($countryCode === null) {
+            return collect();
+        }
+
+        if (! $package->relationLoaded('countryPrices')) {
+            $package->load('countryPrices');
+        }
+
+        return $package->countryPrices->where('country_code', $countryCode)->values();
+    }
+
+    public function findVariant(Package $package, int $countryPriceId): ?PackageCountryPrice
+    {
+        if (! $package->relationLoaded('countryPrices')) {
+            $package->load('countryPrices');
+        }
+
+        $variant = $package->countryPrices->firstWhere('id', $countryPriceId);
+
+        if ($variant) {
+            return $variant;
+        }
+
+        return $package->countryPrices()->find($countryPriceId);
+    }
+
+    public function resolveDefaultVariant(Package $package, ?string $countryCode = null): ?PackageCountryPrice
+    {
+        $variants = $this->variantsForCountry($package, $countryCode);
+
+        if ($variants->isEmpty()) {
+            return null;
+        }
+
+        foreach ($variants as $variant) {
+            if ($this->resolveStock($package, $countryCode, $variant->id) > 0) {
+                return $variant;
+            }
+        }
+
+        return $variants->first();
+    }
+
+    public function resolveStock(Package $package, ?string $countryCode = null, ?int $countryPriceId = null): int
     {
         $pricing = app(ItemPricingService::class);
         $countryCode = $pricing->resolveCountryCodeForPackage($package, $countryCode);
@@ -81,12 +167,34 @@ class PackagePricingService
             return 0;
         }
 
-        $countryPrice = $package->relationLoaded('countryPrices')
-            ? $package->countryPrices->firstWhere('country_code', $countryCode)
-            : $package->countryPrices()->where('country_code', $countryCode)->first();
+        if ($countryPriceId) {
+            $variant = $this->findVariant($package, $countryPriceId);
 
-        if ($countryPrice && $countryPrice->stock !== null) {
-            return (int) $countryPrice->stock;
+            if ($variant && $variant->country_code === $countryCode) {
+                if ($variant->stock !== null) {
+                    return (int) $variant->stock;
+                }
+
+                return (int) $package->stock;
+            }
+        }
+
+        $variants = $this->variantsForCountry($package, $countryCode);
+
+        if ($variants->isNotEmpty()) {
+            $total = 0;
+            $hasVariantStock = false;
+
+            foreach ($variants as $variant) {
+                if ($variant->stock !== null) {
+                    $total += (int) $variant->stock;
+                    $hasVariantStock = true;
+                }
+            }
+
+            if ($hasVariantStock) {
+                return $total;
+            }
         }
 
         return (int) $package->stock;
@@ -163,7 +271,7 @@ class PackagePricingService
             $updateData['stock'] = $totalStock;
         }
 
-        if (!empty($updateData)) {
+        if (! empty($updateData)) {
             $package->update($updateData);
         }
     }

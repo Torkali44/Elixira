@@ -12,6 +12,7 @@ use App\Models\ItemImage;
 use App\Models\Tag;
 use App\Support\ItemPricingService;
 use App\Support\TagService;
+use App\Support\UploadedImageOptimizer;
 use Illuminate\Support\Facades\Storage;
 
 class ItemController extends Controller
@@ -65,6 +66,7 @@ class ItemController extends Controller
 
         if ($request->hasFile('image')) {
             $data['image'] = $request->file('image')->store('items', 'public');
+            UploadedImageOptimizer::optimize($data['image']);
         }
 
         $item = Item::create($data);
@@ -74,6 +76,7 @@ class ItemController extends Controller
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $image) {
                 $path = $image->store('items/gallery', 'public');
+                UploadedImageOptimizer::optimize($path);
                 $item->images()->create(['image' => $path]);
             }
         }
@@ -102,18 +105,35 @@ class ItemController extends Controller
                 Storage::disk('public')->delete($item->image);
             }
             $data['image'] = $request->file('image')->store('items', 'public');
+            UploadedImageOptimizer::optimize($data['image']);
         } else {
             // Keep the old image if no new one is uploaded
             unset($data['image']);
         }
 
         $item->update($data);
-        app(ItemPricingService::class)->syncCountryPrices($item, $request->input('country_prices', []));
+
+        try {
+            app(ItemPricingService::class)->syncCountryPrices($item, $request->input('country_prices', []));
+        } catch (\Illuminate\Database\QueryException $exception) {
+            report($exception);
+
+            $message = str_contains($exception->getMessage(), 'item_country_prices')
+                ? 'Could not save country sizes/prices. On the server database, drop the unique index on (item_id, country_code) so multiple sizes per country are allowed.'
+                : 'Could not save country sizes/prices. Please check the database columns size_en, size_ar, stock, and reward_points.';
+
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', $message);
+        }
+
         app(TagService::class)->syncFromInput($item, $request->input('tags'));
 
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $image) {
                 $path = $image->store('items/gallery', 'public');
+                UploadedImageOptimizer::optimize($path);
                 $item->images()->create(['image' => $path]);
             }
         }

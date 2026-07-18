@@ -39,3 +39,45 @@ test('new users can register and must verify email', function () {
         return $mail->hasTo($user->email);
     });
 });
+
+test('unverified users can re-register with the same email', function () {
+    Mail::fake();
+
+    $existing = User::factory()->unverified()->create([
+        'email' => 'retry@example.com',
+        'name' => 'Old Name',
+    ]);
+
+    $this->post('/register', [
+        'name' => 'New Name',
+        'email' => 'retry@example.com',
+        'phone_country_code' => '+966',
+        'phone' => '501112233',
+        'password' => 'password',
+        'password_confirmation' => 'password',
+        'account_type' => 'customer',
+    ])->assertRedirect(route('verification.notice'));
+
+    expect(User::query()->where('email', 'retry@example.com')->count())->toBe(1)
+        ->and($existing->fresh()->name)->toBe('New Name')
+        ->and($existing->fresh()->hasVerifiedEmail())->toBeFalse();
+
+    Mail::assertSent(EmailVerificationOtpMail::class);
+});
+
+test('verified emails cannot be registered again', function () {
+    User::factory()->create([
+        'email' => 'taken@example.com',
+        'email_verified_at' => now(),
+    ]);
+
+    $this->post('/register', [
+        'name' => 'Someone',
+        'email' => 'taken@example.com',
+        'phone_country_code' => '+966',
+        'phone' => '501112233',
+        'password' => 'password',
+        'password_confirmation' => 'password',
+        'account_type' => 'customer',
+    ])->assertSessionHasErrors('email');
+});
