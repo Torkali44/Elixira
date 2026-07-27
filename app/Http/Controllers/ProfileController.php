@@ -115,7 +115,7 @@ class ProfileController extends Controller
     {
         abort_unless($this->canAccessOrder($request->user(), $order), 404);
 
-        $order->load(['orderItems.item']);
+        $order->load(['orderItems.item', 'orderItems.package']);
 
         return view('profile.orders.invoice', [
             'order' => $order,

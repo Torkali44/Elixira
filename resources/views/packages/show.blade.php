@@ -12,18 +12,60 @@
         display: grid;
         grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
         gap: 3rem;
-        align-items: start;
+        align-items: stretch;
+    }
+    .package-gallery-col {
+        min-width: 0;
+        position: relative;
+        align-self: stretch;
     }
     .package-image-wrap {
-        position: sticky;
-        top: 100px;
-        align-self: start;
+        position: relative;
+        z-index: 2;
         border-radius: 28px;
         overflow: visible;
         background: transparent;
         border: none;
         box-shadow: none;
-        z-index: 2;
+    }
+    @media (min-width: 992px) {
+        .package-detail-grid {
+            display: grid !important;
+            grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr) !important;
+            gap: 3rem !important;
+            align-items: stretch !important;
+        }
+        .package-gallery-col {
+            align-self: stretch;
+        }
+        .package-image-wrap {
+            position: -webkit-sticky;
+            position: sticky;
+            top: 110px;
+            z-index: 12;
+            max-height: calc(100vh - 130px);
+            transform: none !important;
+            will-change: auto !important;
+            box-sizing: border-box;
+        }
+        .package-image-wrap.is-pinned-fixed {
+            position: fixed !important;
+            top: 110px !important;
+            z-index: 12 !important;
+            margin: 0 !important;
+        }
+        .package-image-wrap.is-pinned-bottom {
+            position: absolute !important;
+            top: auto !important;
+            bottom: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            width: 100% !important;
+        }
+        .package-info-panel {
+            transform: none !important;
+            will-change: auto !important;
+        }
     }
     .package-image-wrap .pkg-badge {
         position: absolute;
@@ -129,12 +171,14 @@
     }
     @media (max-width: 991px) {
         .package-detail-grid {
-            grid-template-columns: 1fr;
-            gap: 1.5rem;
+            grid-template-columns: 1fr !important;
+            gap: 1.5rem !important;
         }
         .package-image-wrap {
-            position: relative;
-            top: 0;
+            position: relative !important;
+            top: 0 !important;
+            max-height: none !important;
+            filter: none !important;
         }
         .package-info-panel { padding: 1.75rem; }
         .package-cta-row { flex-direction: column; }
@@ -189,23 +233,22 @@
     <section class="package-hero-section">
         <div class="elx-container">
             <div class="package-detail-grid">
-
-                {{-- Image Column --}}
-                <div class="package-image-wrap" data-animate>
-                    @if($packageGalleryImages->isNotEmpty())
-                        @include('partials.product-image-gallery', [
-                            'images' => $packageGalleryImages,
-                            'alt' => $package->local_name,
-                            'galleryId' => 'package-gallery',
-                        ])
-                    @else
-                        <div class="package-gallery-placeholder"><i class="fas fa-box-open"></i></div>
-                    @endif
-                    <span class="pkg-badge">{{ __('shop.package_badge') }}</span>
+                <div class="package-gallery-col">
+                    <div class="package-image-wrap" id="package-sticky-gallery">
+                        @if($packageGalleryImages->isNotEmpty())
+                            @include('partials.product-image-gallery', [
+                                'images' => $packageGalleryImages,
+                                'alt' => $package->local_name,
+                                'galleryId' => 'package-gallery',
+                            ])
+                        @else
+                            <div class="package-gallery-placeholder"><i class="fas fa-box-open"></i></div>
+                        @endif
+                        <span class="pkg-badge">{{ __('shop.package_badge') }}</span>
+                    </div>
                 </div>
 
-                {{-- Info Column --}}
-                <div class="package-info-panel" data-animate>
+                <div class="package-info-panel">
                     <div style="margin-bottom: 1.25rem;">
                         <span style="color: rgba(255,255,255,0.4); font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em;">{{ __('shop.package_badge') }}</span>
                         <h1 style="font-size: clamp(1.6rem, 3.5vw, 2.25rem); font-weight: 800; margin: 0.4rem 0 0; background: linear-gradient(135deg, #fff 0%, #4ac8f6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1.2; text-align: {{ app()->getLocale() === 'ar' ? 'right' : 'left' }};">
@@ -419,4 +462,89 @@
 })();
 </script>
 @endif
+
+<script>
+(function () {
+    const gallery = document.getElementById('package-sticky-gallery');
+    const col = gallery ? gallery.closest('.package-gallery-col') : null;
+    const grid = gallery ? gallery.closest('.package-detail-grid') : null;
+    if (!gallery || !col || !grid) {
+        return;
+    }
+
+    const mq = window.matchMedia('(min-width: 992px)');
+    const navOffset = 110;
+    let ticking = false;
+
+    function clearPin() {
+        gallery.classList.remove('is-pinned-fixed', 'is-pinned-bottom');
+        gallery.style.position = '';
+        gallery.style.top = '';
+        gallery.style.left = '';
+        gallery.style.right = '';
+        gallery.style.width = '';
+        gallery.style.bottom = '';
+        col.style.minHeight = '';
+    }
+
+    function update() {
+        ticking = false;
+        if (!mq.matches) {
+            clearPin();
+            return;
+        }
+
+        const galleryHeight = gallery.offsetHeight;
+        const colRect = col.getBoundingClientRect();
+        const gridRect = grid.getBoundingClientRect();
+        const stopTop = gridRect.bottom - galleryHeight;
+
+        col.style.minHeight = galleryHeight + 'px';
+
+        if (colRect.top > navOffset) {
+            clearPin();
+            return;
+        }
+
+        if (stopTop <= navOffset) {
+            gallery.classList.remove('is-pinned-fixed');
+            gallery.classList.add('is-pinned-bottom');
+            gallery.style.position = 'absolute';
+            gallery.style.top = 'auto';
+            gallery.style.bottom = '0';
+            gallery.style.left = '0';
+            gallery.style.right = '0';
+            gallery.style.width = '100%';
+            return;
+        }
+
+        gallery.classList.remove('is-pinned-bottom');
+        gallery.classList.add('is-pinned-fixed');
+        gallery.style.position = 'fixed';
+        gallery.style.top = navOffset + 'px';
+        gallery.style.bottom = 'auto';
+        gallery.style.left = colRect.left + 'px';
+        gallery.style.right = 'auto';
+        gallery.style.width = colRect.width + 'px';
+    }
+
+    function onScroll() {
+        if (!ticking) {
+            window.requestAnimationFrame(update);
+            ticking = true;
+        }
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    mq.addEventListener('change', onScroll);
+    window.addEventListener('load', update);
+    if (typeof ResizeObserver !== 'undefined') {
+        new ResizeObserver(onScroll).observe(gallery);
+        new ResizeObserver(onScroll).observe(grid);
+    }
+    update();
+})();
+</script>
+
 @endsection

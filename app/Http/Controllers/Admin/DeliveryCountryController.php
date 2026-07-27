@@ -75,7 +75,7 @@ class DeliveryCountryController extends Controller
 
     public function updateCity(Request $request, DeliveryCountry $deliveryCountry, DeliveryCity $deliveryCity): RedirectResponse
     {
-        abort_unless($deliveryCity->delivery_country_id === $deliveryCountry->id, 404);
+        abort_unless((int) $deliveryCity->delivery_country_id === (int) $deliveryCountry->id, 404);
 
         $validated = $this->validateCity($request);
         $deliveryCity->update($validated);
@@ -87,7 +87,7 @@ class DeliveryCountryController extends Controller
 
     public function destroyCity(DeliveryCountry $deliveryCountry, DeliveryCity $deliveryCity): RedirectResponse
     {
-        abort_unless($deliveryCity->delivery_country_id === $deliveryCountry->id, 404);
+        abort_unless((int) $deliveryCity->delivery_country_id === (int) $deliveryCountry->id, 404);
 
         $deliveryCity->delete();
 

@@ -51,5 +51,8 @@ it('embeds variant reward points on the product page for size switching', functi
         ->assertSee('id="product-points-text"', false)
         ->assertSee('"points":30', false)
         ->assertSee('"points":50', false)
-        ->assertSee('product-points-text', false);
+        ->assertSee('product-points-text', false)
+        ->assertSee('product-gallery-col', false)
+        ->assertSee('id="product-sticky-gallery"', false)
+        ->assertSee('is-pinned-fixed', false);
 });

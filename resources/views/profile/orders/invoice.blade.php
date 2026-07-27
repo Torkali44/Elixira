@@ -23,6 +23,12 @@
             color: #1a2550;
         }
 
+        .ltr-text {
+            direction: ltr !important;
+            unicode-bidi: embed;
+            display: inline-block;
+        }
+
         /* ── SCREEN CONTROLS ── */
         .screen-controls {
             max-width: 860px;
@@ -89,7 +95,7 @@
             box-shadow: 0 20px 60px rgba(0,0,0,0.4), 0 4px 16px rgba(0,0,0,0.2);
             max-width: 860px;
             margin: 0 auto;
-            padding: 52px 56px;
+            padding: 48px 52px;
             font-size: 14px;
             line-height: 1.6;
             color: #1a2550;
@@ -99,42 +105,44 @@
         .inv-header {
             display: flex;
             justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 36px;
+            align-items: center;
+            margin-bottom: 32px;
+            gap: 16px;
         }
-        .inv-logo img { height: 36px; width: auto; }
+        .inv-logo img { height: 40px; width: auto; object-fit: contain; }
         .inv-title {
-            font-size: 2.5rem;
+            font-size: 2.2rem;
             font-weight: 900;
-            letter-spacing: 4px;
+            letter-spacing: 1px;
             color: #1a2550;
             text-transform: uppercase;
             line-height: 1;
+            margin: 0;
         }
 
         /* ── META ROW ── */
         .inv-meta {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-            margin-bottom: 28px;
+            gap: 1.5rem;
+            margin-bottom: 24px;
         }
         .inv-co-name {
             font-weight: 700;
-            font-size: 1rem;
+            font-size: 1.05rem;
             color: #1a2550;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
         }
         .inv-co-detail {
             color: #6b7280;
             font-size: 0.85rem;
-            line-height: 1.75;
+            line-height: 1.7;
         }
         .inv-info-tbl {
             margin-left: auto;
             border-collapse: collapse;
         }
-        .inv-info-tbl td { padding: 2px 0; font-size: 0.85rem; }
+        .inv-info-tbl td { padding: 3px 0; font-size: 0.85rem; }
         .inv-info-tbl td:first-child {
             color: #9ca3af;
             padding-right: 16px;
@@ -155,56 +163,73 @@
         .inv-hr {
             border: none;
             border-top: 1px solid #e5e7eb;
-            margin: 28px 0;
+            margin: 24px 0;
         }
 
         /* ── BILL TO ── */
         .bill-label {
             font-size: 0.72rem;
             font-weight: 700;
-            letter-spacing: 1.8px;
+            letter-spacing: 1.5px;
             color: #2563eb;
             text-transform: uppercase;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
         .bill-name  { font-weight: 700; font-size: 1rem; color: #1a2550; margin-bottom: 4px; }
         .bill-info  { color: #6b7280; font-size: 0.85rem; line-height: 1.75; }
 
         /* ── ITEMS TABLE ── */
-        .inv-tbl { width: 100%; border-collapse: collapse; margin: 28px 0; }
-        .inv-tbl thead tr   { background: #1a2550; color: #fff; }
-        .inv-tbl thead th   {
-            padding: 13px 16px;
-            font-size: 0.72rem;
+        .inv-tbl-wrapper {
+            margin: 24px 0;
+            width: 100%;
+        }
+        .inv-tbl { width: 100%; border-collapse: collapse; }
+        .inv-tbl thead tr { background: #1a2550; color: #fff; }
+        .inv-tbl thead th {
+            padding: 12px 14px;
+            font-size: 0.75rem;
             font-weight: 700;
-            letter-spacing: 1.2px;
+            letter-spacing: 0.5px;
             text-transform: uppercase;
             text-align: left;
+            color: #ffffff;
         }
-        .inv-tbl thead th:first-child { border-radius: 9px 0 0 9px; width: 44px; text-align: center; }
-        .inv-tbl thead th:last-child  { border-radius: 0 9px 9px 0; text-align: right; }
+        .inv-tbl thead th:first-child { width: 44px; text-align: center; }
+        .inv-tbl thead th:last-child  { text-align: right; }
         .inv-tbl thead th.c  { text-align: center; }
         .inv-tbl thead th.r  { text-align: right; }
         .inv-tbl tbody tr   { border-bottom: 1px solid #f3f4f6; }
         .inv-tbl tbody tr:last-child { border-bottom: none; }
-        .inv-tbl tbody td   { padding: 13px 16px; color: #374151; font-size: 0.9rem; }
+        .inv-tbl tbody td   { padding: 12px 14px; color: #374151; font-size: 0.9rem; }
         .inv-tbl tbody td:first-child { text-align: center; color: #9ca3af; font-weight: 600; }
         .inv-tbl tbody td:nth-child(3) { text-align: center; }
         .inv-tbl tbody td:nth-child(4) { text-align: right; }
         .inv-tbl tbody td:last-child   { text-align: right; font-weight: 600; color: #1a2550; }
 
         /* ── SUMMARY ── */
-        .inv-summary { display: flex; justify-content: flex-end; margin-top: 4px; }
-        .inv-summary-box { width: 320px; }
+        .inv-summary { display: flex; justify-content: flex-end; margin-top: 8px; }
+        .inv-summary-box { width: 340px; }
         .sum-row {
             display: flex;
             justify-content: space-between;
+            align-items: center;
             padding: 7px 0;
             font-size: 0.875rem;
             color: #6b7280;
             border-bottom: 1px solid #f3f4f6;
         }
         .sum-row:last-of-type { border-bottom: none; }
+        .points-row {
+            background: rgba(16, 185, 129, 0.07);
+            padding: 8px 12px !important;
+            border-radius: 8px;
+            margin: 6px 0;
+            border-bottom: none !important;
+        }
+        .points-val {
+            font-weight: 700;
+            color: #059669;
+        }
         .sum-total {
             display: flex;
             justify-content: space-between;
@@ -217,39 +242,96 @@
         .sum-total-label {
             font-size: 0.78rem;
             font-weight: 800;
-            letter-spacing: 1.5px;
+            letter-spacing: 1.2px;
             text-transform: uppercase;
             color: #2563eb;
         }
-        .sum-total-val { font-size: 1.3rem; font-weight: 800; color: #2563eb; }
+        .sum-total-val { font-size: 1.25rem; font-weight: 800; color: #2563eb; }
 
         /* ── FOOTER ── */
-        .inv-footer { text-align: center; padding-top: 32px; }
+        .inv-footer { text-align: center; padding-top: 28px; }
         .inv-footer-icon {
-            width: 48px;
-            height: 48px;
+            width: 44px;
+            height: 44px;
             border-radius: 50%;
             border: 2px solid #2563eb;
             display: inline-flex;
             align-items: center;
             justify-content: center;
             color: #2563eb;
-            font-size: 1.1rem;
-            margin-bottom: 12px;
+            font-size: 1rem;
+            margin-bottom: 10px;
         }
-        .inv-footer-title { font-weight: 700; font-size: 1rem; color: #1a2550; margin-bottom: 4px; }
+        .inv-footer-title { font-weight: 700; font-size: 0.95rem; color: #1a2550; margin-bottom: 4px; }
         .inv-footer-sub   { color: #9ca3af; font-size: 0.85rem; }
 
         /* ── RTL SUPPORT ── */
+        [dir="rtl"] .inv-info-tbl { margin-left: 0; margin-right: auto; }
         [dir="rtl"] .inv-info-tbl td:first-child { text-align: right; padding-right: 0; padding-left: 16px; }
         [dir="rtl"] .inv-info-tbl td:last-child  { text-align: left; }
         [dir="rtl"] .inv-tbl thead th { text-align: right; }
-        [dir="rtl"] .inv-tbl thead th:first-child { border-radius: 0 9px 9px 0; text-align: center; }
-        [dir="rtl"] .inv-tbl thead th:last-child  { border-radius: 9px 0 0 9px; text-align: left; }
+        [dir="rtl"] .inv-tbl thead th:first-child { text-align: center; }
+        [dir="rtl"] .inv-tbl thead th:last-child  { text-align: left; }
         [dir="rtl"] .inv-tbl tbody td:last-child   { text-align: left; }
         [dir="rtl"] .inv-tbl tbody td:nth-child(4) { text-align: left; }
         [dir="rtl"] .sum-row { flex-direction: row; }
-        [dir="rtl"] .ctrl-group { flex-direction: row-reverse; }
+
+        /* ── MOBILE RESPONSIVE ── */
+        @media (max-width: 680px) {
+            body {
+                padding: 1rem 0.5rem;
+            }
+            .screen-controls {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0.75rem;
+            }
+            .ctrl-group {
+                justify-content: space-between;
+                width: 100%;
+            }
+            .inv {
+                padding: 24px 16px;
+                border-radius: 14px;
+            }
+            .inv-header {
+                flex-direction: column-reverse;
+                align-items: flex-start;
+                gap: 12px;
+                margin-bottom: 24px;
+            }
+            .inv-title {
+                font-size: 1.75rem;
+                letter-spacing: 1px;
+            }
+            .inv-meta {
+                grid-template-columns: 1fr;
+                gap: 18px;
+                margin-bottom: 20px;
+            }
+            .inv-info-tbl {
+                margin-left: 0;
+                margin-right: 0;
+                width: 100%;
+            }
+            .inv-tbl-wrapper {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                margin: 20px 0;
+                border-radius: 8px;
+                border: 1px solid #e5e7eb;
+            }
+            .inv-tbl {
+                min-width: 500px;
+                margin: 0;
+            }
+            .inv-summary {
+                justify-content: stretch;
+            }
+            .inv-summary-box {
+                width: 100%;
+            }
+        }
 
         /* ══════════════════════════════════════════
            PRINT STYLES — only the white invoice
@@ -269,7 +351,6 @@
                 color-adjust: exact;
             }
 
-            /* Hide everything except the invoice card */
             .screen-controls { display: none !important; }
 
             .inv {
@@ -280,14 +361,15 @@
                 margin: 0 !important;
             }
 
-            /* Force table header dark background in print */
+            .inv-tbl-wrapper {
+                border: none !important;
+                overflow: visible !important;
+            }
+
             .inv-tbl thead tr { background: #1a2550 !important; color: #fff !important; }
             .inv-tbl thead th { color: #fff !important; }
-
-            /* Force summary total blue */
             .sum-total { background: #eff6ff !important; }
 
-            /* Avoid page breaks inside rows */
             .inv-tbl tbody tr { page-break-inside: avoid; }
             .inv-summary { page-break-inside: avoid; }
             .inv-footer  { page-break-inside: avoid; }
@@ -297,7 +379,7 @@
 </head>
 <body>
 
-    {{-- ══ SCREEN CONTROLS (hidden on print) ══ --}}
+    {{-- ══ SCREEN CONTROLS ══ --}}
     <div class="screen-controls">
         {{-- Left: Back button --}}
         <div class="ctrl-group">
@@ -307,7 +389,7 @@
             </a>
         </div>
 
-        {{-- Right: Language + Download --}}
+        {{-- Right: Language + Print + Download --}}
         <div class="ctrl-group">
             @if(app()->getLocale() === 'ar')
                 <a href="{{ route('lang.switch', 'en') }}" class="ctrl-btn ctrl-btn--lang">
@@ -318,6 +400,10 @@
                     <i class="fas fa-language"></i> العربية
                 </a>
             @endif
+
+            <button onclick="window.print()" class="ctrl-btn ctrl-btn--glass">
+                <i class="fas fa-print"></i> {{ __('orders_page.print_invoice') }}
+            </button>
 
             <button onclick="downloadInvoice()" class="ctrl-btn ctrl-btn--primary">
                 <i class="fas fa-download"></i> {{ __('orders_page.download_invoice') }}
@@ -339,11 +425,11 @@
         {{-- Company Info + Invoice Details --}}
         <div class="inv-meta">
             <div>
-                <div class="inv-co-name">Elixira</div>
+                <div class="inv-co-name">{{ __('orders_page.company_name') }}</div>
                 <div class="inv-co-detail">
-                    Dubai, United Arab Emirates<br>
-                    +971 14 784 165<br>
-                    www.elixira.com
+                    {{ __('orders_page.company_address') }}<br>
+                    <span dir="ltr" class="ltr-text">{{ __('orders_page.company_phone') }}</span><br>
+                    {{ __('orders_page.company_website') }}
                 </div>
             </div>
             <div>
@@ -354,7 +440,7 @@
                     </tr>
                     <tr>
                         <td>{{ __('orders_page.invoice_date') }}</td>
-                        <td>{{ $order->created_at->translatedFormat('d F Y') }}</td>
+                        <td>{{ $order->created_at->locale(app()->getLocale())->translatedFormat('d F Y') }}</td>
                     </tr>
                     <tr>
                         <td>{{ __('orders_page.time') }}</td>
@@ -377,7 +463,9 @@
             <div class="bill-label">{{ __('orders_page.bill_to') }}</div>
             <div class="bill-name">{{ $order->customer_name }}</div>
             <div class="bill-info">
-                <x-phone-flag :phone="$order->customer_phone" />
+                <span dir="ltr" class="ltr-text">
+                    <x-phone-flag :phone="$order->customer_phone" />
+                </span>
                 @if($order->customer_email)
                     <br>{{ $order->customer_email }}
                 @endif
@@ -388,36 +476,46 @@
         </div>
 
         {{-- Items Table --}}
-        <table class="inv-tbl">
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>{{ __('orders_page.description') }}</th>
-                    <th class="c">{{ __('orders_page.qty') }}</th>
-                    <th class="r">{{ __('orders_page.unit_price') }}</th>
-                    <th class="r">{{ __('orders_page.total') }}</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($order->orderItems as $i => $orderItem)
+        <div class="inv-tbl-wrapper">
+            <table class="inv-tbl">
+                <thead>
                     <tr>
-                        <td>{{ $i + 1 }}</td>
-                        <td>
-                            @if($orderItem->product_name)
-                                {{ $orderItem->product_name }}
-                            @elseif($orderItem->item)
-                                {{ $orderItem->item->local_name }}
-                            @else
-                                {{ __('orders_page.product_removed') }}
-                            @endif
-                        </td>
-                        <td>{{ $orderItem->quantity }}</td>
-                        <td>﷼ {{ number_format($orderItem->price, 2) }}</td>
-                        <td>﷼ {{ number_format($orderItem->price * $orderItem->quantity, 2) }}</td>
+                        <th>#</th>
+                        <th>{{ __('orders_page.description') }}</th>
+                        <th class="c">{{ __('orders_page.qty') }}</th>
+                        <th class="r">{{ __('orders_page.unit_price') }}</th>
+                        <th class="r">{{ __('orders_page.total') }}</th>
                     </tr>
-                @endforeach
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @php $isAr = app()->getLocale() === 'ar'; @endphp
+                    @foreach($order->orderItems as $i => $orderItem)
+                        @php
+                            $productName = null;
+                            if ($orderItem->item) {
+                                $productName = $isAr 
+                                    ? ($orderItem->item->name_ar ?: $orderItem->item->name_en ?: $orderItem->item->name) 
+                                    : ($orderItem->item->name_en ?: $orderItem->item->name ?: $orderItem->item->name_ar);
+                            } elseif ($orderItem->package) {
+                                $productName = $isAr 
+                                    ? ($orderItem->package->name_ar ?: $orderItem->package->name_en ?: $orderItem->package->name) 
+                                    : ($orderItem->package->name_en ?: $orderItem->package->name ?: $orderItem->package->name_ar);
+                            }
+                            if (! $productName) {
+                                $productName = $orderItem->product_name ?: __('orders_page.product_removed');
+                            }
+                        @endphp
+                        <tr>
+                            <td>{{ $i + 1 }}</td>
+                            <td>{{ $productName }}</td>
+                            <td>{{ $orderItem->quantity }}</td>
+                            <td>{{ __('orders_page.currency') }} {{ number_format($orderItem->price, 2) }}</td>
+                            <td>{{ __('orders_page.currency') }} {{ number_format($orderItem->price * $orderItem->quantity, 2) }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
 
         {{-- Summary --}}
         <div class="inv-summary">
@@ -426,28 +524,54 @@
                     $subtotal = $order->orderItems->sum(fn($i) => $i->price * $i->quantity);
                     $discount = (float) ($order->discount_amount ?? 0);
                     $shipping = (float) ($order->shipping_amount ?? 0);
+
+                    $pricingService = app(\App\Support\ItemPricingService::class);
+                    $countryCode = session('shopping_country');
+                    $txPoints = \App\Models\UserPointsTransaction::where('order_id', $order->id)->sum('points');
+
+                    if ($txPoints > 0) {
+                        $pointsEarned = (int) $txPoints;
+                    } else {
+                        $pointsEarned = (int) $order->orderItems->sum(function($item) use ($pricingService, $countryCode) {
+                            if ($item->package_id && $item->package) {
+                                return $pricingService->resolvePackageRewardPoints($item->package, $countryCode) * (int) $item->quantity;
+                            }
+                            if ($item->item) {
+                                return $pricingService->resolveRewardPoints($item->item, $countryCode) * (int) $item->quantity;
+                            }
+                            return 0;
+                        });
+                    }
                 @endphp
                 <div class="sum-row">
                     <span>{{ __('orders_page.subtotal') }}</span>
-                    <span>﷼ {{ number_format($subtotal, 2) }}</span>
+                    <span>{{ __('orders_page.currency') }} {{ number_format($subtotal, 2) }}</span>
                 </div>
+                @if($discount > 0)
                 <div class="sum-row">
                     <span>{{ __('orders_page.discount') }}</span>
-                    <span>﷼ {{ number_format($discount, 2) }}</span>
+                    <span>-{{ __('orders_page.currency') }} {{ number_format($discount, 2) }}</span>
                 </div>
+                @endif
                 <div class="sum-row">
                     <span>{{ __('orders_page.shipping') }}</span>
-                    <span>﷼ {{ number_format($shipping, 2) }}</span>
+                    <span>{{ __('orders_page.currency') }} {{ number_format($shipping, 2) }}</span>
                 </div>
+                @if($pointsEarned > 0)
+                <div class="sum-row points-row">
+                    <span><i class="fas fa-star" style="color: #f59e0b; margin-inline-end: 4px;"></i> {{ __('orders_page.points_earned') }}</span>
+                    <span class="points-val">+{{ $pointsEarned }} {{ __('home.reward_points', ['count' => '']) }}</span>
+                </div>
+                @endif
                 <div class="sum-total">
                     <span class="sum-total-label">{{ __('orders_page.grand_total') }}</span>
-                    <span class="sum-total-val">﷼ {{ number_format($order->total_amount, 2) }}</span>
+                    <span class="sum-total-val">{{ __('orders_page.currency') }} {{ number_format($order->total_amount, 2) }}</span>
                 </div>
             </div>
         </div>
 
         {{-- Footer --}}
-        <hr class="inv-hr" style="margin-top: 36px;">
+        <hr class="inv-hr" style="margin-top: 32px;">
         <div class="inv-footer">
             <div class="inv-footer-icon"><i class="fas fa-heart"></i></div>
             <div class="inv-footer-title">{{ __('orders_page.thank_you_footer') }}</div>
@@ -459,29 +583,38 @@
     <script>
         function downloadInvoice() {
             const element = document.querySelector('.inv');
+            const wrapper = document.querySelector('.inv-tbl-wrapper');
+
+            const prevWidth = element.style.width;
+            const prevMaxWidth = element.style.maxWidth;
+            const prevPadding = element.style.padding;
+            const prevBoxShadow = element.style.boxShadow;
+            const prevBorderRadius = element.style.borderRadius;
+            const prevWrapperBorder = wrapper ? wrapper.style.border : '';
+
+            // Set fixed desktop width for clean PDF snapshot
+            element.style.width = '800px';
+            element.style.maxWidth = '800px';
+            element.style.padding = '36px 40px';
+            element.style.boxShadow = 'none';
+            element.style.borderRadius = '0';
+            if (wrapper) wrapper.style.border = 'none';
+
             const opt = {
-                margin:       [10, 10, 10, 10],
+                margin:       [8, 8, 8, 8],
                 filename:     'Invoice-{{ $order->reference }}.pdf',
                 image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, useCORS: true },
+                html2canvas:  { scale: 2, useCORS: true, windowWidth: 860 },
                 jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
 
-            // Temporary styles for download to look perfect
-            const oldBoxShadow = element.style.boxShadow;
-            const oldBorderRadius = element.style.borderRadius;
-            const oldPadding = element.style.padding;
-
-            // Adjust card to fit print/pdf dimensions
-            element.style.boxShadow = 'none';
-            element.style.borderRadius = '0';
-            element.style.padding = '20px';
-
             html2pdf().set(opt).from(element).save().then(() => {
-                // Restore old styles
-                element.style.boxShadow = oldBoxShadow;
-                element.style.borderRadius = oldBorderRadius;
-                element.style.padding = oldPadding;
+                element.style.width = prevWidth;
+                element.style.maxWidth = prevMaxWidth;
+                element.style.padding = prevPadding;
+                element.style.boxShadow = prevBoxShadow;
+                element.style.borderRadius = prevBorderRadius;
+                if (wrapper) wrapper.style.border = prevWrapperBorder;
             });
         }
     </script>

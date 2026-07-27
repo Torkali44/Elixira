@@ -25,11 +25,12 @@
 }
 
 html {
-    overflow-x: hidden;
+    /* clip keeps horizontal bleed clipped without breaking position:sticky */
+    overflow-x: clip;
 }
 
 body {
-    overflow-x: hidden;
+    overflow-x: clip;
 }
 
 img,
@@ -129,7 +130,7 @@ body {
     background: var(--elx-darker);
     color: var(--elx-white);
     line-height: 1.6;
-    overflow-x: hidden;
+    overflow-x: clip;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     min-height: 100dvh;
@@ -2020,11 +2021,11 @@ html[dir="rtl"] .elx-image-gallery__nav--next i {
         padding-left: 0.85rem !important;
         padding-right: 0.85rem !important;
         max-width: 100%;
-        overflow-x: hidden;
+        overflow-x: clip;
     }
 
     body {
-        overflow-x: hidden;
+        overflow-x: clip;
     }
 
     .elx-nav__inner {
@@ -2124,6 +2125,8 @@ html[dir="rtl"] .elx-image-gallery__nav--next i {
     .package-image-wrap {
         position: relative !important;
         top: auto !important;
+        max-height: none !important;
+        filter: none !important;
     }
 
     .product-info,

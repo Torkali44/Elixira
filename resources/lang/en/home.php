@@ -5,6 +5,7 @@ return [
     'hero_title' => 'Welcome to Elixira',
     'hero_subtitle' => 'Clean, potent skincare rooted in nature — curated for your daily ritual.',
     'enter_store' => 'Enter Store',
+    'discover' => 'Discover',
     'go_cart' => 'Go Cart',
     'products_count' => ':count products',
     'categories_section' => 'Shop by Category',

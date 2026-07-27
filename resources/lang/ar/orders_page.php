@@ -62,4 +62,10 @@ return [
     'unit_price' => 'سعر الوحدة',
     'thank_you_footer' => 'شكراً لتعاملكم معنا!',
     'contact_hint' => 'إذا كان لديك أي استفسار، يرجى التواصل معنا.',
+    'company_name' => 'إيليكسيرا',
+    'company_address' => 'مركز النخيل، الطائف، المملكة العربية السعودية – الربيع، الطائف',
+    'company_phone' => '+971 54 592 0050',
+    'company_website' => 'www.elixira.com',
+    'currency' => '﷼',
 ];
+

@@ -229,8 +229,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
 
     Route::resource('delivery-countries', App\Http\Controllers\Admin\DeliveryCountryController::class)->except(['show']);
     Route::post('delivery-countries/{deliveryCountry}/cities', [App\Http\Controllers\Admin\DeliveryCountryController::class, 'storeCity'])->name('delivery-countries.cities.store');
-    Route::patch('delivery-countries/{deliveryCountry}/cities/{deliveryCity}', [App\Http\Controllers\Admin\DeliveryCountryController::class, 'updateCity'])->name('delivery-countries.cities.update');
-    Route::delete('delivery-countries/{deliveryCountry}/cities/{deliveryCity}', [App\Http\Controllers\Admin\DeliveryCountryController::class, 'destroyCity'])->name('delivery-countries.cities.destroy');
+    // POST-only paths: shared hosts often break PATCH/DELETE method spoofing
+    Route::post('delivery-countries/{deliveryCountry}/cities/{deliveryCity}/update', [App\Http\Controllers\Admin\DeliveryCountryController::class, 'updateCity'])->name('delivery-countries.cities.update');
+    Route::post('delivery-countries/{deliveryCountry}/cities/{deliveryCity}/delete', [App\Http\Controllers\Admin\DeliveryCountryController::class, 'destroyCity'])->name('delivery-countries.cities.destroy');
 
     // Newsletter Subscribers
     Route::get('subscribers', [NewsletterController::class, 'index'])->name('subscribers.index');

@@ -31,6 +31,7 @@ return [
     'phone' => 'الهاتف',
     'address' => 'العنوان',
     'description' => 'الوصف',
+    'back' => 'رجوع',
 
     // Navigation
     'home' => 'الرئيسية',

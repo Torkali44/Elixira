@@ -8,21 +8,16 @@
     </div>
 </li>
 <li class="elx-nav__dropdown">
-    <a href="{{ route('about') }}" class="{{ request()->routeIs('about') || request()->routeIs('brands.*') || request()->routeIs('faqs.*') ? 'active' : '' }}">{{ __('app.about') }} <i class="fas fa-chevron-down"></i></a>
+    <a href="{{ route('about') }}" class="{{ request()->routeIs('about') || request()->routeIs('brands.*') || request()->routeIs('faqs.*') || request()->routeIs('blogs.*') ? 'active' : '' }}">{{ __('app.about') }} <i class="fas fa-chevron-down"></i></a>
     <div class="elx-nav__dropdown-menu">
         <a href="{{ route('about') }}" class="{{ request()->routeIs('about') ? 'active' : '' }}">{{ __('app.about_us') }}</a>
         <a href="{{ route('brands.index') }}" class="{{ request()->routeIs('brands.*') ? 'active' : '' }}">{{ __('app.brands') }}</a>
         <a href="{{ route('faqs.index') }}" class="{{ request()->routeIs('faqs.*') ? 'active' : '' }}">{{ __('app.faqs') }}</a>
-    </div>
-</li>
-<li><a href="{{ route('testimonials.index') }}" class="{{ request()->routeIs('testimonials.*') ? 'active' : '' }}">{{ __('app.testimonials') }}</a></li>
-<li class="elx-nav__dropdown">
-    <a href="{{ route('contact') }}" class="{{ request()->routeIs('contact') || request()->routeIs('blogs.*') ? 'active' : '' }}">{{ __('app.contact') }} <i class="fas fa-chevron-down"></i></a>
-    <div class="elx-nav__dropdown-menu">
-        <a href="{{ route('contact') }}" class="{{ request()->routeIs('contact') ? 'active' : '' }}">{{ __('app.contact_us') }}</a>
         <a href="{{ route('blogs.index') }}" class="{{ request()->routeIs('blogs.*') ? 'active' : '' }}">{{ __('app.blogs') }}</a>
     </div>
 </li>
+<li><a href="{{ route('testimonials.index') }}" class="{{ request()->routeIs('testimonials.*') ? 'active' : '' }}">{{ __('app.testimonials') }}</a></li>
+<li><a href="{{ route('contact') }}" class="{{ request()->routeIs('contact') ? 'active' : '' }}">{{ __('app.contact') }}</a></li>
 <li>
     @auth
         <a href="{{ route('profile.orders.index') }}"

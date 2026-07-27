@@ -55,7 +55,6 @@
                                 </button>
                                 <form action="{{ route('admin.delivery-countries.cities.destroy', [$deliveryCountry, $city]) }}" method="POST" class="d-inline" onsubmit="return confirm(@json(__('admin.delivery_zones.delete_city_confirm')));">
                                     @csrf
-                                    @method('DELETE')
                                     <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
                                 </form>
                             </td>
@@ -64,7 +63,6 @@
                             <td colspan="5" class="bg-light">
                                 <form action="{{ route('admin.delivery-countries.cities.update', [$deliveryCountry, $city]) }}" method="POST" class="p-3">
                                     @csrf
-                                    @method('PATCH')
                                     <div class="row g-3">
                                         <div class="col-md-3">
                                             <label class="form-label">{{ __('admin.delivery_zones.name_en') }}</label>

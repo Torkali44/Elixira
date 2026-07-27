@@ -195,6 +195,15 @@
                     <p>{{ __('home.coming_soon_desc') }}</p>
                 </div>
             @endif
+
+            <div class="elx-products__actions" data-animate style="display: flex; justify-content: center; align-items: center; gap: 1.25rem; margin-top: 3.5rem; flex-wrap: wrap;">
+                <a href="{{ route('menu.index') }}" class="elx-btn elx-btn--primary" style="padding: 0.85rem 2.4rem; font-size: 1rem; border-radius: 100px;">
+                    <i class="fas fa-store me-2"></i> {{ __('home.enter_store') }}
+                </a>
+                <a href="{{ route('blogs.index') }}" class="elx-btn elx-btn--glass" style="padding: 0.85rem 2.4rem; font-size: 1rem; border-radius: 100px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); color: #fff; text-decoration: none;">
+                    <i class="fas fa-compass me-2"></i> {{ __('home.discover') }}
+                </a>
+            </div>
         </div>
     </section>
 
@@ -205,7 +214,7 @@
                     <span class="elx-insights__label">{{ __('home.brand_insights') }}</span>
                     <h2>{{ __('home.explore_title') }}</h2>
                     <p>{{ __('home.explore_desc') }}</p>
-                    <a href="{{ route('menu.index') }}" class="elx-btn elx-btn--primary">{{ __('home.discover_more') }}</a>
+                    <a href="{{ route('blogs.index') }}" class="elx-btn elx-btn--primary">{{ __('home.discover_more') }}</a>
                 </div>
                 <div class="elx-insights__stats">
                     <div class="elx-stat-card">

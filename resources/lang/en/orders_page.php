@@ -62,4 +62,9 @@ return [
     'unit_price' => 'Unit Price',
     'thank_you_footer' => 'Thank you for your business!',
     'contact_hint' => 'If you have any questions, please contact us.',
+    'company_name' => 'Elixira',
+    'company_address' => 'Al Nakheel Center, Taif, Saudi Arabia – Al Rabi, Taif',
+    'company_phone' => '+971 54 592 0050',
+    'company_website' => 'www.elixira.com',
+    'currency' => 'SAR',
 ];

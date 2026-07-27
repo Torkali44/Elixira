@@ -6,16 +6,74 @@
 <style>
     .product-detail-grid {
         display: grid;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
         gap: 4rem;
-        align-items: start;
+        /* stretch so gallery column is as tall as product-info — required for sticky */
+        align-items: stretch;
     }
+
+    .product-gallery-col {
+        min-width: 0;
+        position: relative;
+    }
+
     .product-gallery {
-        position: sticky;
-        top: 100px;
-        align-self: start;
+        position: relative;
         z-index: 2;
     }
+
+    .product-info {
+        min-width: 0;
+    }
+
+    @media (min-width: 992px) {
+        .product-detail-grid {
+            display: grid !important;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+            gap: 4rem !important;
+            align-items: stretch !important;
+        }
+
+        .product-gallery-col {
+            align-self: stretch;
+        }
+
+        /* JS pins with position:fixed; sticky kept as no-JS fallback */
+        .product-gallery {
+            position: -webkit-sticky;
+            position: sticky;
+            top: 110px;
+            z-index: 12;
+            max-height: calc(100vh - 130px);
+            overflow: visible;
+            transform: none !important;
+            will-change: auto !important;
+            box-sizing: border-box;
+        }
+
+        .product-gallery.is-pinned-fixed,
+        .product-gallery.is-pinned-bottom {
+            position: fixed !important;
+            top: 110px !important;
+            z-index: 12 !important;
+            margin: 0 !important;
+        }
+
+        .product-gallery.is-pinned-bottom {
+            position: absolute !important;
+            top: auto !important;
+            bottom: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            width: 100% !important;
+        }
+
+        .product-info {
+            transform: none !important;
+            will-change: auto !important;
+        }
+    }
+
     .main-img-container {
         background: var(--elx-glass);
         backdrop-filter: blur(42px);
@@ -66,8 +124,8 @@
     }
 
     @media (max-width: 991px) {
-        .product-detail-grid { grid-template-columns: 1fr; gap: 2rem; }
-        .product-gallery { position: relative; top: auto; }
+        .product-detail-grid { grid-template-columns: 1fr !important; gap: 2rem !important; }
+        .product-gallery { position: relative !important; top: auto !important; max-height: none !important; filter: none !important; }
         .blog-section { padding: 2rem; }
     }
 
@@ -234,24 +292,31 @@
 @endphp
 <div class="page-content">
     <div class="elx-container">
+        <div style="margin-bottom: 1.5rem;">
+            <button onclick="if(document.referrer && document.referrer.indexOf(window.location.host) !== -1) { history.back(); } else { window.location.href='{{ route('menu.index') }}'; }" class="elx-btn elx-btn--glass" style="padding: 0.5rem 1.25rem; font-size: 0.9rem; gap: 0.55rem; display: inline-flex; align-items: center; border-radius: 100px; cursor: pointer;">
+                <i class="fas fa-arrow-{{ app()->getLocale() === 'ar' ? 'right' : 'left' }}"></i>
+                <span>{{ __('app.back') }}</span>
+            </button>
+        </div>
         <div class="product-detail-grid">
-            {{-- Left: Image --}}
-            <div class="product-gallery" data-animate>
-                @if($galleryImages->isNotEmpty())
-                    @include('partials.product-image-gallery', [
-                        'images' => $galleryImages,
-                        'alt' => $item->local_name,
-                        'galleryId' => 'item-gallery',
-                    ])
-                @else
-                    <div class="elx-image-gallery__stage elx-image-gallery__stage--placeholder">
-                        <i class="fas fa-seedling"></i>
-                    </div>
-                @endif
+            {{-- Tall column wrapper is required so sticky gallery can pin until grid ends --}}
+            <div class="product-gallery-col">
+                <div class="product-gallery" id="product-sticky-gallery">
+                    @if($galleryImages->isNotEmpty())
+                        @include('partials.product-image-gallery', [
+                            'images' => $galleryImages,
+                            'alt' => $item->local_name,
+                            'galleryId' => 'item-gallery',
+                        ])
+                    @else
+                        <div class="elx-image-gallery__stage elx-image-gallery__stage--placeholder">
+                            <i class="fas fa-seedling"></i>
+                        </div>
+                    @endif
+                </div>
             </div>
 
-            {{-- Right: Info --}}
-            <div class="product-info" data-animate>
+            <div class="product-info">
                 <div id="product-stock-badge" class="stock-badge {{ ($resolvedStock > 0 || $hasPrivateAccess) ? 'stock-in' : 'stock-out' }}">
                     <i id="product-stock-icon" class="fas {{ ($resolvedStock > 0 || $hasPrivateAccess) ? 'fa-check' : 'fa-times' }} me-1"></i>
                     <span id="product-stock-text">
@@ -1130,4 +1195,89 @@
 })();
 </script>
 @endif
+
+<script>
+(function () {
+    const gallery = document.getElementById('product-sticky-gallery');
+    const col = gallery ? gallery.closest('.product-gallery-col') : null;
+    const grid = gallery ? gallery.closest('.product-detail-grid') : null;
+    if (!gallery || !col || !grid) {
+        return;
+    }
+
+    const mq = window.matchMedia('(min-width: 992px)');
+    const navOffset = 110;
+    let ticking = false;
+
+    function clearPin() {
+        gallery.classList.remove('is-pinned-fixed', 'is-pinned-bottom');
+        gallery.style.position = '';
+        gallery.style.top = '';
+        gallery.style.left = '';
+        gallery.style.right = '';
+        gallery.style.width = '';
+        gallery.style.bottom = '';
+        col.style.minHeight = '';
+    }
+
+    function update() {
+        ticking = false;
+        if (!mq.matches) {
+            clearPin();
+            return;
+        }
+
+        const galleryHeight = gallery.offsetHeight;
+        const colRect = col.getBoundingClientRect();
+        const gridRect = grid.getBoundingClientRect();
+        const stopTop = gridRect.bottom - galleryHeight;
+
+        col.style.minHeight = galleryHeight + 'px';
+
+        if (colRect.top > navOffset) {
+            clearPin();
+            return;
+        }
+
+        if (stopTop <= navOffset) {
+            gallery.classList.remove('is-pinned-fixed');
+            gallery.classList.add('is-pinned-bottom');
+            gallery.style.position = 'absolute';
+            gallery.style.top = 'auto';
+            gallery.style.bottom = '0';
+            gallery.style.left = '0';
+            gallery.style.right = '0';
+            gallery.style.width = '100%';
+            return;
+        }
+
+        gallery.classList.remove('is-pinned-bottom');
+        gallery.classList.add('is-pinned-fixed');
+        gallery.style.position = 'fixed';
+        gallery.style.top = navOffset + 'px';
+        gallery.style.bottom = 'auto';
+        gallery.style.left = colRect.left + 'px';
+        gallery.style.right = 'auto';
+        gallery.style.width = colRect.width + 'px';
+    }
+
+    function onScroll() {
+        if (!ticking) {
+            window.requestAnimationFrame(update);
+            ticking = true;
+        }
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    mq.addEventListener('change', onScroll);
+    window.addEventListener('load', update);
+    if (typeof ResizeObserver !== 'undefined') {
+        new ResizeObserver(onScroll).observe(gallery);
+        new ResizeObserver(onScroll).observe(grid);
+    }
+    update();
+})();
+</script>
+
 @endsection

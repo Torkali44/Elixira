@@ -5,6 +5,7 @@ return [
     'hero_title' => 'مرحباً بك في إيليكسيرا',
     'hero_subtitle' => 'عناية بالبشرة نظيفة وفعّالة متجذرة في الطبيعة — مختارة لطقوسك اليومية.',
     'enter_store' => 'ادخل المتجر',
+    'discover' => 'اكتشف',
     'go_cart' => 'السلة',
     'products_count' => ':count منتج',
     'categories_section' => 'تسوق حسب الفئة',

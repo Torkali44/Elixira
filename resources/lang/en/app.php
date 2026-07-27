@@ -31,6 +31,7 @@ return [
     'phone' => 'Phone',
     'address' => 'Address',
     'description' => 'Description',
+    'back' => 'Back',
 
     // Navigation
     'home' => 'Home',

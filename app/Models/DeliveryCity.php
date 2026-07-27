@@ -19,6 +19,7 @@ class DeliveryCity extends Model
     protected function casts(): array
     {
         return [
+            'delivery_country_id' => 'integer',
             'delivery_fee' => 'decimal:2',
             'is_active' => 'boolean',
             'sort_order' => 'integer',
