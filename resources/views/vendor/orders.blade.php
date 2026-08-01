@@ -70,7 +70,7 @@
                                         </div>
                                     @endforeach
                                 </td>
-                                <td class="fw-bold text-success">﷼ {{ number_format($vendorTotal, 2) }}</td>
+                                <td class="fw-bold text-success">{{ app(\App\Support\ItemPricingService::class)->currencySymbol($order->deliveryCountryCode()) }} {{ number_format($vendorTotal, 2) }}</td>
                                 <td>
                                     <span class="badge rounded-pill bg-{{ $statusBadge }} py-2 px-3">
                                         {{ $statusLabel }}

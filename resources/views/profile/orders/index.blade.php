@@ -63,7 +63,7 @@
                             </div>
                             <div style="text-align:right;">
                                 <span class="orders-status {{ $statusClass }}">{{ $statusLabel }}</span>
-                                <div style="margin-top:.6rem; color:var(--elx-cyan); font-size:1.2rem; font-weight:700;">﷼ {{ number_format($order->total_amount, 2) }}</div>
+                                <div style="margin-top:.6rem; color:var(--elx-cyan); font-size:1.2rem; font-weight:700;">{{ app(\App\Support\ItemPricingService::class)->currencySymbol($order->deliveryCountryCode()) }} {{ number_format($order->total_amount, 2) }}</div>
                             </div>
                         </div>
                         <div style="margin-top:.8rem; color:rgba(255,255,255,.78);">
@@ -74,7 +74,14 @@
                             <span style="color:var(--elx-gray); display:inline-flex; align-items:center; gap:.35rem;">
                                 <x-phone-flag :phone="$order->customer_phone" />
                             </span>
-                            <div style="display:flex; gap:.5rem;">
+                            <div style="display:flex; gap:.5rem; align-items:center;">
+                                @if($order->status === 'pending')
+                                    <form action="{{ route('profile.orders.cancel', $order->id) }}" method="POST" data-confirm="{{ __('orders_page.cancel_confirm') }}" style="display:inline;">
+                                        @csrf
+                                        @method('PATCH')
+                                        <button type="submit" class="elx-btn elx-btn--glass" style="color: #ff8a8a; border-color: rgba(220,53,69,0.3);">{{ __('orders_page.cancel_order') }}</button>
+                                    </form>
+                                @endif
                                 <a href="{{ url('/profile/orders/'.$order->id.'/invoice') }}" class="elx-btn elx-btn--glass">{{ __('orders_page.invoice') }}</a>
                                 <a href="{{ url('/profile/orders/'.$order->id) }}" class="elx-btn elx-btn--glass">{{ __('orders_page.view_details') }}</a>
                             </div>

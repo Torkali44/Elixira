@@ -100,6 +100,15 @@ class OrderController extends Controller
         return redirect()->back()->with('success', 'The order status has been successfully updated.');
     }
 
+    public function destroy(Order $order)
+    {
+        $order->orderItems()->delete();
+        $order->delete();
+
+        return redirect()->route('admin.orders.index')
+            ->with('success', __('admin.orders.deleted_success'));
+    }
+
     /**
      * Peak hour/day use MySQL-only functions in the original form; Laravel Cloud often uses PostgreSQL.
      */

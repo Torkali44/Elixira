@@ -497,6 +497,41 @@
                     Swal.fire({ icon: 'warning', title: cartConfig.i18n.errorTitle, text: cartConfig.i18n.cityRequired });
                 }
                 city.focus();
+
+                return;
+            }
+
+            const { sharedInput } = els();
+            const rawSharedCode = (sharedInput ? sharedInput.value : '').trim();
+            if (rawSharedCode.length > 0 && !sharedShippingActive) {
+                e.preventDefault();
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: cartConfig.i18n.sharedUnverifiedTitle || cartConfig.i18n.errorTitle,
+                        text: (cartConfig.i18n.sharedUnverifiedText || '').replace(':code', rawSharedCode),
+                        showCancelButton: true,
+                        confirmButtonText: cartConfig.i18n.sharedUnverifiedVerifyBtn || 'Verify',
+                        cancelButtonText: cartConfig.i18n.sharedUnverifiedClearBtn || 'Clear',
+                        confirmButtonColor: '#1f8db5',
+                        cancelButtonColor: '#6c757d',
+                    }).then(function (result) {
+                        if (result.isConfirmed) {
+                            checkSharedShippingOrder();
+                            const checkBtn = document.getElementById('shared-shipping-check-btn');
+                            if (checkBtn) {
+                                checkBtn.focus();
+                            }
+                        } else if (result.dismiss === Swal.DismissReason.cancel) {
+                            if (sharedInput) {
+                                sharedInput.value = '';
+                            }
+                            clearSharedShipping(true);
+                        }
+                    });
+                }
+
+                return;
             }
         });
     }

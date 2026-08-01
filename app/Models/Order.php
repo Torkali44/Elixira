@@ -17,6 +17,7 @@ class Order extends Model
         'customer_phone',
         'address',
         'delivery_city_id',
+        'country_code',
         'delivery_fee',
         'shared_shipping_order_id',
         'subtotal_amount',
@@ -76,19 +77,24 @@ class Order extends Model
 
     public function deliveryCountryCode(): ?string
     {
+        if (! empty($this->country_code)) {
+            return $this->country_code;
+        }
+
         $this->loadMissing('deliveryCity.country');
 
         if ($this->deliveryCity?->country) {
             return $this->deliveryCity->country->code;
         }
 
-        $phone = $this->customer_phone;
+        $phone = (string) $this->customer_phone;
+        $digits = preg_replace('/[^\d]/', '', $phone);
 
-        if ($phone && str_starts_with($phone, '+971')) {
+        if (str_starts_with($digits, '971')) {
             return 'UAE';
         }
 
-        if ($phone && str_starts_with($phone, '+966')) {
+        if (str_starts_with($digits, '966')) {
             return 'KSA';
         }
 

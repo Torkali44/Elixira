@@ -3,7 +3,14 @@
 @section('content')
     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
         <h2 class="mb-0">{{ __('admin.orders.order_number', ['id' => $order->reference]) }}</h2>
-        <a href="{{ route('admin.orders.index') }}" class="btn btn-secondary"><i class="fas fa-arrow-left me-2"></i> {{ __('admin.orders.back_to_orders') }}</a>
+        <div class="d-flex gap-2">
+            <form action="{{ route('admin.orders.destroy', $order->id) }}" method="POST" data-confirm="{{ __('admin.orders.confirm_delete') }}">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="btn btn-danger"><i class="fas fa-trash me-2"></i> {{ __('admin.orders.delete_order') }}</button>
+            </form>
+            <a href="{{ route('admin.orders.index') }}" class="btn btn-secondary"><i class="fas fa-arrow-left me-2"></i> {{ __('admin.orders.back_to_orders') }}</a>
+        </div>
     </div>
 
     <div class="row">
@@ -23,22 +30,25 @@
                             </tr>
                         </thead>
                         <tbody>
+                            @php
+                                $orderCurrency = app(\App\Support\ItemPricingService::class)->currencySymbol($order->deliveryCountryCode());
+                            @endphp
                             @foreach($order->orderItems as $item)
                                 <tr>
                                     <td>{{ $item->item->name ?? __('admin.orders.removed_product') }}</td>
-                                    <td>﷼ {{ number_format($item->price, 2) }}</td>
+                                    <td>{{ $orderCurrency }} {{ number_format($item->price, 2) }}</td>
                                     <td>{{ $item->quantity }}</td>
-                                    <td>﷼ {{ number_format($item->price * $item->quantity, 2) }}</td>
+                                    <td>{{ $orderCurrency }} {{ number_format($item->price * $item->quantity, 2) }}</td>
                                 </tr>
                             @endforeach
                             <tr class="table-light fw-bold">
                                 <td colspan="3" class="text-end">{{ __('admin.orders.subtotal') }}</td>
-                                <td>﷼ {{ number_format($order->subtotal_amount ?? $order->total_amount, 2) }}</td>
+                                <td>{{ $orderCurrency }} {{ number_format($order->subtotal_amount ?? $order->total_amount, 2) }}</td>
                             </tr>
                             @if(($order->delivery_fee ?? 0) > 0)
                                 <tr class="table-light">
                                     <td colspan="3" class="text-end">{{ __('admin.orders.delivery_fee') }}</td>
-                                    <td>﷼ {{ number_format($order->delivery_fee, 2) }}</td>
+                                    <td>{{ $orderCurrency }} {{ number_format($order->delivery_fee, 2) }}</td>
                                 </tr>
                             @elseif($order->usesSharedShipping())
                                 <tr class="table-light">
@@ -50,7 +60,7 @@
                             @endif
                             <tr class="table-light fw-bold">
                                 <td colspan="3" class="text-end">{{ __('admin.orders.total') }}</td>
-                                <td>﷼ {{ number_format($order->total_amount, 2) }}</td>
+                                <td>{{ $orderCurrency }} {{ number_format($order->total_amount, 2) }}</td>
                             </tr>
                         </tbody>
                     </table>

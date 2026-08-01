@@ -238,14 +238,21 @@
                                 <td>{{ $order->user ? ($order->user->role === 'admin' ? __('admin.orders.admin') : __('admin.orders.user')) : __('admin.orders.guest') }}</td>
                                 <td>{{ $order->user_code ?? '-' }}</td>
                                 <td>{{ $order->address ?? '-' }}</td>
-                                <td>﷼ {{ number_format($order->total_amount, 2) }}</td>
+                                <td>{{ app(\App\Support\ItemPricingService::class)->currencySymbol($order->deliveryCountryCode()) }} {{ number_format($order->total_amount, 2) }}</td>
                                 <td>{{ $order->created_at->format('Y-m-d H:i') }}</td>
                                 <td>
                                     <span class="badge bg-{{ $badge($order->status) }}">{{ $label($order->status) }}</span>
                                 </td>
                                 <td>
-                                    <a href="{{ route('admin.orders.show', $order->id) }}"
-                                        class="btn btn-sm btn-outline-primary"><i class="fas fa-eye"></i> {{ __('admin.orders.details') }}</a>
+                                    <div class="d-flex gap-1">
+                                        <a href="{{ route('admin.orders.show', $order->id) }}"
+                                            class="btn btn-sm btn-outline-primary"><i class="fas fa-eye"></i> {{ __('admin.orders.details') }}</a>
+                                        <form action="{{ route('admin.orders.destroy', $order->id) }}" method="POST" data-confirm="{{ __('admin.orders.confirm_delete') }}">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                         @empty

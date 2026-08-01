@@ -96,6 +96,7 @@ Route::get('/cart/shared-shipping-order', [CartController::class, 'lookupSharedS
 
 Route::get('/track-order', [OrderController::class, 'track'])->name('orders.track');
 Route::get('/track-order/{order}/invoice', [OrderController::class, 'invoice'])->name('orders.invoice');
+Route::patch('/track-order/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
 
 Route::get('/testimonials', [TestimonialController::class, 'index'])->name('testimonials.index');
 Route::post('/testimonials', [TestimonialController::class, 'store'])->name('testimonials.store');
@@ -134,6 +135,8 @@ Route::middleware(['auth', 'verified.or.admin'])->group(function () {
     Route::get('/profile/orders', [ProfileController::class, 'orders'])->name('profile.orders.index');
     Route::get('/profile/orders/{order}', [ProfileController::class, 'showOrder'])->name('profile.orders.show');
     Route::get('/profile/orders/{order}/invoice', [ProfileController::class, 'invoice'])->name('profile.orders.invoice');
+    Route::patch('/profile/orders/{order}/cancel', [ProfileController::class, 'cancelOrder'])->name('profile.orders.cancel');
+    Route::patch('/profile/orders/{order}/update', [ProfileController::class, 'updateOrder'])->name('profile.orders.update');
     Route::get('/profile/avatar-options', [ProfileController::class, 'avatarOptions'])->name('profile.avatar-options');
     Route::patch('/profile/avatar-options', [ProfileController::class, 'updateAvatarOption'])->name('profile.avatar-options.update');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -187,6 +190,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::get('orders', [AdminOrderController::class, 'index'])->name('orders.index');
     Route::get('orders/{order}', [AdminOrderController::class, 'show'])->name('orders.show');
     Route::patch('orders/{order}', [AdminOrderController::class, 'update'])->name('orders.update');
+    Route::delete('orders/{order}', [AdminOrderController::class, 'destroy'])->name('orders.destroy');
 
     Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
     Route::get('reports/orders', [ReportController::class, 'orders'])->name('reports.orders');

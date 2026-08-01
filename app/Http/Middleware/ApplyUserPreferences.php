@@ -53,7 +53,13 @@ class ApplyUserPreferences
         app()->setLocale($locale);
 
         $user = auth()->user();
-        session(['shopping_country' => app(ItemPricingService::class)->detectUserCountry($user)]);
+
+        // Only detect and set the country if there is no valid value already stored in the session.
+        // This prevents overwriting a user-selected country on every page request.
+        $existingCountry = session('shopping_country');
+        if (! is_string($existingCountry) || ! in_array($existingCountry, ['KSA', 'UAE'], true)) {
+            session(['shopping_country' => app(ItemPricingService::class)->detectUserCountry($user)]);
+        }
 
         view()->share('currentLocale', $locale);
         view()->share('isRtl', $locale === 'ar');

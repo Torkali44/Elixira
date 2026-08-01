@@ -128,9 +128,9 @@
         </div>
 
         <div class="elx-products__grid menu-products-grid" id="products-grid" style="margin-bottom: 6rem;">
-            @forelse($items as $product)
+            @forelse($items as $cardIndex => $product)
                 <div class="product-item cat-{{ $product->category_id }}" data-animate>
-                    @include('partials.product-card', ['product' => $product, 'selectedCountry' => $selectedCountry])
+                    @include('partials.product-card', ['product' => $product, 'selectedCountry' => $selectedCountry, 'cardIndex' => $cardIndex])
                 </div>
             @empty
                 <div class="menu-empty-state" data-animate>

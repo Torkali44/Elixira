@@ -214,6 +214,39 @@ class ProfileController extends Controller
         return $this->accountOrdersQuery($user)->whereKey($order->id)->exists();
     }
 
+    /**
+     * Cancel a pending order that belongs to the current user.
+     */
+    public function cancelOrder(Request $request, Order $order): RedirectResponse
+    {
+        abort_unless($this->canAccessOrder($request->user(), $order), 404);
+        abort_unless($order->status === 'pending', 403, __('orders_page.cannot_cancel_confirmed'));
+
+        $order->update(['status' => 'cancelled']);
+
+        return redirect()->route('profile.orders.show', $order->id)
+            ->with('success', __('orders_page.order_cancelled_success'));
+    }
+
+    /**
+     * Update notes/address on a pending order that belongs to the current user.
+     */
+    public function updateOrder(Request $request, Order $order): RedirectResponse
+    {
+        abort_unless($this->canAccessOrder($request->user(), $order), 404);
+        abort_unless($order->status === 'pending', 403, __('orders_page.cannot_edit_confirmed'));
+
+        $validated = $request->validate([
+            'notes'   => ['nullable', 'string', 'max:1000'],
+            'address' => ['nullable', 'string', 'min:5', 'max:500'],
+        ]);
+
+        $order->update(array_filter($validated, fn ($v) => $v !== null));
+
+        return redirect()->route('profile.orders.show', $order->id)
+            ->with('success', __('orders_page.order_updated_success'));
+    }
+
     public function addAddress(Request $request): RedirectResponse
     {
         $request->validate([

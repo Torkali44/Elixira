@@ -95,13 +95,18 @@
 </style>
 @endsection
 
+@inject('pricing', 'App\Support\ItemPricingService')
+@php
+    $currencySymbol = $pricing->currencySymbol($order->deliveryCountryCode());
+@endphp
+
 @section('content')
 <div class="page-content">
     <div class="elx-container">
         {{-- Section Header --}}
         <div class="elx-section__header" data-animate>
             <h1 class="elx-hero__title">
-                <span class="elx-hero__title-gradient">Order #{{ $order->id }}</span>
+                <span class="elx-hero__title-gradient">{{ __('track.order_heading', ['id' => $order->reference]) }}</span>
             </h1>
             <p class="elx-hero__subtitle">{{ $order->created_at->format('M j, Y \a\t g:i A') }}</p>
         </div>
@@ -112,12 +117,12 @@
                     {{-- Status Header --}}
                     <div class="status-header">
                         <div>
-                            <span style="color: var(--elx-gray);">Current Status</span>
-                            <h2 style="color: var(--elx-accent); margin-top: 0.5rem; font-size: 1.8rem;">✧ {{ ucfirst($order->status) }}</h2>
+                            <span style="color: var(--elx-gray);">{{ __('track.current_status') }}</span>
+                            <h2 style="color: var(--elx-accent); margin-top: 0.5rem; font-size: 1.8rem;">✧ {{ __('notifications.status.' . $order->status) }}</h2>
                         </div>
                         <div style="text-align: right;">
-                            <span style="color: var(--elx-gray);">Order Total</span>
-                            <h2 style="color: var(--elx-cyan); margin-top: 0.5rem; font-size: 1.8rem;">﷼ {{ number_format($order->total_amount, 2) }}</h2>
+                            <span style="color: var(--elx-gray);">{{ __('track.order_total') }}</span>
+                            <h2 style="color: var(--elx-cyan); margin-top: 0.5rem; font-size: 1.8rem;">{{ $currencySymbol }} {{ number_format($order->total_amount, 2) }}</h2>
                         </div>
                     </div>
 
@@ -125,12 +130,15 @@
                     <div class="timeline">
                         @php
                             $steps = [
-                                ['status' => 'pending', 'label' => 'Order Received', 'desc' => 'We have received your order.'],
-                                ['status' => 'confirmed', 'label' => 'Confirmed', 'desc' => 'Your order has been confirmed.'],
-                                ['status' => 'preparing', 'label' => 'Preparing', 'desc' => 'We are preparing your items.'],
-                                ['status' => 'ready', 'label' => 'Ready to Ship', 'desc' => 'Your package is ready.'],
-                                ['status' => 'delivered', 'label' => 'Delivered', 'desc' => 'Enjoy your Elixira ritual.'],
+                                ['status' => 'pending', 'label' => __('orders_page.timeline_pending_title'), 'desc' => __('orders_page.timeline_pending_desc')],
+                                ['status' => 'confirmed', 'label' => __('orders_page.timeline_confirmed_title'), 'desc' => __('orders_page.timeline_confirmed_desc')],
+                                ['status' => 'preparing', 'label' => __('orders_page.timeline_preparing_title'), 'desc' => __('orders_page.timeline_preparing_desc')],
+                                ['status' => 'ready', 'label' => __('orders_page.timeline_ready_title'), 'desc' => __('orders_page.timeline_ready_desc')],
+                                ['status' => 'delivered', 'label' => __('orders_page.timeline_delivered_title'), 'desc' => __('orders_page.timeline_delivered_desc')],
                             ];
+                            if ($order->status === 'cancelled') {
+                                $steps[] = ['status' => 'cancelled', 'label' => __('orders_page.timeline_cancelled_title'), 'desc' => __('orders_page.timeline_cancelled_desc')];
+                            }
                             $reached = true;
                         @endphp
                         @foreach($steps as $step)
@@ -146,28 +154,28 @@
                     {{-- Customer Info --}}
                     <div class="info-grid">
                         <div class="info-group">
-                            <label>Customer Name</label>
+                            <label>{{ __('track.customer_name') }}</label>
                             <p>{{ $order->customer_name }}</p>
                         </div>
                         <div class="info-group">
-                            <label>Phone Number</label>
+                            <label>{{ __('track.phone_number') }}</label>
                             <p style="display: flex; align-items: center; gap: 0.4rem;"><x-phone-flag :phone="$order->customer_phone" /></p>
                         </div>
                         <div class="info-group" style="grid-column: span 2;">
-                            <label>Shipping Address</label>
+                            <label>{{ __('track.shipping_address') }}</label>
                             <p>{{ $order->address }}</p>
                         </div>
                     </div>
 
                     {{-- Items --}}
                     <div style="margin-top: 4rem;">
-                        <h3 style="font-size: 1.2rem; color: var(--elx-accent); margin-bottom: 1rem;">✧ Order Items</h3>
+                        <h3 style="font-size: 1.2rem; color: var(--elx-accent); margin-bottom: 1rem;">✧ {{ __('track.order_items') }}</h3>
                         <table class="item-table">
                             <thead>
                                 <tr>
-                                    <th>Product</th>
-                                    <th>Quantity</th>
-                                    <th style="text-align: right;">Total</th>
+                                    <th>{{ __('track.product') }}</th>
+                                    <th>{{ __('track.quantity') }}</th>
+                                    <th style="text-align: right;">{{ __('track.total') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -175,10 +183,10 @@
                                 <tr>
                                     <td>
                                         <div style="font-weight: 600;">{{ $orderItem->product_name ?: ($orderItem->item?->local_name ?? __('orders_page.product_removed')) }}</div>
-                                        <div style="font-size: 0.8rem; color: var(--elx-gray);">﷼ {{ number_format($orderItem->price, 2) }} each</div>
+                                        <div style="font-size: 0.8rem; color: var(--elx-gray);">{{ $currencySymbol }} {{ number_format($orderItem->price, 2) }} {{ __('track.each') }}</div>
                                     </td>
                                     <td>x{{ $orderItem->quantity }}</td>
-                                    <td style="text-align: right; font-weight: 700; color: var(--elx-cyan);">﷼ {{ number_format($orderItem->price * $orderItem->quantity, 2) }}</td>
+                                    <td style="text-align: right; font-weight: 700; color: var(--elx-cyan);">{{ $currencySymbol }} {{ number_format($orderItem->price * $orderItem->quantity, 2) }}</td>
                                 </tr>
                                 @endforeach
                             </tbody>
@@ -187,13 +195,23 @@
                 </div>
 
                 <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 2rem; flex-wrap: wrap;">
+                    @if($order->status === 'pending')
+                        <form action="{{ route('orders.cancel', $order->id) }}" method="POST" data-confirm="{{ __('orders_page.cancel_confirm') }}" style="display:inline;">
+                            @csrf
+                            @method('PATCH')
+                            <input type="hidden" name="phone" value="{{ $order->customer_phone }}">
+                            <button type="submit" class="elx-btn elx-btn--danger" style="background: rgba(220, 53, 69, 0.2); border: 1px solid rgba(220, 53, 69, 0.4); color: #ff8a8a;">
+                                <i class="fas fa-times me-1"></i> {{ __('orders_page.cancel_order') }}
+                            </button>
+                        </form>
+                    @endif
                     <a href="{{ route('orders.track', ['phone' => $order->customer_phone]) }}" class="elx-btn elx-btn--glass">
-                        <i class="fas fa-arrow-left"></i> All My Orders
+                        <i class="fas fa-arrow-left"></i> {{ __('track.all_my_orders') }}
                     </a>
                     <a href="{{ route('orders.invoice', ['order' => $order->id, 'phone' => $order->customer_phone]) }}" target="_blank" class="elx-btn elx-btn--glass">
                         <i class="fas fa-print"></i> {{ __('track.print_invoice') }}
                     </a>
-                    <a href="{{ route('home') }}" class="elx-btn elx-btn--primary">Back to Home</a>
+                    <a href="{{ route('home') }}" class="elx-btn elx-btn--primary">{{ __('track.back_to_home') }}</a>
                 </div>
             </div>
         </div>

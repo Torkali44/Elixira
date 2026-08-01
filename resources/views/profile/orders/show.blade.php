@@ -212,6 +212,7 @@
 
 @section('content')
 @php
+    $orderCurrency = app(\App\Support\ItemPricingService::class)->currencySymbol($order->deliveryCountryCode());
     $statusClasses = [
         'pending' => 'account-status--pending',
         'confirmed' => 'account-status--confirmed',
@@ -221,12 +222,15 @@
         'cancelled' => 'account-status--cancelled',
     ];
     $timeline = [
-        ['status' => 'pending', 'title' => 'Order received', 'description' => 'Your order is safely in the system.'],
-        ['status' => 'confirmed', 'title' => 'Confirmed', 'description' => 'The team reviewed and confirmed the order.'],
-        ['status' => 'preparing', 'title' => 'Preparing', 'description' => 'Your products are being prepared right now.'],
-        ['status' => 'ready', 'title' => 'Ready', 'description' => 'The package is packed and ready for the next step.'],
-        ['status' => 'delivered', 'title' => 'Delivered', 'description' => 'The order reached its destination successfully.'],
+        ['status' => 'pending', 'title' => __('orders_page.timeline_pending_title'), 'description' => __('orders_page.timeline_pending_desc')],
+        ['status' => 'confirmed', 'title' => __('orders_page.timeline_confirmed_title'), 'description' => __('orders_page.timeline_confirmed_desc')],
+        ['status' => 'preparing', 'title' => __('orders_page.timeline_preparing_title'), 'description' => __('orders_page.timeline_preparing_desc')],
+        ['status' => 'ready', 'title' => __('orders_page.timeline_ready_title'), 'description' => __('orders_page.timeline_ready_desc')],
+        ['status' => 'delivered', 'title' => __('orders_page.timeline_delivered_title'), 'description' => __('orders_page.timeline_delivered_desc')],
     ];
+    if ($order->status === 'cancelled') {
+        $timeline[] = ['status' => 'cancelled', 'title' => __('orders_page.timeline_cancelled_title'), 'description' => __('orders_page.timeline_cancelled_desc')];
+    }
     $activeReached = true;
 @endphp
 
@@ -251,16 +255,45 @@
                     </div>
 
                     <div class="account-hero__actions">
+                        @if($order->status === 'pending')
+                            <form action="{{ route('profile.orders.cancel', $order->id) }}" method="POST" data-confirm="{{ __('orders_page.cancel_confirm') }}" style="display:inline;">
+                                @csrf
+                                @method('PATCH')
+                                <button type="submit" class="elx-btn elx-btn--danger" style="background: rgba(220, 53, 69, 0.2); border: 1px solid rgba(220, 53, 69, 0.4); color: #ff8a8a;">
+                                    <i class="fas fa-times me-1"></i> {{ __('orders_page.cancel_order') }}
+                                </button>
+                            </form>
+                        @endif
                         <a href="{{ route('profile.orders.index') }}" class="elx-btn elx-btn--glass">{{ __('orders_page.back_to_orders') }}</a>
                         <a href="{{ url('/profile/orders/'.$order->id.'/invoice') }}" class="elx-btn elx-btn--glass">{{ __('orders_page.invoice') }}</a>
                         <a href="{{ route('menu.index') }}" class="elx-btn elx-btn--primary">{{ __('orders_page.shop_again') }}</a>
                     </div>
                 </div>
 
+                @if(session('success'))
+                    <div style="background: rgba(40, 167, 69, 0.15); border: 1px solid rgba(40, 167, 69, 0.3); color: #7ef0bf; padding: 1rem 1.2rem; border-radius: 16px; margin-bottom: 1.5rem;">
+                        <i class="fas fa-check-circle me-2"></i>{{ session('success') }}
+                    </div>
+                @endif
+                @if(session('error'))
+                    <div style="background: rgba(220, 53, 69, 0.15); border: 1px solid rgba(220, 53, 69, 0.3); color: #ff8a8a; padding: 1rem 1.2rem; border-radius: 16px; margin-bottom: 1.5rem;">
+                        <i class="fas fa-exclamation-circle me-2"></i>{{ session('error') }}
+                    </div>
+                @endif
+
+                @if($order->status !== 'pending' && $order->status !== 'cancelled')
+                    <div style="background: rgba(13, 202, 240, 0.08); border: 1px solid rgba(13, 202, 240, 0.2); color: #8fdfff; padding: 1rem 1.2rem; border-radius: 16px; margin-bottom: 1.5rem; font-size: 0.92rem;">
+                        <i class="fas fa-info-circle me-2"></i>{{ __('orders_page.contact_admin_to_cancel') }}
+                        <a href="https://wa.me/971545920050" target="_blank" style="color: #4ac8f6; font-weight: 700; text-decoration: underline; margin-inline-start: 0.5rem;">
+                            <i class="fab fa-whatsapp me-1"></i>{{ __('orders_page.contact_support') }}
+                        </a>
+                    </div>
+                @endif
+
                 <div class="account-order-kpis">
                     <div class="account-order-kpi">
                         <span class="account-order-kpi__label">{{ __('orders_page.order_total') }}</span>
-                        <span class="account-order-kpi__value">﷼ {{ number_format($order->total_amount, 2) }}</span>
+                        <span class="account-order-kpi__value">{{ $orderCurrency }} {{ number_format($order->total_amount, 2) }}</span>
                     </div>
                     <div class="account-order-kpi">
                         <span class="account-order-kpi__label">{{ __('orders_page.items') }}</span>
@@ -301,11 +334,11 @@
 
                                 <div>
                                     <h4 style="margin-bottom: 0.35rem;">{{ $orderItem->item?->local_name ?: __('orders_page.product_removed') }}</h4>
-                                    <div style="color: var(--elx-gray);">{{ __('orders_page.qty_each', ['qty' => $orderItem->quantity, 'price' => number_format($orderItem->price, 2)]) }}</div>
+                                    <div style="color: var(--elx-gray);">{{ __('orders_page.qty_each', ['qty' => $orderItem->quantity, 'price' => $orderCurrency . ' ' . number_format($orderItem->price, 2)]) }}</div>
                                 </div>
 
                                 <div style="text-align: right; font-size: 1.1rem; font-weight: 700; color: var(--elx-cyan);">
-                                    ﷼ {{ number_format($orderItem->price * $orderItem->quantity, 2) }}
+                                    {{ $orderCurrency }} {{ number_format($orderItem->price * $orderItem->quantity, 2) }}
                                 </div>
                             </div>
                         @endforeach
@@ -317,16 +350,34 @@
                         <h3 style="font-size: 1.2rem; color: var(--elx-accent); margin-bottom: 1rem;">{{ __('orders_page.delivery_summary') }}</h3>
 
                         <div class="account-order-block">
-                            <div style="display: grid; gap: 0.95rem;">
-                                <div>
-                                    <div style="color: var(--elx-light); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em;">{{ __('orders_page.shipping_address') }}</div>
-                                    <div style="margin-top: 0.35rem;">{{ $order->address }}</div>
+                            @if($order->status === 'pending')
+                                <form action="{{ route('profile.orders.update', $order->id) }}" method="POST" style="display: grid; gap: 1rem;">
+                                    @csrf
+                                    @method('PATCH')
+                                    <div>
+                                        <label style="color: var(--elx-light); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; display: block; margin-bottom: 0.35rem;">{{ __('orders_page.shipping_address') }}</label>
+                                        <textarea name="address" rows="2" style="width: 100%; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--elx-border); border-radius: 12px; color: #fff; padding: 0.6rem 0.8rem; font-size: 0.9rem; font-family: inherit;">{{ old('address', $order->address) }}</textarea>
+                                    </div>
+                                    <div>
+                                        <label style="color: var(--elx-light); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; display: block; margin-bottom: 0.35rem;">{{ __('orders_page.notes') }}</label>
+                                        <textarea name="notes" rows="2" placeholder="{{ __('orders_page.no_notes') }}" style="width: 100%; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--elx-border); border-radius: 12px; color: #fff; padding: 0.6rem 0.8rem; font-size: 0.9rem; font-family: inherit;">{{ old('notes', $order->notes) }}</textarea>
+                                    </div>
+                                    <button type="submit" class="elx-btn elx-btn--glass" style="justify-content: center; padding: 0.6rem 1rem; font-size: 0.9rem;">
+                                        <i class="fas fa-save me-1"></i> {{ __('orders_page.save_changes') }}
+                                    </button>
+                                </form>
+                            @else
+                                <div style="display: grid; gap: 0.95rem;">
+                                    <div>
+                                        <div style="color: var(--elx-light); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em;">{{ __('orders_page.shipping_address') }}</div>
+                                        <div style="margin-top: 0.35rem;">{{ $order->address }}</div>
+                                    </div>
+                                    <div>
+                                        <div style="color: var(--elx-light); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em;">{{ __('orders_page.notes') }}</div>
+                                        <div style="margin-top: 0.35rem; color: rgba(255, 255, 255, 0.78);">{{ $order->notes ?: __('orders_page.no_notes') }}</div>
+                                    </div>
                                 </div>
-                                <div>
-                                    <div style="color: var(--elx-light); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em;">{{ __('orders_page.notes') }}</div>
-                                    <div style="margin-top: 0.35rem; color: rgba(255, 255, 255, 0.78);">{{ $order->notes ?: __('orders_page.no_notes') }}</div>
-                                </div>
-                            </div>
+                            @endif
                         </div>
 
                         <div class="account-order-block" style="margin-top: 1rem;">
@@ -340,7 +391,7 @@
                             </div>
                             <div class="account-order-row">
                                 <span>{{ __('orders_page.total_amount') }}</span>
-                                <strong>﷼ {{ number_format($order->total_amount, 2) }}</strong>
+                                <strong>{{ $orderCurrency }} {{ number_format($order->total_amount, 2) }}</strong>
                             </div>
                         </div>
                     </div>

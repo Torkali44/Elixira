@@ -49,8 +49,12 @@ class CartController extends Controller
 
         $cartCountry = session('shopping_country') ?? $pricing->detectUserCountry();
         $cartCurrency = $pricing->currencySymbol($cartCountry);
-        $defaultPhoneCountry = $this->resolveDefaultPhoneCountry();
-        $deliveryCityOptions = $this->deliveryCityOptionsForPhoneCountry($defaultPhoneCountry);
+        $cartPhoneCountry = match ($cartCountry) {
+            'UAE' => '+971',
+            'KSA' => '+966',
+            default => $this->resolveDefaultPhoneCountry(),
+        };
+        $deliveryCityOptions = $this->deliveryCityOptionsForPhoneCountry($cartPhoneCountry);
         $deliveryFeesById = collect($deliveryCityOptions)->mapWithKeys(
             fn (array $option) => [(string) $option['id'] => (float) $option['delivery_fee']]
         )->all();
@@ -64,7 +68,7 @@ class CartController extends Controller
             'hasUnavailableItems',
             'cartCountry',
             'cartCurrency',
-            'defaultPhoneCountry',
+            'cartPhoneCountry',
             'deliveryCityOptions',
             'deliveryFeesById',
         ));
@@ -494,7 +498,11 @@ class CartController extends Controller
         $subtotal = collect($cart)->sum(fn (array $details) => $details['price'] * $details['quantity']);
 
         $fullPhone = $request->country_code.ltrim($request->phone_number, '0');
-        $shoppingCountry = app(ItemPricingService::class)->mapPhoneCountryCode($request->country_code);
+        $cartSessionCountry = session('shopping_country');
+        $phoneCountry = app(ItemPricingService::class)->mapPhoneCountryCode($request->country_code);
+        $shoppingCountry = (is_string($cartSessionCountry) && in_array($cartSessionCountry, ['KSA', 'UAE'], true))
+            ? $cartSessionCountry
+            : $phoneCountry;
         session(['shopping_country' => $shoppingCountry]);
 
         $deliveryCity = null;
@@ -631,6 +639,8 @@ class CartController extends Controller
                 }
             }
 
+            $orderCountryCode = $deliveryCity?->country?->code ?? $shoppingCountry;
+
             $order = Order::create([
                 'user_id' => $authenticatedUser?->id,
                 'user_code' => $resolvedUserCode,
@@ -638,6 +648,7 @@ class CartController extends Controller
                 'customer_phone' => $fullPhone,
                 'address' => $orderAddress,
                 'delivery_city_id' => $deliveryCity?->id ?? $sharedShippingOrder?->delivery_city_id,
+                'country_code' => $orderCountryCode,
                 'delivery_fee' => $deliveryFee,
                 'shared_shipping_order_id' => $sharedShippingOrder?->id,
                 'subtotal_amount' => $subtotal,

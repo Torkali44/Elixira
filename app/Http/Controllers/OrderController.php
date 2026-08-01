@@ -48,4 +48,16 @@ class OrderController extends Controller
 
         return view('profile.orders.invoice', compact('order'));
     }
+
+    public function cancel(Request $request, Order $order)
+    {
+        $phone = $request->input('phone') ?? $request->query('phone');
+        abort_unless($phone && $order->customer_phone === $phone, 403);
+        abort_unless($order->status === 'pending', 403, __('orders_page.cannot_cancel_confirmed'));
+
+        $order->update(['status' => 'cancelled']);
+
+        return redirect()->route('orders.track', ['order_id' => $order->id, 'phone' => $order->customer_phone])
+            ->with('success', __('orders_page.order_cancelled_success'));
+    }
 }

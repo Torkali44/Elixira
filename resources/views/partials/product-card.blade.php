@@ -11,12 +11,16 @@
     $isOutOfStock = ! $hasAnyCountryStock && ! $hasPrivateAccess;
     $canAddToCart = count($cardCountries) > 0 && ! $isOutOfStock;
     $cardRewardPoints = $pricingService->resolveRewardPoints($product, $cardCountry, $countryPriceId);
+    // Eager-load first 8 images (above the fold), lazy-load the rest
+    $isAboveFold = ($cardIndex ?? 99) < 8;
+    $imgLoading = $isAboveFold ? 'eager' : 'lazy';
+    $imgFetchPriority = $isAboveFold ? 'high' : 'low';
 @endphp
 
 <div class="elx-product-card" data-animate onclick="window.location='{{ route('menu.show', $product->id) }}?country={{ $cardCountry }}{{ $countryPriceId ? '&country_price_id='.$countryPriceId : '' }}'">
     <a href="{{ route('menu.show', $product->id) }}?country={{ $cardCountry }}{{ $countryPriceId ? '&country_price_id='.$countryPriceId : '' }}" class="elx-product-card__image-container" onclick="event.stopPropagation();">
         @if($product->image)
-            <img src="{{ $product->image_url }}" alt="{{ $product->local_name }}" width="400" height="400" loading="lazy" decoding="async" @class(['is-grayscale' => $isOutOfStock])>
+            <img src="{{ $product->image_url }}" alt="{{ $product->local_name }}" width="400" height="400" loading="{{ $imgLoading }}" fetchpriority="{{ $imgFetchPriority }}" decoding="async" @class(['is-grayscale' => $isOutOfStock])>
         @else
             <div class="elx-product-card__no-img">
                 <i class="fas fa-seedling"></i>

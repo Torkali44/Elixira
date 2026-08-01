@@ -1,4 +1,4 @@
-﻿@extends('layouts.framer')
+@extends('layouts.framer')
 
 @section('title', __('track.page_title'))
 
@@ -154,7 +154,7 @@
                                     <span class="status-badge bg-{{ $statusMap[$order->status] ?? 'pending' }}">
                                         {{ __('notifications.status.'.$order->status) }}
                                     </span>
-                                    <div style="margin-top: 0.5rem; font-weight: 700; color: var(--elx-white);">﷼ {{ number_format($order->total_amount, 2) }}</div>
+                                    <div style="margin-top: 0.5rem; font-weight: 700; color: var(--elx-white);">{{ app(\App\Support\ItemPricingService::class)->currencySymbol($order->deliveryCountryCode()) }} {{ number_format($order->total_amount, 2) }}</div>
                                 </div>
                             </div>
                         </a>
